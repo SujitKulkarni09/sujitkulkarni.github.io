@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Adventure Land 🤖 — Learn How AI Thinks!</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400..700&family=Nunito:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+  --sky:#8ED1FC;
+  --sky-deep:#4FB6EE;
+  --sky-pale:#EAF7FF;
+  --pink:#FFB3D9;
+  --pink-deep:#FF6FB0;
+  --pink-pale:#FFEAF5;
+  --sun:#FFE066;
+  --sun-deep:#FFC93C;
+  --mint:#9BF0C7;
+  --mint-deep:#3FCF8E;
+  --ink:#332B5E;
+  --ink-soft:#5B5382;
+  --white:#FFFFFF;
+  --purple:#B69CFF;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  font-family:'Nunito',sans-serif;
+  color:var(--ink);
+  background:linear-gradient(180deg,var(--sky-pale) 0%, #FFF6FB 50%, var(--pink-pale) 100%);
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.display{font-family:'Fredoka',sans-serif;}
+::selection{background:var(--sun);color:var(--ink);}
+a{color:inherit;}
+
+/* ---------- utility ---------- */
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px;}
+.section{position:relative;padding:90px 0 70px;}
+.eyebrow{
+  display:inline-block;font-family:'Fredoka',sans-serif;font-weight:600;
+  background:var(--white);border:3px solid var(--ink);color:var(--ink);
+  padding:6px 18px;border-radius:999px;font-size:.85rem;letter-spacing:.03em;
+  box-shadow:4px 4px 0 var(--ink);margin-bottom:18px;
+}
+.section h2{font-size:clamp(1.8rem,4vw,2.6rem);margin:0 0 12px;line-height:1.1;}
+.section p.lead{font-size:1.1rem;color:var(--ink-soft);max-width:680px;margin:0 0 34px;}
+.btn{
+  font-family:'Fredoka',sans-serif;font-weight:600;font-size:1rem;color:var(--ink);
+  background:var(--sun);border:3px solid var(--ink);border-radius:16px;
+  padding:12px 26px;cursor:pointer;box-shadow:0 6px 0 var(--ink);
+  transition:transform .08s ease, box-shadow .08s ease;
+}
+.btn:hover{transform:translateY(-2px);}
+.btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--ink);}
+.btn.pink{background:var(--pink);}
+.btn.mint{background:var(--mint);}
+.btn.sky{background:var(--sky);}
+.btn.small{padding:8px 16px;font-size:.85rem;border-radius:12px;box-shadow:0 4px 0 var(--ink);}
+.card3d{
+  background:var(--white);border:3px solid var(--ink);border-radius:26px;
+  box-shadow:8px 8px 0 var(--ink);
+}
+
+/* ---------- floating ambient background (autoplay) ---------- */
+.sky-layer{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.cloud{position:absolute;opacity:.85;animation:drift linear infinite;}
+.cloud .puff{position:absolute;background:#fff;border-radius:50%;box-shadow:0 6px 0 rgba(151,196,224,.5);}
+.star{position:absolute;background:var(--sun);clip-path:polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);animation:twinkle 2.6s ease-in-out infinite;}
+@keyframes drift{from{transform:translateX(-10vw);}to{transform:translateX(110vw);}}
+@keyframes twinkle{0%,100%{opacity:.25;transform:scale(.8);}50%{opacity:1;transform:scale(1.15);}}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;padding:70px 0 40px;text-align:center;overflow:hidden;}
+.hero-badge{
+  font-family:'Fredoka',sans-serif;font-size:.8rem;font-weight:600;color:var(--ink);
+  background:var(--white);border:3px solid var(--ink);border-radius:999px;
+  padding:6px 16px;display:inline-flex;align-items:center;gap:8px;box-shadow:4px 4px 0 var(--ink);
+}
+.hero h1{
+  font-size:clamp(2.4rem,7vw,4.4rem);line-height:1.02;margin:22px 0 14px;
+  background:linear-gradient(90deg,var(--sky-deep),var(--pink-deep));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{font-size:1.15rem;color:var(--ink-soft);max-width:560px;margin:0 auto 30px;}
+.hero-ctas{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-bottom:50px;}
+
+/* robot mascot - pure CSS 3D-ish */
+.robot{width:150px;height:170px;margin:0 auto;position:relative;animation:bob 3.2s ease-in-out infinite;}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-1deg);}50%{transform:translateY(-14px) rotate(1deg);}}
+.robot .antenna{position:absolute;top:-22px;left:50%;transform:translateX(-50%);width:6px;height:26px;background:var(--ink);border-radius:4px;}
+.robot .antenna::after{content:'';position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:16px;height:16px;background:var(--sun);border:3px solid var(--ink);border-radius:50%;animation:twinkle 1.4s ease-in-out infinite;}
+.robot .head{position:absolute;top:0;left:50%;transform:translateX(-50%);width:110px;height:80px;background:var(--sky);border:4px solid var(--ink);border-radius:28px;box-shadow:0 8px 0 var(--sky-deep), 6px 10px 0 rgba(51,43,94,.15);}
+.robot .eye{position:absolute;top:30px;width:16px;height:16px;background:var(--ink);border-radius:50%;animation:blink 4s infinite;}
+.robot .eye.l{left:24px;}
+.robot .eye.r{right:24px;}
+@keyframes blink{0%,92%,100%{transform:scaleY(1);}95%{transform:scaleY(.1);}}
+.robot .cheek{position:absolute;top:50px;width:14px;height:9px;background:var(--pink-deep);border-radius:50%;opacity:.8;}
+.robot .cheek.l{left:14px;}.robot .cheek.r{right:14px;}
+.robot .body{position:absolute;top:76px;left:50%;transform:translateX(-50%);width:130px;height:80px;background:var(--pink);border:4px solid var(--ink);border-radius:26px;box-shadow:0 8px 0 var(--pink-deep);}
+.robot .panel{position:absolute;top:96px;left:50%;transform:translateX(-50%);width:64px;height:34px;background:var(--white);border:3px solid var(--ink);border-radius:12px;display:flex;align-items:center;justify-content:center;gap:5px;}
+.robot .panel i{width:8px;height:8px;border-radius:50%;background:var(--mint-deep);animation:pulseDot 1.6s infinite;}
+.robot .panel i:nth-child(2){background:var(--sun-deep);animation-delay:.3s;}
+.robot .panel i:nth-child(3){background:var(--pink-deep);animation-delay:.6s;}
+@keyframes pulseDot{0%,100%{opacity:.3;}50%{opacity:1;}}
+.robot .arm{position:absolute;top:88px;width:10px;height:34px;background:var(--sky-deep);border:3px solid var(--ink);border-radius:8px;animation:wave 2.4s ease-in-out infinite;}
+.robot .arm.l{left:6px;transform-origin:top;}
+.robot .arm.r{right:6px;transform-origin:top;animation-delay:1.2s;}
+@keyframes wave{0%,100%{transform:rotate(0deg);}50%{transform:rotate(18deg);}}
+
+/* speech bubble */
+.speech{position:relative;background:var(--white);border:3px solid var(--ink);border-radius:18px;padding:10px 16px;font-family:'Fredoka',sans-serif;font-size:.9rem;box-shadow:4px 4px 0 var(--ink);display:inline-block;margin-bottom:14px;}
+.speech::after{content:'';position:absolute;bottom:-14px;left:38px;border-width:12px 8px 0;border-style:solid;border-color:var(--ink) transparent transparent;}
+.speech::before{content:'';position:absolute;bottom:-9px;left:41px;border-width:9px 6px 0;border-style:solid;border-color:var(--white) transparent transparent;z-index:1;}
+
+/* ---------- NESTED CIRCLES (AI > ML > DL > NN) ---------- */
+.nest{position:relative;width:340px;height:340px;margin:20px auto;flex-shrink:0;}
+.nest .ring{position:absolute;border-radius:50%;border:4px solid var(--ink);display:flex;align-items:flex-start;justify-content:center;padding-top:16px;font-family:'Fredoka',sans-serif;font-weight:600;}
+.nest .ring span{background:var(--white);border:2px solid var(--ink);padding:2px 10px;border-radius:999px;font-size:.78rem;}
+.r1{inset:0;background:var(--sky);box-shadow:0 8px 0 var(--sky-deep);}
+.r2{inset:44px;background:var(--pink);box-shadow:0 8px 0 var(--pink-deep);}
+.r3{inset:96px;background:var(--sun);box-shadow:0 8px 0 var(--sun-deep);}
+.r4{inset:142px;background:var(--mint);box-shadow:0 6px 0 var(--mint-deep);display:flex;align-items:center;justify-content:center;padding:0;}
+.r4 span{font-size:.7rem;}
+.split{display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:center;}
+.split .text{flex:1;min-width:260px;}
+.mini-def{display:flex;gap:10px;align-items:flex-start;margin-bottom:14px;padding:12px 14px;background:var(--white);border:2px solid var(--ink);border-radius:14px;box-shadow:3px 3px 0 var(--ink);}
+.mini-def b{font-family:'Fredoka',sans-serif;}
+.mini-def .dot{width:14px;height:14px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+
+/* ---------- MACHINE (input -> output demo) ---------- */
+.machine{padding:26px;}
+.machine-row{display:grid;grid-template-columns:1fr auto 1fr;gap:16px;align-items:center;}
+@media(max-width:720px){.machine-row{grid-template-columns:1fr;}}
+.io-box{background:var(--white);border:3px solid var(--ink);border-radius:18px;padding:18px;box-shadow:5px 5px 0 var(--ink);}
+.io-box label{font-family:'Fredoka',sans-serif;font-weight:600;font-size:.85rem;display:block;margin-bottom:8px;}
+.io-box input, .io-box select{
+  width:100%;font-family:'Nunito',sans-serif;font-size:1rem;padding:10px 12px;
+  border:2px solid var(--ink);border-radius:10px;background:var(--sky-pale);
+}
+.io-box .out-text{min-height:44px;font-family:'Space Mono',monospace;font-size:1.05rem;background:var(--pink-pale);border:2px dashed var(--ink);border-radius:10px;padding:10px 12px;word-break:break-word;}
+.conveyor{position:relative;width:100%;height:64px;display:flex;align-items:center;justify-content:center;}
+.conveyor .brain-can{width:74px;height:74px;background:var(--purple);border:4px solid var(--ink);border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:30px;box-shadow:0 6px 0 #8a6ee8;animation:think 1.4s ease-in-out infinite;}
+@keyframes think{0%,100%{transform:rotate(-4deg) scale(1);}50%{transform:rotate(4deg) scale(1.06);}}
+.arrow{font-size:1.6rem;}
+
+/* ---------- GAMES ---------- */
+.games-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px;}
+.game-card{padding:22px;position:relative;}
+.game-card h3{margin:0 0 6px;font-size:1.3rem;}
+.game-card .tag{display:inline-block;font-size:.72rem;font-family:'Fredoka',sans-serif;background:var(--mint);border:2px solid var(--ink);border-radius:999px;padding:2px 10px;margin-bottom:10px;}
+.item-row{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0;}
+.item-chip{
+  font-size:1.6rem;background:var(--sky-pale);border:2px solid var(--ink);border-radius:14px;
+  padding:10px 12px;cursor:default;position:relative;
+}
+.score-pill{font-family:'Fredoka',sans-serif;font-weight:600;background:var(--sun);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;display:inline-block;}
+.feedback{font-family:'Fredoka',sans-serif;font-weight:600;min-height:24px;margin-top:8px;}
+.big-emoji{font-size:2.6rem;text-align:center;}
+.choice-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;}
+
+/* brain builder */
+.brain-canvas{position:relative;height:220px;background:var(--sky-pale);border:2px dashed var(--ink);border-radius:16px;overflow:hidden;margin:14px 0;}
+.node{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--white);border:3px solid var(--ink);transition:all .25s ease;}
+.node.active{background:var(--sun);box-shadow:0 0 0 6px rgba(255,224,102,.4);}
+.link{position:absolute;height:2px;background:var(--ink-soft);opacity:.25;transform-origin:0 0;transition:opacity .2s;}
+.link.active{opacity:1;background:var(--pink-deep);height:3px;}
+
+/* quiz */
+.quiz-box{padding:24px;}
+.quiz-opt{display:block;width:100%;text-align:left;font-family:'Nunito',sans-serif;font-size:1rem;padding:12px 16px;margin:8px 0;background:var(--white);border:2.5px solid var(--ink);border-radius:12px;cursor:pointer;transition:transform .08s;}
+.quiz-opt:hover{transform:translateX(4px);background:var(--sky-pale);}
+.quiz-opt.correct{background:var(--mint);}
+.quiz-opt.wrong{background:#FFC9C9;}
+.progress-track{height:14px;border:2px solid var(--ink);border-radius:999px;background:var(--white);overflow:hidden;margin-bottom:16px;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--sky-deep),var(--pink-deep));width:0%;transition:width .4s ease;}
+
+/* ---------- GLOSSARY ---------- */
+.dial-wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:var(--white);border:3px solid var(--ink);border-radius:20px;padding:18px 22px;box-shadow:6px 6px 0 var(--ink);margin-bottom:30px;}
+.dial-label{font-family:'Fredoka',sans-serif;font-weight:600;}
+input[type=range]{-webkit-appearance:none;width:220px;height:10px;border-radius:999px;background:linear-gradient(90deg,var(--sky),var(--pink));border:2px solid var(--ink);}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--sun);border:3px solid var(--ink);cursor:pointer;box-shadow:2px 2px 0 var(--ink);}
+input[type=range]::-moz-range-thumb{width:26px;height:26px;border-radius:50%;background:var(--sun);border:3px solid var(--ink);cursor:pointer;}
+.level-name{font-family:'Fredoka',sans-serif;font-weight:600;background:var(--sun);border:2px solid var(--ink);border-radius:999px;padding:4px 14px;font-size:.85rem;}
+.search-box{flex:1;min-width:180px;}
+.search-box input{width:100%;padding:10px 14px;border:2px solid var(--ink);border-radius:12px;font-family:'Nunito',sans-serif;font-size:.95rem;}
+.cat-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;}
+.cat-btn{font-family:'Fredoka',sans-serif;font-size:.8rem;font-weight:600;background:var(--white);border:2px solid var(--ink);border-radius:999px;padding:6px 14px;cursor:pointer;}
+.cat-btn.active{background:var(--pink);}
+.gloss-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;}
+.term-card{background:var(--white);border:2.5px solid var(--ink);border-radius:18px;padding:16px 18px;box-shadow:4px 4px 0 var(--ink);}
+.term-card h4{margin:0 0 4px;font-size:1.05rem;font-family:'Fredoka',sans-serif;}
+.term-card .abbr{font-size:.72rem;color:var(--ink-soft);margin-bottom:8px;}
+.term-card .def{font-size:.92rem;line-height:1.45;min-height:56px;}
+.term-card .def.tech{font-family:'Space Mono',monospace;font-size:.8rem;background:var(--sky-pale);padding:8px 10px;border-radius:8px;}
+.hidden{display:none !important;}
+
+footer{text-align:center;padding:60px 24px 90px;position:relative;}
+footer .sig{font-family:'Fredoka',sans-serif;font-weight:600;font-size:1.1rem;background:var(--white);display:inline-block;padding:14px 26px;border:3px solid var(--ink);border-radius:18px;box-shadow:5px 5px 0 var(--ink);}
+footer .sig small{display:block;font-family:'Nunito',sans-serif;font-weight:600;color:var(--ink-soft);font-size:.8rem;margin-top:4px;}
+
+.wave{display:block;width:100%;line-height:0;}
+
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important;}
+}
+</style>
+</head>
+<body>
+
+<div class="sky-layer" id="skyLayer"></div>
+
+<!-- ================= HERO ================= -->
+<header class="hero wrap">
+  <div class="hero-badge">✨ Welcome to</div>
+  <h1>AI Adventure Land</h1>
+  <p>A giggly, glowy place where kids <em>and</em> grown-ups discover how Artificial Intelligence actually thinks — one game at a time.</p>
+
+  <div class="robot" aria-hidden="true">
+    <div class="antenna"></div>
+    <div class="head"><div class="eye l"></div><div class="eye r"></div><div class="cheek l"></div><div class="cheek r"></div></div>
+    <div class="arm l"></div><div class="arm r"></div>
+    <div class="body"><div class="panel"><i></i><i></i><i></i></div></div>
+  </div>
+  <div class="speech" style="margin-top:12px;">Hi! I'm Byte 🤖 — I'll be your guide today!</div>
+
+  <div class="hero-ctas">
+    <a href="#big-ideas" class="btn pink">🧠 What is AI?</a>
+    <a href="#games" class="btn sky">🎮 Play the Games</a>
+    <a href="#glossary" class="btn mint">📖 Word Wonderland</a>
+  </div>
+</header>
+
+<!-- ================= BIG IDEAS ================= -->
+<section class="section wrap" id="big-ideas">
+  <span class="eyebrow">🧩 Big Idea #1</span>
+  <h2>AI, ML, DL, NN — they're nested dolls!</h2>
+  <p class="lead">These four letters get mixed up all the time. Here's the secret: each one lives <em>inside</em> the next, like Russian nesting dolls.</p>
+
+  <div class="split">
+    <div class="nest">
+      <div class="ring r1"><span>Artificial Intelligence</span></div>
+      <div class="ring r2" style="padding-top:14px;"><span>Machine Learning</span></div>
+      <div class="ring r3" style="padding-top:12px;"><span>Deep Learning</span></div>
+      <div class="ring r4"><span>Neural Networks</span></div>
+    </div>
+    <div class="text">
+      <div class="mini-def"><div class="dot" style="background:var(--sky);"></div><div><b>AI</b> — any computer doing something that seems "smart," even with simple rules a person wrote.</div></div>
+      <div class="mini-def"><div class="dot" style="background:var(--pink);"></div><div><b>ML</b> — a computer that gets smarter by studying lots of examples, instead of being told exact rules.</div></div>
+      <div class="mini-def"><div class="dot" style="background:var(--sun-deep);"></div><div><b>DL</b> — machine learning that uses many layered "brain-like" networks to learn very tricky patterns.</div></div>
+      <div class="mini-def"><div class="dot" style="background:var(--mint-deep);"></div><div><b>NN</b> — the actual layered structure (inspired by brain cells) that deep learning is built from.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="section wrap" id="how-it-works" style="background:linear-gradient(180deg,transparent,rgba(142,209,252,.25),transparent);border-radius:40px;">
+  <span class="eyebrow">⚙️ Big Idea #2</span>
+  <h2>Input → Brain → Output</h2>
+  <p class="lead">Every single AI does the exact same three-step dance. Feed it <b>Input</b>, it <b>thinks</b> using patterns it learned, and it hands back an <b>Output</b>. Try it yourself below!</p>
+
+  <div class="card3d machine">
+    <div class="machine-row">
+      <div class="io-box">
+        <label>1️⃣ INPUT — type something</label>
+        <input id="ioInput" type="text" maxlength="60" placeholder="type a happy or sad sentence...">
+        <label style="margin-top:12px;">Choose the robot's brain skill:</label>
+        <select id="ioMode">
+          <option value="shout">📣 SHOUT-INATOR (uppercase)</option>
+          <option value="reverse">🔁 Reverse-inator</option>
+          <option value="mood">😊 Mood Detector (mini NLP)</option>
+          <option value="emoji">🌈 Emoji-fier</option>
+        </select>
+      </div>
+      <div class="conveyor"><div class="brain-can">🧠</div></div>
+      <div class="io-box">
+        <label>3️⃣ OUTPUT — what the AI made</label>
+        <div class="out-text" id="ioOutput">…waiting for input…</div>
+      </div>
+    </div>
+    <p style="font-size:.85rem;color:var(--ink-soft);margin:16px 2px 0;">👉 Notice: the robot never "understands" like you do — it just runs your input through a pattern it was built or trained to follow. That's the whole trick behind every AI, from a spam filter to a chatbot!</p>
+  </div>
+</section>
+
+<!-- ================= GAMES ================= -->
+<section class="section wrap" id="games">
+  <span class="eyebrow">🎮 Play Zone</span>
+  <h2>Fun games to think like an AI</h2>
+  <p class="lead">Grab a grown-up or a kid — these three games turn AI ideas into things you can actually click, train and win.</p>
+
+  <div class="games-grid">
+
+    <!-- GAME 1: Train a Bot -->
+    <div class="card3d game-card">
+      <span class="tag">Teaches: Training Data + Prediction</span>
+      <h3>🍎 Train-a-Bot</h3>
+      <p style="font-size:.92rem;">Show Byte 5 examples of fruit vs. veggie. Then let it guess new ones all by itself!</p>
+      <div class="big-emoji" id="tabEmoji">🍎</div>
+      <p style="text-align:center;font-family:'Fredoka',sans-serif;" id="tabPrompt">Is this a FRUIT or a VEGGIE? Teach me!</p>
+      <div class="choice-row" style="justify-content:center;" id="tabChoices">
+        <button class="btn small pink" onclick="tabAnswer('fruit')">🍓 Fruit</button>
+        <button class="btn small mint" onclick="tabAnswer('veggie')">🥦 Veggie</button>
+      </div>
+      <p class="feedback" id="tabFeedback" style="text-align:center;"></p>
+      <p style="text-align:center;"><span class="score-pill" id="tabScore">Training: 0 / 5</span></p>
+    </div>
+
+    <!-- GAME 2: Build-a-Brain -->
+    <div class="card3d game-card">
+      <span class="tag">Teaches: Neural Network structure</span>
+      <h3>🧠 Build-a-Brain</h3>
+      <p style="font-size:.92rem;">This is a mini Neural Network: an Input layer, a Hidden layer, and an Output layer. Press "Fire!" to watch a signal travel through, just like real AI math (weights & activations)!</p>
+      <div class="brain-canvas" id="brainCanvas"></div>
+      <div style="text-align:center;"><button class="btn small sky" onclick="fireBrain()">⚡ Fire the Brain!</button></div>
+    </div>
+
+    <!-- GAME 3: Quiz -->
+    <div class="card3d game-card" style="grid-column:1/-1;">
+      <span class="tag">Teaches: Everything you just learned!</span>
+      <h3>🏆 AI Quiz Challenge</h3>
+      <div class="progress-track"><div class="progress-fill" id="quizProgress"></div></div>
+      <div id="quizArea"></div>
+      <p style="text-align:right;"><span class="score-pill" id="quizScore">Score: 0</span></p>
+    </div>
+
+  </div>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section class="section wrap" id="glossary">
+  <span class="eyebrow">📖 Word Wonderland</span>
+  <h2>The Complete AI · ML · DL · NN Glossary</h2>
+  <p class="lead">Every word explained <b>5 different ways</b> — from "explain it to a 5-year-old" all the way to full technical language. Slide the dial, search a word, and explore!</p>
+
+  <div class="dial-wrap">
+    <span class="dial-label">🎚️ Explain-o-Meter:</span>
+    <input type="range" min="1" max="5" value="2" id="levelDial">
+    <span class="level-name" id="levelName">Kid Explorer (7–10)</span>
+    <div class="search-box"><input type="text" id="glossSearch" placeholder="🔍 Search a word... e.g. 'neuron'"></div>
+  </div>
+
+  <div class="cat-filters" id="catFilters"></div>
+  <div class="gloss-grid" id="glossGrid"></div>
+</section>
+
+<footer>
+  <div class="speech" style="margin-bottom:10px;">Great job exploring, adventurer! 🎉</div>
+  <div class="sig">Created by Your Own AI AugMentor 🤖<small>— Sujit Kulkarni —</small></div>
+</footer>
+
+<script>
+/* ================= AMBIENT BACKGROUND (autoplay) ================= */
+(function(){
+  const layer = document.getElementById('skyLayer');
+  for(let i=0;i<5;i++){
+    const c = document.createElement('div');
+    c.className='cloud';
+    const top = Math.random()*70+2;
+    const scale = .5+Math.random()*0.9;
+    const dur = 40+Math.random()*40;
+    c.style.top = top+'vh';
+    c.style.left='0';
+    c.style.transform=`scale(${scale})`;
+    c.style.animationDuration = dur+'s';
+    c.style.animationDelay = (-Math.random()*dur)+'s';
+    c.innerHTML = `<div class="puff" style="width:70px;height:40px;left:0;top:10px;"></div>
+                   <div class="puff" style="width:50px;height:50px;left:30px;top:-6px;"></div>
+                   <div class="puff" style="width:60px;height:36px;left:66px;top:12px;"></div>`;
+    c.style.width='140px';c.style.height='60px';
+    layer.appendChild(c);
+  }
+  for(let i=0;i<14;i++){
+    const s = document.createElement('div');
+    s.className='star';
+    s.style.width=s.style.height=(6+Math.random()*8)+'px';
+    s.style.top=(Math.random()*95)+'vh';
+    s.style.left=(Math.random()*98)+'vw';
+    s.style.animationDelay=(Math.random()*2.6)+'s';
+    layer.appendChild(s);
+  }
+})();
+
+/* ================= INPUT -> OUTPUT MACHINE ================= */
+const ioInput=document.getElementById('ioInput'), ioMode=document.getElementById('ioMode'), ioOutput=document.getElementById('ioOutput');
+const HAPPY=['happy','love','fun','yay','great','awesome','good','joy','excited','win','sun','smile'];
+const SAD=['sad','bad','hate','cry','angry','mad','upset','lost','sick','tired','dark','sorry'];
+function moodDetect(txt){
+  const t=txt.toLowerCase();
+  let h=0,s=0;
+  HAPPY.forEach(w=>{if(t.includes(w))h++;});
+  SAD.forEach(w=>{if(t.includes(w))s++;});
+  if(h===0&&s===0) return "🤔 Not sure — I need more clue-words! (that's a real AI problem too)";
+  if(h>s) return "😊 Happy mood detected! (matched "+h+" happy word(s))";
+  if(s>h) return "😢 Sad mood detected! (matched "+s+" sad word(s))";
+  return "😐 Mixed feelings detected!";
+}
+const EMOJI_MAP={cat:'🐱',dog:'🐶',love:'❤️',happy:'😊',sad:'😢',sun:'☀️',moon:'🌙',star:'⭐',food:'🍕',run:'🏃',fast:'⚡',robot:'🤖',ai:'🤖',water:'💧',fire:'🔥',cool:'😎',king:'👑',music:'🎵'};
+function emojify(txt){
+  return txt.split(/\s+/).map(w=>{
+    const clean=w.toLowerCase().replace(/[^a-z]/g,'');
+    return EMOJI_MAP[clean] ? w+EMOJI_MAP[clean] : w;
+  }).join(' ') || '…';
+}
+function runMachine(){
+  const val = ioInput.value.trim();
+  if(!val){ ioOutput.textContent='…waiting for input…'; return;}
+  let out='';
+  switch(ioMode.value){
+    case 'shout': out = val.toUpperCase()+' 📣'; break;
+    case 'reverse': out = val.split('').reverse().join(''); break;
+    case 'mood': out = moodDetect(val); break;
+    case 'emoji': out = emojify(val); break;
+  }
+  ioOutput.textContent = out;
+}
+ioInput.addEventListener('input', runMachine);
+ioMode.addEventListener('change', runMachine);
+
+/* ================= GAME 1: TRAIN A BOT ================= */
+const trainSet=[
+  {e:'🍎',ans:'fruit'},{e:'🥕',ans:'veggie'},{e:'🍌',ans:'fruit'},{e:'🥦',ans:'veggie'},{e:'🍇',ans:'fruit'}
+];
+const testSet=[
+  {e:'🍓',ans:'fruit'},{e:'🌽',ans:'veggie'},{e:'🍍',ans:'fruit'},{e:'🥔',ans:'veggie'}
+];
+let tabIndex=0, tabScoreN=0, tabPhase='train';
+function tabRender(){
+  const emojiEl=document.getElementById('tabEmoji');
+  const promptEl=document.getElementById('tabPrompt');
+  const scoreEl=document.getElementById('tabScore');
+  const feedback=document.getElementById('tabFeedback');
+  feedback.textContent='';
+  if(tabPhase==='train'){
+    if(tabIndex>=trainSet.length){
+      tabPhase='test'; tabIndex=0;
+      promptEl.textContent="✅ Training done! Now I'll GUESS by myself...";
+      scoreEl.textContent='Testing: 0 / '+testSet.length;
+      setTimeout(tabRender,1200);
+      return;
+    }
+    emojiEl.textContent=trainSet[tabIndex].e;
+    promptEl.textContent='Is this a FRUIT or a VEGGIE? Teach me!';
+    scoreEl.textContent='Training: '+tabIndex+' / '+trainSet.length;
+  } else {
+    if(tabIndex>=testSet.length){
+      promptEl.textContent='🎉 All done! I learned the pattern from your examples — that\'s exactly what "training data" does for real AI!';
+      emojiEl.textContent='🏆';
+      scoreEl.textContent='Bot score: '+tabScoreN+' / '+testSet.length;
+      document.getElementById('tabChoices').classList.add('hidden');
+      return;
+    }
+    const item=testSet[tabIndex];
+    emojiEl.textContent=item.e;
+    promptEl.textContent="My guess is coming up... 🤖 thinking...";
+    scoreEl.textContent='Testing: '+tabIndex+' / '+testSet.length;
+    setTimeout(()=>{
+      // simple "AI": guesses correctly (simulating a trained model), with tiny playful randomness
+      const guess = Math.random() < 0.85 ? item.ans : (item.ans==='fruit'?'veggie':'fruit');
+      const correct = guess===item.ans;
+      if(correct) tabScoreN++;
+      promptEl.textContent = `I think this is a ${guess.toUpperCase()}! ${correct?'✅ Correct!':'❌ Oops, it was a '+item.ans+'.'}`;
+      scoreEl.textContent='Bot score: '+tabScoreN+' / '+(tabIndex+1);
+      tabIndex++;
+      setTimeout(tabRender,1500);
+    },900);
+  }
+}
+function tabAnswer(choice){
+  if(tabPhase!=='train') return;
+  const item=trainSet[tabIndex];
+  const feedback=document.getElementById('tabFeedback');
+  if(choice===item.ans){ feedback.textContent='✅ Yes! Byte is learning from your label.'; feedback.style.color='#2f9e6f';}
+  else { feedback.textContent='Hmm, actually it\'s a '+item.ans+' — that\'s ok, examples can be tricky!'; feedback.style.color='#e2557a';}
+  tabIndex++;
+  setTimeout(tabRender,900);
+}
+tabRender();
+
+/* ================= GAME 2: BUILD A BRAIN ================= */
+const canvas=document.getElementById('brainCanvas');
+const layout=[
+  {x:12,ys:[30,90,150]},   // input layer 3 nodes
+  {x:130,ys:[15,65,115,165]}, // hidden layer 4 nodes
+  {x:250,ys:[55,120]}      // output 2 nodes
+];
+let nodeEls=[], linkEls=[];
+function buildBrain(){
+  canvas.innerHTML='';
+  nodeEls=[]; linkEls=[];
+  layout.forEach((layer,li)=>{
+    nodeEls[li]=[];
+    layer.ys.forEach((y,ni)=>{
+      const n=document.createElement('div');
+      n.className='node';
+      n.style.left=layer.x+'px';
+      n.style.top=y+'px';
+      canvas.appendChild(n);
+      nodeEls[li].push(n);
+    });
+  });
+  for(let li=0;li<layout.length-1;li++){
+    linkEls[li]=[];
+    layout[li].ys.forEach((y1,i1)=>{
+      layout[li+1].ys.forEach((y2,i2)=>{
+        const l=document.createElement('div');
+        l.className='link';
+        const x1=layout[li].x+22, x2=layout[li+1].x;
+        const dx=x2-x1, dy=y2-y1;
+        const len=Math.sqrt(dx*dx+dy*dy);
+        const ang=Math.atan2(dy,dx)*180/Math.PI;
+        l.style.width=len+'px';
+        l.style.left=x1+'px';
+        l.style.top=(y1+11)+'px';
+        l.style.transform=`rotate(${ang}deg)`;
+        canvas.appendChild(l);
+        linkEls[li].push(l);
+      });
+    });
+  }
+}
+buildBrain();
+function fireBrain(){
+  // reset
+  nodeEls.flat().forEach(n=>n.classList.remove('active'));
+  linkEls.flat().forEach(l=>l.classList.remove('active'));
+  let delay=0;
+  nodeEls[0].forEach(n=>{ setTimeout(()=>n.classList.add('active'),delay); });
+  delay+=350;
+  linkEls[0].forEach(l=>{ setTimeout(()=>l.classList.add('active'),delay); });
+  delay+=350;
+  nodeEls[1].forEach(n=>{ setTimeout(()=>n.classList.add('active'),delay); });
+  delay+=350;
+  linkEls[1].forEach(l=>{ setTimeout(()=>l.classList.add('active'),delay); });
+  delay+=350;
+  nodeEls[2].forEach(n=>{ setTimeout(()=>n.classList.add('active'),delay); });
+}
+
+/* ================= GAME 3: QUIZ ================= */
+const quizData=[
+  {q:"What does AI stand for?", opts:["Artificial Intelligence","Automatic Internet","Amazing Ideas","Animal Instinct"], a:0},
+  {q:"What does a Machine Learning model need to learn from?", opts:["Magic","Training data / examples","A dictionary only","Nothing"], a:1},
+  {q:"In a Neural Network, what's a single tiny 'thinking unit' called?", opts:["A pixel","A neuron","A cloud","A cookie"], a:1},
+  {q:"What is the 3-step flow every AI follows?", opts:["Sleep → Dream → Wake","Input → Process → Output","Click → Save → Print","Guess → Cry → Repeat"], a:1},
+  {q:"If a robot only follows rules a person typed, with no learning, is it AI?", opts:["No, never AI","Yes, it can still count as simple AI","Only on Tuesdays","Only if it's blue"], a:1},
+  {q:"What is it called when a model memorizes examples too well and fails on new ones?", opts:["Overfitting","Undercooking","Rebooting","Overclocking"], a:0},
+  {q:"What powers most modern chatbots like Byte's big cousins?", opts:["A calculator","A Large Language Model (LLM)","A microwave","A paper map"], a:1},
+  {q:"What do we call the 'answer key' used to teach a model in supervised learning?", opts:["A label","A password","A cookie","A firewall"], a:0}
+];
+let qIdx=0, qScore=0;
+function renderQuiz(){
+  const area=document.getElementById('quizArea');
+  document.getElementById('quizProgress').style.width = (qIdx/quizData.length*100)+'%';
+  if(qIdx>=quizData.length){
+    area.innerHTML = `<div class="big-emoji">${qScore===quizData.length?'🏆':'🎉'}</div>
+      <p style="text-align:center;font-family:'Fredoka',sans-serif;font-size:1.15rem;">You scored ${qScore} / ${quizData.length}!<br>${qScore>=6?'You think like a true AI explorer!':'Nice try — replay to beat your score!'}</p>
+      <p style="text-align:center;"><button class="btn small mint" onclick="restartQuiz()">🔁 Play Again</button></p>`;
+    document.getElementById('quizProgress').style.width='100%';
+    return;
+  }
+  const item=quizData[qIdx];
+  area.innerHTML = `<p style="font-family:'Fredoka',sans-serif;font-size:1.1rem;">${qIdx+1}. ${item.q}</p>` +
+    item.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerQuiz(${i})">${o}</button>`).join('');
+}
+function answerQuiz(i){
+  const item=quizData[qIdx];
+  const btns=document.querySelectorAll('.quiz-opt');
+  btns.forEach((b,idx)=>{
+    b.disabled=true;
+    if(idx===item.a) b.classList.add('correct');
+    else if(idx===i) b.classList.add('wrong');
+  });
+  if(i===item.a) qScore++;
+  document.getElementById('quizScore').textContent='Score: '+qScore;
+  setTimeout(()=>{ qIdx++; renderQuiz(); }, 1000);
+}
+function restartQuiz(){ qIdx=0; qScore=0; document.getElementById('quizScore').textContent='Score: 0'; renderQuiz(); }
+renderQuiz();
+
+/* ================= GLOSSARY DATA ================= */
+/* levels: [1]=Tiny Explorer 4-6, [2]=Kid Explorer 7-10, [3]=Teen, [4]=Grown-Up, [5]=Tech */
+const LEVEL_NAMES=["","Tiny Explorer (4–6)","Kid Explorer (7–10)","Teen Level","Grown-Up Level","Tech Level"];
+const GLOSSARY=[
+{t:"Artificial Intelligence",abbr:"AI",cat:"Big Ideas",L:[
+ "A computer that tries to act a little bit smart, like a friendly robot friend.",
+ "Any computer program that can do things that normally need human thinking, like recognizing pictures.",
+ "A broad field of computer science focused on making machines perform tasks that normally require human intelligence.",
+ "The umbrella term for any system — rule-based or learned — that mimics decision-making, perception, or reasoning.",
+ "AI: the study and engineering of computational systems capable of performing tasks associated with human cognition, spanning symbolic rule-based systems through modern statistical/ML approaches."]},
+{t:"Machine Learning",abbr:"ML",cat:"Big Ideas",L:[
+ "Teaching a computer by showing it lots of examples, like showing a puppy tricks.",
+ "A way for computers to get better at a task by studying data instead of being told exact steps.",
+ "A subfield of AI where algorithms find patterns in data and improve performance without being explicitly reprogrammed.",
+ "A statistical approach to AI: models learn parameters from data to generalize to new, unseen examples.",
+ "ML: the construction of algorithms that build a mathematical model from sample data ('training data') to make predictions/decisions without task-specific hard-coded instructions."]},
+{t:"Deep Learning",abbr:"DL",cat:"Big Ideas",L:[
+ "Machine learning with a super-duper big brain made of lots of layers.",
+ "Machine learning that uses many stacked 'brain layers' to spot really tricky patterns, like faces in photos.",
+ "A subset of ML using multi-layered neural networks to automatically learn hierarchical feature representations.",
+ "Deep learning scales ML with many-layered neural nets, letting the model learn its own features instead of humans hand-picking them.",
+ "DL: ML using artificial neural networks with multiple hidden layers (deep architectures) to learn hierarchical representations directly from raw data."]},
+{t:"Algorithm",abbr:"",cat:"Big Ideas",L:[
+ "A recipe of steps a computer follows, like steps to bake cookies.",
+ "A set of exact instructions a computer follows to solve a problem or finish a task.",
+ "A finite, well-defined sequence of steps used to solve a problem or perform a computation.",
+ "The logical procedure underlying any program — from sorting a list to training a neural net.",
+ "Algorithm: a formally specified, deterministic (or stochastic) sequence of computational steps that transforms input into output within finite time."]},
+{t:"Data",abbr:"",cat:"Big Ideas",L:[
+ "All the pictures, words, and numbers a computer looks at to learn.",
+ "Information — like photos, text, or numbers — that a computer studies to learn things.",
+ "Raw facts and figures (text, images, numbers, audio) that ML models are trained and evaluated on.",
+ "The fuel of every ML system; its quality, size, and diversity heavily determine model performance and bias.",
+ "Data: structured or unstructured recorded observations serving as the empirical substrate for model fitting, validation, and inference."]},
+{t:"Robot vs AI",abbr:"",cat:"Big Ideas",L:[
+ "A robot is the metal body; AI is the smart brain inside — you can have one without the other!",
+ "A robot is a physical machine that can move; AI is the thinking part. Some robots have AI, some don't.",
+ "'Robot' describes hardware capable of physical action; 'AI' describes the software/decision-making — they're independent concepts that often combine.",
+ "Not all robots use AI (many follow simple fixed motors/sensors), and not all AI is embodied in a robot (e.g. a chatbot has no body).",
+ "Robotics concerns embodied physical agents and actuation; AI concerns computational reasoning/perception — overlapping but orthogonal fields."]},
+{t:"Turing Test",abbr:"",cat:"Big Ideas",L:[
+ "A game where you chat with someone hidden and try to guess if it's a robot or a real person.",
+ "A test where a person chats with a hidden computer and a hidden human, and tries to tell which is which.",
+ "A thought experiment by Alan Turing proposing that a machine is 'intelligent' if its conversation is indistinguishable from a human's.",
+ "A famous but debated benchmark for machine intelligence based on conversational indistinguishability rather than internal reasoning.",
+ "Turing Test: an operational criterion for machine intelligence in which a human evaluator, via text-only dialogue, cannot reliably distinguish a machine from a human interlocutor."]},
+{t:"Generative AI",abbr:"GenAI",cat:"Big Ideas",L:[
+ "AI that makes brand-new pictures, stories, or songs, like a magic art robot.",
+ "AI that creates new things — pictures, stories, music — instead of just answering questions.",
+ "AI models that generate novel content (text, images, audio, code) by learning the patterns of large datasets.",
+ "Generative models learn a probability distribution over data and sample from it to produce new, plausible outputs.",
+ "GenAI: models (e.g. diffusion models, autoregressive transformers, GANs) that learn p(data) or p(data|prompt) to synthesize novel, coherent samples."]},
+
+{t:"Training Data",abbr:"",cat:"How Machines Learn",L:[
+ "The pile of example pictures or words you show the robot so it can practice.",
+ "The examples a computer studies to learn a task, like flashcards for a robot.",
+ "The dataset used to fit a model's parameters — the 'lessons' the algorithm learns from.",
+ "Training data quality/coverage directly shapes what patterns (and biases) a model internalizes.",
+ "Training data: the labeled or unlabeled sample set used during the optimization/fitting phase to adjust model parameters (weights)."]},
+{t:"Test Data",abbr:"",cat:"How Machines Learn",L:[
+ "New examples the robot has NEVER seen, used to check if it really learned.",
+ "Fresh examples used after training to see if the computer actually learned, not just memorized.",
+ "A held-out dataset, unseen during training, used to evaluate a model's ability to generalize.",
+ "Keeping test data separate from training prevents overly optimistic performance estimates ('data leakage').",
+ "Test data: a disjoint sample partition reserved exclusively for unbiased evaluation of generalization error post-training."]},
+{t:"Model",abbr:"",cat:"How Machines Learn",L:[
+ "The robot's brain after it has practiced — the thing that makes guesses.",
+ "The 'trained brain' a computer builds after studying lots of examples.",
+ "The mathematical structure (with learned parameters) that maps inputs to predictions.",
+ "A model is essentially a function approximator whose parameters were tuned via training on data.",
+ "Model: a parameterized function f(x; θ) — where θ are learned weights — mapping input space to output/prediction space."]},
+{t:"Supervised Learning",abbr:"",cat:"How Machines Learn",L:[
+ "Learning with an answer key, like a teacher checking your homework.",
+ "Learning where every example comes with the correct answer already attached, so the computer can check itself.",
+ "A training paradigm where models learn a mapping from inputs to known, labeled outputs.",
+ "Most classification/regression systems (spam filters, price predictors) are trained this way, requiring labeled data.",
+ "Supervised learning: optimization of f(x)→y using paired (input, ground-truth label) examples, minimizing a loss between predictions and labels."]},
+{t:"Unsupervised Learning",abbr:"",cat:"How Machines Learn",L:[
+ "Learning by yourself, finding groups of similar things with no answer key.",
+ "The computer looks for patterns or groups in data all by itself, with no correct answers given.",
+ "A training paradigm that discovers structure (clusters, patterns) in unlabeled data.",
+ "Used for tasks like customer segmentation or anomaly detection where labels are unavailable or expensive.",
+ "Unsupervised learning: inference of latent structure (e.g. via clustering, dimensionality reduction) from unlabeled data without an explicit target variable."]},
+{t:"Reinforcement Learning",abbr:"RL",cat:"How Machines Learn",L:[
+ "Learning by trying things and getting stars for good moves, like a video game.",
+ "The computer tries actions, gets rewards for good moves and penalties for bad ones, and learns over time.",
+ "A learning paradigm where an agent learns to act in an environment to maximize cumulative reward.",
+ "RL powers game-playing AIs and robotics control, learning strategy through trial, error, and feedback signals.",
+ "RL: an agent learns a policy π(a|s) that maximizes expected cumulative reward through interaction with an environment, often formalized as a Markov Decision Process."]},
+{t:"Label",abbr:"",cat:"How Machines Learn",L:[
+ "The correct sticker on an example, like 'this is a cat.'",
+ "The correct answer attached to an example so the computer knows what it should learn.",
+ "The ground-truth tag attached to a training example (e.g. 'spam'/'not spam').",
+ "Labels are the target variable in supervised learning; label quality directly affects model accuracy.",
+ "Label: the target value y associated with input x in a supervised dataset, used to compute training loss."]},
+{t:"Feature",abbr:"",cat:"How Machines Learn",L:[
+ "A clue about something, like 'has whiskers' helps guess it's a cat.",
+ "A measurable clue or detail (like color or size) that helps a computer make a decision.",
+ "An individual measurable property or characteristic used as input to a model.",
+ "Feature choice/engineering strongly affects model performance, especially in classical (non-deep) ML.",
+ "Feature: an input variable x_i in a feature vector representing a dimension of the data used for model inference."]},
+{t:"Prediction",abbr:"",cat:"How Machines Learn",L:[
+ "The robot's best guess about something new.",
+ "The computer's answer or guess when it sees something it hasn't seen before.",
+ "The output a trained model produces when given a new, unseen input.",
+ "Predictions come with a confidence/probability, reflecting the model's certainty, not guaranteed truth.",
+ "Prediction: the inference-time output ŷ = f(x; θ) generated by applying a trained model to novel input data."]},
+{t:"Overfitting",abbr:"",cat:"How Machines Learn",L:[
+ "When the robot memorizes the exact homework but can't solve a new problem.",
+ "When a computer memorizes its examples so well it fails on brand-new ones.",
+ "A modeling error where a model learns noise/specifics of training data, hurting generalization.",
+ "Overfitting shows as great training accuracy but poor test accuracy — a key thing engineers guard against.",
+ "Overfitting: excessive model complexity relative to data leads to fitting sampling noise, producing low bias but high variance and poor out-of-sample generalization."]},
+{t:"Underfitting",abbr:"",cat:"How Machines Learn",L:[
+ "When the robot didn't practice enough and gets everything wrong, even easy stuff.",
+ "When a computer hasn't learned enough patterns, so it does badly even on things it studied.",
+ "A modeling error where the model is too simple to capture underlying patterns in the data.",
+ "Underfitting shows as poor performance on both training and test data — often fixed with a bigger/better model.",
+ "Underfitting: excessively simple model or insufficient training leads to high bias, failing to capture true data-generating patterns."]},
+{t:"Epoch",abbr:"",cat:"How Machines Learn",L:[
+ "One full time the robot looked through ALL its flashcards.",
+ "One complete pass through the whole set of training examples.",
+ "One full cycle of training over the entire dataset before parameters are updated a full round.",
+ "Models often train for many epochs, gradually reducing error each pass, until performance plateaus.",
+ "Epoch: a single complete iteration of the training loop over the full training dataset, typically batched via stochastic gradient methods."]},
+
+{t:"Neural Network",abbr:"NN",cat:"Brain Parts",L:[
+ "A pretend brain made of tiny dots connected like a spiderweb.",
+ "A computer structure inspired by brain cells, made of connected layers that pass signals to each other.",
+ "A computational model composed of interconnected nodes ('neurons') organized in layers that transform input signals.",
+ "NNs learn by adjusting connection strengths (weights) through exposure to data, loosely inspired by biological brains.",
+ "Neural Network: a directed graph of parameterized 'neuron' units organized in layers, computing nested nonlinear transformations f(x)=σ(Wx+b) to approximate complex functions."]},
+{t:"Neuron",abbr:"",cat:"Brain Parts",L:[
+ "One tiny dot in the pretend brain that lights up.",
+ "A single tiny 'decision-maker' unit inside a neural network.",
+ "A basic computational unit that receives inputs, weighs them, and produces an output signal.",
+ "Each artificial neuron computes a weighted sum of inputs, adds a bias, then applies an activation function.",
+ "Neuron: a unit computing y = σ(Σ wᵢxᵢ + b), where σ is a nonlinear activation function, wᵢ are learned weights, and b is a learned bias."]},
+{t:"Layer",abbr:"",cat:"Brain Parts",L:[
+ "A row of dots in the pretend brain, like a row of friends passing a ball.",
+ "A group of neurons stacked together that all work at the same 'step' of thinking.",
+ "A collection of neurons that process inputs from the previous layer and pass results to the next.",
+ "Networks typically have an input layer, one+ hidden layers, and an output layer, each transforming the signal further.",
+ "Layer: a set of neurons applying the same class of transformation in parallel; deep networks stack many layers to build hierarchical feature representations."]},
+{t:"Weight",abbr:"",cat:"Brain Parts",L:[
+ "How much the robot 'listens' to one clue versus another.",
+ "A number that says how important one piece of information is to the robot's decision.",
+ "A learnable parameter that scales the importance of an input signal in a neuron's computation.",
+ "Weights are adjusted during training via gradient descent to minimize prediction error.",
+ "Weight: a trainable scalar parameter wᵢ in a neuron's linear combination, updated via gradient-based optimization to reduce loss."]},
+{t:"Bias (parameter)",abbr:"",cat:"Brain Parts",L:[
+ "A little extra nudge the robot adds to its guess, just in case.",
+ "An extra adjustable number added to a neuron's math to help it fit better.",
+ "A learnable offset term added to a neuron's weighted sum before activation.",
+ "Bias shifts the activation threshold, letting a neuron fire even when weighted inputs are small.",
+ "Bias: the additive parameter b in y = σ(Wx + b), shifting the decision boundary independent of input values."]},
+{t:"Activation Function",abbr:"",cat:"Brain Parts",L:[
+ "The rule that decides if a dot 'lights up' or stays dark.",
+ "A math rule that decides how strongly a neuron 'fires' its signal onward.",
+ "A nonlinear function applied to a neuron's weighted sum, enabling networks to model complex patterns.",
+ "Common choices (ReLU, sigmoid, tanh) introduce nonlinearity — without them, deep networks would collapse into linear models.",
+ "Activation function σ(·): a nonlinear mapping applied post-linear-combination, essential for universal function approximation in multi-layer networks."]},
+{t:"Loss Function",abbr:"",cat:"Brain Parts",L:[
+ "A number that tells the robot how wrong its guess was — smaller is better!",
+ "A score that measures how far off the computer's guess was from the right answer.",
+ "A function quantifying the difference between predicted and true outputs, guiding training.",
+ "Training minimizes the loss function via optimization, improving predictions across many examples.",
+ "Loss function L(ŷ, y): a differentiable objective (e.g. cross-entropy, MSE) minimized during optimization to align predictions with ground truth."]},
+{t:"Gradient Descent",abbr:"",cat:"Brain Parts",L:[
+ "The robot takes tiny steps downhill on a 'wrongness mountain' until it's at the bottom.",
+ "A method where the computer nudges its numbers little by little to make fewer mistakes.",
+ "An optimization algorithm that iteratively adjusts parameters in the direction that reduces the loss.",
+ "It computes the gradient (slope) of the loss with respect to each weight and steps opposite to it.",
+ "Gradient Descent: θ ← θ − η∇L(θ), iteratively updating parameters θ opposite the loss gradient, scaled by learning rate η, to reach a local/global minimum."]},
+{t:"Backpropagation",abbr:"",cat:"Brain Parts",L:[
+ "The robot looks back at its mistake and tells every dot how to change a little.",
+ "A way for the computer to send the 'you were wrong here' message backward through all its layers.",
+ "The algorithm that computes how much each weight contributed to the error, layer by layer, backward.",
+ "Backprop uses the chain rule of calculus to efficiently compute gradients for every parameter in deep networks.",
+ "Backpropagation: reverse-mode automatic differentiation applying the chain rule to propagate ∂L/∂output backward through the computation graph, yielding gradients for all weights."]},
+{t:"Convolutional Neural Network",abbr:"CNN",cat:"Brain Parts",L:[
+ "A special brain that's great at looking at pictures, like finding a cat in a photo.",
+ "A neural network built especially to understand images by scanning small patches at a time.",
+ "A deep learning architecture using convolutional filters to detect spatial patterns like edges and shapes in images.",
+ "CNNs use shared, sliding filters (kernels) to efficiently detect local patterns regardless of position — great for vision tasks.",
+ "CNN: a network using learnable convolutional kernels that slide over spatially-structured input, exploiting local connectivity and weight-sharing to build hierarchical spatial feature maps."]},
+{t:"Recurrent Neural Network",abbr:"RNN",cat:"Brain Parts",L:[
+ "A brain with a memory, that remembers what it just heard, like following a story.",
+ "A neural network that remembers earlier words or steps to understand things that happen in order, like sentences.",
+ "A network architecture with loops, allowing information to persist across steps in a sequence.",
+ "RNNs process sequential data (text, time-series) by maintaining a hidden state updated at every step.",
+ "RNN: a network with recurrent connections maintaining hidden state h_t = f(h_{t-1}, x_t), enabling temporal/sequential dependency modeling (largely superseded by Transformers for many tasks)."]},
+{t:"Transformer",abbr:"",cat:"Brain Parts",L:[
+ "A super-brain that can look at a whole sentence at once and decide what's most important.",
+ "A modern kind of neural network that reads a whole sentence at once and figures out which words matter most to each other.",
+ "A neural network architecture using 'attention' to weigh relationships between all elements of a sequence simultaneously.",
+ "Transformers replaced RNNs in most language AI because attention parallelizes well and captures long-range context.",
+ "Transformer: an architecture built on multi-head self-attention, computing weighted contextual representations Attention(Q,K,V)=softmax(QKᵀ/√d)V, forming the backbone of modern LLMs."]},
+
+{t:"Natural Language Processing",abbr:"NLP",cat:"Cool AI Words",L:[
+ "Teaching a computer to understand talking and writing.",
+ "The part of AI that helps computers read, understand, and write human language.",
+ "A field of AI focused on enabling computers to process, understand, and generate human language.",
+ "NLP powers translation, chatbots, spell-check, and sentiment analysis by modeling language statistically.",
+ "NLP: the subfield of AI/computational linguistics developing models to parse, represent, and generate natural language via statistical and neural methods."]},
+{t:"Computer Vision",abbr:"CV",cat:"Cool AI Words",L:[
+ "Teaching a computer to 'see' pictures like your eyes do.",
+ "The part of AI that helps computers understand pictures and videos, like spotting a dog in a photo.",
+ "A field of AI that enables machines to interpret and analyze visual information from images or video.",
+ "CV underlies face unlock, self-driving car perception, and medical image diagnosis systems.",
+ "Computer Vision: the discipline developing algorithms (often CNN/Transformer-based) to extract semantic understanding from pixel data."]},
+{t:"Chatbot",abbr:"",cat:"Cool AI Words",L:[
+ "A robot friend you can type to, and it types back!",
+ "A computer program you can chat with by typing, and it writes back answers.",
+ "A conversational AI application designed to simulate dialogue with a human user.",
+ "Modern chatbots are usually powered by Large Language Models trained on massive text datasets.",
+ "Chatbot: a dialogue-system application, historically rule/retrieval-based, now typically implemented via fine-tuned or prompted LLMs generating context-aware responses."]},
+{t:"Large Language Model",abbr:"LLM",cat:"Cool AI Words",L:[
+ "A giant robot brain that has read almost the whole internet and can talk about anything.",
+ "A huge AI model trained on tons and tons of text, so it can chat, answer, and write about many topics.",
+ "A deep learning model (usually Transformer-based) trained on massive text corpora to understand and generate language.",
+ "LLMs predict the next likely word repeatedly, and this simple mechanism produces surprisingly coherent, useful text.",
+ "LLM: a large-scale, typically Transformer-based autoregressive or masked language model with billions of parameters, trained via next-token prediction over vast text corpora, often further aligned via fine-tuning/RLHF."]},
+{t:"Token",abbr:"",cat:"Cool AI Words",L:[
+ "A tiny puzzle piece of a word that the robot reads one at a time.",
+ "A small chunk of text (like part of a word) that AI language models read and write, piece by piece.",
+ "The basic unit (word, sub-word, or character) into which text is split for processing by a language model.",
+ "LLMs don't see raw text — they see sequences of tokens mapped to numeric IDs and embeddings.",
+ "Token: a discrete unit produced by a tokenizer (e.g. byte-pair encoding) representing sub-word text segments, mapped to embedding vectors as model input/output units."]},
+{t:"Prompt",abbr:"",cat:"Cool AI Words",L:[
+ "The question or message you type to ask the robot for help.",
+ "The words you type to tell an AI what you want it to do or answer.",
+ "The input text given to a language model to elicit a desired response.",
+ "Prompt wording/structure significantly affects LLM output quality — this skill is called 'prompt engineering.'",
+ "Prompt: the input context (instructions, examples, or query) conditioning an LLM's next-token generation distribution."]},
+{t:"Fine-tuning",abbr:"",cat:"Cool AI Words",L:[
+ "Giving the robot's brain some extra practice on a special new subject.",
+ "Taking an already-smart AI and training it a little more on a specific topic to make it even better at that.",
+ "The process of further training a pre-trained model on a smaller, specific dataset to specialize its behavior.",
+ "Fine-tuning is cheaper than training from scratch, since the model already knows general language/vision patterns.",
+ "Fine-tuning: continued gradient-based training of a pre-trained model's weights (fully or via adapters like LoRA) on a task-specific dataset to specialize performance."]},
+{t:"GPU",abbr:"Graphics Processing Unit",cat:"Cool AI Words",L:[
+ "A super-fast computer chip that helps robots think quickly.",
+ "A special computer chip, originally for video games, that's great at doing lots of AI math super fast.",
+ "A processor optimized for performing many parallel calculations simultaneously, essential for training AI models.",
+ "GPUs' massive parallelism accelerates the matrix multiplications that dominate neural network training and inference.",
+ "GPU: a many-core parallel processor optimized for high-throughput matrix/tensor operations, foundational hardware for training and serving deep learning models at scale."]},
+{t:"Dataset",abbr:"",cat:"Cool AI Words",L:[
+ "The whole big box of examples the robot practices with.",
+ "The full collection of examples — pictures, text, or numbers — used to teach or test an AI.",
+ "An organized collection of data samples used for training, validating, or testing a model.",
+ "Dataset size, diversity, and cleanliness are often more important to model quality than architecture choice.",
+ "Dataset: a curated, structured corpus of samples (often split into train/validation/test partitions) serving as empirical input to model development."]},
+{t:"Classification",abbr:"",cat:"Cool AI Words",L:[
+ "Sorting things into groups, like 'cat' or 'dog.'",
+ "A task where the computer sorts things into categories, like spam vs. not spam.",
+ "A supervised learning task predicting a discrete category label for a given input.",
+ "Classification underlies spam filters, medical diagnosis flags, and image recognition ('is this a cat?').",
+ "Classification: a supervised task learning a decision function f(x)→c mapping inputs to one of a finite set of discrete class labels c."]},
+{t:"Regression",abbr:"",cat:"Cool AI Words",L:[
+ "Guessing a number, like how tall a plant will grow.",
+ "A task where the computer predicts a number, like tomorrow's temperature or a house price.",
+ "A supervised learning task predicting a continuous numeric value from input data.",
+ "Regression models output real numbers rather than categories, evaluated with metrics like mean squared error.",
+ "Regression: a supervised task learning f(x)→ℝ that estimates a continuous target variable, typically optimized via a loss like MSE or MAE."]},
+{t:"Clustering",abbr:"",cat:"Cool AI Words",L:[
+ "Finding friends that are alike and putting them in the same group, without being told the groups first.",
+ "Grouping similar things together automatically, without anyone telling the computer the group names.",
+ "An unsupervised learning technique that groups similar data points based on shared characteristics.",
+ "Clustering (e.g. k-means) reveals hidden structure in data — useful for customer segments or anomaly spotting.",
+ "Clustering: an unsupervised task partitioning a dataset into groups (clusters) that minimize intra-cluster distance and maximize inter-cluster distance under some similarity metric."]},
+{t:"Hyperparameter",abbr:"",cat:"Cool AI Words",L:[
+ "A setting a person picks BEFORE the robot starts practicing, like how fast it should study.",
+ "A setting chosen by the AI's builder (not learned by the AI) that controls how training happens.",
+ "A configuration value set prior to training (e.g. learning rate, layer count) rather than learned from data.",
+ "Hyperparameter tuning (manual or automated search) can dramatically affect final model performance.",
+ "Hyperparameter: an external configuration variable governing the learning algorithm's behavior (e.g. learning rate η, batch size, network depth), set prior to and not updated during training."]},
+{t:"AI Bias / Fairness",abbr:"",cat:"Cool AI Words",L:[
+ "Sometimes a robot learns unfair habits from unfair examples, so people have to check its guesses.",
+ "When an AI treats certain people unfairly because its training examples weren't fair or balanced to begin with.",
+ "Systematic errors in AI outputs that unfairly disadvantage certain groups, often rooted in unrepresentative training data.",
+ "AI bias is a major real-world concern (in hiring, lending, policing tools) requiring careful dataset design and auditing.",
+ "AI Bias: systematic, unwanted skew in model outputs arising from non-representative training data, label bias, or objective misalignment, studied and mitigated within algorithmic fairness research."]}
+];
+
+/* ================= RENDER GLOSSARY ================= */
+const glossGrid=document.getElementById('glossGrid');
+const catFiltersEl=document.getElementById('catFilters');
+const levelDial=document.getElementById('levelDial');
+const levelNameEl=document.getElementById('levelName');
+const searchEl=document.getElementById('glossSearch');
+let activeCat='All';
+
+const cats=['All',...new Set(GLOSSARY.map(g=>g.cat))];
+cats.forEach(c=>{
+  const b=document.createElement('button');
+  b.className='cat-btn'+(c==='All'?' active':'');
+  b.textContent=c;
+  b.onclick=()=>{ activeCat=c; document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); renderGlossary(); };
+  catFiltersEl.appendChild(b);
+});
+
+function renderGlossary(){
+  const lvl=parseInt(levelDial.value,10);
+  const q=searchEl.value.trim().toLowerCase();
+  glossGrid.innerHTML='';
+  GLOSSARY.filter(g=>{
+    const matchesCat = activeCat==='All' || g.cat===activeCat;
+    const matchesSearch = !q || g.t.toLowerCase().includes(q) || (g.abbr && g.abbr.toLowerCase().includes(q));
+    return matchesCat && matchesSearch;
+  }).forEach(g=>{
+    const card=document.createElement('div');
+    card.className='term-card';
+    card.innerHTML = `<h4>${g.t}${g.abbr?` <span style="color:var(--pink-deep);">(${g.abbr})</span>`:''}</h4>
+      <div class="abbr">${g.cat}</div>
+      <div class="def ${lvl===5?'tech':''}">${g.L[lvl-1]}</div>`;
+    glossGrid.appendChild(card);
+  });
+  if(!glossGrid.children.length){
+    glossGrid.innerHTML='<p style="grid-column:1/-1;text-align:center;color:var(--ink-soft);">No words found — try another search! 🔎</p>';
+  }
+}
+levelDial.addEventListener('input', ()=>{ levelNameEl.textContent=LEVEL_NAMES[levelDial.value]; renderGlossary(); });
+searchEl.addEventListener('input', renderGlossary);
+renderGlossary();
+</script>
+</body>
+</html>
