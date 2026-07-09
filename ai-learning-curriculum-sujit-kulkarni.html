@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Learning Curriculum — Compiled by Sujit Kulkarni</title>
+<style>
+:root{
+  --bg:#070d18;--surface:#0d1520;--surface2:#111e2e;--border:#1e2d42;
+  --text:#e2e8f0;--muted:#64748b;
+  --blue:#2563eb;--lblue:#60a5fa;--navy:#1e3a8a;--cobalt:#1d4ed8;
+  --teal:#0d9488;--lteal:#2dd4bf;--emerald:#065f46;--lgreen:#34d399;
+  --gold:#d97706;--amber:#b45309;--bronze:#92400e;
+  --violet:#7c3aed;--lviolet:#a78bfa;
+  --slate:#475569;--cloud:#94a3b8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.6;overflow-x:hidden;}
+
+.hero{background:linear-gradient(135deg,#070d18 0%,#0a1628 50%,#070d18 100%);border-bottom:2px solid var(--blue);padding:52px 24px 40px;text-align:center;position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 55% at 50% 0%,rgba(37,99,235,.15) 0%,transparent 70%);pointer-events:none;}
+.eyebrow{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--lblue);margin-bottom:14px;font-weight:700;}
+.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--blue);animation:pulse 2s infinite;margin-right:6px;vertical-align:middle;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(2rem,5.5vw,3.8rem);font-weight:900;line-height:1.1;margin-bottom:10px;}
+.hero h1 .w1{color:#93c5fd;}.hero h1 .w2{color:#fff;}.hero h1 .w3{color:var(--lblue);}
+.hero-sub{color:var(--gold);font-size:.82rem;letter-spacing:3px;text-transform:uppercase;font-weight:700;margin-bottom:12px;}
+.hero-desc{color:var(--muted);font-size:.96rem;max-width:680px;margin:0 auto 26px;line-height:1.8;}
+.badge{background:linear-gradient(90deg,var(--cobalt),var(--blue));color:#fff;font-weight:800;font-size:13px;padding:8px 24px;border-radius:99px;display:inline-block;letter-spacing:1px;box-shadow:0 4px 20px rgba(37,99,235,.3);}
+
+nav{position:sticky;top:0;z-index:100;background:rgba(7,13,24,.97);border-bottom:1px solid var(--border);padding:0 16px;display:flex;gap:2px;overflow-x:auto;}
+nav a{padding:12px 13px;color:var(--muted);text-decoration:none;font-size:12.5px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:all .2s;cursor:pointer;}
+nav a:hover{color:var(--lblue);border-bottom-color:var(--blue);}
+
+.sec{padding:62px 0;}.sec.alt{background:var(--surface);}
+.container{max-width:1300px;margin:0 auto;padding:0 24px;}
+.sec-label{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--lblue);font-weight:700;margin-bottom:8px;}
+.sec-title{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;margin-bottom:12px;}
+.sec-desc{color:var(--muted);max-width:700px;margin-bottom:36px;font-size:.95rem;line-height:1.8;}
+
+/* INFOBOX */
+.infobox{background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--blue);border-left:4px solid var(--blue);border-radius:10px;padding:18px 22px;margin-bottom:36px;color:#93c5fd;font-size:.91rem;line-height:1.8;}
+.infobox strong{color:var(--lblue);}
+
+/* STATS */
+.stats{display:flex;gap:36px;flex-wrap:wrap;margin-bottom:46px;}
+.stat{text-align:center;}.stat-n{font-size:2.8rem;font-weight:900;line-height:1;}
+.stat p{color:#475569;font-size:.79rem;margin-top:4px;}
+
+/* FC SCROLL */
+.fc-scroll{width:100%;overflow-x:auto;padding:10px 0 20px;background:var(--surface2);border-radius:16px;border:1px solid var(--border);}
+.fc-scroll svg{display:block;margin:0 auto;}
+
+/* PHASE CARDS */
+.phase-wrap{display:flex;flex-direction:column;gap:28px;}
+.phase-card{background:var(--surface2);border-radius:16px;border:1px solid var(--border);overflow:hidden;transition:box-shadow .2s;}
+.phase-card:hover{box-shadow:0 8px 32px rgba(0,0,0,.4);}
+.phase-header{display:flex;align-items:center;gap:18px;padding:22px 26px;}
+.phase-num{font-size:2.4rem;font-weight:900;line-height:1;opacity:.9;min-width:54px;}
+.phase-meta{flex:1;}
+.phase-title{font-size:1.1rem;font-weight:800;margin-bottom:4px;}
+.phase-badge{display:inline-block;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:4px;letter-spacing:.5px;text-transform:uppercase;}
+.phase-body{padding:0 26px 24px;}
+.phase-desc{color:var(--muted);font-size:.9rem;line-height:1.75;margin-bottom:18px;}
+.phase-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:640px){.phase-cols{grid-template-columns:1fr;}}
+.phase-col h4{font-size:.75rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px;}
+.topic-list{list-style:none;}
+.topic-list li{padding:5px 0;font-size:.87rem;color:#94a3b8;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+.topic-list li:last-child{border-bottom:none;}
+.topic-list li::before{content:'→';color:inherit;opacity:.6;font-size:.8rem;flex-shrink:0;}
+.link-list{display:flex;flex-direction:column;gap:7px;}
+.res-link{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:8px;text-decoration:none;transition:background .15s,border-color .15s;}
+.res-link:hover{background:rgba(37,99,235,.1);border-color:var(--blue);}
+.res-link-icon{font-size:1rem;flex-shrink:0;}
+.res-link-text{font-size:.82rem;}
+.res-link-text strong{color:var(--text);display:block;margin-bottom:1px;}
+.res-link-text span{color:var(--muted);font-size:.75rem;}
+.duration-bar{height:4px;border-radius:99px;margin-top:16px;}
+.duration-label{font-size:.72rem;color:var(--muted);margin-top:6px;}
+
+/* COMPARISON TABLE */
+.cmp-table{width:100%;border-collapse:collapse;font-size:.84rem;}
+.cmp-table th{background:var(--surface2);color:var(--lblue);padding:12px 14px;text-align:left;font-size:.74rem;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid var(--cobalt);}
+.cmp-table td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);}
+.cmp-table tr:hover td{background:rgba(37,99,235,.05);color:var(--text);}
+.cmp-table td:first-child{color:var(--text);font-weight:600;}
+
+/* BARS */
+.bar-wrap{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+@media(max-width:700px){.bar-wrap{grid-template-columns:1fr;}}
+.bh{font-size:.78rem;letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:18px;}
+.bi{display:flex;align-items:center;gap:12px;margin-bottom:13px;}
+.bl{width:180px;font-size:.83rem;flex-shrink:0;color:#94a3b8;}
+.bb{flex:1;background:var(--border);border-radius:99px;height:9px;overflow:hidden;}
+.bf{height:100%;border-radius:99px;width:0;transition:width 1.4s ease;}
+.bv{width:46px;text-align:right;font-size:.78rem;color:var(--muted);}
+
+/* SEARCH / TABLE */
+.search{width:100%;max-width:480px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:.93rem;padding:12px 18px;border-radius:10px;outline:none;margin-bottom:24px;transition:border-color .2s;}
+.search:focus{border-color:var(--blue);}
+.search::placeholder{color:var(--muted);}
+.tw{overflow-x:auto;}
+table.idx{width:100%;border-collapse:collapse;font-size:.84rem;}
+table.idx th{background:var(--surface2);color:var(--lblue);padding:12px 14px;text-align:left;font-size:.74rem;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid var(--cobalt);}
+table.idx td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--muted);}
+table.idx tr:hover td{background:rgba(37,99,235,.05);color:var(--text);}
+table.idx td:first-child{color:var(--text);font-weight:600;}
+
+/* TAKEAWAY */
+.takeaway{background:linear-gradient(135deg,#080f1f,#0d1a30);border:2px solid var(--blue);border-radius:16px;padding:30px 36px;display:flex;align-items:flex-start;gap:22px;margin-top:40px;box-shadow:0 8px 32px rgba(37,99,235,.12);}
+.ta-icon{font-size:2.6rem;flex-shrink:0;}
+.ta-title{font-size:.82rem;font-weight:800;color:var(--lblue);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px;}
+.ta-text{color:#94a3b8;font-size:.94rem;line-height:1.8;}
+.ta-text strong{color:var(--text);}
+
+/* PILL */
+.pill-row{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px;}
+.pill{font-size:.71rem;padding:3px 9px;border-radius:99px;background:rgba(255,255,255,.05);color:var(--muted);border:1px solid rgba(255,255,255,.1);}
+
+footer{background:var(--surface);border-top:1px solid var(--border);padding:38px 24px;text-align:center;color:var(--muted);font-size:.85rem;}
+footer strong{color:var(--lblue);}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow"><span class="dot"></span>Zero to AI · Complete Layman Curriculum · Step by Step</div>
+  <h1><span class="w1">Learn</span> <span class="w2">AI</span> <span class="w3">from Scratch</span></h1>
+  <div class="hero-sub">● End-to-End Curriculum for Complete Beginners</div>
+  <p class="hero-desc">No maths degree. No coding background. No experience required. This curriculum takes you from absolute zero — understanding what AI is — all the way to building real AI projects. Follow the phases in order. Every step has free resources.</p>
+  <span class="badge">✦ Compiled by Sujit Kulkarni</span>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#overview">Overview</a>
+  <a href="#flowchart">Roadmap</a>
+  <a href="#phase1">Phase 1</a>
+  <a href="#phase2">Phase 2</a>
+  <a href="#phase3">Phase 3</a>
+  <a href="#phase4">Phase 4</a>
+  <a href="#phase5">Phase 5</a>
+  <a href="#phase6">Phase 6</a>
+  <a href="#phase7">Phase 7</a>
+  <a href="#tools">Tools</a>
+  <a href="#index">Index</a>
+</nav>
+
+<!-- OVERVIEW -->
+<div class="sec" id="overview">
+<div class="container">
+  <div class="sec-label">Before You Begin</div>
+  <h2 class="sec-title">How to Use This Curriculum</h2>
+  <p class="sec-desc">This is a structured, step-by-step path. Think of it as a staircase — each phase builds on the last. You cannot skip phases and expect the later ones to make sense. Spend the time recommended, then move on.</p>
+
+  <div class="infobox"><strong>Who is this for?</strong> Anyone — students, professionals, managers, entrepreneurs, teachers — who wants to understand and use AI meaningfully. You do not need to know how to code to complete Phases 1–4. Coding starts only in Phase 5, and even then it is gentle and guided.</div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-n" style="color:var(--lblue);">7</div><p>Learning Phases</p></div>
+    <div class="stat"><div class="stat-n" style="color:var(--lteal);">6–9</div><p>Months (part-time)</p></div>
+    <div class="stat"><div class="stat-n" style="color:var(--gold);">100%</div><p>Free Resources</p></div>
+    <div class="stat"><div class="stat-n" style="color:var(--lgreen);">0</div><p>Prerequisites</p></div>
+  </div>
+
+  <div class="tw" style="margin-bottom:0;">
+  <table class="cmp-table">
+    <thead><tr><th>Phase</th><th>Name</th><th>Duration</th><th>Difficulty</th><th>What You Gain</th></tr></thead>
+    <tbody>
+      <tr><td>Phase 1</td><td>AI Foundations</td><td>2–3 weeks</td><td>⬜ Beginner</td><td>Understand what AI is and isn't</td></tr>
+      <tr><td>Phase 2</td><td>Maths Essentials</td><td>4–6 weeks</td><td>⬜ Beginner</td><td>Just enough maths — no calculus yet</td></tr>
+      <tr><td>Phase 3</td><td>Python for AI</td><td>4–6 weeks</td><td>🟦 Intermediate</td><td>Code your first AI programs</td></tr>
+      <tr><td>Phase 4</td><td>Machine Learning Basics</td><td>6–8 weeks</td><td>🟦 Intermediate</td><td>Build and train ML models</td></tr>
+      <tr><td>Phase 5</td><td>Deep Learning</td><td>6–8 weeks</td><td>🟦 Intermediate</td><td>Neural networks, CNNs, RNNs</td></tr>
+      <tr><td>Phase 6</td><td>LLMs &amp; Generative AI</td><td>4–6 weeks</td><td>🟧 Advanced</td><td>Understand and use modern AI</td></tr>
+      <tr><td>Phase 7</td><td>Build Real Projects</td><td>Ongoing</td><td>🟧 Advanced</td><td>Portfolio, career, specialisation</td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<!-- ══════ FLOWCHART ══════ -->
+<div class="sec alt" id="flowchart">
+<div class="container">
+  <div class="sec-label">Visual Roadmap</div>
+  <h2 class="sec-title">AI Learning Path — Complete Flowchart</h2>
+  <p class="sec-desc">Your journey from zero to AI practitioner — every phase, topic, and milestone visualised in a clean top-down flowchart.</p>
+
+  <div class="fc-scroll">
+  <svg viewBox="0 0 1100 1480" xmlns="http://www.w3.org/2000/svg"
+       style="width:100%;max-width:1100px;min-width:600px;display:block;font-family:'Segoe UI',system-ui,sans-serif;">
+    <defs>
+      <marker id="ma" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#60a5fa"/></marker>
+      <marker id="mb" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><polygon points="0,0 7,2.5 0,5" fill="#94a3b8"/></marker>
+      <filter id="gl"><feGaussianBlur stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="gs"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <linearGradient id="g0" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1e3a8a"/><stop offset="100%" stop-color="#2563eb"/></linearGradient>
+      <linearGradient id="g1" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#1d4ed8"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient>
+      <linearGradient id="g2" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#0f766e"/><stop offset="100%" stop-color="#0d9488"/></linearGradient>
+      <linearGradient id="g3" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#065f46"/><stop offset="100%" stop-color="#059669"/></linearGradient>
+      <linearGradient id="g4" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#78350f"/><stop offset="100%" stop-color="#d97706"/></linearGradient>
+      <linearGradient id="g5" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#4c1d95"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient>
+      <linearGradient id="g6" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#164e63"/><stop offset="100%" stop-color="#0891b2"/></linearGradient>
+      <linearGradient id="g7" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#134e4a"/><stop offset="100%" stop-color="#0d9488"/></linearGradient>
+    </defs>
+
+    <!-- START -->
+    <rect x="350" y="18" width="400" height="56" rx="14" fill="url(#g0)" filter="url(#gl)"/>
+    <text x="550" y="42" text-anchor="middle" fill="#fff" font-size="17" font-weight="900">🚀  You — Starting from Zero</text>
+    <text x="550" y="62" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10.5">No maths · No coding · No experience needed</text>
+
+    <!-- START → P1 -->
+    <line x1="550" y1="74" x2="550" y2="102" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 1 ── -->
+    <rect x="280" y="102" width="540" height="56" rx="12" fill="url(#g1)" filter="url(#gs)"/>
+    <text x="550" y="126" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">📘  Phase 1 · AI Foundations  (2–3 weeks)</text>
+    <text x="550" y="145" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">What is AI? · Types of AI · How ML works (concept) · Real-world applications</text>
+    <!-- P1 topics horizontal -->
+    <line x1="550" y1="158" x2="550" y2="176" stroke="#3b82f6" stroke-width="1.5"/>
+    <line x1="200" y1="176" x2="900" y2="176" stroke="#3b82f6" stroke-width="1.5"/>
+    <line x1="230" y1="176" x2="230" y2="194" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="390" y1="176" x2="390" y2="194" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="550" y1="176" x2="550" y2="194" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="710" y1="176" x2="710" y2="194" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="870" y1="176" x2="870" y2="194" stroke="#3b82f6" stroke-width="1.2" marker-end="url(#mb)"/>
+    <rect x="162" y="194" width="136" height="34" rx="7" fill="#111827" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="230" y="210" text-anchor="middle" fill="#60a5fa" font-size="9.5" font-weight="700">AI vs ML vs DL</text>
+    <text x="230" y="222" text-anchor="middle" fill="#475569" font-size="8.5">Core distinction</text>
+    <rect x="322" y="194" width="136" height="34" rx="7" fill="#111827" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="390" y="210" text-anchor="middle" fill="#60a5fa" font-size="9.5" font-weight="700">Supervised Learning</text>
+    <text x="390" y="222" text-anchor="middle" fill="#475569" font-size="8.5">Concept only</text>
+    <rect x="482" y="194" width="136" height="34" rx="7" fill="#111827" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="550" y="210" text-anchor="middle" fill="#60a5fa" font-size="9.5" font-weight="700">Neural Networks</text>
+    <text x="550" y="222" text-anchor="middle" fill="#475569" font-size="8.5">High-level intuition</text>
+    <rect x="642" y="194" width="136" height="34" rx="7" fill="#111827" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="710" y="210" text-anchor="middle" fill="#60a5fa" font-size="9.5" font-weight="700">AI Ethics &amp; Safety</text>
+    <text x="710" y="222" text-anchor="middle" fill="#475569" font-size="8.5">Bias, fairness</text>
+    <rect x="802" y="194" width="136" height="34" rx="7" fill="#111827" stroke="#3b82f6" stroke-width="1.2"/>
+    <text x="870" y="210" text-anchor="middle" fill="#60a5fa" font-size="9.5" font-weight="700">AI Applications</text>
+    <text x="870" y="222" text-anchor="middle" fill="#475569" font-size="8.5">NLP, Vision, RL</text>
+
+    <!-- P1 → P2 -->
+    <line x1="550" y1="228" x2="550" y2="256" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 2 ── -->
+    <rect x="280" y="256" width="540" height="56" rx="12" fill="url(#g2)" filter="url(#gs)"/>
+    <text x="550" y="280" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">📐  Phase 2 · Maths Essentials  (4–6 weeks)</text>
+    <text x="550" y="299" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">Linear Algebra · Statistics · Probability · Calculus basics · All explained visually</text>
+    <line x1="550" y1="312" x2="550" y2="330" stroke="#0d9488" stroke-width="1.5"/>
+    <line x1="230" y1="330" x2="870" y2="330" stroke="#0d9488" stroke-width="1.5"/>
+    <line x1="270" y1="330" x2="270" y2="348" stroke="#0d9488" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="430" y1="330" x2="430" y2="348" stroke="#0d9488" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="550" y1="330" x2="550" y2="348" stroke="#0d9488" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="690" y1="330" x2="690" y2="348" stroke="#0d9488" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="838" y1="330" x2="838" y2="348" stroke="#0d9488" stroke-width="1.2" marker-end="url(#mb)"/>
+    <rect x="200" y="348" width="140" height="34" rx="7" fill="#111827" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="270" y="364" text-anchor="middle" fill="#2dd4bf" font-size="9.5" font-weight="700">Vectors &amp; Matrices</text>
+    <text x="270" y="376" text-anchor="middle" fill="#475569" font-size="8.5">Linear algebra basics</text>
+    <rect x="358" y="348" width="144" height="34" rx="7" fill="#111827" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="430" y="364" text-anchor="middle" fill="#2dd4bf" font-size="9.5" font-weight="700">Probability</text>
+    <text x="430" y="376" text-anchor="middle" fill="#475569" font-size="8.5">Bayes theorem</text>
+    <rect x="482" y="348" width="136" height="34" rx="7" fill="#111827" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="550" y="364" text-anchor="middle" fill="#2dd4bf" font-size="9.5" font-weight="700">Statistics</text>
+    <text x="550" y="376" text-anchor="middle" fill="#475569" font-size="8.5">Mean, variance, dist</text>
+    <rect x="618" y="348" width="144" height="34" rx="7" fill="#111827" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="690" y="364" text-anchor="middle" fill="#2dd4bf" font-size="9.5" font-weight="700">Derivatives</text>
+    <text x="690" y="376" text-anchor="middle" fill="#475569" font-size="8.5">Gradient descent idea</text>
+    <rect x="764" y="348" width="148" height="34" rx="7" fill="#111827" stroke="#0d9488" stroke-width="1.2"/>
+    <text x="838" y="364" text-anchor="middle" fill="#2dd4bf" font-size="9.5" font-weight="700">Visualisation</text>
+    <text x="838" y="376" text-anchor="middle" fill="#475569" font-size="8.5">3Blue1Brown method</text>
+
+    <!-- P2 → P3 -->
+    <line x1="550" y1="382" x2="550" y2="410" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 3 ── -->
+    <rect x="280" y="410" width="540" height="56" rx="12" fill="url(#g3)" filter="url(#gs)"/>
+    <text x="550" y="434" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">🐍  Phase 3 · Python for AI  (4–6 weeks)</text>
+    <text x="550" y="453" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">Python basics · NumPy · Pandas · Matplotlib · Jupyter notebooks</text>
+    <line x1="550" y1="466" x2="550" y2="484" stroke="#059669" stroke-width="1.5"/>
+    <line x1="230" y1="484" x2="870" y2="484" stroke="#059669" stroke-width="1.5"/>
+    <line x1="260" y1="484" x2="260" y2="502" stroke="#059669" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="390" y1="484" x2="390" y2="502" stroke="#059669" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="520" y1="484" x2="520" y2="502" stroke="#059669" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="660" y1="484" x2="660" y2="502" stroke="#059669" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="830" y1="484" x2="830" y2="502" stroke="#059669" stroke-width="1.2" marker-end="url(#mb)"/>
+    <rect x="192" y="502" width="136" height="34" rx="7" fill="#111827" stroke="#059669" stroke-width="1.2"/>
+    <text x="260" y="518" text-anchor="middle" fill="#34d399" font-size="9.5" font-weight="700">Python Basics</text>
+    <text x="260" y="530" text-anchor="middle" fill="#475569" font-size="8.5">Variables, loops, functions</text>
+    <rect x="322" y="502" width="136" height="34" rx="7" fill="#111827" stroke="#059669" stroke-width="1.2"/>
+    <text x="390" y="518" text-anchor="middle" fill="#34d399" font-size="9.5" font-weight="700">NumPy</text>
+    <text x="390" y="530" text-anchor="middle" fill="#475569" font-size="8.5">Arrays &amp; maths</text>
+    <rect x="452" y="502" width="136" height="34" rx="7" fill="#111827" stroke="#059669" stroke-width="1.2"/>
+    <text x="520" y="518" text-anchor="middle" fill="#34d399" font-size="9.5" font-weight="700">Pandas</text>
+    <text x="520" y="530" text-anchor="middle" fill="#475569" font-size="8.5">Data tables</text>
+    <rect x="592" y="502" width="136" height="34" rx="7" fill="#111827" stroke="#059669" stroke-width="1.2"/>
+    <text x="660" y="518" text-anchor="middle" fill="#34d399" font-size="9.5" font-weight="700">Matplotlib</text>
+    <text x="660" y="530" text-anchor="middle" fill="#475569" font-size="8.5">Visualise data</text>
+    <rect x="762" y="502" width="136" height="34" rx="7" fill="#111827" stroke="#059669" stroke-width="1.2"/>
+    <text x="830" y="518" text-anchor="middle" fill="#34d399" font-size="9.5" font-weight="700">Jupyter Notebooks</text>
+    <text x="830" y="530" text-anchor="middle" fill="#475569" font-size="8.5">Interactive coding</text>
+
+    <!-- P3 → P4 -->
+    <line x1="550" y1="536" x2="550" y2="564" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 4 ── -->
+    <rect x="280" y="564" width="540" height="56" rx="12" fill="url(#g4)" filter="url(#gs)"/>
+    <text x="550" y="588" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">🤖  Phase 4 · Machine Learning Basics  (6–8 weeks)</text>
+    <text x="550" y="607" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">Scikit-learn · Regression · Classification · Clustering · Model evaluation</text>
+    <line x1="550" y1="620" x2="550" y2="638" stroke="#d97706" stroke-width="1.5"/>
+    <line x1="200" y1="638" x2="900" y2="638" stroke="#d97706" stroke-width="1.5"/>
+    <line x1="230" y1="638" x2="230" y2="656" stroke="#d97706" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="380" y1="638" x2="380" y2="656" stroke="#d97706" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="550" y1="638" x2="550" y2="656" stroke="#d97706" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="720" y1="638" x2="720" y2="656" stroke="#d97706" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="870" y1="638" x2="870" y2="656" stroke="#d97706" stroke-width="1.2" marker-end="url(#mb)"/>
+    <rect x="155" y="656" width="150" height="34" rx="7" fill="#111827" stroke="#d97706" stroke-width="1.2"/>
+    <text x="230" y="672" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="700">Linear Regression</text>
+    <text x="230" y="684" text-anchor="middle" fill="#475569" font-size="8.5">Predict numbers</text>
+    <rect x="305" y="656" width="150" height="34" rx="7" fill="#111827" stroke="#d97706" stroke-width="1.2"/>
+    <text x="380" y="672" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="700">Classification</text>
+    <text x="380" y="684" text-anchor="middle" fill="#475569" font-size="8.5">SVM, kNN, DT</text>
+    <rect x="475" y="656" width="150" height="34" rx="7" fill="#111827" stroke="#d97706" stroke-width="1.2"/>
+    <text x="550" y="672" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="700">Clustering</text>
+    <text x="550" y="684" text-anchor="middle" fill="#475569" font-size="8.5">k-Means, DBSCAN</text>
+    <rect x="645" y="656" width="150" height="34" rx="7" fill="#111827" stroke="#d97706" stroke-width="1.2"/>
+    <text x="720" y="672" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="700">Ensemble Methods</text>
+    <text x="720" y="684" text-anchor="middle" fill="#475569" font-size="8.5">Random Forest, XGBoost</text>
+    <rect x="795" y="656" width="150" height="34" rx="7" fill="#111827" stroke="#d97706" stroke-width="1.2"/>
+    <text x="870" y="672" text-anchor="middle" fill="#fbbf24" font-size="9.5" font-weight="700">Model Evaluation</text>
+    <text x="870" y="684" text-anchor="middle" fill="#475569" font-size="8.5">Accuracy, F1, AUC</text>
+
+    <!-- P4 → P5 -->
+    <line x1="550" y1="690" x2="550" y2="718" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 5 ── -->
+    <rect x="280" y="718" width="540" height="56" rx="12" fill="url(#g5)" filter="url(#gs)"/>
+    <text x="550" y="742" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">🧠  Phase 5 · Deep Learning  (6–8 weeks)</text>
+    <text x="550" y="761" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">Neural networks · CNN · RNN · PyTorch / TensorFlow · Transfer learning</text>
+    <line x1="550" y1="774" x2="550" y2="792" stroke="#7c3aed" stroke-width="1.5"/>
+    <line x1="210" y1="792" x2="890" y2="792" stroke="#7c3aed" stroke-width="1.5"/>
+    <line x1="240" y1="792" x2="240" y2="810" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="390" y1="792" x2="390" y2="810" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="550" y1="792" x2="550" y2="810" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="710" y1="792" x2="710" y2="810" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="860" y1="792" x2="860" y2="810" stroke="#7c3aed" stroke-width="1.2" marker-end="url(#mb)"/>
+    <rect x="164" y="810" width="152" height="34" rx="7" fill="#111827" stroke="#7c3aed" stroke-width="1.2"/>
+    <text x="240" y="826" text-anchor="middle" fill="#a78bfa" font-size="9.5" font-weight="700">MLP</text>
+    <text x="240" y="838" text-anchor="middle" fill="#475569" font-size="8.5">Feedforward nets</text>
+    <rect x="314" y="810" width="152" height="34" rx="7" fill="#111827" stroke="#7c3aed" stroke-width="1.2"/>
+    <text x="390" y="826" text-anchor="middle" fill="#a78bfa" font-size="9.5" font-weight="700">CNN</text>
+    <text x="390" y="838" text-anchor="middle" fill="#475569" font-size="8.5">Image recognition</text>
+    <rect x="474" y="810" width="152" height="34" rx="7" fill="#111827" stroke="#7c3aed" stroke-width="1.2"/>
+    <text x="550" y="826" text-anchor="middle" fill="#a78bfa" font-size="9.5" font-weight="700">RNN / LSTM</text>
+    <text x="550" y="838" text-anchor="middle" fill="#475569" font-size="8.5">Sequences &amp; text</text>
+    <rect x="634" y="810" width="152" height="34" rx="7" fill="#111827" stroke="#7c3aed" stroke-width="1.2"/>
+    <text x="710" y="826" text-anchor="middle" fill="#a78bfa" font-size="9.5" font-weight="700">Transfer Learning</text>
+    <text x="710" y="838" text-anchor="middle" fill="#475569" font-size="8.5">Pre-trained models</text>
+    <rect x="784" y="810" width="152" height="34" rx="7" fill="#111827" stroke="#7c3aed" stroke-width="1.2"/>
+    <text x="860" y="826" text-anchor="middle" fill="#a78bfa" font-size="9.5" font-weight="700">Transformers</text>
+    <text x="860" y="838" text-anchor="middle" fill="#475569" font-size="8.5">Attention mechanism</text>
+
+    <!-- P5 → P6 -->
+    <line x1="550" y1="844" x2="550" y2="872" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 6 ── -->
+    <rect x="280" y="872" width="540" height="56" rx="12" fill="url(#g6)" filter="url(#gs)"/>
+    <text x="550" y="896" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">💬  Phase 6 · LLMs &amp; Generative AI  (4–6 weeks)</text>
+    <text x="550" y="915" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">GPT · BERT · Prompt engineering · RAG · LangChain · Fine-tuning</text>
+    <line x1="550" y1="928" x2="550" y2="946" stroke="#0891b2" stroke-width="1.5"/>
+    <line x1="210" y1="946" x2="890" y2="946" stroke="#0891b2" stroke-width="1.5"/>
+    <line x1="248" y1="946" x2="248" y2="964" stroke="#0891b2" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="400" y1="946" x2="400" y2="964" stroke="#0891b2" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="550" y1="946" x2="550" y2="964" stroke="#0891b2" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="700" y1="946" x2="700" y2="964" stroke="#0891b2" stroke-width="1.2" marker-end="url(#mb)"/>
+    <line x1="852" y1="946" x2="852" y2="964" stroke="#0891b2" stroke-width="1.2" marker-end="url(#mb)"/>
+    <rect x="170" y="964" width="156" height="34" rx="7" fill="#111827" stroke="#0891b2" stroke-width="1.2"/>
+    <text x="248" y="980" text-anchor="middle" fill="#67e8f9" font-size="9.5" font-weight="700">How LLMs Work</text>
+    <text x="248" y="992" text-anchor="middle" fill="#475569" font-size="8.5">Tokens, context window</text>
+    <rect x="322" y="964" width="156" height="34" rx="7" fill="#111827" stroke="#0891b2" stroke-width="1.2"/>
+    <text x="400" y="980" text-anchor="middle" fill="#67e8f9" font-size="9.5" font-weight="700">Prompt Engineering</text>
+    <text x="400" y="992" text-anchor="middle" fill="#475569" font-size="8.5">CoT, few-shot, roles</text>
+    <rect x="472" y="964" width="156" height="34" rx="7" fill="#111827" stroke="#0891b2" stroke-width="1.2"/>
+    <text x="550" y="980" text-anchor="middle" fill="#67e8f9" font-size="9.5" font-weight="700">RAG</text>
+    <text x="550" y="992" text-anchor="middle" fill="#475569" font-size="8.5">Retrieval-augmented gen</text>
+    <rect x="622" y="964" width="156" height="34" rx="7" fill="#111827" stroke="#0891b2" stroke-width="1.2"/>
+    <text x="700" y="980" text-anchor="middle" fill="#67e8f9" font-size="9.5" font-weight="700">Fine-tuning</text>
+    <text x="700" y="992" text-anchor="middle" fill="#475569" font-size="8.5">LoRA, PEFT</text>
+    <rect x="774" y="964" width="156" height="34" rx="7" fill="#111827" stroke="#0891b2" stroke-width="1.2"/>
+    <text x="852" y="980" text-anchor="middle" fill="#67e8f9" font-size="9.5" font-weight="700">LangChain / APIs</text>
+    <text x="852" y="992" text-anchor="middle" fill="#475569" font-size="8.5">Build LLM apps</text>
+
+    <!-- P6 → P7 -->
+    <line x1="550" y1="998" x2="550" y2="1026" stroke="#60a5fa" stroke-width="2.5" marker-end="url(#ma)"/>
+
+    <!-- ── PHASE 7 ── -->
+    <rect x="280" y="1026" width="540" height="56" rx="12" fill="url(#g7)" filter="url(#gs)"/>
+    <text x="550" y="1050" text-anchor="middle" fill="#fff" font-size="14" font-weight="900">🏗  Phase 7 · Build Real Projects  (Ongoing)</text>
+    <text x="550" y="1069" text-anchor="middle" fill="rgba(255,255,255,.72)" font-size="10">Portfolio · Kaggle · Open-source · Specialise · Job / freelance / research</text>
+
+    <!-- P7 branches: 4 specialisations -->
+    <line x1="550" y1="1082" x2="550" y2="1106" stroke="#0d9488" stroke-width="1.5"/>
+    <line x1="165" y1="1106" x2="935" y2="1106" stroke="#0d9488" stroke-width="1.5"/>
+    <line x1="200" y1="1106" x2="200" y2="1124" stroke="#0d9488" stroke-width="1.5" marker-end="url(#mb)"/>
+    <line x1="400" y1="1106" x2="400" y2="1124" stroke="#0d9488" stroke-width="1.5" marker-end="url(#mb)"/>
+    <line x1="600" y1="1106" x2="600" y2="1124" stroke="#0d9488" stroke-width="1.5" marker-end="url(#mb)"/>
+    <line x1="800" y1="1106" x2="800" y2="1124" stroke="#0d9488" stroke-width="1.5" marker-end="url(#mb)"/>
+    <rect x="102" y="1124" width="196" height="58" rx="10" fill="#0a1f1e" stroke="#0d9488" stroke-width="1.8"/>
+    <text x="200" y="1146" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="800">🔬 ML Research</text>
+    <text x="200" y="1162" text-anchor="middle" fill="#475569" font-size="9">Papers · arXiv</text>
+    <text x="200" y="1175" text-anchor="middle" fill="#475569" font-size="9">PhD / lab track</text>
+    <rect x="302" y="1124" width="196" height="58" rx="10" fill="#0a1f1e" stroke="#0d9488" stroke-width="1.8"/>
+    <text x="400" y="1146" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="800">🛠 ML Engineer</text>
+    <text x="400" y="1162" text-anchor="middle" fill="#475569" font-size="9">MLOps · Deploy</text>
+    <text x="400" y="1175" text-anchor="middle" fill="#475569" font-size="9">Industry track</text>
+    <rect x="502" y="1124" width="196" height="58" rx="10" fill="#0a1f1e" stroke="#0d9488" stroke-width="1.8"/>
+    <text x="600" y="1146" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="800">🤖 AI Product</text>
+    <text x="600" y="1162" text-anchor="middle" fill="#475569" font-size="9">LLM apps · SaaS</text>
+    <text x="600" y="1175" text-anchor="middle" fill="#475569" font-size="9">Startup track</text>
+    <rect x="702" y="1124" width="196" height="58" rx="10" fill="#0a1f1e" stroke="#0d9488" stroke-width="1.8"/>
+    <text x="800" y="1146" text-anchor="middle" fill="#2dd4bf" font-size="11" font-weight="800">📊 Data Science</text>
+    <text x="800" y="1162" text-anchor="middle" fill="#475569" font-size="9">Analytics · BI</text>
+    <text x="800" y="1175" text-anchor="middle" fill="#475569" font-size="9">Business track</text>
+
+    <!-- LEGEND -->
+    <rect x="30" y="1220" width="1040" height="1.5" fill="#1e2d42"/>
+    <text x="550" y="1248" text-anchor="middle" fill="#475569" font-size="10" font-weight="700" letter-spacing="2">PHASE COLOUR KEY</text>
+    <rect x="78" y="1262" width="12" height="12" rx="3" fill="#2563eb"/><text x="96" y="1273" fill="#64748b" font-size="9.5">Phase 1 · AI Foundations</text>
+    <rect x="248" y="1262" width="12" height="12" rx="3" fill="#0d9488"/><text x="266" y="1273" fill="#64748b" font-size="9.5">Phase 2 · Maths</text>
+    <rect x="388" y="1262" width="12" height="12" rx="3" fill="#059669"/><text x="406" y="1273" fill="#64748b" font-size="9.5">Phase 3 · Python</text>
+    <rect x="520" y="1262" width="12" height="12" rx="3" fill="#d97706"/><text x="538" y="1273" fill="#64748b" font-size="9.5">Phase 4 · ML Basics</text>
+    <rect x="680" y="1262" width="12" height="12" rx="3" fill="#7c3aed"/><text x="698" y="1273" fill="#64748b" font-size="9.5">Phase 5 · Deep Learning</text>
+    <rect x="860" y="1262" width="12" height="12" rx="3" fill="#0891b2"/><text x="878" y="1273" fill="#64748b" font-size="9.5">Phase 6 · LLMs</text>
+
+    <!-- TIMELINE BAR -->
+    <text x="550" y="1310" text-anchor="middle" fill="#475569" font-size="10" font-weight="700" letter-spacing="2">APPROXIMATE TIMELINE (PART-TIME · ~1 HR/DAY)</text>
+    <rect x="60" y="1322" width="980" height="18" rx="6" fill="#111827" stroke="#1e2d42" stroke-width="1"/>
+    <rect x="60" y="1322" width="126" height="18" rx="4" fill="#2563eb" opacity=".8"/>
+    <rect x="186" y="1322" width="175" height="18" rx="4" fill="#0d9488" opacity=".8"/>
+    <rect x="361" y="1322" width="175" height="18" rx="4" fill="#059669" opacity=".8"/>
+    <rect x="536" y="1322" width="175" height="18" rx="4" fill="#d97706" opacity=".8"/>
+    <rect x="711" y="1322" width="175" height="18" rx="4" fill="#7c3aed" opacity=".8"/>
+    <rect x="886" y="1322" width="154" height="18" rx="4" fill="#0891b2" opacity=".8"/>
+    <text x="123" y="1346" text-anchor="middle" fill="#60a5fa" font-size="8">Wk 1–3</text>
+    <text x="273" y="1346" text-anchor="middle" fill="#2dd4bf" font-size="8">Wk 4–9</text>
+    <text x="448" y="1346" text-anchor="middle" fill="#34d399" font-size="8">Wk 10–15</text>
+    <text x="623" y="1346" text-anchor="middle" fill="#fbbf24" font-size="8">Wk 16–23</text>
+    <text x="798" y="1346" text-anchor="middle" fill="#a78bfa" font-size="8">Wk 24–31</text>
+    <text x="963" y="1346" text-anchor="middle" fill="#67e8f9" font-size="8">Wk 32–37</text>
+
+    <text x="550" y="1400" text-anchor="middle" fill="#1e2d42" font-size="10">✦  Compiled by Sujit Kulkarni  —  AI Learning Curriculum  ·  Zero to AI Practitioner  ✦</text>
+  </svg>
+  </div>
+</div>
+</div>
+
+<!-- PHASE CARDS -->
+<div class="sec" id="phase1">
+<div class="container">
+  <div class="sec-label">Phase 1 · 2–3 Weeks</div>
+  <h2 class="sec-title">📘 AI Foundations — Understand Before You Code</h2>
+  <p class="sec-desc">Before touching any code or maths, build a solid mental model of what AI actually is, how it works at a high level, and where it is used. This phase is entirely conceptual — no prerequisites.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#0c1a38,#0d1e3d);">
+        <div class="phase-num" style="color:#3b82f6;">01</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#60a5fa;">AI Foundations</div>
+          <span class="phase-badge" style="background:rgba(37,99,235,.2);color:#60a5fa;border:1px solid #2563eb;">⬜ Beginner · 2–3 Weeks · No Prerequisites</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#60a5fa;">~15 hrs</div><div style="font-size:.75rem;color:var(--muted);">total effort</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Start here. Understand what Artificial Intelligence, Machine Learning, and Deep Learning mean — and how they differ. Learn about the real-world applications all around you. Build a vocabulary so that everything that follows makes sense.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#60a5fa;">Topics to Cover</h4>
+            <ul class="topic-list" style="--li-color:#3b82f6;">
+              <li style="color:#94a3b8;">What is Artificial Intelligence?</li>
+              <li style="color:#94a3b8;">AI vs Machine Learning vs Deep Learning</li>
+              <li style="color:#94a3b8;">Supervised, Unsupervised, Reinforcement Learning</li>
+              <li style="color:#94a3b8;">How does a model "learn"? (conceptual)</li>
+              <li style="color:#94a3b8;">Neural networks — intuition without maths</li>
+              <li style="color:#94a3b8;">AI in everyday life — search, recommendations, ChatGPT</li>
+              <li style="color:#94a3b8;">AI Ethics — bias, fairness, safety basics</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#60a5fa;">Free Resources</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://www.elementsofai.com/" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Elements of AI</strong><span>University of Helsinki · Free course · No coding</span></div></a>
+              <a class="res-link" href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>But what is a neural network? — 3Blue1Brown</strong><span>YouTube · 19 min · Best visual explanation ever made</span></div></a>
+              <a class="res-link" href="https://www.coursera.org/learn/ai-for-everyone" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>AI for Everyone — Andrew Ng</strong><span>Coursera · Free to audit · No maths or coding</span></div></a>
+              <a class="res-link" href="https://www.youtube.com/watch?v=ukzFI9rgwfU" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>Machine Learning in 100 seconds</strong><span>Fireship · YouTube · Quick overview</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#1d4ed8,#3b82f6);width:15%;"></div>
+        <div class="duration-label">Phase 1 of 7 — Build your mental model first. Do not skip.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sec alt" id="phase2">
+<div class="container">
+  <div class="sec-label">Phase 2 · 4–6 Weeks</div>
+  <h2 class="sec-title">📐 Maths Essentials — Just Enough, No More</h2>
+  <p class="sec-desc">You do not need a maths degree. You need four specific topics — linear algebra, statistics, probability, and a touch of calculus — all taught visually. Skip the textbooks; use the visual resources below.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#071e1c,#0a1f1e);">
+        <div class="phase-num" style="color:#0d9488;">02</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#2dd4bf;">Maths Essentials</div>
+          <span class="phase-badge" style="background:rgba(13,148,136,.2);color:#2dd4bf;border:1px solid #0d9488;">⬜ Beginner-friendly · 4–6 Weeks · Visual approach</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#2dd4bf;">~30 hrs</div><div style="font-size:.75rem;color:var(--muted);">total effort</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Focus only on what AI actually uses. Vectors and matrices (how data is represented), probability (how models express uncertainty), statistics (how we measure performance), and derivatives (how models learn via gradient descent). All taught visually — no heavy proofs.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#2dd4bf;">Topics to Cover</h4>
+            <ul class="topic-list">
+              <li style="color:#94a3b8;">Vectors, matrices, dot products</li>
+              <li style="color:#94a3b8;">Matrix multiplication (how neural nets compute)</li>
+              <li style="color:#94a3b8;">Mean, median, variance, standard deviation</li>
+              <li style="color:#94a3b8;">Probability distributions — normal, uniform</li>
+              <li style="color:#94a3b8;">Bayes theorem — conditional probability</li>
+              <li style="color:#94a3b8;">What is a derivative? (gradient descent intuition)</li>
+              <li style="color:#94a3b8;">Chain rule — why backpropagation works</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#2dd4bf;">Free Resources</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>Essence of Linear Algebra — 3Blue1Brown</strong><span>YouTube Playlist · Best visual linear algebra series</span></div></a>
+              <a class="res-link" href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>Essence of Calculus — 3Blue1Brown</strong><span>YouTube Playlist · Visual calculus for derivatives</span></div></a>
+              <a class="res-link" href="https://www.khanacademy.org/math/statistics-probability" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Statistics &amp; Probability — Khan Academy</strong><span>Free · Interactive · Self-paced</span></div></a>
+              <a class="res-link" href="https://mml-book.github.io/" target="_blank"><span class="res-link-icon">📖</span><div class="res-link-text"><strong>Maths for Machine Learning (free PDF)</strong><span>Cambridge · Complete textbook · Free download</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#0f766e,#0d9488);width:30%;"></div>
+        <div class="duration-label">Phase 2 of 7 — Learn visually. Do not memorise formulas. Understand ideas.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sec" id="phase3">
+<div class="container">
+  <div class="sec-label">Phase 3 · 4–6 Weeks</div>
+  <h2 class="sec-title">🐍 Python for AI — Your First Coding Language</h2>
+  <p class="sec-desc">Python is the language of AI. It is beginner-friendly, has the most AI libraries, and is what every major AI framework uses. Learn just enough Python to work with data and run models.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#071a0e,#0a1f10);">
+        <div class="phase-num" style="color:#059669;">03</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#34d399;">Python for AI</div>
+          <span class="phase-badge" style="background:rgba(5,150,105,.2);color:#34d399;border:1px solid #059669;">🟦 Beginner–Intermediate · 4–6 Weeks · First code</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#34d399;">~35 hrs</div><div style="font-size:.75rem;color:var(--muted);">total effort</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Learn Python specifically for data science and AI — not general software development. Focus on Jupyter notebooks (the standard AI coding environment), NumPy for numbers, Pandas for data, and Matplotlib for visualisation. You will write your first working data analysis script by the end of this phase.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#34d399;">Topics to Cover</h4>
+            <ul class="topic-list">
+              <li style="color:#94a3b8;">Python syntax — variables, loops, functions</li>
+              <li style="color:#94a3b8;">Lists, dictionaries, comprehensions</li>
+              <li style="color:#94a3b8;">Jupyter Notebook setup and workflow</li>
+              <li style="color:#94a3b8;">NumPy — arrays, broadcasting, operations</li>
+              <li style="color:#94a3b8;">Pandas — DataFrames, filtering, groupby</li>
+              <li style="color:#94a3b8;">Matplotlib + Seaborn — charts, plots</li>
+              <li style="color:#94a3b8;">File I/O — read CSV, JSON, Excel</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#34d399;">Free Resources</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://www.kaggle.com/learn/python" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Python — Kaggle Learn</strong><span>Free · Interactive · Runs in browser · No install</span></div></a>
+              <a class="res-link" href="https://www.kaggle.com/learn/pandas" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Pandas — Kaggle Learn</strong><span>Free · Hands-on exercises in browser</span></div></a>
+              <a class="res-link" href="https://cs231n.github.io/python-numpy-tutorial/" target="_blank"><span class="res-link-icon">📖</span><div class="res-link-text"><strong>NumPy Tutorial — Stanford CS231n</strong><span>Free guide · Covers everything needed for AI</span></div></a>
+              <a class="res-link" href="https://www.youtube.com/watch?v=rfscVS0vtbw" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>Python Full Course for Beginners</strong><span>freeCodeCamp · YouTube · 4.5 hours</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#065f46,#059669);width:45%;"></div>
+        <div class="duration-label">Phase 3 of 7 — Type every example. Do not copy-paste. Muscle memory matters.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sec alt" id="phase4">
+<div class="container">
+  <div class="sec-label">Phase 4 · 6–8 Weeks</div>
+  <h2 class="sec-title">🤖 Machine Learning Basics — Train Your First Models</h2>
+  <p class="sec-desc">Now the real AI work begins. Use Scikit-learn — the easiest ML library — to train, evaluate, and improve real machine learning models on real datasets. This is where theory meets practice.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#1a0e00,#1f1200);">
+        <div class="phase-num" style="color:#d97706;">04</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#fbbf24;">Machine Learning Basics</div>
+          <span class="phase-badge" style="background:rgba(217,119,6,.2);color:#fbbf24;border:1px solid #d97706;">🟦 Intermediate · 6–8 Weeks · First real models</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#fbbf24;">~50 hrs</div><div style="font-size:.75rem;color:var(--muted);">total effort</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Learn the classic ML algorithms — regression for predicting numbers, classification for predicting categories, clustering for grouping data. Learn how to evaluate whether your model is actually good. End this phase by completing a full end-to-end ML project on Kaggle.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#fbbf24;">Topics to Cover</h4>
+            <ul class="topic-list">
+              <li style="color:#94a3b8;">Linear &amp; Logistic Regression</li>
+              <li style="color:#94a3b8;">Decision Trees &amp; Random Forests</li>
+              <li style="color:#94a3b8;">Support Vector Machines (SVM)</li>
+              <li style="color:#94a3b8;">k-Nearest Neighbours (kNN)</li>
+              <li style="color:#94a3b8;">k-Means Clustering</li>
+              <li style="color:#94a3b8;">Train/test split, cross-validation</li>
+              <li style="color:#94a3b8;">Accuracy, precision, recall, F1, AUC-ROC</li>
+              <li style="color:#94a3b8;">Overfitting vs underfitting</li>
+              <li style="color:#94a3b8;">Feature engineering basics</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#fbbf24;">Free Resources</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://www.coursera.org/learn/machine-learning" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Machine Learning Specialisation — Andrew Ng</strong><span>Coursera · Free to audit · The gold standard course</span></div></a>
+              <a class="res-link" href="https://www.kaggle.com/learn/intro-to-machine-learning" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Intro to ML — Kaggle Learn</strong><span>Free · Hands-on · Real datasets in browser</span></div></a>
+              <a class="res-link" href="https://scikit-learn.org/stable/tutorial/" target="_blank"><span class="res-link-icon">📖</span><div class="res-link-text"><strong>Scikit-learn Official Tutorials</strong><span>Free docs · Best ML library for beginners</span></div></a>
+              <a class="res-link" href="https://www.statlearning.com/" target="_blank"><span class="res-link-icon">📖</span><div class="res-link-text"><strong>Introduction to Statistical Learning (free PDF)</strong><span>Stanford · The go-to ML theory textbook</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#78350f,#d97706);width:58%;"></div>
+        <div class="duration-label">Phase 4 of 7 — Complete the Titanic Kaggle competition. Your first real ML win.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sec" id="phase5">
+<div class="container">
+  <div class="sec-label">Phase 5 · 6–8 Weeks</div>
+  <h2 class="sec-title">🧠 Deep Learning — Neural Networks from Scratch</h2>
+  <p class="sec-desc">Go deeper into the architectures that power modern AI. Build neural networks, understand CNNs for images, RNNs for sequences, and the Transformer architecture that underpins GPT and BERT.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#150a2a,#1a0f3c);">
+        <div class="phase-num" style="color:#7c3aed;">05</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#a78bfa;">Deep Learning</div>
+          <span class="phase-badge" style="background:rgba(124,58,237,.2);color:#a78bfa;border:1px solid #7c3aed;">🟦 Intermediate · 6–8 Weeks · PyTorch/TensorFlow</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#a78bfa;">~55 hrs</div><div style="font-size:.75rem;color:var(--muted);">total effort</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Learn how neural networks actually work — neurons, layers, weights, activation functions, backpropagation, and gradient descent. Build CNNs for image classification, RNNs for text, and study the Transformer architecture. Use PyTorch (recommended) or TensorFlow/Keras.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#a78bfa;">Topics to Cover</h4>
+            <ul class="topic-list">
+              <li style="color:#94a3b8;">Perceptrons, layers, activation functions</li>
+              <li style="color:#94a3b8;">Backpropagation and gradient descent</li>
+              <li style="color:#94a3b8;">Batch normalisation, dropout, regularisation</li>
+              <li style="color:#94a3b8;">CNNs — convolution, pooling, stride</li>
+              <li style="color:#94a3b8;">RNNs, LSTMs, GRUs — sequence modelling</li>
+              <li style="color:#94a3b8;">Attention mechanism — the key innovation</li>
+              <li style="color:#94a3b8;">Transformer architecture — how GPT works</li>
+              <li style="color:#94a3b8;">Transfer learning — fine-tune pretrained models</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#a78bfa;">Free Resources</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://course.fast.ai/" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Practical Deep Learning for Coders — fast.ai</strong><span>Free · Top-down approach · Best for practitioners</span></div></a>
+              <a class="res-link" href="https://www.deeplearning.ai/courses/deep-learning-specialization/" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Deep Learning Specialisation — Andrew Ng</strong><span>Coursera · Free to audit · 5 courses</span></div></a>
+              <a class="res-link" href="https://pytorch.org/tutorials/beginner/basics/intro.html" target="_blank"><span class="res-link-icon">📖</span><div class="res-link-text"><strong>PyTorch Official Tutorial</strong><span>Free · Hands-on · Industry standard framework</span></div></a>
+              <a class="res-link" href="https://www.youtube.com/watch?v=ER2It2mIagI" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>Attention Is All You Need — Explained</strong><span>YouTube · Yannic Kilcher · The Transformer paper</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#4c1d95,#7c3aed);width:73%;"></div>
+        <div class="duration-label">Phase 5 of 7 — Build an image classifier. Build a text sentiment model. Ship them.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sec alt" id="phase6">
+<div class="container">
+  <div class="sec-label">Phase 6 · 4–6 Weeks</div>
+  <h2 class="sec-title">💬 LLMs &amp; Generative AI — Modern AI Mastery</h2>
+  <p class="sec-desc">The cutting edge. Understand how ChatGPT, Claude, Gemini, and other large language models work. Learn prompt engineering, RAG, LangChain, and how to build real AI applications on top of these models.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#071622,#091e2e);">
+        <div class="phase-num" style="color:#0891b2;">06</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#67e8f9;">LLMs &amp; Generative AI</div>
+          <span class="phase-badge" style="background:rgba(8,145,178,.2);color:#67e8f9;border:1px solid #0891b2;">🟧 Advanced · 4–6 Weeks · Modern AI stack</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#67e8f9;">~40 hrs</div><div style="font-size:.75rem;color:var(--muted);">total effort</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Learn how large language models are trained (pre-training, RLHF, fine-tuning). Master prompt engineering to get better outputs. Build a RAG application that lets an LLM answer questions about your own documents. Understand the business and ethical implications of generative AI.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#67e8f9;">Topics to Cover</h4>
+            <ul class="topic-list">
+              <li style="color:#94a3b8;">Tokenisation — how text becomes numbers</li>
+              <li style="color:#94a3b8;">Pre-training, instruction tuning, RLHF</li>
+              <li style="color:#94a3b8;">Context windows and their limits</li>
+              <li style="color:#94a3b8;">Prompt engineering — CoT, few-shot, roles</li>
+              <li style="color:#94a3b8;">Embeddings and vector databases</li>
+              <li style="color:#94a3b8;">RAG — retrieval-augmented generation</li>
+              <li style="color:#94a3b8;">Fine-tuning with LoRA / PEFT</li>
+              <li style="color:#94a3b8;">LangChain / LlamaIndex — build LLM apps</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#67e8f9;">Free Resources</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://www.deeplearning.ai/short-courses/" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>Short Courses — DeepLearning.AI</strong><span>Free · ChatGPT Prompt Eng, LangChain, RAG and more</span></div></a>
+              <a class="res-link" href="https://huggingface.co/learn/nlp-course/chapter1/1" target="_blank"><span class="res-link-icon">🎓</span><div class="res-link-text"><strong>HuggingFace NLP Course</strong><span>Free · Hands-on · Transformers, fine-tuning, deployment</span></div></a>
+              <a class="res-link" href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank"><span class="res-link-icon">▶️</span><div class="res-link-text"><strong>Intro to Large Language Models — Andrej Karpathy</strong><span>YouTube · 1 hour · Best LLM explainer for practitioners</span></div></a>
+              <a class="res-link" href="https://github.com/karpathy/nanoGPT" target="_blank"><span class="res-link-icon">💻</span><div class="res-link-text"><strong>nanoGPT — Andrej Karpathy</strong><span>GitHub · Build a GPT from scratch in ~300 lines</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#164e63,#0891b2);width:87%;"></div>
+        <div class="duration-label">Phase 6 of 7 — Build a RAG chatbot over your own documents. Ship it.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<div class="sec" id="phase7">
+<div class="container">
+  <div class="sec-label">Phase 7 · Ongoing</div>
+  <h2 class="sec-title">🏗 Build Real Projects — Specialise &amp; Ship</h2>
+  <p class="sec-desc">The only way to become an AI practitioner is to build things. Choose a specialisation, start competing on Kaggle, contribute to open-source, and build a public portfolio. Your projects are your CV.</p>
+  <div class="phase-wrap">
+    <div class="phase-card">
+      <div class="phase-header" style="background:linear-gradient(135deg,#071e1c,#0a1f1e);">
+        <div class="phase-num" style="color:#0d9488;">07</div>
+        <div class="phase-meta">
+          <div class="phase-title" style="color:#2dd4bf;">Build Real Projects</div>
+          <span class="phase-badge" style="background:rgba(13,148,136,.2);color:#2dd4bf;border:1px solid #0d9488;">🟧 Advanced · Ongoing · Choose your path</span>
+        </div>
+        <div style="text-align:right;"><div style="font-size:1.1rem;font-weight:800;color:#2dd4bf;">Ongoing</div><div style="font-size:.75rem;color:var(--muted);">forever</div></div>
+      </div>
+      <div class="phase-body">
+        <p class="phase-desc">Now you apply everything. Pick a specialisation track and go deep. Build 3–5 real projects, put them on GitHub, write about them. The AI field evolves monthly — staying current means reading papers, following researchers, and building constantly.</p>
+        <div class="phase-cols">
+          <div class="phase-col">
+            <h4 style="color:#2dd4bf;">Project Ideas to Start</h4>
+            <ul class="topic-list">
+              <li style="color:#94a3b8;">House price predictor (regression)</li>
+              <li style="color:#94a3b8;">Email spam classifier (classification)</li>
+              <li style="color:#94a3b8;">Movie recommendation engine</li>
+              <li style="color:#94a3b8;">Image classifier (your own dataset)</li>
+              <li style="color:#94a3b8;">Sentiment analysis on Twitter/Reddit</li>
+              <li style="color:#94a3b8;">RAG chatbot over a PDF document</li>
+              <li style="color:#94a3b8;">Kaggle competition — top 50% finish</li>
+              <li style="color:#94a3b8;">Fine-tune an open-source LLM</li>
+            </ul>
+          </div>
+          <div class="phase-col">
+            <h4 style="color:#2dd4bf;">Platforms &amp; Communities</h4>
+            <div class="link-list">
+              <a class="res-link" href="https://www.kaggle.com/" target="_blank"><span class="res-link-icon">🏆</span><div class="res-link-text"><strong>Kaggle</strong><span>Free · Real datasets · Competitions · Community notebooks</span></div></a>
+              <a class="res-link" href="https://huggingface.co/" target="_blank"><span class="res-link-icon">🤗</span><div class="res-link-text"><strong>HuggingFace</strong><span>Free · Models · Datasets · Spaces to deploy</span></div></a>
+              <a class="res-link" href="https://arxiv.org/list/cs.LG/recent" target="_blank"><span class="res-link-icon">📄</span><div class="res-link-text"><strong>arXiv — ML / AI Papers</strong><span>Free · Latest research papers before publication</span></div></a>
+              <a class="res-link" href="https://paperswithcode.com/" target="_blank"><span class="res-link-icon">💻</span><div class="res-link-text"><strong>Papers With Code</strong><span>Free · Papers + their code · SOTA benchmarks</span></div></a>
+            </div>
+          </div>
+        </div>
+        <div class="duration-bar" style="background:linear-gradient(90deg,#0f766e,#0d9488);width:100%;"></div>
+        <div class="duration-label">Phase 7 of 7 — You are now an AI practitioner. Keep building. Keep shipping.</div>
+      </div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <div class="ta-icon">🎓</div>
+    <div>
+      <div class="ta-title">The One Rule</div>
+      <p class="ta-text">The single most important principle in learning AI is this: <strong>every concept must be implemented in code</strong>. Watching videos and reading books creates the illusion of understanding. Only when you write the code, see it fail, debug it, and make it work do you actually learn. <strong>Build something every week</strong> — no matter how small. After 6 months of consistent daily effort, you will be employable. After 12 months, you will be formidable.</p>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- TOOLS -->
+<div class="sec alt" id="tools">
+<div class="container">
+  <div class="sec-label">Essential Tools</div>
+  <h2 class="sec-title">Tools &amp; Difficulty Levels</h2>
+  <p class="sec-desc">A clear map of every tool you will encounter — what phase to learn it in and how hard it is to pick up.</p>
+  <div class="bar-wrap">
+    <div>
+      <p class="bh" style="color:var(--lblue);">Ease of Learning (Higher = Easier)</p>
+      <div class="bi"><div class="bl">Jupyter Notebook</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--teal),var(--lteal))" data-v="95"></div></div><div class="bv">Easy</div></div>
+      <div class="bi"><div class="bl">Kaggle (free GPU)</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--teal),var(--lteal))" data-v="90"></div></div><div class="bv">Easy</div></div>
+      <div class="bi"><div class="bl">Scikit-learn</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--navy),var(--lblue))" data-v="85"></div></div><div class="bv">Easy</div></div>
+      <div class="bi"><div class="bl">Pandas / NumPy</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--emerald),var(--lgreen))" data-v="80"></div></div><div class="bv">Easy</div></div>
+      <div class="bi"><div class="bl">HuggingFace</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--teal),var(--lteal))" data-v="70"></div></div><div class="bv">Medium</div></div>
+      <div class="bi"><div class="bl">PyTorch</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--violet),var(--lviolet))" data-v="58"></div></div><div class="bv">Medium</div></div>
+      <div class="bi"><div class="bl">LangChain</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--cobalt),var(--lblue))" data-v="55"></div></div><div class="bv">Medium</div></div>
+      <div class="bi"><div class="bl">Fine-tuning (LoRA)</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--bronze),var(--gold))" data-v="35"></div></div><div class="bv">Hard</div></div>
+    </div>
+    <div>
+      <p class="bh" style="color:var(--lteal);">Industry Demand (2026)</p>
+      <div class="bi"><div class="bl">Prompt Engineering</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--cobalt),var(--lblue))" data-v="96"></div></div><div class="bv">96%</div></div>
+      <div class="bi"><div class="bl">Python for AI</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--emerald),var(--lgreen))" data-v="94"></div></div><div class="bv">94%</div></div>
+      <div class="bi"><div class="bl">LLM App Building</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--teal),var(--lteal))" data-v="90"></div></div><div class="bv">90%</div></div>
+      <div class="bi"><div class="bl">ML Fundamentals</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--gold),var(--amber))" data-v="88"></div></div><div class="bv">88%</div></div>
+      <div class="bi"><div class="bl">Deep Learning</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--violet),var(--lviolet))" data-v="84"></div></div><div class="bv">84%</div></div>
+      <div class="bi"><div class="bl">RAG &amp; Embeddings</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--teal),var(--lteal))" data-v="80"></div></div><div class="bv">80%</div></div>
+      <div class="bi"><div class="bl">MLOps / Deployment</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--bronze),var(--gold))" data-v="75"></div></div><div class="bv">75%</div></div>
+      <div class="bi"><div class="bl">Fine-tuning LLMs</div><div class="bb"><div class="bf" style="background:linear-gradient(90deg,var(--navy),var(--lblue))" data-v="68"></div></div><div class="bv">68%</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- INDEX -->
+<div class="sec" id="index">
+<div class="container">
+  <div class="sec-label">Complete Reference</div>
+  <h2 class="sec-title">Full Resource Index</h2>
+  <p class="sec-desc">Every resource mentioned in this curriculum — searchable by phase, type, or topic.</p>
+  <input class="search" id="srch" type="text" placeholder="Search... e.g. PyTorch, Andrew Ng, free, RAG" oninput="ft()">
+  <div class="tw">
+  <table class="idx" id="tbl">
+    <thead><tr><th>Resource</th><th>Phase</th><th>Type</th><th>Provider</th><th>Cost</th><th>Link</th></tr></thead>
+    <tbody>
+      <tr><td>Elements of AI</td><td>Phase 1</td><td>Course</td><td>Univ of Helsinki</td><td>Free</td><td><a href="https://www.elementsofai.com/" target="_blank" style="color:var(--lblue);">elementsofai.com</a></td></tr>
+      <tr><td>AI for Everyone — Andrew Ng</td><td>Phase 1</td><td>Course</td><td>Coursera / DeepLearning.AI</td><td>Free audit</td><td><a href="https://www.coursera.org/learn/ai-for-everyone" target="_blank" style="color:var(--lblue);">coursera.org</a></td></tr>
+      <tr><td>But what is a neural network? — 3B1B</td><td>Phase 1</td><td>Video</td><td>3Blue1Brown / YouTube</td><td>Free</td><td><a href="https://www.youtube.com/watch?v=aircAruvnKk" target="_blank" style="color:var(--lblue);">youtube.com</a></td></tr>
+      <tr><td>Essence of Linear Algebra — 3B1B</td><td>Phase 2</td><td>Video series</td><td>3Blue1Brown / YouTube</td><td>Free</td><td><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank" style="color:var(--lblue);">youtube.com</a></td></tr>
+      <tr><td>Essence of Calculus — 3B1B</td><td>Phase 2</td><td>Video series</td><td>3Blue1Brown / YouTube</td><td>Free</td><td><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank" style="color:var(--lblue);">youtube.com</a></td></tr>
+      <tr><td>Statistics &amp; Probability</td><td>Phase 2</td><td>Course</td><td>Khan Academy</td><td>Free</td><td><a href="https://www.khanacademy.org/math/statistics-probability" target="_blank" style="color:var(--lblue);">khanacademy.org</a></td></tr>
+      <tr><td>Maths for ML (free PDF)</td><td>Phase 2</td><td>Book</td><td>Cambridge University Press</td><td>Free PDF</td><td><a href="https://mml-book.github.io/" target="_blank" style="color:var(--lblue);">mml-book.github.io</a></td></tr>
+      <tr><td>Python — Kaggle Learn</td><td>Phase 3</td><td>Course</td><td>Kaggle</td><td>Free</td><td><a href="https://www.kaggle.com/learn/python" target="_blank" style="color:var(--lblue);">kaggle.com/learn</a></td></tr>
+      <tr><td>Pandas — Kaggle Learn</td><td>Phase 3</td><td>Course</td><td>Kaggle</td><td>Free</td><td><a href="https://www.kaggle.com/learn/pandas" target="_blank" style="color:var(--lblue);">kaggle.com/learn</a></td></tr>
+      <tr><td>NumPy Tutorial — Stanford CS231n</td><td>Phase 3</td><td>Tutorial</td><td>Stanford</td><td>Free</td><td><a href="https://cs231n.github.io/python-numpy-tutorial/" target="_blank" style="color:var(--lblue);">cs231n.github.io</a></td></tr>
+      <tr><td>Machine Learning Specialisation — Andrew Ng</td><td>Phase 4</td><td>Course</td><td>Coursera / DeepLearning.AI</td><td>Free audit</td><td><a href="https://www.coursera.org/learn/machine-learning" target="_blank" style="color:var(--lblue);">coursera.org</a></td></tr>
+      <tr><td>Intro to ML — Kaggle Learn</td><td>Phase 4</td><td>Course</td><td>Kaggle</td><td>Free</td><td><a href="https://www.kaggle.com/learn/intro-to-machine-learning" target="_blank" style="color:var(--lblue);">kaggle.com/learn</a></td></tr>
+      <tr><td>Intro to Statistical Learning</td><td>Phase 4</td><td>Book</td><td>Stanford (Hastie et al)</td><td>Free PDF</td><td><a href="https://www.statlearning.com/" target="_blank" style="color:var(--lblue);">statlearning.com</a></td></tr>
+      <tr><td>Practical Deep Learning — fast.ai</td><td>Phase 5</td><td>Course</td><td>fast.ai / Jeremy Howard</td><td>Free</td><td><a href="https://course.fast.ai/" target="_blank" style="color:var(--lblue);">course.fast.ai</a></td></tr>
+      <tr><td>Deep Learning Specialisation — Andrew Ng</td><td>Phase 5</td><td>Course</td><td>Coursera / DeepLearning.AI</td><td>Free audit</td><td><a href="https://www.deeplearning.ai/courses/deep-learning-specialization/" target="_blank" style="color:var(--lblue);">deeplearning.ai</a></td></tr>
+      <tr><td>PyTorch Official Tutorial</td><td>Phase 5</td><td>Tutorial</td><td>Meta / PyTorch</td><td>Free</td><td><a href="https://pytorch.org/tutorials/" target="_blank" style="color:var(--lblue);">pytorch.org</a></td></tr>
+      <tr><td>Short Courses — DeepLearning.AI</td><td>Phase 6</td><td>Course</td><td>DeepLearning.AI</td><td>Free</td><td><a href="https://www.deeplearning.ai/short-courses/" target="_blank" style="color:var(--lblue);">deeplearning.ai</a></td></tr>
+      <tr><td>HuggingFace NLP Course</td><td>Phase 6</td><td>Course</td><td>HuggingFace</td><td>Free</td><td><a href="https://huggingface.co/learn/nlp-course" target="_blank" style="color:var(--lblue);">huggingface.co/learn</a></td></tr>
+      <tr><td>Intro to LLMs — Andrej Karpathy</td><td>Phase 6</td><td>Video</td><td>YouTube</td><td>Free</td><td><a href="https://www.youtube.com/watch?v=zjkBMFhNj_g" target="_blank" style="color:var(--lblue);">youtube.com</a></td></tr>
+      <tr><td>nanoGPT — Karpathy</td><td>Phase 6</td><td>Code</td><td>GitHub</td><td>Free</td><td><a href="https://github.com/karpathy/nanoGPT" target="_blank" style="color:var(--lblue);">github.com/karpathy</a></td></tr>
+      <tr><td>Kaggle Competitions</td><td>Phase 7</td><td>Platform</td><td>Kaggle / Google</td><td>Free</td><td><a href="https://www.kaggle.com/competitions" target="_blank" style="color:var(--lblue);">kaggle.com</a></td></tr>
+      <tr><td>HuggingFace Hub</td><td>Phase 7</td><td>Platform</td><td>HuggingFace</td><td>Free</td><td><a href="https://huggingface.co/" target="_blank" style="color:var(--lblue);">huggingface.co</a></td></tr>
+      <tr><td>Papers With Code</td><td>Phase 7</td><td>Research</td><td>Community</td><td>Free</td><td><a href="https://paperswithcode.com/" target="_blank" style="color:var(--lblue);">paperswithcode.com</a></td></tr>
+      <tr><td>arXiv CS.LG — Latest Papers</td><td>Phase 7</td><td>Research</td><td>Cornell University</td><td>Free</td><td><a href="https://arxiv.org/list/cs.LG/recent" target="_blank" style="color:var(--lblue);">arxiv.org</a></td></tr>
+    </tbody>
+  </table>
+  </div>
+</div>
+</div>
+
+<footer>
+  <div style="font-size:1.9rem;margin-bottom:10px;">🚀</div>
+  <p>AI Learning Curriculum — Zero to AI Practitioner</p>
+  <p style="margin-top:8px;">Compiled with care by <strong>Sujit Kulkarni</strong></p>
+  <p style="margin-top:14px;font-size:.76rem;opacity:.35;">7 phases · 6–9 months · 24 free resources · Clean SVG roadmap · Timeline bar · No external dependencies · Fully offline</p>
+</footer>
+
+<script>
+function ft(){
+  var v=document.getElementById('srch').value.toLowerCase();
+  document.querySelectorAll('#tbl tbody tr').forEach(function(r){
+    r.style.display=r.textContent.toLowerCase().includes(v)?'':'none';
+  });
+}
+var done=false;
+window.addEventListener('scroll',function(){
+  if(done)return;
+  var s=document.getElementById('tools');
+  if(s&&s.getBoundingClientRect().top<window.innerHeight*.9){
+    document.querySelectorAll('.bf').forEach(function(b){b.style.width=b.dataset.v+'%';});
+    done=true;
+  }
+},{passive:true});
+var secs=document.querySelectorAll('[id]');
+var nls=document.querySelectorAll('nav a');
+window.addEventListener('scroll',function(){
+  var c='';
+  secs.forEach(function(s){if(window.scrollY>=s.offsetTop-140)c=s.id;});
+  nls.forEach(function(a){
+    var m=a.getAttribute('href')==='#'+c;
+    a.style.color=m?'#60a5fa':'';
+    a.style.borderBottomColor=m?'#2563eb':'transparent';
+  });
+},{passive:true});
+nls.forEach(function(a){
+  a.addEventListener('click',function(e){
+    e.preventDefault();
+    var t=document.querySelector(a.getAttribute('href'));
+    if(t)t.scrollIntoView({behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
