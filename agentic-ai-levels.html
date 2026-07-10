@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Development of Agentic AI — 7 Levels</title>
+<meta name="author" content="Sujit Kulkarni">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F5F0; --ink:#1C1A17; --dim:#5C5850; --line:#DEDAD0;
+    --panel:#FFFFFF; --accent:#3457D5; --accent-dim:#E8ECFB;
+    --good:#1F8A5F; --good-bg:#E7F5EE; --bad:#C43D3D; --bad-bg:#FBEAEA;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;font-size:16.5px;line-height:1.6;}
+  h1,h2,h3{font-family:'Source Serif 4',serif;margin:0;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  p{margin:0;}
+
+  /* very quiet ambient texture — not competing with reading */
+  #ambient{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background:radial-gradient(circle at 15% 10%, rgba(52,87,213,.05), transparent 45%),
+               radial-gradient(circle at 85% 90%, rgba(52,87,213,.04), transparent 45%);
+  }
+
+  header{position:sticky;top:0;z-index:20;background:rgba(247,245,240,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:14px 5vw;display:flex;align-items:center;justify-content:space-between;}
+  header .brand{font-family:'Source Serif 4',serif;font-weight:700;font-size:15px;}
+  header .credit{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);}
+
+  main{position:relative;z-index:5;max-width:880px;margin:0 auto;padding:6vh 6vw 14vh;}
+
+  /* INTRO */
+  #note{background:var(--accent-dim);border:1px solid #C6D0F5;border-radius:10px;padding:18px 22px;margin-bottom:5vh;font-size:14.5px;color:#293C8F;}
+  #note b{color:var(--accent);}
+  h1.title{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;}
+  .subtitle{margin-top:14px;color:var(--dim);font-size:17px;max-width:62ch;}
+
+  /* PROGRESS RAIL */
+  #rail{display:flex;gap:6px;margin:5vh 0 2vh;flex-wrap:wrap;}
+  .rail-dot{
+    flex:1;min-width:36px;height:6px;border-radius:3px;background:var(--line);
+    cursor:pointer;transition:background .2s ease;position:relative;
+  }
+  .rail-dot.visited{background:#B7C3EF;}
+  .rail-dot.active{background:var(--accent);}
+  .rail-dot.quizzed{background:var(--good);}
+
+  /* LEVEL CARD */
+  .level{display:none;}
+  .level.active{display:block;animation:fadein .35s ease;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .level-eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);}
+  .level h2{font-size:clamp(1.6rem,3.2vw,2.2rem);margin-top:8px;}
+  .level .oneliner{margin-top:10px;font-size:17.5px;color:var(--dim);}
+
+  .diagram{
+    margin-top:4vh;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:28px 22px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:10px;
+    box-shadow:0 4px 18px rgba(0,0,0,.04);
+  }
+  .dbox{
+    border:1.5px solid var(--line);border-radius:8px;padding:10px 14px;font-family:'IBM Plex Mono',monospace;
+    font-size:13px;text-align:center;background:#FBFAF7;color:var(--dim);white-space:nowrap;
+  }
+  .dbox.new{border-color:var(--accent);background:var(--accent-dim);color:var(--accent);font-weight:600;box-shadow:0 0 0 3px rgba(52,87,213,.08);}
+  .dbox.stack{display:flex;flex-direction:column;gap:4px;}
+  .darrow{color:var(--dim);font-size:16px;}
+  .dnote{width:100%;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--dim);margin-top:10px;}
+
+  .why{margin-top:4vh;}
+  .why h3{font-size:14px;font-family:'IBM Plex Mono',monospace;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);margin-bottom:10px;}
+  .why p{font-size:16px;color:#3A362F;max-width:68ch;}
+  .why p+p{margin-top:10px;}
+
+  #hear-btn{
+    margin-top:22px;background:transparent;border:1px solid var(--line);color:var(--dim);
+    font-family:'IBM Plex Mono',monospace;font-size:12px;padding:9px 16px;border-radius:20px;cursor:pointer;
+    display:inline-flex;align-items:center;gap:8px;transition:all .2s ease;
+  }
+  #hear-btn:hover{border-color:var(--accent);color:var(--accent);}
+  #hear-btn svg{width:14px;height:14px;}
+
+  /* QUIZ */
+  .quiz{margin-top:5vh;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:24px;}
+  .quiz .qlabel{font-family:'IBM Plex Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--dim);}
+  .quiz .qtext{font-size:17px;margin-top:8px;font-weight:600;}
+  .qopts{margin-top:16px;display:flex;flex-direction:column;gap:9px;}
+  .qopt{
+    text-align:left;border:1px solid var(--line);background:#FBFAF7;border-radius:8px;padding:12px 14px;
+    cursor:pointer;font-size:14.5px;font-family:'Inter',sans-serif;color:var(--ink);transition:all .15s ease;
+  }
+  .qopt:hover{border-color:var(--accent);}
+  .qopt.correct{background:var(--good-bg);border-color:var(--good);color:#12563A;}
+  .qopt.incorrect{background:var(--bad-bg);border-color:var(--bad);color:#7A2424;}
+  .qopt[disabled]{cursor:default;}
+  .qfeedback{margin-top:14px;font-size:14px;padding:12px 14px;border-radius:8px;display:none;}
+  .qfeedback.show{display:block;}
+  .qfeedback.correct-fb{background:var(--good-bg);color:#12563A;}
+  .qfeedback.incorrect-fb{background:var(--bad-bg);color:#7A2424;}
+
+  .navrow{display:flex;justify-content:space-between;align-items:center;margin-top:5vh;}
+  .navbtn{
+    background:var(--ink);color:var(--bg);border:none;font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+    padding:13px 22px;border-radius:6px;cursor:pointer;letter-spacing:.02em;
+  }
+  .navbtn.secondary{background:transparent;color:var(--dim);border:1px solid var(--line);}
+  .navbtn:disabled{opacity:.35;cursor:default;}
+  .navbtn:hover:not(:disabled){opacity:.85;}
+
+  /* RECAP */
+  #recap{display:none;}
+  #recap.active{display:block;animation:fadein .35s ease;}
+  .recap-row{
+    display:grid;grid-template-columns:140px 1fr;gap:16px;align-items:start;
+    padding:16px 0;border-bottom:1px solid var(--line);
+  }
+  .recap-row .rlvl{font-family:'Source Serif 4',serif;font-weight:700;font-size:15px;}
+  .recap-row .rdesc{font-size:14.5px;color:var(--dim);}
+  #score-summary{margin-top:3vh;background:var(--accent-dim);border-radius:10px;padding:18px 22px;font-size:15px;color:#293C8F;}
+
+  footer{text-align:center;padding:6vh 6vw;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--dim);border-top:1px solid var(--line);}
+</style>
+</head>
+<body>
+
+<div id="ambient"></div>
+
+<header>
+  <div class="brand">The Development of Agentic AI</div>
+  <div class="credit">Sujit Kulkarni Series · Entry 03</div>
+</header>
+
+<main>
+
+  <div id="note"><b>A note on the format:</b> this page is built to teach, not to impress — one level at a time, no autoplay, no narration racing ahead of the text. Each level ends with a short question, because being quizzed on something works far better for memory than just reading it again.</div>
+
+  <h1 class="title">Seven levels, from a scripted chatbot to agents that delegate to other agents.</h1>
+  <p class="subtitle">Each level adds exactly one real capability the previous one didn't have. Go in order the first time — the whole point is that level 4 only makes sense once you've felt the limits of level 3.</p>
+
+  <div id="rail"></div>
+
+  <!-- LEVEL 1 -->
+  <section class="level active" data-level="0">
+    <div class="level-eyebrow mono">LEVEL 1 OF 7</div>
+    <h2>Script Bots</h2>
+    <p class="oneliner">No intelligence — scripted input mapped to scripted output.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">→</div>
+      <div class="dbox new">Scripts</div><div class="darrow">→</div>
+      <div class="dbox">Output</div>
+    </div>
+    <div class="dnote">e.g. "if user says X, reply with Y" — a decision tree, not a model</div>
+    <div class="why">
+      <h3>Why this is the floor</h3>
+      <p>A script bot has no model of language at all — it's pattern-matching against phrases someone anticipated in advance. Ask it something the author didn't foresee, and it fails outright or falls back to a generic default. There's no understanding to fall back on, because there was never any understanding to begin with.</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="Script bots have no intelligence. They map scripted input directly to scripted output, using rules someone wrote in advance. If a query falls outside what was anticipated, the bot fails or returns a default response — there's no understanding underneath it to fall back on.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="0">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">What happens when a script bot gets a query its rules didn't anticipate?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="false">It reasons through the problem like a human would.</button>
+        <button class="qopt" data-correct="true">It fails, or falls back to a generic default response.</button>
+        <button class="qopt" data-correct="false">It searches the web for an answer.</button>
+        <button class="qopt" data-correct="false">It asks a more capable agent to take over.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev" disabled>← Back</button>
+      <button class="navbtn" data-nav="next">Next level →</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 2 -->
+  <section class="level" data-level="1">
+    <div class="level-eyebrow mono">LEVEL 2 OF 7</div>
+    <h2>LLMs</h2>
+    <p class="oneliner">A language model answers from what it learned in training — still no tools, no memory.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">→</div>
+      <div class="dbox">Tokenizer</div><div class="darrow">→</div>
+      <div class="dbox new">Neural Network<br><span style="font-size:10px;">(attention mechanism)</span></div><div class="darrow">→</div>
+      <div class="dbox">Decoder</div><div class="darrow">→</div>
+      <div class="dbox">Output</div>
+    </div>
+    <div class="dnote">the query is tokenized, processed by a trained network, then decoded back into text</div>
+    <div class="why">
+      <h3>The actual leap from level 1</h3>
+      <p>An LLM isn't following an "if this, then that" rule someone wrote. The attention mechanism lets it weigh which words in a sentence matter most to each other, so it generalizes to phrasings it never saw verbatim — which is exactly what a script bot can't do.</p>
+      <p>But it's still a closed box: everything it "knows" was frozen at training time. It can't look anything up, and it forgets everything the moment the conversation ends.</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="An LLM tokenizes the query, processes it through a trained neural network using an attention mechanism, then decodes the result back into text. Unlike a script bot, it generalizes to phrasings it never saw before. But everything it knows was frozen at training time — it can't look anything up, and it has no memory between conversations.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="1">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">What actually lets an LLM handle phrasing it never saw during training?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="false">A connected search engine.</button>
+        <button class="qopt" data-correct="true">The attention mechanism, which weighs how words in the input relate to each other.</button>
+        <button class="qopt" data-correct="false">A memory database of past conversations.</button>
+        <button class="qopt" data-correct="false">A set of hand-written rules.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev">← Back</button>
+      <button class="navbtn" data-nav="next">Next level →</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 3 -->
+  <section class="level" data-level="2">
+    <div class="level-eyebrow mono">LEVEL 3 OF 7</div>
+    <h2>LLMs + Tools</h2>
+    <p class="oneliner">The model can now call external functions through APIs — it can act, not just talk.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">→</div>
+      <div class="dbox">LLM</div>
+      <div class="darrow">⇄</div>
+      <div class="dbox new">Tools<br><span style="font-size:10px;">(via unique APIs)</span></div>
+      <div class="darrow">→</div>
+      <div class="dbox">Output</div>
+    </div>
+    <div class="dnote">the model decides mid-response that it needs a tool, calls it, then continues</div>
+    <div class="why">
+      <h3>The actual leap from level 2</h3>
+      <p>A plain LLM can only tell you what it remembers from training. Give it a calculator tool, and it can compute an exact answer instead of guessing. Give it a weather API, and it can tell you today's forecast — something no amount of training data could have covered, because "today" didn't exist when it was trained.</p>
+      <p>The catch: each tool needs its own custom integration, hand-built for that specific API. There's no standard way to plug in a new one yet, and the model still isn't grounding answers in a searchable body of your own documents.</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="With tools, the model can call external functions through APIs mid-response, then continue. It can compute exact answers or check live information instead of relying only on frozen training data. The catch is that each tool needs its own custom integration, and the model still isn't grounding its answers in a searchable set of your own documents.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="2">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">Compared to RAG (the next level), what's LLMs+Tools still missing?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="false">The ability to call any external tool at all.</button>
+        <button class="qopt" data-correct="true">A way to dynamically retrieve and ground answers in a searchable body of external documents.</button>
+        <button class="qopt" data-correct="false">The ability to generate language.</button>
+        <button class="qopt" data-correct="false">Access to the internet, period.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev">← Back</button>
+      <button class="navbtn" data-nav="next">Next level →</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 4 -->
+  <section class="level" data-level="3">
+    <div class="level-eyebrow mono">LEVEL 4 OF 7</div>
+    <h2>RAG — Retrieval-Augmented Generation</h2>
+    <p class="oneliner">The agent dynamically pulls relevant data before answering, instead of answering from memory alone.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">→</div>
+      <div class="dbox stack"><span>Tools</span><span>Database</span></div>
+      <div class="darrow">→</div>
+      <div class="dbox new">Retrieval<br><span style="font-size:10px;">(relevant chunks found)</span></div>
+      <div class="darrow">→</div>
+      <div class="dbox new">Augmented<br><span style="font-size:10px;">(context + prompt)</span></div>
+      <div class="darrow">→</div>
+      <div class="dbox">Generation → Output</div>
+    </div>
+    <div class="dnote">R-A-G: Retrieval finds evidence, Augmented context assembles it, Generation writes the answer</div>
+    <div class="why">
+      <h3>The actual leap from level 3</h3>
+      <p>Tools alone give the model one-off actions. RAG gives it a searchable memory of your actual content — internal docs, a knowledge base, current web results — retrieved fresh for every query and inserted directly into the prompt before the model answers.</p>
+      <p>This is the mechanism, not a marketing claim, behind why RAG systems hallucinate less: the model is answering from evidence sitting right in its context window, not purely from what it memorized months or years earlier.</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="RAG stands for Retrieval, Augmented, Generation. Retrieval finds relevant chunks of external data — documents, a database, web search. That evidence gets assembled into the prompt as context. Only then does the model generate its answer. This is the actual mechanism behind why RAG systems hallucinate less than a plain language model — the answer is grounded in retrieved evidence, not just memorized training data.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="3">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">In RAG, what does the "R" (Retrieval) step actually do?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="false">Recalls the previous conversation from memory.</button>
+        <button class="qopt" data-correct="true">Finds relevant chunks of external data — documents, a database, or web search — related to the query.</button>
+        <button class="qopt" data-correct="false">Picks a random API to call.</button>
+        <button class="qopt" data-correct="false">Delegates the task to a sub-agent.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev">← Back</button>
+      <button class="navbtn" data-nav="next">Next level →</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 5 -->
+  <section class="level" data-level="4">
+    <div class="level-eyebrow mono">LEVEL 5 OF 7</div>
+    <h2>Agentic Memory</h2>
+    <p class="oneliner">The agent now remembers — both within a session and across sessions over time.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">⇄</div>
+      <div class="dbox">Agent</div><div class="darrow">⇄</div>
+      <div class="dbox new stack">
+        <span>Short: cache, working</span>
+        <span>Long: semantic, episodic, procedural</span>
+      </div>
+    </div>
+    <div class="dnote">short-term memory lasts a session; long-term memory persists and is deliberately categorized</div>
+    <div class="why">
+      <h3>The actual leap from level 4</h3>
+      <p>RAG retrieves facts from a static knowledge base. Memory is different — it's the agent's own accumulated experience. Semantic memory holds general facts it's learned; episodic memory holds specific past events ("last week you asked about X and preferred Y"); procedural memory holds learned skills or workflows.</p>
+      <p>This is what makes an agent feel continuous across conversations instead of starting from zero every single time — a distinction that matters when you're evaluating whether a product's "memory" is real or just a longer prompt.</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="Agentic memory splits into short-term and long-term. Short-term covers cache and working memory within a session. Long-term splits further into semantic memory for general facts, episodic memory for specific past events, and procedural memory for learned skills or workflows. This is what makes an agent feel continuous across conversations instead of starting from zero every time.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="4">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">What's the difference between semantic and episodic long-term memory?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="true">Semantic stores general facts; episodic stores specific past events or experiences.</button>
+        <button class="qopt" data-correct="false">They're two names for the same thing.</button>
+        <button class="qopt" data-correct="false">Semantic is short-term; episodic is long-term.</button>
+        <button class="qopt" data-correct="false">Episodic is for tools; semantic is for databases.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev">← Back</button>
+      <button class="navbtn" data-nav="next">Next level →</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 6 -->
+  <section class="level" data-level="5">
+    <div class="level-eyebrow mono">LEVEL 6 OF 7</div>
+    <h2>MCP — Model Context Protocol</h2>
+    <p class="oneliner">A standard way to connect an agent to enterprise tools, instead of a custom integration for every one.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">⇄</div>
+      <div class="dbox">Agent</div><div class="darrow">⇄</div>
+      <div class="dbox new">MCP Server</div><div class="darrow">→</div>
+      <div class="dbox stack"><span>Playwright</span><span>Chroma</span><span>…any server</span></div>
+    </div>
+    <div class="dnote">one protocol, many servers — no bespoke integration code per tool</div>
+    <div class="why">
+      <h3>The actual leap from level 3's tools</h3>
+      <p>Back at level 3, every tool needed its own hand-built API integration — real engineering work, repeated for each new tool. MCP replaces that with one shared protocol: any tool that speaks MCP can be plugged in without custom glue code.</p>
+      <p>This is the difference between "we integrated five tools, painstakingly, one at a time" and "we support any tool that implements this one open standard."</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="MCP is a standard protocol connecting an agent to an MCP server, which in turn connects to any number of external tools — a browser automation tool, a vector database, an internal enterprise system. The point is that any tool implementing this one protocol can be plugged in without custom integration code, unlike the one-off API integrations tools required back at level three.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="5">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">What problem does MCP solve that plain "LLMs + Tools" (level 3) didn't?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="false">It makes the underlying model more intelligent.</button>
+        <button class="qopt" data-correct="true">It gives a standardized way to connect to many tools, instead of a custom integration per tool.</button>
+        <button class="qopt" data-correct="false">It removes the need for a database entirely.</button>
+        <button class="qopt" data-correct="false">It replaces the need for memory.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev">← Back</button>
+      <button class="navbtn" data-nav="next">Next level →</button>
+    </div>
+  </section>
+
+  <!-- LEVEL 7 -->
+  <section class="level" data-level="6">
+    <div class="level-eyebrow mono">LEVEL 7 OF 7</div>
+    <h2>A2A Agents — Agent to Agent</h2>
+    <p class="oneliner">A main agent delegates parts of a task to specialized sub-agents and coordinates their work.</p>
+    <div class="diagram">
+      <div class="dbox">Query</div><div class="darrow">⇄</div>
+      <div class="dbox">Main Agent<br><span style="font-size:10px;">(tools, db, cache)</span></div>
+      <div class="darrow">⇄</div>
+      <div class="dbox new">A2A Protocol</div>
+      <div class="darrow">⇄</div>
+      <div class="dbox">Sub Agent<br><span style="font-size:10px;">(tools, db, cache)</span></div>
+    </div>
+    <div class="dnote">each agent can have its own tools and memory — this is composition, not just one bigger agent</div>
+    <div class="why">
+      <h3>The actual leap from level 6</h3>
+      <p>MCP connects one agent to many tools. A2A connects many agents to each other. A main agent can break a complex task into pieces, hand each piece to a sub-agent specialized for it, and assemble the results — the same reason large software systems are built from many small services instead of one giant program.</p>
+      <p>This is the top of the ladder because it's compositional: a well-built sub-agent at level 7 is itself potentially everything from level 1 through 6, wrapped up and delegated to.</p>
+    </div>
+    <button id="hear-btn" class="mono" data-text="In an agent to agent, or A2A, system, a main agent delegates parts of a task to specialized sub-agents through the A2A protocol, and coordinates their results. Each sub-agent can have its own tools, database, and memory. This is compositional — a sub-agent can itself be everything from the earlier levels, wrapped up and delegated to, which is why this sits at the top of the ladder.">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+      Hear this level explained
+    </button>
+
+    <div class="quiz" data-qlevel="6">
+      <div class="qlabel mono">Quick check</div>
+      <div class="qtext">In an A2A setup, what does the main agent actually do?</div>
+      <div class="qopts">
+        <button class="qopt" data-correct="false">Answers every part of the query itself, without help.</button>
+        <button class="qopt" data-correct="true">Delegates parts of a task to specialized sub-agents and coordinates their results.</button>
+        <button class="qopt" data-correct="false">Only stores memory, nothing else.</button>
+        <button class="qopt" data-correct="false">Removes the need for tools across the whole system.</button>
+      </div>
+      <div class="qfeedback mono"></div>
+    </div>
+
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="prev">← Back</button>
+      <button class="navbtn" data-nav="next">See the full recap →</button>
+    </div>
+  </section>
+
+  <!-- RECAP -->
+  <section id="recap">
+    <div class="level-eyebrow mono">RECAP</div>
+    <h2>The whole ladder, in one screen</h2>
+    <p class="oneliner" style="margin-bottom:2vh;">One line each — if you can explain why each level exists in your own words, you've actually learned this.</p>
+    <div id="recap-list"></div>
+    <div id="score-summary"></div>
+    <div class="navrow">
+      <button class="navbtn secondary" data-nav="restart">↺ Start over</button>
+      <button class="navbtn" data-nav="review">Jump back to level 1</button>
+    </div>
+  </section>
+
+</main>
+
+<footer>Sourced structure adapted from a user-provided reference diagram · explanations independently written · Sujit Kulkarni Series</footer>
+
+<script>
+const LEVELS = [
+  {name:'Script Bots', line:'No intelligence — rules mapped directly to responses.'},
+  {name:'LLMs', line:'Trained language generation, but no tools, no memory.'},
+  {name:'LLMs + Tools', line:'Can call external APIs to act, not just talk.'},
+  {name:'RAG', line:'Retrieves real evidence before answering — reduces hallucination.'},
+  {name:'Agentic Memory', line:'Remembers across a session, and across sessions over time.'},
+  {name:'MCP', line:'One standard protocol connects it to many tools, not custom code per tool.'},
+  {name:'A2A Agents', line:'A main agent delegates to specialized sub-agents and coordinates them.'}
+];
+
+const rail = document.getElementById('rail');
+LEVELS.forEach((l,i)=>{
+  const d = document.createElement('div');
+  d.className = 'rail-dot' + (i===0 ? ' active' : '');
+  d.dataset.idx = i;
+  d.title = l.name;
+  d.addEventListener('click', ()=>goTo(i));
+  rail.appendChild(d);
+});
+
+const levelSections = Array.from(document.querySelectorAll('.level'));
+const quizState = {}; // idx -> true/false answered correctly
+let current = 0;
+
+function updateRail(){
+  rail.querySelectorAll('.rail-dot').forEach((d,i)=>{
+    d.classList.toggle('active', i===current);
+    d.classList.toggle('visited', i < current);
+    d.classList.toggle('quizzed', quizState[i]===true);
+  });
+}
+
+function goTo(idx){
+  if(idx < 0 || idx >= LEVELS.length) return;
+  levelSections.forEach(s=>s.classList.remove('active'));
+  document.getElementById('recap').classList.remove('active');
+  levelSections[idx].classList.add('active');
+  current = idx;
+  updateRail();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function showRecap(){
+  levelSections.forEach(s=>s.classList.remove('active'));
+  const recap = document.getElementById('recap');
+  recap.classList.add('active');
+  const list = document.getElementById('recap-list');
+  list.innerHTML = '';
+  LEVELS.forEach(l=>{
+    const row = document.createElement('div');
+    row.className = 'recap-row';
+    row.innerHTML = `<div class="rlvl">${l.name}</div><div class="rdesc">${l.line}</div>`;
+    list.appendChild(row);
+  });
+  const correctCount = Object.values(quizState).filter(v=>v===true).length;
+  const summary = document.getElementById('score-summary');
+  summary.textContent = `You answered ${correctCount} of ${LEVELS.length} quick checks correctly on the first try. ${correctCount===LEVELS.length ? "That's the full ladder, solid." : "Worth revisiting the ones you missed — that's normal, and it's exactly what the check was for."}`;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+document.querySelectorAll('[data-nav="next"]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(current === LEVELS.length - 1) showRecap();
+    else goTo(current+1);
+  });
+});
+document.querySelectorAll('[data-nav="prev"]').forEach(btn=>{
+  btn.addEventListener('click', ()=> goTo(current-1));
+});
+document.querySelector('[data-nav="restart"]').addEventListener('click', ()=>{
+  Object.keys(quizState).forEach(k=>delete quizState[k]);
+  document.querySelectorAll('.qopt').forEach(b=>{ b.disabled=false; b.classList.remove('correct','incorrect'); });
+  document.querySelectorAll('.qfeedback').forEach(f=>{ f.classList.remove('show'); f.textContent=''; });
+  goTo(0);
+});
+document.querySelector('[data-nav="review"]').addEventListener('click', ()=> goTo(0));
+
+/* QUIZ LOGIC — immediate feedback, one attempt scored, can still explore */
+document.querySelectorAll('.quiz').forEach(quiz=>{
+  const idx = parseInt(quiz.dataset.qlevel, 10);
+  const opts = quiz.querySelectorAll('.qopt');
+  const fb = quiz.querySelector('.qfeedback');
+  let answered = false;
+  opts.forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      if(answered) return;
+      answered = true;
+      const isCorrect = opt.dataset.correct === 'true';
+      opts.forEach(o=>{
+        o.disabled = true;
+        if(o.dataset.correct === 'true') o.classList.add('correct');
+        else if(o === opt) o.classList.add('incorrect');
+      });
+      quizState[idx] = isCorrect;
+      fb.textContent = isCorrect
+        ? '✓ Correct — that\'s the key distinction this level adds.'
+        : '✕ Not quite — the highlighted option above is correct. Worth rereading the "why this matters" note.';
+      fb.className = 'qfeedback show ' + (isCorrect ? 'correct-fb' : 'incorrect-fb');
+      updateRail();
+    });
+  });
+});
+
+/* ON-DEMAND VOICE — single section, user-triggered, not autoplay */
+document.querySelectorAll('#hear-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const text = btn.dataset.text;
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.rate = 0.98;
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v=>/en/i.test(v.lang));
+    if(preferred) utter.voice = preferred;
+    window.speechSynthesis.speak(utter);
+  });
+});
+if('speechSynthesis' in window){ window.speechSynthesis.onvoiceschanged = ()=>{ window.speechSynthesis.getVoices(); }; }
+</script>
+</body>
+</html>
