@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI for All — A Guide from Zero, by Sujit Kulkarni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213B;
+    --paper:#FAF8F4;
+    --slate:#2E4374;
+    --amber:#E8A33D;
+    --charcoal:#22252B;
+    --sage:#7FA98E;
+    --line:#DCD5C6;
+    --card:#FFFFFF;
+    --paper-dim:#F1EDE2;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--charcoal);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces',serif;
+    color:var(--ink);
+    margin:0 0 .4em 0;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  a{color:var(--slate);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  ::selection{background:var(--amber);color:var(--ink);}
+
+  /* progress bar */
+  #progress{
+    position:fixed;top:0;left:0;height:3px;background:var(--amber);
+    width:0%;z-index:999;transition:width .1s linear;
+  }
+
+  /* layout */
+  .shell{display:flex;max-width:1400px;margin:0 auto;}
+  nav.toc{
+    width:260px;flex-shrink:0;position:sticky;top:0;height:100vh;
+    padding:28px 18px 28px 32px;overflow-y:auto;border-right:1px solid var(--line);
+  }
+  nav.toc .brand{font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:6px;}
+  nav.toc .brand-sub{font-size:.72rem;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:28px;display:block;}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:chapter;}
+  nav.toc li{counter-increment:chapter;margin-bottom:2px;}
+  nav.toc a{
+    display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--charcoal);
+    font-size:.88rem;padding:7px 8px;border-radius:6px;transition:background .15s,color .15s;
+  }
+  nav.toc a::before{
+    content:counter(chapter,decimal-leading-zero);
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--slate);flex-shrink:0;
+  }
+  nav.toc a:hover{background:var(--paper-dim);}
+  nav.toc a.active{background:var(--ink);color:#fff;}
+  nav.toc a.active::before{color:var(--amber);}
+
+  main{flex:1;min-width:0;}
+
+  /* hero */
+  .hero{
+    background:var(--ink);color:var(--paper);padding:100px 64px 90px 64px;position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(232,163,61,.35), transparent 70%);
+  }
+  .hero .eyebrow{
+    font-family:'JetBrains Mono',monospace;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;
+    font-size:.78rem;margin-bottom:22px;
+  }
+  .hero h1{
+    color:#fff;font-size:clamp(2.4rem,5vw,4.2rem);line-height:1.05;max-width:820px;font-weight:600;
+  }
+  .hero h1 em{font-style:italic;color:var(--amber);}
+  .hero p.lede{
+    max-width:640px;font-size:1.15rem;color:#D9DEEB;margin-top:24px;position:relative;
+  }
+  .hero .author{
+    margin-top:44px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#AEB8CE;
+    position:relative;
+  }
+  .hero .author strong{color:var(--amber);font-weight:600;}
+
+  section{padding:80px 64px;border-bottom:1px solid var(--line);}
+  section .kicker{
+    font-family:'JetBrains Mono',monospace;color:var(--slate);text-transform:uppercase;letter-spacing:.1em;
+    font-size:.76rem;margin-bottom:12px;
+  }
+  section h2{font-size:2rem;max-width:700px;}
+  section .intro{max-width:680px;color:#454A55;font-size:1.02rem;margin-top:14px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px;}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:26px;
+  }
+  .card h3{font-size:1.1rem;}
+  .card p{color:#454A55;font-size:.95rem;margin:0;}
+
+  /* reassurance section */
+  .reassure{background:var(--paper-dim);}
+  .reassure blockquote{
+    font-family:'Fraunces',serif;font-style:italic;font-size:1.5rem;color:var(--ink);
+    max-width:760px;border-left:4px solid var(--amber);padding-left:24px;margin:32px 0;
+  }
+
+  /* simulator */
+  .simulator{background:var(--ink);color:var(--paper);}
+  .simulator h2{color:#fff;}
+  .simulator .kicker{color:var(--amber);}
+  .simulator .intro{color:#C4CAD9;}
+  .sim-box{
+    margin-top:36px;background:#0E1930;border:1px solid #2A3B5E;border-radius:12px;padding:28px;
+  }
+  .sim-input-row{display:flex;gap:12px;}
+  .sim-input-row input{
+    flex:1;background:#101E3B;border:1px solid #33456B;color:#fff;padding:14px 16px;border-radius:8px;
+    font-family:'JetBrains Mono',monospace;font-size:.95rem;
+  }
+  .sim-input-row button{
+    background:var(--amber);border:none;color:var(--ink);font-weight:700;padding:0 22px;border-radius:8px;
+    cursor:pointer;font-family:'Inter',sans-serif;font-size:.92rem;transition:transform .12s;
+  }
+  .sim-input-row button:hover{transform:translateY(-1px);}
+  .sim-steps{margin-top:28px;display:flex;flex-direction:column;gap:16px;}
+  .sim-step{
+    display:grid;grid-template-columns:140px 1fr;gap:18px;padding:16px;border-radius:8px;background:#101E3B;
+    border:1px solid #223256;opacity:.35;transition:opacity .4s;
+  }
+  .sim-step.show{opacity:1;}
+  .sim-step .label{font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;align-self:start;padding-top:2px;}
+  .sim-step .content{font-size:.92rem;color:#DCE1EC;}
+  .token-chip{
+    display:inline-block;background:#1B2C51;border:1px solid #34497A;color:#fff;padding:4px 10px;border-radius:6px;
+    margin:3px 4px 3px 0;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  }
+  .token-chip .id{color:var(--amber);margin-left:6px;font-size:.72rem;}
+  .vecbar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--sage),var(--amber));margin-top:6px;}
+  .sim-output{
+    margin-top:8px;font-family:'Fraunces',serif;font-size:1.05rem;color:#fff;border-top:1px dashed #33456B;
+    padding-top:10px;
+  }
+  .typing-cursor{display:inline-block;width:8px;background:var(--amber);animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* timeline */
+  .timeline{margin-top:44px;position:relative;padding-left:28px;border-left:2px solid var(--line);}
+  .tl-item{position:relative;padding-bottom:36px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:"";position:absolute;left:-34px;top:4px;width:12px;height:12px;border-radius:50%;
+    background:var(--amber);border:3px solid var(--paper);outline:2px solid var(--amber);
+  }
+  .tl-year{font-family:'JetBrains Mono',monospace;color:var(--slate);font-size:.85rem;font-weight:600;}
+  .tl-item h4{margin:4px 0 6px 0;font-size:1.15rem;}
+  .tl-item p{color:#454A55;margin:0;max-width:640px;font-size:.95rem;}
+
+  /* accordion */
+  .accordion{margin-top:36px;border-top:1px solid var(--line);}
+  .acc-item{border-bottom:1px solid var(--line);}
+  .acc-head{
+    display:flex;justify-content:space-between;align-items:center;padding:22px 4px;cursor:pointer;
+  }
+  .acc-head h3{margin:0;font-size:1.1rem;}
+  .acc-head .plus{font-family:'JetBrains Mono',monospace;font-size:1.3rem;color:var(--slate);transition:transform .25s;}
+  .acc-item.open .plus{transform:rotate(45deg);color:var(--amber);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .acc-item.open .acc-body{max-height:600px;}
+  .acc-body-inner{padding:0 4px 24px 4px;color:#454A55;font-size:.95rem;max-width:720px;}
+  .acc-body-inner .tag{
+    display:inline-block;background:var(--paper-dim);color:var(--slate);font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;padding:3px 9px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;
+  }
+
+  /* tabs (learning types) */
+  .tabs{display:flex;gap:8px;margin-top:32px;flex-wrap:wrap;}
+  .tab-btn{
+    background:var(--card);border:1px solid var(--line);padding:10px 18px;border-radius:30px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;color:var(--charcoal);
+  }
+  .tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .tab-panel{display:none;margin-top:24px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:28px;}
+  .tab-panel.active{display:block;}
+  .tab-panel h3{font-size:1.15rem;}
+  .tab-panel p{color:#454A55;}
+  .tab-panel .example{
+    margin-top:14px;padding:14px 16px;background:var(--paper-dim);border-radius:8px;font-size:.9rem;
+    border-left:3px solid var(--amber);
+  }
+
+  /* subjects web */
+  .subject-pill{
+    display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+    padding:8px 16px;border-radius:30px;font-size:.85rem;font-weight:600;margin:0 8px 8px 0;
+  }
+  .subject-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);}
+
+  /* roadmap */
+  .roadmap{counter-reset:step;margin-top:36px;}
+  .rm-step{
+    display:grid;grid-template-columns:64px 1fr;gap:20px;padding:22px 0;border-top:1px solid var(--line);
+  }
+  .rm-step:last-child{border-bottom:1px solid var(--line);}
+  .rm-num{
+    counter-increment:step;font-family:'Fraunces',serif;font-size:1.8rem;color:var(--amber);font-weight:600;
+  }
+  .rm-num::before{content:counter(step,decimal-leading-zero);}
+  .rm-step h4{margin:0 0 6px 0;}
+  .rm-step p{margin:0;color:#454A55;font-size:.94rem;max-width:640px;}
+  .rm-step .chip{
+    display:inline-block;margin-top:10px;background:var(--paper-dim);color:var(--slate);font-size:.75rem;
+    font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:6px;
+  }
+
+  /* glossary */
+  .glossary{margin-top:36px;columns:2;column-gap:40px;}
+  @media(max-width:900px){.glossary{columns:1;}}
+  .gterm{break-inside:avoid;margin-bottom:22px;}
+  .gterm dt{font-family:'Fraunces',serif;font-weight:600;color:var(--ink);font-size:1.02rem;}
+  .gterm dd{margin:4px 0 0 0;color:#454A55;font-size:.92rem;}
+
+  /* sources */
+  .sources ul{padding-left:20px;color:#454A55;font-size:.92rem;}
+  .sources li{margin-bottom:6px;}
+
+  footer{
+    background:var(--ink);color:#AEB8CE;padding:60px 64px 40px 64px;
+  }
+  footer .foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;}
+  footer h4{color:#fff;font-size:1rem;margin-bottom:10px;}
+  footer p{margin:0;font-size:.88rem;max-width:420px;}
+  footer .credit{
+    margin-top:44px;padding-top:24px;border-top:1px solid #2A3B5E;font-family:'JetBrains Mono',monospace;
+    font-size:.82rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+  footer .credit strong{color:var(--amber);}
+
+  @media(max-width:1000px){
+    nav.toc{display:none;}
+    .hero{padding:70px 24px;}
+    section{padding:56px 24px;}
+    footer{padding:44px 24px;}
+  }
+  @media(prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="shell">
+  <nav class="toc" id="toc">
+    <span class="brand">AI for All</span>
+    <span class="brand-sub">A course from zero</span>
+    <ol>
+      <li><a href="#start" data-target="start">Start here</a></li>
+      <li><a href="#why" data-target="why">Why this matters to you</a></li>
+      <li><a href="#simulator" data-target="simulator">What happens when you ask AI</a></li>
+      <li><a href="#history" data-target="history">Where AI came from</a></li>
+      <li><a href="#components" data-target="components">The building blocks</a></li>
+      <li><a href="#types" data-target="types">How machines learn</a></li>
+      <li><a href="#subjects" data-target="subjects">Subjects linked to AI</a></li>
+      <li><a href="#training" data-target="training">How a model is trained</a></li>
+      <li><a href="#life" data-target="life">AI in daily life</a></li>
+      <li><a href="#risks" data-target="risks">Limits and risks</a></li>
+      <li><a href="#roadmap" data-target="roadmap">Your learning path</a></li>
+      <li><a href="#glossary" data-target="glossary">Glossary</a></li>
+      <li><a href="#sources" data-target="sources">Sources</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="hero" id="start">
+      <div class="eyebrow">A plain-language guide — no school required</div>
+      <h1>You don't need a <em>degree</em> to understand the most important<br>invention of your lifetime.</h1>
+      <p class="lede">This is a complete, curated walkthrough of Artificial Intelligence — built for someone starting with nothing, not even confidence. No assumed knowledge. No jargon left unexplained. Just a clear path from "what even is AI" to genuinely understanding how it works.</p>
+      <div class="author">Curated &amp; Compiled by <strong>Sujit Kulkarni</strong> · Built entirely from publicly available knowledge</div>
+    </section>
+
+    <section class="reassure" id="why">
+      <div class="kicker">Before we begin</div>
+      <h2>No academic background required to learn this.</h2>
+      <p class="intro">This guide is built on purpose for a reader with no formal schooling, no English fluency, and no prior exposure to computers or academia. Read this carefully: <strong>none of that is a disqualifier for understanding AI.</strong> AI was not built to be understood only by people with degrees — it was built to eventually be used by everyone, including people who cannot read or write. That is exactly why voice assistants, translation apps, and image-based tools exist.</p>
+      <blockquote>Curiosity is the only entry requirement. Everything else — English, math, coding — is a tool picked up along the way, not a gate that has to be passed through first.</blockquote>
+      <div class="grid3">
+        <div class="card">
+          <h3>No English? No problem to start.</h3>
+          <p>Every major AI tool today (ChatGPT, Google Gemini, WhatsApp AI) accepts voice input and replies with voice or translated text in Hindi, Marathi, Tamil, and dozens of other languages. AI concepts can be learned in a reader's own language first.</p>
+        </div>
+        <div class="card">
+          <h3>No school? Also fine.</h3>
+          <p>The people who built the first thinking machines were mathematicians, electricians, and hobbyists — many with no formal computer science training, because the field didn't exist yet. It was built by curious people, one step at a time — and it can be understood the same way.</p>
+        </div>
+        <div class="card">
+          <h3>No direction? This gives you one.</h3>
+          <p>AI is one of the few skills today where basic literacy in the topic — not even coding — already opens real work: content checking, data labelling, prompt writing, AI-assisted customer support. This guide ends with a real starting path.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="simulator" id="simulator">
+      <div class="kicker">Chapter 01 · The core idea</div>
+      <h2>What actually happens when you type a question to an AI?</h2>
+      <p class="intro">This is the single most important thing to understand before anything else. Type any short question below and press "Ask" to see, step by step, exactly what an AI system like ChatGPT does behind the scenes — from your sentence to its reply.</p>
+      <div class="sim-box">
+        <div class="sim-input-row">
+          <input type="text" id="simInput" placeholder="Type a question, e.g. what is the moon made of" maxlength="60">
+          <button id="simBtn">Ask →</button>
+        </div>
+        <div class="sim-steps" id="simSteps">
+          <div class="sim-step" data-step="1">
+            <div class="label">Step 1 — Tokenising</div>
+            <div class="content">Your sentence is broken into small pieces called <b>tokens</b> — usually whole words or word-fragments. Computers cannot read letters the way you do; they need everything sliced into countable units first.
+              <div id="tokenChips" style="margin-top:10px;"></div>
+            </div>
+          </div>
+          <div class="sim-step" data-step="2">
+            <div class="label">Step 2 — Numbers, not words</div>
+            <div class="content">Each token is converted into a long list of numbers called a <b>vector embedding</b>. This number-list captures the token's meaning — words used in similar ways end up with similar numbers. The AI never actually "reads" — it only ever calculates with numbers.
+              <div class="vecbar"></div>
+            </div>
+          </div>
+          <div class="sim-step" data-step="3">
+            <div class="label">Step 3 — The neural network</div>
+            <div class="content">These numbers pass through a huge stack of mathematical layers called a <b>neural network</b> — inspired loosely by neurons in a brain. Modern AI chatbots use a design called a <b>Transformer</b>, which is especially good at figuring out which earlier words in your sentence matter most for understanding the next word — this trick is called <b>attention</b>.</div>
+          </div>
+          <div class="sim-step" data-step="4">
+            <div class="label">Step 4 — Predicting, not knowing</div>
+            <div class="content">The model does not "look up" an answer in a database. It calculates the probability of every possible next word it knows, over and over, one word at a time — this word, then the next, then the next — based on patterns it saw across enormous amounts of text during training.</div>
+          </div>
+          <div class="sim-step" data-step="5">
+            <div class="label">Step 5 — Your reply</div>
+            <div class="content">Those predicted word-pieces are stitched back into readable sentences and sent to your screen. The entire process — tokens to numbers to layers to predictions to text — happens in well under a second.
+              <div class="sim-output" id="simOutput"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="history">
+      <div class="kicker">Chapter 02 · Origins</div>
+      <h2>Where did AI actually come from?</h2>
+      <p class="intro">AI is not a recent invention — it is over 70 years old. It grew slowly, went through periods where it was almost abandoned, and only became what you use today in the last decade.</p>
+      <div class="timeline">
+        <div class="tl-item"><span class="tl-year">1950</span><h4>Alan Turing asks "Can machines think?"</h4><p>The British mathematician Alan Turing proposed a test — later called the Turing Test — to judge whether a machine's conversation could be mistaken for a human's. This question is widely credited with starting the field.</p></div>
+        <div class="tl-item"><span class="tl-year">1956</span><h4>The term "Artificial Intelligence" is coined</h4><p>At a workshop at Dartmouth College in the US, researchers John McCarthy, Marvin Minsky, and others formally named the field "Artificial Intelligence" and predicted rapid progress.</p></div>
+        <div class="tl-item"><span class="tl-year">1960s–70s</span><h4>Early rule-based systems</h4><p>Early AI worked by hand-coding rules — "if this, then that." These systems could solve narrow puzzles but broke down on anything unpredictable, since every rule had to be written by a human.</p></div>
+        <div class="tl-item"><span class="tl-year">1970s &amp; 1980s</span><h4>The "AI winters"</h4><p>Progress fell far short of promises. Funding dried up twice, in periods researchers now call "AI winters" — reminders that hype and reality had drifted apart.</p></div>
+        <div class="tl-item"><span class="tl-year">1997</span><h4>Deep Blue beats a world chess champion</h4><p>IBM's Deep Blue defeated world chess champion Garry Kasparov, showing that a machine could out-calculate a human expert in a well-defined game.</p></div>
+        <div class="tl-item"><span class="tl-year">2012</span><h4>Deep learning takes off</h4><p>A neural network called AlexNet dramatically outperformed older methods at recognising objects in photos, at a competition called ImageNet — this moment is widely seen as the start of the modern "deep learning" era, powered by more data and much faster computer chips (GPUs).</p></div>
+        <div class="tl-item"><span class="tl-year">2017</span><h4>The Transformer is introduced</h4><p>Researchers at Google published a design called the "Transformer" in a paper that introduced the attention mechanism described earlier. This single design underlies almost every major AI chatbot today.</p></div>
+        <div class="tl-item"><span class="tl-year">2022</span><h4>ChatGPT reaches the public</h4><p>OpenAI released ChatGPT to the public, making advanced conversational AI accessible to anyone with an internet connection for the first time — this is the moment AI went from a lab topic to a household word.</p></div>
+        <div class="tl-item"><span class="tl-year">2023–Present</span><h4>The multi-model era</h4><p>Multiple companies — OpenAI, Google, Anthropic, Meta, and others — now release increasingly capable models that understand text, images, audio, and video, and can act as agents that use tools on your behalf.</p></div>
+      </div>
+    </section>
+
+    <section id="components">
+      <div class="kicker">Chapter 03 · What AI is made of</div>
+      <h2>The four ingredients behind every AI system</h2>
+      <p class="intro">Strip away the buzzwords and every AI system, however advanced, is built from the same four ingredients.</p>
+      <div class="accordion" id="accordion">
+        <div class="acc-item open">
+          <div class="acc-head"><h3>1. Data — the experience the AI learns from</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">Raw material</span><p>Data is text, images, sound, or numbers collected from books, websites, photos, sensors, and more. A model's knowledge is entirely shaped by the data it was trained on — nothing more, nothing less. Bad or narrow data produces a biased or limited model, which is why "what data was used" is one of the most important questions in AI.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>2. Algorithms — the rules for learning</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">The recipe</span><p>An algorithm is a precise set of mathematical steps that tells the computer how to adjust itself as it looks at data, so that its guesses get better over time. Different algorithms suit different problems — some are good at spotting patterns in images, others at understanding language.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>3. Models — the "trained brain"</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">The result</span><p>A model is what you get after an algorithm has finished learning from data — millions or billions of internal numbers, called <b>parameters</b>, that together represent everything the system has "learned." When people say a model has "175 billion parameters," they mean that many adjustable numbers make up its knowledge.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>4. Compute — the electricity and hardware</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">The muscle</span><p>Training a large model requires enormous computing power, usually from specialised chips called GPUs (Graphics Processing Units), running for weeks in giant data centres. This is why building the biggest AI models is currently limited to a small number of well-funded companies — though using an already-trained model needs far less power, which is why it can run on your phone.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="types">
+      <div class="kicker">Chapter 04 · How machines actually learn</div>
+      <h2>Three ways a machine can be taught</h2>
+      <p class="intro">Not all AI learns the same way. Click each tab to see how a machine can be trained, with an everyday example for each.</p>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="t1">Supervised Learning</button>
+        <button class="tab-btn" data-tab="t2">Unsupervised Learning</button>
+        <button class="tab-btn" data-tab="t3">Reinforcement Learning</button>
+      </div>
+      <div class="tab-panel active" id="t1">
+        <h3>Supervised Learning — learning with an answer key</h3>
+        <p>The machine is shown many examples that already have the correct answer attached, and it learns the pattern that connects one to the other. It is like solving hundreds of practice questions where the answer key is right there.</p>
+        <div class="example">Example: showing an AI 10,000 photos labelled "cat" or "dog" until it can correctly label a new, unseen photo on its own.</div>
+      </div>
+      <div class="tab-panel" id="t2">
+        <h3>Unsupervised Learning — finding patterns with no answer key</h3>
+        <p>The machine is given data with no labels at all and asked to find its own structure — grouping similar things together without being told what the groups mean.</p>
+        <div class="example">Example: a shopping app grouping customers into "budget shoppers" and "premium shoppers" purely from buying patterns, without anyone defining those groups in advance.</div>
+      </div>
+      <div class="tab-panel" id="t3">
+        <h3>Reinforcement Learning — learning by trial, error, and reward</h3>
+        <p>The machine takes actions in an environment and receives a reward or penalty depending on the outcome, gradually learning the strategy that earns the most reward over time — similar to how a person learns a video game by playing it repeatedly.</p>
+        <div class="example">Example: an AI learning to play a strategy game by playing millions of matches against itself, improving after every win and loss. This same idea — reward and correction — is also used to make chatbots more helpful and polite, through a technique called RLHF (Reinforcement Learning from Human Feedback).</div>
+      </div>
+    </section>
+
+    <section id="subjects">
+      <div class="kicker">Chapter 05 · What powers AI underneath</div>
+      <h2>The subjects hiding inside AI — explained without the fear</h2>
+      <p class="intro">You do not need to master these to use or even deeply understand AI conceptually. But if you ever want to go further, these are the subjects it draws from — and in plain words, why.</p>
+      <div>
+        <span class="subject-pill"><span class="dot"></span>Statistics &amp; Probability</span>
+        <span class="subject-pill"><span class="dot"></span>Linear Algebra</span>
+        <span class="subject-pill"><span class="dot"></span>Calculus</span>
+        <span class="subject-pill"><span class="dot"></span>Computer Programming</span>
+        <span class="subject-pill"><span class="dot"></span>Linguistics</span>
+        <span class="subject-pill"><span class="dot"></span>Cognitive Science</span>
+        <span class="subject-pill"><span class="dot"></span>Philosophy &amp; Ethics</span>
+        <span class="subject-pill"><span class="dot"></span>Electronics &amp; Hardware</span>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>Statistics &amp; Probability</h3><p>AI rarely knows anything for certain — it deals in likelihoods. Probability is simply the math of "how likely," and it's what lets an AI say "this word is most likely next" rather than being certain of anything.</p></div>
+        <div class="card"><h3>Linear Algebra</h3><p>This is the math of working with big grids of numbers at once (called matrices and vectors). Since AI turns everything — words, pixels, sounds — into number-lists, this is the machinery doing the heavy lifting underneath.</p></div>
+        <div class="card"><h3>Calculus</h3><p>Training a model means constantly nudging millions of numbers to slightly reduce its mistakes. Calculus is the tool that calculates exactly which direction and how much to nudge each number.</p></div>
+        <div class="card"><h3>Computer Programming</h3><p>Someone has to write the instructions that run all of this. Python is the most common programming language used to build AI today, largely because it is considered relatively approachable for beginners.</p></div>
+        <div class="card"><h3>Linguistics</h3><p>The study of how human language is structured — grammar, meaning, context — informs how language-based AI is designed to understand and generate text that reads naturally.</p></div>
+        <div class="card"><h3>Cognitive Science</h3><p>The study of how human minds think, perceive, and remember. Early AI researchers borrowed loosely from ideas about the brain — like neurons — when designing neural networks, though modern AI works quite differently from a real brain.</p></div>
+        <div class="card"><h3>Philosophy &amp; Ethics</h3><p>Questions about fairness, truth, responsibility, and what a machine should or shouldn't be allowed to do are central to how AI is designed and governed — this is a field, not an afterthought.</p></div>
+        <div class="card"><h3>Electronics &amp; Hardware</h3><p>None of this runs without physical chips, wiring, and power. The design of faster, more efficient computer chips directly shapes what AI is capable of at any point in time.</p></div>
+      </div>
+    </section>
+
+    <section id="training">
+      <div class="kicker">Chapter 06 · Building the model</div>
+      <h2>How a model like ChatGPT is actually trained</h2>
+      <p class="intro">A brief, honest walk through the real production process, in the order it typically happens.</p>
+      <div class="roadmap">
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Collect enormous amounts of text</h4><p>Publicly available books, websites, articles, and code are gathered — often hundreds of billions of words — to give the model broad exposure to human language and knowledge.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Clean and filter the data</h4><p>Duplicate, low-quality, or harmful content is filtered out as much as possible before training begins, since the model will absorb whatever patterns exist in what it reads.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Pre-train — teach it to predict the next word</h4><p>The model is repeatedly shown text with the last word hidden, and adjusts its internal numbers until it gets better and better at guessing the missing word. This single, simple task, repeated billions of times, is what teaches it grammar, facts, reasoning patterns, and style.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Fine-tune on quality examples</h4><p>The model is then trained further on smaller, carefully written examples of good, helpful answers, to shift it from "predicting any internet text" toward "answering like a helpful assistant."</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Align with human feedback</h4><p>Human reviewers rate different responses from the model, and the model is adjusted to produce more of what people rated highly — teaching it to be more helpful, honest, and safe, not just fluent.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Test and release</h4><p>Before public release, the model is tested for accuracy, safety, and bias, then deployed on servers that respond to millions of people typing questions to it — including you.</p></div></div>
+      </div>
+    </section>
+
+    <section id="life">
+      <div class="kicker">Chapter 07 · Not just chatbots</div>
+      <h2>AI you're probably already using</h2>
+      <p class="intro">AI is not only chatbots. It's already quietly running inside things you likely use every week.</p>
+      <div class="grid3">
+        <div class="card"><h3>Voice typing &amp; translation</h3><p>Google Translate and voice-to-text tools use AI to convert speech to text and translate between languages — including ones you may not read well yourself.</p></div>
+        <div class="card"><h3>Photo recognition</h3><p>Your phone's camera app automatically identifying faces, or Google Photos letting you search "beach" and finding your beach photos, is AI recognising visual patterns.</p></div>
+        <div class="card"><h3>Recommendations</h3><p>YouTube, Instagram, and Spotify all use AI to predict what you're likely to watch or listen to next, based on patterns in what you and similar users engaged with before.</p></div>
+        <div class="card"><h3>Maps &amp; navigation</h3><p>Apps like Google Maps use AI to predict traffic and suggest the fastest route, based on patterns in millions of other people's live journeys.</p></div>
+        <div class="card"><h3>Banking &amp; fraud checks</h3><p>Banks use AI to flag unusual transactions that don't match your normal spending pattern, helping catch fraud in real time.</p></div>
+        <div class="card"><h3>Healthcare screening</h3><p>AI tools assist doctors by scanning medical images like X-rays for early signs of disease, flagging areas that deserve closer human attention.</p></div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <div class="kicker">Chapter 08 · Being honest about the downsides</div>
+      <h2>What AI gets wrong, and why it matters</h2>
+      <p class="intro">Understanding AI properly means understanding its real limits too — not just the impressive parts.</p>
+      <div class="accordion">
+        <div class="acc-item open">
+          <div class="acc-head"><h3>It can be confidently wrong</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>Because AI predicts likely-sounding text rather than checking facts, it can produce false information stated with total confidence — often called "hallucination." Always verify anything important from another source.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>It can inherit human bias</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>If the data it learned from contains unfair patterns about gender, caste, religion, or race, the model can repeat or even amplify those patterns unless deliberately corrected.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>It affects jobs, real ones</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>AI is automating parts of many jobs — from writing to basic customer service to simple coding. This is genuinely disruptive, but it is also creating entirely new roles around building, checking, and directing AI systems.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>Privacy and misuse</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>AI can be misused to create convincing fake images, audio, or text (sometimes called "deepfakes"), and can be trained on personal data without full consent. This is why AI regulation and ethics is now a serious, active field, not a footnote.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="kicker">Chapter 09 · Where you go from here</div>
+      <h2>A real starting path — zero prerequisites</h2>
+      <p class="intro">A practical order to actually build understanding, assuming no English fluency and no prior study. Go at your own pace — there is no deadline here.</p>
+      <div class="roadmap">
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Talk to an AI chatbot in your own language</h4><p>Open any free AI chat app and simply type or speak in Hindi, Marathi, or any language you're comfortable in. Ask it to explain something you're curious about, in simple words. This alone builds real familiarity fast.</p><span class="chip">Cost: free · Time: today</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Re-read this guide's chapters 1–4</h4><p>Come back to "What happens when you type a question," "Where AI came from," "Building blocks," and "How machines learn." Read them slowly, one chapter a day if needed. Understanding, not speed, is the goal.</p><span class="chip">Cost: free · Time: this week</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Watch beginner videos in your language on YouTube</h4><p>Search "AI kya hai" or the equivalent in your language. Many creators explain AI concepts in simple, spoken terms with visuals — no reading required.</p><span class="chip">Cost: free · Time: ongoing</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Practice "prompting" — asking AI well</h4><p>Prompting is simply the skill of asking an AI clear, specific questions to get useful answers. This alone is a real, employable skill today, and needs no coding at all.</p><span class="chip">Cost: free · Time: 2–3 weeks</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Pick up basic English gradually, through AI itself</h4><p>Ask an AI chatbot to explain new English words to you in your own language as you go. You will absorb vocabulary naturally through use, without a classroom.</p><span class="chip">Cost: free · Time: months, gradually</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>Only if curious — try one beginner Python lesson</h4><p>If and when you're ready, free platforms offer beginner coding lessons with no prior knowledge assumed. This step is optional, not required to "understand" AI.</p><span class="chip">Cost: free · Time: whenever ready</span></div></div>
+      </div>
+    </section>
+
+    <section id="glossary">
+      <div class="kicker">Reference</div>
+      <h2>Plain-language glossary</h2>
+      <p class="intro">Every technical word used in this guide, defined simply, in one place.</p>
+      <dl class="glossary">
+        <div class="gterm"><dt>Algorithm</dt><dd>A precise set of steps a computer follows to solve a problem or learn from data.</dd></div>
+        <div class="gterm"><dt>Artificial Intelligence (AI)</dt><dd>Computer systems designed to perform tasks that normally require human intelligence, such as understanding language or recognising images.</dd></div>
+        <div class="gterm"><dt>Attention</dt><dd>A technique that lets a model figure out which earlier words matter most when understanding or generating the next word.</dd></div>
+        <div class="gterm"><dt>Chatbot</dt><dd>A program designed to hold a text or voice conversation with a person.</dd></div>
+        <div class="gterm"><dt>Deep Learning</dt><dd>A type of machine learning using neural networks with many layers, capable of learning very complex patterns.</dd></div>
+        <div class="gterm"><dt>Generative AI</dt><dd>AI that creates new content — text, images, audio, or video — rather than just analysing existing content.</dd></div>
+        <div class="gterm"><dt>GPU</dt><dd>Graphics Processing Unit — a computer chip especially good at the kind of fast, repeated math that AI training needs.</dd></div>
+        <div class="gterm"><dt>Hallucination</dt><dd>When an AI confidently states something false, because it is predicting plausible text rather than checking facts.</dd></div>
+        <div class="gterm"><dt>Large Language Model (LLM)</dt><dd>An AI model trained on huge amounts of text to understand and generate human language, like the models behind ChatGPT.</dd></div>
+        <div class="gterm"><dt>Machine Learning (ML)</dt><dd>A branch of AI where systems improve at a task by learning from data, rather than being explicitly programmed with fixed rules.</dd></div>
+        <div class="gterm"><dt>Model</dt><dd>The end result of training — a set of learned numbers that lets a computer make predictions on new, unseen input.</dd></div>
+        <div class="gterm"><dt>Neural Network</dt><dd>A layered mathematical structure loosely inspired by neurons in the brain, used to find patterns in data.</dd></div>
+        <div class="gterm"><dt>Parameter</dt><dd>One of the many internal adjustable numbers inside a model that together represent what it has learned.</dd></div>
+        <div class="gterm"><dt>Prompt</dt><dd>The question or instruction you give an AI system.</dd></div>
+        <div class="gterm"><dt>Token</dt><dd>A small piece of text — often a word or part of a word — that an AI model processes as a single unit.</dd></div>
+        <div class="gterm"><dt>Training</dt><dd>The process of showing a model large amounts of data so it can learn patterns and improve at a task.</dd></div>
+        <div class="gterm"><dt>Transformer</dt><dd>The neural network design, introduced in 2017, that underlies most modern language AI, built around the attention mechanism.</dd></div>
+        <div class="gterm"><dt>Vector / Embedding</dt><dd>A list of numbers used to represent the meaning of a word, image, or other piece of data mathematically.</dd></div>
+      </dl>
+    </section>
+
+    <section class="sources" id="sources">
+      <div class="kicker">Transparency</div>
+      <h2>Where this was compiled from</h2>
+      <p class="intro">In line with the request for this guide, every fact here is drawn from widely and publicly documented information about the history and mechanics of AI — no private, paywalled, or invented sources.</p>
+      <ul>
+        <li>General historical record of the Dartmouth Workshop (1956) and the Turing Test (1950), as documented across public computer science history sources.</li>
+        <li>Public reporting on the ImageNet competition (2012) and its role in the rise of deep learning.</li>
+        <li>The publicly published research paper "Attention Is All You Need" (Google, 2017), which introduced the Transformer architecture.</li>
+        <li>Public product announcements and documentation from OpenAI, Google, Anthropic, and IBM regarding ChatGPT, Deep Blue, Gemini, and related systems.</li>
+        <li>General, widely-taught concepts in machine learning (supervised, unsupervised, and reinforcement learning; RLHF) as covered in open educational material.</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="foot-grid">
+    <div>
+      <h4>AI for All</h4>
+      <p>A free, plain-language guide built to prove that understanding AI has no prerequisites — only curiosity.</p>
+    </div>
+    <div>
+      <h4>How to use this page</h4>
+      <p>Read one chapter at a time using the menu on the left. Come back as often as you like — nothing here expires.</p>
+    </div>
+  </div>
+  <div class="credit">
+    <span>Curated &amp; Compiled by <strong>Sujit Kulkarni</strong></span>
+    <span>Built strictly from publicly available sources</span>
+  </div>
+</footer>
+
+<script>
+  // progress bar
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  // toc active state
+  const sections = document.querySelectorAll('main section, main .hero');
+  const tocLinks = document.querySelectorAll('nav.toc a');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector('nav.toc a[data-target="'+e.target.id+'"]');
+        if(link) link.classList.add('active');
+      }
+    });
+  }, {rootMargin: '-40% 0px -50% 0px'});
+  sections.forEach(s => { if(s.id) io.observe(s); });
+
+  // accordions
+  document.querySelectorAll('.acc-item').forEach(item => {
+    item.querySelector('.acc-head').addEventListener('click', () => {
+      item.classList.toggle('open');
+    });
+  });
+
+  // tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // simulator
+  const simBtn = document.getElementById('simBtn');
+  const simInput = document.getElementById('simInput');
+  const simSteps = document.querySelectorAll('.sim-step');
+  const tokenChips = document.getElementById('tokenChips');
+  const simOutput = document.getElementById('simOutput');
+
+  const sampleReplies = {
+    default: "That's a great question to explore — here's a simple, clear answer built from patterns in what I learned."
+  };
+
+  function runSimulation(){
+    let text = simInput.value.trim();
+    if(!text) text = "what is the moon made of";
+    simSteps.forEach(s => s.classList.remove('show'));
+    tokenChips.innerHTML = '';
+    simOutput.innerHTML = '';
+
+    const words = text.split(/\s+/).filter(Boolean);
+    words.forEach((w, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'token-chip';
+      chip.innerHTML = w.toLowerCase() + '<span class="id">#' + (1000 + i) + '</span>';
+      tokenChips.appendChild(chip);
+    });
+
+    let delay = 0;
+    simSteps.forEach((step) => {
+      setTimeout(() => step.classList.add('show'), delay);
+      delay += 550;
+    });
+
+    setTimeout(() => {
+      const reply = "Based on patterns learned from many similar sentences, here is a likely, helpful answer to: \"" + text + "\"";
+      let i = 0;
+      simOutput.innerHTML = '<span id="typedText"></span><span class="typing-cursor">&nbsp;</span>';
+      const typedEl = document.getElementById('typedText');
+      const t = setInterval(() => {
+        typedEl.textContent += reply[i];
+        i++;
+        if(i >= reply.length) clearInterval(t);
+      }, 12);
+    }, delay);
+  }
+
+  simBtn.addEventListener('click', runSimulation);
+  simInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') runSimulation(); });
+</script>
+</body>
+</html>
