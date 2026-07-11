@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Copilot Debugging & Reasoning Glossary — Sujit Kulkarni</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080B12;
+    --bg-elevated:#0F1420;
+    --surface:#131A2A;
+    --surface-hover:#1A2236;
+    --line:#232B40;
+    --text:#E7EBF4;
+    --muted:#8792A8;
+    --muted-dim:#5C6683;
+    --blue:#5B8DEF;
+    --blue-dim:#2E4C8A;
+    --pink:#EF5DA8;
+    --pink-dim:#8A3060;
+    --amber:#F0B65C;
+    --mono: 'JetBrains Mono', monospace;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    line-height:1.5;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--blue-dim); color:#fff;}
+
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image:
+      linear-gradient(rgba(91,141,239,0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(91,141,239,0.035) 1px, transparent 1px);
+    background-size:48px 48px;
+    pointer-events:none;
+    z-index:0;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 0%, transparent 70%);
+  }
+
+  a{color:inherit;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:88px 24px 64px;
+    text-align:center;
+    z-index:1;
+    border-bottom:1px solid var(--line);
+    overflow:hidden;
+  }
+  .hero-glow{
+    position:absolute; top:-200px; left:50%; transform:translateX(-50%);
+    width:900px; height:500px;
+    background:radial-gradient(ellipse at center, rgba(91,141,239,0.18), transparent 65%);
+    pointer-events:none;
+  }
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--mono); font-size:12px; letter-spacing:0.14em;
+    color:var(--blue); text-transform:uppercase;
+    border:1px solid var(--blue-dim); background:rgba(91,141,239,0.08);
+    padding:6px 14px; border-radius:100px; margin-bottom:28px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--blue); box-shadow:0 0 8px var(--blue);}
+  h1{
+    font-family:var(--display);
+    font-weight:700;
+    font-size:clamp(2rem, 5.2vw, 3.7rem);
+    letter-spacing:-0.02em;
+    line-height:1.08;
+    max-width:920px;
+    margin:0 auto;
+  }
+  h1 .accent{
+    background:linear-gradient(100deg, var(--blue), var(--pink));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .hero-sub{
+    max-width:600px; margin:22px auto 0;
+    color:var(--muted); font-size:16px;
+  }
+  .credit-block{
+    margin-top:36px; display:inline-flex; flex-direction:column; gap:2px;
+    padding:14px 24px; border:1px solid var(--line); border-radius:12px;
+    background:var(--bg-elevated);
+  }
+  .credit-block .name{font-family:var(--display); font-weight:600; font-size:15px; color:var(--text);}
+  .credit-block .role{font-family:var(--mono); font-size:11px; color:var(--muted-dim); letter-spacing:0.08em; text-transform:uppercase;}
+
+  .hero-stats{
+    display:flex; gap:32px; justify-content:center; margin-top:48px; flex-wrap:wrap;
+  }
+  .stat{text-align:left;}
+  .stat b{display:block; font-family:var(--display); font-size:26px; color:var(--text);}
+  .stat span{font-size:12px; color:var(--muted-dim); font-family:var(--mono); text-transform:uppercase; letter-spacing:0.06em;}
+
+  /* ---------- SEARCH ---------- */
+  .search-wrap{
+    max-width:1180px; margin:0 auto; padding:0 24px;
+    position:relative; z-index:2;
+  }
+  .search-box{
+    margin-top:-24px;
+    display:flex; align-items:center; gap:10px;
+    background:var(--surface); border:1px solid var(--line);
+    border-radius:12px; padding:12px 16px;
+    max-width:520px; margin-left:auto; margin-right:auto;
+    box-shadow:0 8px 30px rgba(0,0,0,0.35);
+  }
+  .search-box svg{flex-shrink:0; color:var(--muted-dim);}
+  .search-box input{
+    flex:1; background:transparent; border:none; outline:none;
+    color:var(--text); font-family:var(--body); font-size:14px;
+  }
+  .search-box input::placeholder{color:var(--muted-dim);}
+  .search-count{
+    font-family:var(--mono); font-size:11px; color:var(--muted-dim); white-space:nowrap;
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .page{
+    max-width:1180px; margin:0 auto; padding:56px 24px 100px;
+    display:grid; grid-template-columns:64px 1fr; gap:36px;
+    position:relative; z-index:1;
+  }
+  .rail{
+    position:sticky; top:32px; height:fit-content;
+    display:flex; flex-direction:column; align-items:center; gap:0;
+  }
+  .rail-track{
+    position:relative; display:flex; flex-direction:column; align-items:center;
+  }
+  .rail-node{
+    width:34px; height:34px; border-radius:50%;
+    background:var(--surface); border:2px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--mono); font-size:12px; font-weight:600; color:var(--muted-dim);
+    cursor:pointer; transition:all .25s ease; flex-shrink:0;
+    position:relative; z-index:2;
+  }
+  .rail-node:hover{border-color:var(--blue); color:var(--text);}
+  .rail-node.active{
+    background:var(--blue); border-color:var(--blue); color:#fff;
+    box-shadow:0 0 0 4px rgba(91,141,239,0.18);
+  }
+  .rail-connector{
+    width:2px; height:28px; background:var(--line); flex-shrink:0;
+  }
+  .rail-connector.filled{background:var(--blue);}
+
+  .content{min-width:0;}
+
+  .section-intro{margin-bottom:36px;}
+  .section-intro h2{
+    font-family:var(--display); font-size:22px; font-weight:600;
+    display:flex; align-items:center; gap:10px;
+  }
+  .section-intro p{color:var(--muted); font-size:14px; margin-top:8px; max-width:660px;}
+
+  /* ---------- STEP CARDS ---------- */
+  .step{
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:var(--surface);
+    margin-bottom:20px;
+    overflow:hidden;
+    transition:border-color .2s ease, transform .2s ease, opacity .2s ease;
+    scroll-margin-top:32px;
+  }
+  .step:hover{border-color:var(--muted-dim);}
+  .step.open{border-color:var(--blue-dim);}
+  .step.track-infra .step-badge{background:var(--pink); box-shadow:0 0 0 5px rgba(239,93,168,0.14);}
+  .step.track-infra:hover, .step.track-infra.open{border-color:var(--pink-dim);}
+  .step.filtered-out{display:none;}
+
+  .step-head{
+    display:flex; align-items:center; gap:18px;
+    padding:22px 24px;
+    cursor:pointer;
+    user-select:none;
+  }
+  .step-badge{
+    width:40px; height:40px; border-radius:11px;
+    background:var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-weight:700; font-size:16px; color:#fff;
+    flex-shrink:0;
+    box-shadow:0 0 0 5px rgba(91,141,239,0.14);
+  }
+  .step-head-text{flex:1; min-width:0;}
+  .step-head-text .label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--muted-dim); margin-bottom:3px;
+  }
+  .step-head-text h3{
+    font-family:var(--display); font-size:18px; font-weight:600; color:var(--text);
+  }
+  .step-count{
+    font-family:var(--mono); font-size:11px; color:var(--muted-dim);
+    border:1px solid var(--line); border-radius:100px; padding:3px 10px;
+    flex-shrink:0;
+  }
+  .step-chevron{
+    width:28px; height:28px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--muted-dim); transition:transform .25s ease;
+  }
+  .step.open .step-chevron{transform:rotate(180deg); color:var(--text);}
+
+  .step-body{
+    max-height:0; overflow:hidden;
+    transition:max-height .35s ease;
+  }
+  .step.open .step-body{max-height:2200px;}
+  .step-body-inner{
+    padding:0 24px 26px 82px;
+  }
+  .step-desc{
+    list-style:none; margin-bottom:20px;
+  }
+  .step-desc li{
+    position:relative; padding-left:18px; margin-bottom:9px;
+    color:#C6CCDA; font-size:14.5px;
+  }
+  .step-desc li::before{
+    content:""; position:absolute; left:0; top:8px;
+    width:6px; height:6px; border-radius:50%;
+    background:var(--blue);
+  }
+  .track-infra .step-desc li::before{background:var(--pink);}
+
+  .tools-label{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:0.1em; text-transform:uppercase;
+    color:var(--muted-dim); margin-bottom:10px; display:flex; align-items:center; gap:8px;
+  }
+  .tools-label::after{content:""; flex:1; height:1px; background:var(--line);}
+
+  .tools-grid{
+    display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;
+  }
+  .tool-chip{
+    display:flex; align-items:center; gap:7px;
+    padding:7px 12px 7px 8px;
+    background:var(--bg-elevated);
+    border:1px solid var(--line);
+    border-radius:9px;
+    font-size:13px; color:#D6DBE8;
+    font-family:var(--body); font-weight:500;
+    transition:border-color .2s ease, background .2s ease, transform .15s ease;
+    cursor:pointer;
+  }
+  .tool-chip:hover{border-color:var(--blue-dim); background:var(--surface-hover);}
+  .tool-chip.selected{
+    border-color:var(--blue); background:var(--surface-hover);
+    box-shadow:0 0 0 3px rgba(91,141,239,0.12);
+  }
+  .track-infra .tool-chip.selected{border-color:var(--pink); box-shadow:0 0 0 3px rgba(239,93,168,0.12);}
+  .tool-chip .swatch{
+    width:20px; height:20px; border-radius:6px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; font-weight:700; color:#fff;
+  }
+  .tool-chip .info-dot{
+    width:14px; height:14px; border-radius:50%;
+    border:1px solid var(--muted-dim); color:var(--muted-dim);
+    font-size:9.5px; font-family:var(--mono); font-weight:600;
+    display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; margin-left:2px;
+  }
+  .tool-chip.chip-hidden{display:none;}
+
+  .word-chip{
+    display:flex; align-items:center; gap:8px;
+    padding:8px 14px;
+    background:var(--bg-elevated);
+    border:1px solid var(--line);
+    border-radius:100px;
+    font-family:var(--mono); font-size:13px; font-weight:600; color:var(--text);
+    cursor:pointer; transition:all .2s ease;
+  }
+  .word-chip:hover{border-color:var(--pink-dim); background:var(--surface-hover);}
+  .word-chip.selected{border-color:var(--pink); background:var(--surface-hover); box-shadow:0 0 0 3px rgba(239,93,168,0.12);}
+  .word-chip .idx{color:var(--pink); font-size:11px;}
+  .word-chip.chip-hidden{display:none;}
+
+  .tool-detail{
+    max-height:0; overflow:hidden;
+    transition:max-height .28s ease, margin .28s ease;
+    margin-bottom:0;
+  }
+  .tool-detail.open{max-height:160px; margin-bottom:16px;}
+  .tool-detail-inner{
+    background:var(--bg-elevated);
+    border:1px solid var(--blue-dim);
+    border-left:3px solid var(--blue);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:13.5px; color:#C6CCDA;
+    display:flex; gap:10px; align-items:flex-start;
+  }
+  .track-infra .tool-detail-inner{border-color:var(--pink-dim); border-left-color:var(--pink);}
+  .tool-detail-inner .td-name{
+    font-family:var(--display); font-weight:600; color:var(--text);
+    white-space:nowrap; flex-shrink:0;
+  }
+  .tool-detail-inner .td-sep{color:var(--muted-dim); flex-shrink:0;}
+  .tool-detail-inner .td-prompt{
+    display:block; margin-top:6px; font-family:var(--mono); font-size:12.5px;
+    color:var(--blue); background:rgba(91,141,239,0.08); padding:6px 8px; border-radius:6px;
+  }
+  .track-infra .tool-detail-inner .td-prompt{color:var(--pink); background:rgba(239,93,168,0.08);}
+
+  .progress-bar-fixed{
+    position:fixed; top:0; left:0; height:3px; width:0%;
+    background:linear-gradient(90deg, var(--blue), var(--pink));
+    z-index:50; transition:width .1s linear;
+  }
+
+  .legend{
+    display:flex; gap:20px; margin-bottom:28px; flex-wrap:wrap;
+  }
+  .legend-item{display:flex; align-items:center; gap:8px; font-size:12.5px; color:var(--muted); font-family:var(--mono);}
+  .legend-dot{width:9px; height:9px; border-radius:3px;}
+
+  .step-actions{display:flex; gap:10px; align-items:center;}
+  .copy-btn{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:0.03em;
+    color:var(--muted); background:transparent;
+    border:1px solid var(--line); border-radius:8px;
+    padding:7px 12px; cursor:pointer;
+    display:flex; align-items:center; gap:6px;
+    transition:all .2s ease;
+  }
+  .copy-btn:hover{border-color:var(--blue); color:var(--text);}
+  .copy-btn.copied{border-color:var(--blue); color:var(--blue);}
+
+  .pin-note{
+    margin-top:14px; padding:10px 14px;
+    border:1px dashed var(--amber);
+    border-radius:8px;
+    font-size:12.5px; color:var(--amber);
+    font-family:var(--mono);
+    display:flex; align-items:center; gap:8px;
+  }
+
+  .no-results{
+    text-align:center; padding:40px 20px; color:var(--muted-dim);
+    font-family:var(--mono); font-size:13px; display:none;
+  }
+  .no-results.visible{display:block;}
+
+  footer{
+    border-top:1px solid var(--line);
+    padding:48px 24px 60px;
+    text-align:center;
+    position:relative; z-index:1;
+  }
+  footer .compiled{
+    font-family:var(--display); font-size:16px; font-weight:600; color:var(--text);
+  }
+  footer .role{font-family:var(--mono); font-size:11.5px; color:var(--muted-dim); letter-spacing:0.06em; margin-top:4px;}
+  footer .note{margin-top:20px; color:var(--muted-dim); font-size:12.5px; max-width:540px; margin-left:auto; margin-right:auto;}
+
+  @media (max-width: 760px){
+    .page{grid-template-columns:1fr; padding:40px 16px 80px;}
+    .rail{
+      position:sticky; top:0; z-index:20; flex-direction:row;
+      background:rgba(8,11,18,0.92); backdrop-filter:blur(8px);
+      padding:12px 8px; margin:-40px -16px 24px; width:calc(100% + 32px);
+      overflow-x:auto; border-bottom:1px solid var(--line);
+      justify-content:flex-start;
+    }
+    .rail-track{flex-direction:row;}
+    .rail-connector{width:20px; height:2px;}
+    .step-body-inner{padding-left:24px;}
+    .step-head{padding:18px;}
+    .hero{padding:56px 18px 44px;}
+    .hero-stats{gap:20px;}
+    .search-box{margin-top:20px;}
+  }
+
+  [data-reveal]{opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease;}
+  [data-reveal].visible{opacity:1; transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="progress-bar-fixed" id="progressBar"></div>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="eyebrow"><span class="dot"></span> Copilot Debugging &amp; Reasoning Glossary · Complete Handout</div>
+  <h1>The complete Copilot <span class="accent">debugging &amp; reasoning glossary</span></h1>
+  <p class="hero-sub">An expanded, keep-at-your-desk handout: fast bug identification, self-checking your own logic before you trust it, grounding against hallucination, deeper reasoning discipline, technical review skills, and the one-word command list Copilot reliably understands.</p>
+
+  <div class="credit-block">
+    <span class="name">Sujit Kulkarni</span>
+    <span class="role">Compiler · AI AugMentor</span>
+  </div>
+
+  <div class="hero-stats">
+    <div class="stat"><b>10</b><span>Modules</span></div>
+    <div class="stat"><b>24</b><span>One-word actions</span></div>
+    <div class="stat"><b>92</b><span>Total entries</span></div>
+  </div>
+</section>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.4"/><path d="M11 11L14.5 14.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    <input type="text" id="searchInput" placeholder="Search all 92 entries — e.g. hallucination, edge case, memory…">
+    <span class="search-count" id="searchCount"></span>
+  </div>
+</div>
+
+<div class="page">
+  <div class="rail">
+    <div class="rail-track" id="railTrack"></div>
+  </div>
+
+  <div class="content">
+    <div class="section-intro" data-reveal>
+      <h2>The full reference</h2>
+      <p>Click any module to expand it, or search above to jump straight to a term across all ten. Blue covers reasoning discipline — root-cause self-checking, chain-of-thought, grounding, and memory. Pink covers practical execution — triage, code review, testing, performance, the one-word glossary, and the daily list. Click any chip for the full explanation and a ready-to-use line.</p>
+    </div>
+
+    <div class="legend" data-reveal>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--blue)"></span> Reasoning &amp; self-checking discipline</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--pink)"></span> Practical execution &amp; glossary</div>
+    </div>
+
+    <div id="stepsContainer"></div>
+    <div class="no-results" id="noResults">No entries match that search.</div>
+  </div>
+</div>
+
+<footer>
+  <div class="compiled">Compiled by Sujit Kulkarni</div>
+  <div class="role">AI AugMentor · Research Analyst &amp; Workflow Automation Specialist</div>
+  <p class="note">These are general prompting, debugging, and reasoning habits that apply across GitHub Copilot, Microsoft 365 Copilot, and most chat-based AI coding assistants. Exact behavior can vary by model and tool — treat these as starting habits to adapt, not guarantees.</p>
+</footer>
+
+<script>
+const BLUE_PALETTE = ["#5B8DEF","#4E7BD6","#3F66B8","#2E4C8A","#264080","#3A6CC4","#1F3570","#4876C7"];
+const PINK_PALETTE = ["#EF5DA8","#D6488F","#C13B7E","#8A3060","#6B2650","#B22864","#941040","#7A2A54"];
+
+const STEPS = [
+  {
+    n:1, track:"infra", label:"Triage",
+    title:"Bug Identification &amp; Fast Triage",
+    desc:[
+      "Give Copilot the exact error text and stack trace, never a paraphrase, to narrow the search immediately.",
+      "Isolate the single most likely cause before asking for a fix, to avoid a scattershot response.",
+      "Reproduce the failure first, then explain it — confirm it's real before spending time on theory."
+    ],
+    tools:[
+      ["Paste exact error","Pe","Exact wording of the error and stack trace narrows the cause far faster than a paraphrase.","Here is the exact error and stack trace: [paste]. What's the most likely cause?"],
+      ["Isolate before fixing","Ib","Commits to the single most likely responsible line or function before proposing a fix.","Before suggesting a fix, tell me which line or function is most likely responsible."],
+      ["Minimal repro","Mr","Strips a bug down to the smallest snippet that still reproduces it.","Give me the smallest possible code snippet that reproduces this bug."],
+      ["Diff-based debugging","Db","Compares a working and broken version to isolate exactly what changed.","Compare this working version and this broken version — what changed that could cause it?"],
+      ["Rubber-duck the logic","Rd","Has the model explain intended behavior line by line so a mismatch becomes obvious.","Explain what this function is supposed to do, line by line."],
+      ["Bisect the codebase","Bs","Narrows down where a failure lives by isolating half the code at a time.","If we removed the second half of this function, would the bug still happen? Help me bisect it."],
+      ["Check boundaries first","Cb","Tests edge cases and boundary values before looking anywhere else.","Check what happens at zero, negative, empty, and maximum values before anything else."],
+      ["Reproduce before explaining","Rp","Confirms the bug actually reproduces before spending time on an explanation.","First confirm this actually fails as described, then explain why."]
+    ]
+  },
+  {
+    n:2, track:"agent", label:"Root Cause",
+    title:"Root Cause &amp; Self-Identifying Logic Errors",
+    desc:[
+      "Ask the model to expose its own assumptions before it commits to a conclusion.",
+      "Have it check its own reasoning for weak links, contradictions, and falsifiability before you trust it.",
+      "Use a self-critique pass to catch what a first read-through misses."
+    ],
+    tools:[
+      ["State assumptions first","Sa","Surfaces what the model is assuming before it commits to a conclusion.","List the assumptions you're making before you answer."],
+      ["Weakest-link check","Wl","Asks the model to identify the shakiest part of its own reasoning chain.","What's the weakest link in the reasoning you just gave?"],
+      ["Pre-mortem the answer","Pm","Asks what would most likely be wrong if the answer turns out incorrect.","If this answer is wrong, what's the most likely reason?"],
+      ["Contradiction check","Cc","Checks a new conclusion against everything stated earlier in the conversation.","Does this conclusion contradict anything we established earlier?"],
+      ["Rank competing hypotheses","Rh","Orders multiple possible causes by likelihood instead of picking one arbitrarily.","List three possible causes ranked from most to least likely."],
+      ["Trace state step by step","Ts","Follows a variable or piece of data through each step of execution.","Trace how this variable's value changes through each line of the function."],
+      ["Falsifiability check","Fc","Asks what evidence would prove the current answer wrong.","What would prove this conclusion wrong?"],
+      ["Self-critique pass","Sc","Has the model review its own answer as if it were someone else's work.","Now critique your own answer as if you were reviewing someone else's work."]
+    ]
+  },
+  {
+    n:3, track:"agent", label:"Reasoning",
+    title:"Chain-of-Thought &amp; Reasoning Preservation",
+    desc:[
+      "Ask for reasoning steps explicitly instead of letting the model jump straight to a final answer.",
+      "When new information arrives mid-conversation, ask it to re-run the reasoning rather than silently overwrite the conclusion.",
+      "Break large problems into checkpoints and confirm each one before moving on."
+    ],
+    tools:[
+      ["Think in steps","Ts","Forces reasoning to happen visibly, step by step, before any final answer.","Walk through your reasoning step by step before giving the final answer."],
+      ["Re-run after new info","Rn","Prevents new context from silently overwriting earlier correct logic.","Given this new constraint, re-run your reasoning before changing the conclusion."],
+      ["Checkpoint confirmation","Ck","Confirms each stage of a large task before moving to the next.","Stop after step 3 and confirm it's correct before continuing."],
+      ["Separate reasoning from output","Sr","Keeps thinking visible for review while still producing a clean final artifact.","Show your reasoning first, then give me only the final code."],
+      ["Show intermediate values","Iv","Requires actual intermediate results, not just a description of the process.","Show the actual intermediate values at each step, not just the method."],
+      ["Sequential dependency","Sd","Forces later steps to build on earlier results instead of jumping ahead.","Step 2 must use the result from step 1 — don't skip ahead."],
+      ["Reasoning summary first","Rs","Gets a short summary of the approach before the full walkthrough.","Give me a one-line summary of your approach before the full reasoning."],
+      ["Number every step","Ns","Makes each reasoning step individually referenceable for follow-up questions.","Number each step of your reasoning so I can refer back to a specific one."]
+    ]
+  },
+  {
+    n:4, track:"agent", label:"Grounding",
+    title:"Keep the Model From Hallucinating",
+    desc:[
+      "Give explicit permission to say 'I don't know' instead of guessing when it's uncertain.",
+      "Ground answers in a specific source and ask it to say clearly when something isn't covered by that source.",
+      "Ask for confidence flags on any claim that isn't directly backed by what you gave it."
+    ],
+    tools:[
+      ["Permission to say unsure","Pu","Explicitly invites the model to admit uncertainty instead of filling gaps with a guess.","If you're not certain, say so explicitly instead of guessing."],
+      ["Ground in the source","Gs","Restricts answers to a specific file or document and flags what's missing from it.","Only use information from this file. If something isn't in it, tell me it's missing."],
+      ["Ask for confidence flags","Cf","Marks lower-confidence claims inline so you know what to double check.","Mark any claim you're not fully confident about with [unverified]."],
+      ["Request verification steps","Vs","Asks the model how you'd independently confirm its own claim.","Tell me how I could verify this claim myself before I rely on it."],
+      ["No invented APIs","Ni","Explicitly blocks the model from inventing function or library names it isn't sure exist.","Don't invent function or library names — if you're unsure one exists, say so."],
+      ["Cite exact location","Ce","Requires a specific line number or file name behind any factual claim.","Cite the exact line number or file this claim is based on."],
+      ["Knowledge source check","Ks","Distinguishes whether an answer comes from the given material or general training.","Is this based on the code I gave you, or on general knowledge?"],
+      ["Label assumptions explicitly","La","Marks any filled-in gap as an assumption rather than a stated fact.","Label anything you're assuming, rather than stating it as fact."]
+    ]
+  },
+  {
+    n:5, track:"agent", label:"Memory",
+    title:"Memory &amp; Context Management",
+    desc:[
+      "Keep a short, standing 'project facts' block instead of repeating full context every message.",
+      "Summarize prior turns before extending them, so new context doesn't crowd out reasoning quality.",
+      "State critical facts explicitly right before a new question, rather than assuming they carried over."
+    ],
+    tools:[
+      ["Anchor block","An","A short standing block of facts you reference every session instead of re-explaining.","Keep a 'project facts' block at the top of this chat and refer back to it explicitly."],
+      ["Summarize before extending","Sx","Compresses what's been covered so far before adding new requirements.","Summarize what we've covered so far in 3 lines before I add a new requirement."],
+      ["Explicit recall","Er","Restates a key fact directly instead of assuming the model remembered it correctly.","Remember: we're using PostgreSQL, not MySQL, for all queries going forward."],
+      ["Separate memory from reasoning","Sr","Asks it to list what it's keeping in mind before reasoning from it.","First list the constraints you're keeping in mind, then reason from them."],
+      ["Context recap checkpoint","Cr","Periodically asks for a recap of standing context so drift doesn't creep in.","Recap the current context and constraints before we continue."],
+      ["Version-tag context changes","Vt","Marks the point where a fact changed so earlier and later logic don't conflict.","As of this message, assume we're using version 2 of the schema."],
+      ["Trim irrelevant history","Th","Drops stale context before a big new ask so it doesn't dilute attention.","Ignore the earlier discussion about the old design — focus only on the current one."],
+      ["Scope long sessions","Sl","Splits a long conversation into focused sub-conversations instead of one sprawling thread.","Let's treat this as a fresh, scoped conversation focused only on the API layer."]
+    ]
+  },
+  {
+    n:6, track:"infra", label:"Code Quality",
+    title:"Technical Review &amp; Code Quality Skills",
+    desc:[
+      "Ask for a design and structure review, not just a pass or fail on whether the code runs.",
+      "Run security, readability, and coupling checks as separate passes instead of one blended review.",
+      "Ask what's missing — untested paths, hidden dependencies, rollout risk — not just what's present."
+    ],
+    tools:[
+      ["Design review","Dr","Reviews the approach and structure, not just whether the code runs.","Give me a design review of this approach, not just a bug check."],
+      ["Complexity analysis","Ca","Requests Big-O time and space complexity before optimizing anything.","What's the time and space complexity of this function?"],
+      ["Separate security pass","Sp","Runs a dedicated security review distinct from a general logic review.","Now review this code specifically for security issues, separate from logic."],
+      ["Naming &amp; readability","Nr","Reviews variable and function names purely for clarity.","Review the naming and readability of this code, ignoring logic for now."],
+      ["Production failure review","Pf","Asks what would most likely break this code under real production conditions.","What's most likely to break this in production that isn't obvious in testing?"],
+      ["Coupling &amp; dependency check","Cd","Flags overly tight coupling between modules or functions.","Point out any tight coupling or hidden dependencies in this module."],
+      ["Test coverage gaps","Tg","Identifies what isn't currently tested rather than what already is.","What's not covered by the existing tests for this function?"],
+      ["Rollout risk assessment","Rr","Assesses what could go wrong specifically during deployment or rollout.","What's the riskiest part of rolling this change out?"]
+    ]
+  },
+  {
+    n:7, track:"infra", label:"Testing",
+    title:"Testing &amp; Validation Techniques",
+    desc:[
+      "Write edge case and failure-path tests before the typical happy-path tests.",
+      "Predict expected output before running code, to catch faulty assumptions early.",
+      "After any fix, ask what else should be re-tested to catch regressions."
+    ],
+    tools:[
+      ["Edge cases first","Ef","Generates edge case tests before typical happy-path tests.","Write edge case tests for this function before anything else."],
+      ["Negative path tests","Np","Tests failure and invalid-input paths, not just success cases.","Write tests for what should happen when this input is invalid."],
+      ["Test plan before code","Tp","Outlines what should be tested before any implementation exists.","Outline a test plan for this feature before we write any code."],
+      ["Predict output first","Po","Predicts expected output before running, to catch faulty assumptions early.","Before running this, predict what the output should be."],
+      ["Property-based tests","Pb","Suggests general properties that should always hold, not just fixed examples.","Suggest properties that should always hold true for this function, for property-based testing."],
+      ["Regression reminder","Rr","Prompts a check that a fix didn't break something else nearby.","After this fix, what existing behavior should I re-test to be safe?"],
+      ["Never-should-happen list","Ns","Lists conditions that should be impossible, useful as assertions.","List conditions that should never happen in this function, as assertions."]
+    ]
+  },
+  {
+    n:8, track:"infra", label:"Performance",
+    title:"Performance &amp; Optimization Reasoning",
+    desc:[
+      "Establish current complexity and the actual bottleneck before attempting any optimization.",
+      "Compare before-and-after complexity so you know the change actually helped.",
+      "Question whether an optimization is worth its added complexity at your current scale."
+    ],
+    tools:[
+      ["Complexity before optimizing","Cb","Establishes current complexity before attempting any optimization.","What's the current complexity before we try to optimize this?"],
+      ["Profile first","Pf","Identifies the actual bottleneck instead of guessing where it is.","Where is the actual bottleneck here, not where we assume it is?"],
+      ["Before/after comparison","Ba","Compares complexity or performance before and after a proposed change.","Compare the complexity of this function before and after your proposed change."],
+      ["Simplest optimization first","So","Tries the smallest, lowest-risk optimization before a bigger rewrite.","What's the simplest optimization we could try before a full rewrite?"],
+      ["Premature optimization flag","Po","Flags when an optimization isn't worth the added complexity yet.","Is this optimization worth the added complexity at our current scale?"]
+    ]
+  },
+  {
+    n:9, track:"infra", label:"Glossary",
+    title:"One-Word Actions Copilot Understands — Expanded",
+    desc:[
+      "24 single words most coding copilots reliably interpret as a specific action.",
+      "Pair the word with a short target for best results — for example, 'Isolate: the memory leak'.",
+      "Faster and less ambiguous than a full sentence for routine, repeatable tasks."
+    ],
+    tools:[
+      ["Explain","","Walks through what a piece of code or logic does.","Explain: this function."],
+      ["Fix","","Corrects a specific bug or error.","Fix: the null pointer error on line 42."],
+      ["Refactor","","Restructures code for clarity without changing behavior.","Refactor: this class for readability."],
+      ["Optimize","","Improves performance or efficiency.","Optimize: this query for large datasets."],
+      ["Simplify","","Reduces complexity while keeping the same result.","Simplify: this conditional logic."],
+      ["Debug","","Diagnoses the root cause of unexpected behavior.","Debug: why this test fails intermittently."],
+      ["Test","","Generates test cases or a test plan.","Test: edge cases for this input validator."],
+      ["Document","","Writes comments or documentation for code.","Document: this API endpoint."],
+      ["Review","","Gives feedback on code quality or design.","Review: this pull request for issues."],
+      ["Trace","","Follows execution or data flow step by step.","Trace: how this variable changes through the function."],
+      ["Validate","","Checks correctness against requirements or input.","Validate: this form against the schema."],
+      ["Secure","","Identifies and fixes security weaknesses.","Secure: this login endpoint."],
+      ["Format","","Cleans up style and formatting only.","Format: this file to the project style guide."],
+      ["Summarize","","Condenses a long piece of content into key points.","Summarize: this 40-line log output."],
+      ["Compare","","Shows differences between two versions or approaches.","Compare: these two implementations."],
+      ["Audit","","Does a thorough pass for issues across an entire file or module.","Audit: this module for dead code and unused imports."],
+      ["Isolate","","Narrows a problem down to the smallest responsible piece.","Isolate: which part of this pipeline is failing."],
+      ["Reproduce","","Confirms an issue actually occurs before explaining or fixing it.","Reproduce: this bug on a clean branch."],
+      ["Verify","","Double-checks a claim or result against the source of truth.","Verify: this calculation against the spec."],
+      ["Diagnose","","Identifies the underlying cause behind a symptom.","Diagnose: why memory usage climbs over time."],
+      ["Benchmark","","Measures performance under a defined, repeatable condition.","Benchmark: this function against the previous implementation."],
+      ["Sanitize","","Cleans or validates input to prevent bad or unsafe data.","Sanitize: this user input before it hits the database."],
+      ["Modularize","","Breaks a large block of code into smaller, reusable pieces.","Modularize: this 300-line file into smaller components."],
+      ["Deprecate","","Marks code or a feature as outdated and due for removal.","Deprecate: this old endpoint and point callers to the new one."]
+    ]
+  },
+  {
+    n:10, track:"infra", label:"Daily Use",
+    title:"The Daily Desk Cheat List — Expanded",
+    desc:[
+      "Eight habits worth running every single day, regardless of the task.",
+      "Meant to be skimmed in under a minute before any Copilot session starts."
+    ],
+    tools:[
+      ["Start with a goal line","Go","One sentence up front on what 'done' looks like — cuts wasted back-and-forth.","One sentence: what does 'done' look like for this task?"],
+      ["Paste exact errors","Pe","Never paraphrase an error message — copy it exactly, every time.","Here is the exact error message, unedited: [paste]."],
+      ["Ask before assuming","Ab","Has it ask one clarifying question instead of guessing at ambiguous requests.","If anything is ambiguous, ask me one clarifying question first."],
+      ["Request the diff","Rd","Saves review time by seeing only what changed, not the whole file again.","Show me only what changed, not the whole file again."],
+      ["End with a self-check","Sc","Closes every session by surfacing anything uncertain before you trust the output.","List anything in your answer that might be wrong or unverified."],
+      ["One question at a time","Oq","Keeps clarification manageable instead of a wall of five questions at once.","Ask me one question at a time, not a list of five."],
+      ["State constraints upfront","Cu","Front-loads limits so the first draft doesn't miss the obvious ones.","Before you start, here are the constraints: [list them]."],
+      ["Check uncertainty before trusting","Cu2","Surfaces the weakest part of an answer before you act on it.","What's the part of this you're least confident about?"]
+    ]
+  }
+];
+
+const railTrack = document.getElementById('railTrack');
+const stepsContainer = document.getElementById('stepsContainer');
+
+STEPS.forEach((s, i) => {
+  const node = document.createElement('div');
+  node.className = 'rail-node';
+  node.textContent = s.n;
+  node.dataset.target = 'step-' + s.n;
+  node.title = s.title.replace(/&amp;/g,'&');
+  railTrack.appendChild(node);
+  if(i < STEPS.length - 1){
+    const conn = document.createElement('div');
+    conn.className = 'rail-connector';
+    conn.id = 'conn-' + s.n;
+    railTrack.appendChild(conn);
+  }
+
+  const step = document.createElement('div');
+  step.className = 'step track-' + s.track;
+  step.id = 'step-' + s.n;
+  step.dataset.reveal = '';
+
+  const isGlossary = s.n === 9;
+  const palette = s.track === 'agent' ? BLUE_PALETTE : PINK_PALETTE;
+
+  const toolsHTML = s.tools.map((t, ti) => {
+    const searchKey = (t[0] + ' ' + t[2] + ' ' + t[3]).toLowerCase();
+    if (isGlossary) {
+      return `<div class="word-chip" data-search="${searchKey.replace(/"/g,'&quot;')}" data-tool-idx="${ti}" data-desc="${t[2].replace(/"/g,'&quot;')}" data-prompt="${t[3].replace(/"/g,'&quot;')}" data-name="${t[0]}">
+        <span class="idx">${String(ti+1).padStart(2,'0')}</span>${t[0]}
+      </div>`;
+    }
+    const color = palette[ti % palette.length];
+    return `<div class="tool-chip" data-search="${searchKey.replace(/"/g,'&quot;')}" data-tool-idx="${ti}" data-desc="${t[2].replace(/"/g,'&quot;')}" data-prompt="${t[3].replace(/"/g,'&quot;')}" data-name="${t[0]}">
+      <span class="swatch" style="background:${color}">${t[1]}</span>${t[0]}
+      <span class="info-dot">i</span>
+    </div>`;
+  }).join('');
+
+  const descHTML = s.desc.map(d => `<li>${d}</li>`).join('');
+  const promptList = s.tools.map(t => t[0] + ': ' + t[3]).join('\n');
+  const pinNote = s.n === 10 ? `<div class="pin-note">📌 Pin this module — it's the one worth reopening every morning.</div>` : '';
+
+  step.innerHTML = `
+    <div class="step-head" data-toggle>
+      <div class="step-badge">${s.n}</div>
+      <div class="step-head-text">
+        <div class="label">${s.label}</div>
+        <h3>${s.title}</h3>
+      </div>
+      <div class="step-count">${s.tools.length}</div>
+      <div class="step-chevron">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+    </div>
+    <div class="step-body">
+      <div class="step-body-inner">
+        <ul class="step-desc">${descHTML}</ul>
+        <div class="tools-label">${isGlossary ? 'One-word actions · click one for details' : 'Techniques · click one for details'}</div>
+        <div class="tools-grid">${toolsHTML}</div>
+        <div class="tool-detail" data-tool-detail>
+          <div class="tool-detail-inner">
+            <div>
+              <span class="td-name" data-td-name></span>
+              <span class="td-sep">&mdash;</span>
+              <span class="td-desc" data-td-desc></span>
+              <span class="td-prompt" data-td-prompt></span>
+            </div>
+          </div>
+        </div>
+        ${pinNote}
+        <div class="step-actions">
+          <button class="copy-btn" data-copy="${promptList.replace(/"/g,'&quot;')}">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><rect x="3" y="3" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1"/><path d="M2 8V2H8" stroke="currentColor" stroke-width="1"/></svg>
+            Copy this module's list
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+  stepsContainer.appendChild(step);
+});
+
+document.getElementById('step-1').classList.add('open');
+
+document.querySelectorAll('[data-toggle]').forEach(head => {
+  head.addEventListener('click', () => {
+    const step = head.closest('.step');
+    step.classList.toggle('open');
+  });
+});
+
+document.querySelectorAll('.tool-chip, .word-chip').forEach(chip => {
+  chip.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const step = chip.closest('.step');
+    const detail = step.querySelector('[data-tool-detail]');
+    const nameEl = step.querySelector('[data-td-name]');
+    const descEl = step.querySelector('[data-td-desc]');
+    const promptEl = step.querySelector('[data-td-prompt]');
+    const isSame = chip.classList.contains('selected');
+
+    step.querySelectorAll('.tool-chip, .word-chip').forEach(c => c.classList.remove('selected'));
+
+    if (isSame) {
+      detail.classList.remove('open');
+      return;
+    }
+
+    chip.classList.add('selected');
+    nameEl.textContent = chip.dataset.name;
+    descEl.textContent = chip.dataset.desc;
+    promptEl.textContent = '“' + chip.dataset.prompt + '”';
+    detail.classList.add('open');
+  });
+});
+
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const text = btn.dataset.copy;
+    navigator.clipboard.writeText(text).then(() => {
+      const original = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = 'Copied ✓';
+      setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 1500);
+    });
+  });
+});
+
+document.querySelectorAll('.rail-node').forEach(node => {
+  node.addEventListener('click', () => {
+    const target = document.getElementById(node.dataset.target);
+    target.classList.add('open');
+    target.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+});
+
+const railNodes = Array.from(document.querySelectorAll('.rail-node'));
+const stepEls = Array.from(document.querySelectorAll('.step'));
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      const idx = stepEls.indexOf(entry.target);
+      railNodes.forEach(n => n.classList.remove('active'));
+      railNodes[idx].classList.add('active');
+      for(let i=0;i<idx;i++){
+        const c = document.getElementById('conn-' + (i+1));
+        if(c) c.classList.add('filled');
+      }
+      for(let i=idx;i<stepEls.length-1;i++){
+        const c = document.getElementById('conn-' + (i+1));
+        if(c) c.classList.remove('filled');
+      }
+    }
+  });
+}, {threshold:0.5, rootMargin:"-20% 0px -40% 0px"});
+
+stepEls.forEach(el => observer.observe(el));
+
+const progressBar = document.getElementById('progressBar');
+window.addEventListener('scroll', () => {
+  const scrollTop = window.scrollY;
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+  progressBar.style.width = pct + '%';
+});
+
+const revealEls = document.querySelectorAll('[data-reveal]');
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, {threshold:0.1});
+revealEls.forEach(el => revealObserver.observe(el));
+
+railNodes[0].classList.add('active');
+
+/* ---------- SEARCH ---------- */
+const searchInput = document.getElementById('searchInput');
+const searchCount = document.getElementById('searchCount');
+const noResults = document.getElementById('noResults');
+const allChips = Array.from(document.querySelectorAll('.tool-chip, .word-chip'));
+const totalEntries = allChips.length;
+searchCount.textContent = totalEntries + ' entries';
+
+searchInput.addEventListener('input', () => {
+  const q = searchInput.value.trim().toLowerCase();
+  let visibleCount = 0;
+
+  if (!q) {
+    stepEls.forEach(s => s.classList.remove('filtered-out'));
+    allChips.forEach(c => c.classList.remove('chip-hidden'));
+    searchCount.textContent = totalEntries + ' entries';
+    noResults.classList.remove('visible');
+    return;
+  }
+
+  stepEls.forEach(step => {
+    const chips = Array.from(step.querySelectorAll('.tool-chip, .word-chip'));
+    let stepHasMatch = false;
+    chips.forEach(chip => {
+      const match = chip.dataset.search.includes(q);
+      chip.classList.toggle('chip-hidden', !match);
+      if (match) { stepHasMatch = true; visibleCount++; }
+    });
+    step.classList.toggle('filtered-out', !stepHasMatch);
+    if (stepHasMatch) step.classList.add('open');
+  });
+
+  searchCount.textContent = visibleCount + ' match' + (visibleCount === 1 ? '' : 'es');
+  noResults.classList.toggle('visible', visibleCount === 0);
+});
+</script>
+
+</body>
+</html>
