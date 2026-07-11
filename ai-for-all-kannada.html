@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="kn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ಎಲ್ಲರಿಗಾಗಿ AI — ಸೊನ್ನೆಯಿಂದ ಆರಂಭಿಸುವ ಮಾರ್ಗದರ್ಶಿ, ಸುಜಿತ್ ಕುಲಕರ್ಣಿ ಅವರಿಂದ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#12213B;
+    --paper:#FAF8F4;
+    --slate:#2E4374;
+    --amber:#E8A33D;
+    --charcoal:#22252B;
+    --sage:#7FA98E;
+    --line:#DCD5C6;
+    --card:#FFFFFF;
+    --paper-dim:#F1EDE2;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--charcoal);
+    font-family:'Inter',sans-serif;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces',serif;
+    color:var(--ink);
+    margin:0 0 .4em 0;
+    font-weight:600;
+    letter-spacing:-0.01em;
+  }
+  a{color:var(--slate);}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  ::selection{background:var(--amber);color:var(--ink);}
+
+  /* progress bar */
+  #progress{
+    position:fixed;top:0;left:0;height:3px;background:var(--amber);
+    width:0%;z-index:999;transition:width .1s linear;
+  }
+
+  /* layout */
+  .shell{display:flex;max-width:1400px;margin:0 auto;}
+  nav.toc{
+    width:260px;flex-shrink:0;position:sticky;top:0;height:100vh;
+    padding:28px 18px 28px 32px;overflow-y:auto;border-right:1px solid var(--line);
+  }
+  nav.toc .brand{font-family:'Fraunces',serif;font-weight:700;font-size:1.15rem;color:var(--ink);margin-bottom:6px;}
+  nav.toc .brand-sub{font-size:.72rem;color:var(--slate);text-transform:uppercase;letter-spacing:.08em;margin-bottom:28px;display:block;}
+  nav.toc ol{list-style:none;margin:0;padding:0;counter-reset:chapter;}
+  nav.toc li{counter-increment:chapter;margin-bottom:2px;}
+  nav.toc a{
+    display:flex;gap:10px;align-items:baseline;text-decoration:none;color:var(--charcoal);
+    font-size:.88rem;padding:7px 8px;border-radius:6px;transition:background .15s,color .15s;
+  }
+  nav.toc a::before{
+    content:counter(chapter,decimal-leading-zero);
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--slate);flex-shrink:0;
+  }
+  nav.toc a:hover{background:var(--paper-dim);}
+  nav.toc a.active{background:var(--ink);color:#fff;}
+  nav.toc a.active::before{color:var(--amber);}
+
+  main{flex:1;min-width:0;}
+
+  /* hero */
+  .hero{
+    background:var(--ink);color:var(--paper);padding:100px 64px 90px 64px;position:relative;overflow:hidden;
+  }
+  .hero::after{
+    content:"";position:absolute;right:-120px;top:-120px;width:420px;height:420px;border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, rgba(232,163,61,.35), transparent 70%);
+  }
+  .hero .eyebrow{
+    font-family:'JetBrains Mono',monospace;color:var(--amber);letter-spacing:.12em;text-transform:uppercase;
+    font-size:.78rem;margin-bottom:22px;
+  }
+  .hero h1{
+    color:#fff;font-size:clamp(2.4rem,5vw,4.2rem);line-height:1.05;max-width:820px;font-weight:600;
+  }
+  .hero h1 em{font-style:italic;color:var(--amber);}
+  .hero p.lede{
+    max-width:640px;font-size:1.15rem;color:#D9DEEB;margin-top:24px;position:relative;
+  }
+  .hero .author{
+    margin-top:44px;font-family:'JetBrains Mono',monospace;font-size:.85rem;color:#AEB8CE;
+    position:relative;
+  }
+  .hero .author strong{color:var(--amber);font-weight:600;}
+
+  section{padding:80px 64px;border-bottom:1px solid var(--line);}
+  section .kicker{
+    font-family:'JetBrains Mono',monospace;color:var(--slate);text-transform:uppercase;letter-spacing:.1em;
+    font-size:.76rem;margin-bottom:12px;
+  }
+  section h2{font-size:2rem;max-width:700px;}
+  section .intro{max-width:680px;color:#454A55;font-size:1.02rem;margin-top:14px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px;}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px;}
+  @media(max-width:900px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+  .card{
+    background:var(--card);border:1px solid var(--line);border-radius:10px;padding:26px;
+  }
+  .card h3{font-size:1.1rem;}
+  .card p{color:#454A55;font-size:.95rem;margin:0;}
+
+  /* reassurance section */
+  .reassure{background:var(--paper-dim);}
+  .reassure blockquote{
+    font-family:'Fraunces',serif;font-style:italic;font-size:1.5rem;color:var(--ink);
+    max-width:760px;border-left:4px solid var(--amber);padding-left:24px;margin:32px 0;
+  }
+
+  /* simulator */
+  .simulator{background:var(--ink);color:var(--paper);}
+  .simulator h2{color:#fff;}
+  .simulator .kicker{color:var(--amber);}
+  .simulator .intro{color:#C4CAD9;}
+  .sim-box{
+    margin-top:36px;background:#0E1930;border:1px solid #2A3B5E;border-radius:12px;padding:28px;
+  }
+  .sim-input-row{display:flex;gap:12px;}
+  .sim-input-row input{
+    flex:1;background:#101E3B;border:1px solid #33456B;color:#fff;padding:14px 16px;border-radius:8px;
+    font-family:'JetBrains Mono',monospace;font-size:.95rem;
+  }
+  .sim-input-row button{
+    background:var(--amber);border:none;color:var(--ink);font-weight:700;padding:0 22px;border-radius:8px;
+    cursor:pointer;font-family:'Inter',sans-serif;font-size:.92rem;transition:transform .12s;
+  }
+  .sim-input-row button:hover{transform:translateY(-1px);}
+  .sim-steps{margin-top:28px;display:flex;flex-direction:column;gap:16px;}
+  .sim-step{
+    display:grid;grid-template-columns:140px 1fr;gap:18px;padding:16px;border-radius:8px;background:#101E3B;
+    border:1px solid #223256;opacity:.35;transition:opacity .4s;
+  }
+  .sim-step.show{opacity:1;}
+  .sim-step .label{font-family:'JetBrains Mono',monospace;color:var(--amber);font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;align-self:start;padding-top:2px;}
+  .sim-step .content{font-size:.92rem;color:#DCE1EC;}
+  .token-chip{
+    display:inline-block;background:#1B2C51;border:1px solid #34497A;color:#fff;padding:4px 10px;border-radius:6px;
+    margin:3px 4px 3px 0;font-family:'JetBrains Mono',monospace;font-size:.82rem;
+  }
+  .token-chip .id{color:var(--amber);margin-left:6px;font-size:.72rem;}
+  .vecbar{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--sage),var(--amber));margin-top:6px;}
+  .sim-output{
+    margin-top:8px;font-family:'Fraunces',serif;font-size:1.05rem;color:#fff;border-top:1px dashed #33456B;
+    padding-top:10px;
+  }
+  .typing-cursor{display:inline-block;width:8px;background:var(--amber);animation:blink 1s infinite;}
+  @keyframes blink{50%{opacity:0;}}
+
+  /* timeline */
+  .timeline{margin-top:44px;position:relative;padding-left:28px;border-left:2px solid var(--line);}
+  .tl-item{position:relative;padding-bottom:36px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:"";position:absolute;left:-34px;top:4px;width:12px;height:12px;border-radius:50%;
+    background:var(--amber);border:3px solid var(--paper);outline:2px solid var(--amber);
+  }
+  .tl-year{font-family:'JetBrains Mono',monospace;color:var(--slate);font-size:.85rem;font-weight:600;}
+  .tl-item h4{margin:4px 0 6px 0;font-size:1.15rem;}
+  .tl-item p{color:#454A55;margin:0;max-width:640px;font-size:.95rem;}
+
+  /* accordion */
+  .accordion{margin-top:36px;border-top:1px solid var(--line);}
+  .acc-item{border-bottom:1px solid var(--line);}
+  .acc-head{
+    display:flex;justify-content:space-between;align-items:center;padding:22px 4px;cursor:pointer;
+  }
+  .acc-head h3{margin:0;font-size:1.1rem;}
+  .acc-head .plus{font-family:'JetBrains Mono',monospace;font-size:1.3rem;color:var(--slate);transition:transform .25s;}
+  .acc-item.open .plus{transform:rotate(45deg);color:var(--amber);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .acc-item.open .acc-body{max-height:600px;}
+  .acc-body-inner{padding:0 4px 24px 4px;color:#454A55;font-size:.95rem;max-width:720px;}
+  .acc-body-inner .tag{
+    display:inline-block;background:var(--paper-dim);color:var(--slate);font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;padding:3px 9px;border-radius:20px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.05em;
+  }
+
+  /* tabs (learning types) */
+  .tabs{display:flex;gap:8px;margin-top:32px;flex-wrap:wrap;}
+  .tab-btn{
+    background:var(--card);border:1px solid var(--line);padding:10px 18px;border-radius:30px;cursor:pointer;
+    font-family:'Inter',sans-serif;font-size:.88rem;font-weight:600;color:var(--charcoal);
+  }
+  .tab-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .tab-panel{display:none;margin-top:24px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:28px;}
+  .tab-panel.active{display:block;}
+  .tab-panel h3{font-size:1.15rem;}
+  .tab-panel p{color:#454A55;}
+  .tab-panel .example{
+    margin-top:14px;padding:14px 16px;background:var(--paper-dim);border-radius:8px;font-size:.9rem;
+    border-left:3px solid var(--amber);
+  }
+
+  /* subjects web */
+  .subject-pill{
+    display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);
+    padding:8px 16px;border-radius:30px;font-size:.85rem;font-weight:600;margin:0 8px 8px 0;
+  }
+  .subject-pill .dot{width:8px;height:8px;border-radius:50%;background:var(--amber);}
+
+  /* roadmap */
+  .roadmap{counter-reset:step;margin-top:36px;}
+  .rm-step{
+    display:grid;grid-template-columns:64px 1fr;gap:20px;padding:22px 0;border-top:1px solid var(--line);
+  }
+  .rm-step:last-child{border-bottom:1px solid var(--line);}
+  .rm-num{
+    counter-increment:step;font-family:'Fraunces',serif;font-size:1.8rem;color:var(--amber);font-weight:600;
+  }
+  .rm-num::before{content:counter(step,decimal-leading-zero);}
+  .rm-step h4{margin:0 0 6px 0;}
+  .rm-step p{margin:0;color:#454A55;font-size:.94rem;max-width:640px;}
+  .rm-step .chip{
+    display:inline-block;margin-top:10px;background:var(--paper-dim);color:var(--slate);font-size:.75rem;
+    font-family:'JetBrains Mono',monospace;padding:3px 10px;border-radius:6px;
+  }
+
+  /* glossary */
+  .glossary{margin-top:36px;columns:2;column-gap:40px;}
+  @media(max-width:900px){.glossary{columns:1;}}
+  .gterm{break-inside:avoid;margin-bottom:22px;}
+  .gterm dt{font-family:'Fraunces',serif;font-weight:600;color:var(--ink);font-size:1.02rem;}
+  .gterm dd{margin:4px 0 0 0;color:#454A55;font-size:.92rem;}
+
+  /* sources */
+  .sources ul{padding-left:20px;color:#454A55;font-size:.92rem;}
+  .sources li{margin-bottom:6px;}
+
+  footer{
+    background:var(--ink);color:#AEB8CE;padding:60px 64px 40px 64px;
+  }
+  footer .foot-grid{display:flex;justify-content:space-between;flex-wrap:wrap;gap:30px;}
+  footer h4{color:#fff;font-size:1rem;margin-bottom:10px;}
+  footer p{margin:0;font-size:.88rem;max-width:420px;}
+  footer .credit{
+    margin-top:44px;padding-top:24px;border-top:1px solid #2A3B5E;font-family:'JetBrains Mono',monospace;
+    font-size:.82rem;display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;
+  }
+  footer .credit strong{color:var(--amber);}
+
+  @media(max-width:1000px){
+    nav.toc{display:none;}
+    .hero{padding:70px 24px;}
+    section{padding:56px 24px;}
+    footer{padding:44px 24px;}
+  }
+  @media(prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{transition:none !important;animation:none !important;}
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="shell">
+  <nav class="toc" id="toc">
+    <span class="brand">ಎಲ್ಲರಿಗಾಗಿ AI</span>
+    <span class="brand-sub">ಸೊನ್ನೆಯಿಂದ ಒಂದು ಕೋರ್ಸ್</span>
+    <ol>
+      <li><a href="#start" data-target="start">ಇಲ್ಲಿಂದ ಆರಂಭಿಸಿ</a></li>
+      <li><a href="#why" data-target="why">ಇದು ನಿಮಗೆ ಏಕೆ ಮುಖ್ಯ</a></li>
+      <li><a href="#simulator" data-target="simulator">AI ಕೇಳಿದಾಗ ಏನಾಗುತ್ತದೆ</a></li>
+      <li><a href="#history" data-target="history">AI ಎಲ್ಲಿಂದ ಬಂತು</a></li>
+      <li><a href="#components" data-target="components">ಮೂಲ ಘಟಕಗಳು</a></li>
+      <li><a href="#types" data-target="types">ಯಂತ್ರಗಳು ಹೇಗೆ ಕಲಿಯುತ್ತವೆ</a></li>
+      <li><a href="#subjects" data-target="subjects">AI ಗೆ ಸಂಬಂಧಿಸಿದ ವಿಷಯಗಳು</a></li>
+      <li><a href="#training" data-target="training">ಮಾದರಿಯನ್ನು ಹೇಗೆ ತರಬೇತಿ ಮಾಡಲಾಗುತ್ತದೆ</a></li>
+      <li><a href="#life" data-target="life">ದೈನಂದಿನ ಜೀವನದಲ್ಲಿ AI</a></li>
+      <li><a href="#risks" data-target="risks">ಮಿತಿಗಳು ಮತ್ತು ಅಪಾಯಗಳು</a></li>
+      <li><a href="#roadmap" data-target="roadmap">ನಿಮ್ಮ ಕಲಿಕೆಯ ಮಾರ್ಗ</a></li>
+      <li><a href="#glossary" data-target="glossary">ಪದಕೋಶ</a></li>
+      <li><a href="#sources" data-target="sources">ಮೂಲಗಳು</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <section class="hero" id="start">
+      <div class="eyebrow">ಸರಳ ಭಾಷೆಯ ಮಾರ್ಗದರ್ಶಿ — ಶಾಲೆಯ ಅಗತ್ಯವಿಲ್ಲ</div>
+      <h1>ನಿಮ್ಮ ಜೀವಿತಾವಧಿಯ ಅತ್ಯಂತ ಮಹತ್ವದ ಆವಿಷ್ಕಾರವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ನಿಮಗೆ <em>ಪದವಿ</em> ಬೇಕಿಲ್ಲ.</h1>
+      <p class="lede">ಇದು ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆಯ (AI) ಸಂಪೂರ್ಣ, ಸಂಗ್ರಹಿತ ಮಾರ್ಗದರ್ಶಿ — ಏನೂ ಇಲ್ಲದೆ, ಆತ್ಮವಿಶ್ವಾಸವೂ ಇಲ್ಲದೆ ಆರಂಭಿಸುವವರಿಗಾಗಿ ರೂಪಿಸಲಾಗಿದೆ. ಯಾವುದೇ ಪೂರ್ವ ಜ್ಞಾನ ಬೇಕಿಲ್ಲ. ಯಾವುದೇ ತಾಂತ್ರಿಕ ಪದವನ್ನು ವಿವರಿಸದೆ ಬಿಡಲಾಗಿಲ್ಲ. "AI ಎಂದರೇನು" ಎಂಬಲ್ಲಿಂದ ಅದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ ಎಂಬುದನ್ನು ನಿಜವಾಗಿಯೂ ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವವರೆಗಿನ ಸ್ಪಷ್ಟ ಮಾರ್ಗ ಮಾತ್ರ.</p>
+      <div class="author">ಸಂಗ್ರಹಿಸಿ ಸಂಕಲಿಸಿದವರು <strong>ಸುಜಿತ್ ಕುಲಕರ್ಣಿ</strong> · ಸಂಪೂರ್ಣವಾಗಿ ಸಾರ್ವಜನಿಕವಾಗಿ ಲಭ್ಯವಿರುವ ಜ್ಞಾನದಿಂದ ರೂಪಿಸಲಾಗಿದೆ</div>
+    </section>
+
+    <section class="reassure" id="why">
+      <div class="kicker">ನಾವು ಆರಂಭಿಸುವ ಮೊದಲು</div>
+      <h2>ಇದನ್ನು ಕಲಿಯಲು ಶೈಕ್ಷಣಿಕ ಹಿನ್ನೆಲೆಯ ಅಗತ್ಯವಿಲ್ಲ.</h2>
+      <p class="intro">ಔಪಚಾರಿಕ ಶಿಕ್ಷಣವಿಲ್ಲದ, ಇಂಗ್ಲಿಷ್ ನಿರರ್ಗಳವಾಗಿಲ್ಲದ, ಕಂಪ್ಯೂಟರ್ ಅಥವಾ ಶೈಕ್ಷಣಿಕ ಜಗತ್ತಿನ ಪೂರ್ವ ಪರಿಚಯವಿಲ್ಲದ ಓದುಗರಿಗಾಗಿಯೇ ಈ ಮಾರ್ಗದರ್ಶಿಯನ್ನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ರೂಪಿಸಲಾಗಿದೆ. ಇದನ್ನು ಎಚ್ಚರಿಕೆಯಿಂದ ಓದಿ: <strong>ಇವಾವುದೂ AI ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಅಡ್ಡಿಯಲ್ಲ.</strong> AI ಅನ್ನು ಪದವಿ ಪಡೆದವರು ಮಾತ್ರ ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವಂತೆ ರೂಪಿಸಲಾಗಿಲ್ಲ — ಓದಲು ಬರೆಯಲು ಬಾರದವರೂ ಸೇರಿದಂತೆ ಎಲ್ಲರೂ ಅಂತಿಮವಾಗಿ ಬಳಸುವಂತೆ ಇದನ್ನು ರೂಪಿಸಲಾಗಿದೆ. ಧ್ವನಿ ಸಹಾಯಕಗಳು, ಅನುವಾದ ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಮತ್ತು ಚಿತ್ರ-ಆಧಾರಿತ ಸಾಧನಗಳು ಇರುವುದೇ ಇದಕ್ಕಾಗಿ.</p>
+      <blockquote>ಕುತೂಹಲವೊಂದೇ ಪ್ರವೇಶದ ಅಗತ್ಯತೆ. ಉಳಿದೆಲ್ಲವೂ — ಇಂಗ್ಲಿಷ್, ಗಣಿತ, ಕೋಡಿಂಗ್ — ದಾರಿಯುದ್ದಕ್ಕೂ ಕಲಿಯುವ ಸಾಧನಗಳೇ ಹೊರತು, ಮೊದಲು ದಾಟಲೇಬೇಕಾದ ಹೆಬ್ಬಾಗಿಲಲ್ಲ.</blockquote>
+      <div class="grid3">
+        <div class="card">
+          <h3>ಇಂಗ್ಲಿಷ್ ಗೊತ್ತಿಲ್ಲವೇ? ಆರಂಭಿಸಲು ಸಮಸ್ಯೆಯಿಲ್ಲ.</h3>
+          <p>ಇಂದಿನ ಪ್ರತಿಯೊಂದು ಪ್ರಮುಖ AI ಸಾಧನವೂ (ChatGPT, Google Gemini, WhatsApp AI) ಧ್ವನಿ ಇನ್‌ಪುಟ್ ಸ್ವೀಕರಿಸುತ್ತದೆ ಮತ್ತು ಹಿಂದಿ, ಮರಾಠಿ, ತಮಿಳು ಸೇರಿದಂತೆ ಹಲವಾರು ಭಾಷೆಗಳಲ್ಲಿ ಧ್ವನಿ ಅಥವಾ ಅನುವಾದಿತ ಪಠ್ಯದೊಂದಿಗೆ ಉತ್ತರಿಸುತ್ತದೆ. AI ಪರಿಕಲ್ಪನೆಗಳನ್ನು ಮೊದಲು ಓದುಗರ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲೇ ಕಲಿಯಬಹುದು.</p>
+        </div>
+        <div class="card">
+          <h3>ಶಾಲೆಗೆ ಹೋಗಿಲ್ಲವೇ? ಅದೂ ಪರವಾಗಿಲ್ಲ.</h3>
+          <p>ಮೊದಲ ಚಿಂತನಶೀಲ ಯಂತ್ರಗಳನ್ನು ನಿರ್ಮಿಸಿದವರು ಗಣಿತಜ್ಞರು, ಎಲೆಕ್ಟ್ರಿಷಿಯನ್‌ಗಳು ಮತ್ತು ಹವ್ಯಾಸಿಗಳು — ಅನೇಕರಿಗೆ ಔಪಚಾರಿಕ ಕಂಪ್ಯೂಟರ್ ವಿಜ್ಞಾನ ತರಬೇತಿ ಇರಲಿಲ್ಲ, ಏಕೆಂದರೆ ಆ ಕ್ಷೇತ್ರವೇ ಆಗ ಅಸ್ತಿತ್ವದಲ್ಲಿ ಇರಲಿಲ್ಲ. ಇದನ್ನು ಕುತೂಹಲಿ ಜನರು ಒಂದೊಂದೇ ಹೆಜ್ಜೆಯಲ್ಲಿ ಕಟ್ಟಿದರು — ಅದೇ ರೀತಿಯಲ್ಲಿ ಇದನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬಹುದು.</p>
+        </div>
+        <div class="card">
+          <h3>ದಿಕ್ಕು ತೋಚುತ್ತಿಲ್ಲವೇ? ಇದು ನಿಮಗೆ ಒಂದು ದಿಕ್ಕು ನೀಡುತ್ತದೆ.</h3>
+          <p>ಈ ವಿಷಯದ ಮೂಲಭೂತ ಪರಿಚಯವಷ್ಟೇ — ಕೋಡಿಂಗ್ ಕೂಡ ಬೇಕಿಲ್ಲದೆ — ನಿಜವಾದ ಕೆಲಸಗಳನ್ನು ತೆರೆಯುವ ಇಂದಿನ ಕೆಲವೇ ಕೌಶಲ್ಯಗಳಲ್ಲಿ AI ಒಂದು: ಕಂಟೆಂಟ್ ಪರಿಶೀಲನೆ, ಡೇಟಾ ಲೇಬಲಿಂಗ್, ಪ್ರಾಂಪ್ಟ್ ಬರೆಯುವಿಕೆ, AI-ಸಹಾಯಿತ ಗ್ರಾಹಕ ಬೆಂಬಲ. ಈ ಮಾರ್ಗದರ್ಶಿ ನಿಜವಾದ ಆರಂಭಿಕ ಮಾರ್ಗದೊಂದಿಗೆ ಕೊನೆಗೊಳ್ಳುತ್ತದೆ.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="simulator" id="simulator">
+      <div class="kicker">ಅಧ್ಯಾಯ 01 · ಮೂಲ ಕಲ್ಪನೆ</div>
+      <h2>ನೀವು AI ಗೆ ಪ್ರಶ್ನೆ ಟೈಪ್ ಮಾಡಿದಾಗ ನಿಜವಾಗಿ ಏನಾಗುತ್ತದೆ?</h2>
+      <p class="intro">ಇತರ ಎಲ್ಲದಕ್ಕಿಂತ ಮೊದಲು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕಾದ ಅತ್ಯಂತ ಮುಖ್ಯ ಸಂಗತಿ ಇದು. ಕೆಳಗೆ ಯಾವುದೇ ಚಿಕ್ಕ ಪ್ರಶ್ನೆಯನ್ನು ಟೈಪ್ ಮಾಡಿ "Ask" ಒತ್ತಿ, ChatGPT ನಂತಹ AI ವ್ಯವಸ್ಥೆ ಪರದೆಯ ಹಿಂದೆ ನಿಖರವಾಗಿ ಏನು ಮಾಡುತ್ತದೆ ಎಂಬುದನ್ನು — ನಿಮ್ಮ ವಾಕ್ಯದಿಂದ ಅದರ ಉತ್ತರದವರೆಗೆ — ಹಂತಹಂತವಾಗಿ ನೋಡಿ.</p>
+      <div class="sim-box">
+        <div class="sim-input-row">
+          <input type="text" id="simInput" placeholder="ಒಂದು ಪ್ರಶ್ನೆ ಟೈಪ್ ಮಾಡಿ, ಉದಾ: ಚಂದ್ರ ಯಾವುದರಿಂದ ಮಾಡಲ್ಪಟ್ಟಿದೆ" maxlength="60">
+          <button id="simBtn">ಕೇಳಿ →</button>
+        </div>
+        <div class="sim-steps" id="simSteps">
+          <div class="sim-step" data-step="1">
+            <div class="label">ಹಂತ 1 — ಟೋಕನೀಕರಣ</div>
+            <div class="content">ನಿಮ್ಮ ವಾಕ್ಯವನ್ನು <b>ಟೋಕನ್‌ಗಳು</b> ಎಂಬ ಚಿಕ್ಕ ತುಣುಕುಗಳಾಗಿ ಒಡೆಯಲಾಗುತ್ತದೆ — ಸಾಮಾನ್ಯವಾಗಿ ಪೂರ್ಣ ಪದಗಳು ಅಥವಾ ಪದ-ತುಣುಕುಗಳು. ಕಂಪ್ಯೂಟರ್‌ಗಳು ನಿಮ್ಮಂತೆ ಅಕ್ಷರಗಳನ್ನು ಓದಲಾರವು; ಎಲ್ಲವನ್ನೂ ಮೊದಲು ಎಣಿಸಬಹುದಾದ ಘಟಕಗಳಾಗಿ ಕತ್ತರಿಸಬೇಕಾಗುತ್ತದೆ.
+              <div id="tokenChips" style="margin-top:10px;"></div>
+            </div>
+          </div>
+          <div class="sim-step" data-step="2">
+            <div class="label">ಹಂತ 2 — ಪದಗಳಲ್ಲ, ಸಂಖ್ಯೆಗಳು</div>
+            <div class="content">ಪ್ರತಿ ಟೋಕನ್ ಅನ್ನು <b>ವೆಕ್ಟರ್ ಎಂಬೆಡಿಂಗ್</b> ಎಂಬ ಸಂಖ್ಯೆಗಳ ದೀರ್ಘ ಪಟ್ಟಿಯಾಗಿ ಪರಿವರ್ತಿಸಲಾಗುತ್ತದೆ. ಈ ಸಂಖ್ಯೆ-ಪಟ್ಟಿ ಟೋಕನ್‌ನ ಅರ್ಥವನ್ನು ಸೆರೆಹಿಡಿಯುತ್ತದೆ — ಸಮಾನ ರೀತಿಯಲ್ಲಿ ಬಳಸುವ ಪದಗಳು ಸಮಾನ ಸಂಖ್ಯೆಗಳನ್ನು ಪಡೆಯುತ್ತವೆ. AI ಎಂದಿಗೂ ನಿಜವಾಗಿ "ಓದುವುದಿಲ್ಲ" — ಅದು ಸಂಖ್ಯೆಗಳೊಂದಿಗೆ ಮಾತ್ರ ಲೆಕ್ಕಾಚಾರ ಮಾಡುತ್ತದೆ.
+              <div class="vecbar"></div>
+            </div>
+          </div>
+          <div class="sim-step" data-step="3">
+            <div class="label">ಹಂತ 3 — ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್</div>
+            <div class="content">ಈ ಸಂಖ್ಯೆಗಳು <b>ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್</b> ಎಂಬ ಗಣಿತದ ಪದರಗಳ ಬೃಹತ್ ರಾಶಿಯ ಮೂಲಕ ಹಾದುಹೋಗುತ್ತವೆ — ಮೆದುಳಿನ ನರಕೋಶಗಳಿಂದ ಸಡಿಲವಾಗಿ ಪ್ರೇರಿತವಾಗಿದೆ. ಆಧುನಿಕ AI ಚಾಟ್‌ಬಾಟ್‌ಗಳು <b>ಟ್ರಾನ್ಸ್‌ಫಾರ್ಮರ್</b> ಎಂಬ ವಿನ್ಯಾಸವನ್ನು ಬಳಸುತ್ತವೆ, ಇದು ನಿಮ್ಮ ವಾಕ್ಯದಲ್ಲಿನ ಹಿಂದಿನ ಯಾವ ಪದಗಳು ಮುಂದಿನ ಪದವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಹೆಚ್ಚು ಮುಖ್ಯ ಎಂಬುದನ್ನು ಕಂಡುಹಿಡಿಯುವಲ್ಲಿ ವಿಶೇಷವಾಗಿ ಪರಿಣತ — ಈ ಟ್ರಿಕ್ ಅನ್ನು <b>ಅಟೆನ್ಶನ್</b> ಎಂದು ಕರೆಯಲಾಗುತ್ತದೆ.</div>
+          </div>
+          <div class="sim-step" data-step="4">
+            <div class="label">ಹಂತ 4 — ಗೊತ್ತಿರುವುದಲ್ಲ, ಊಹಿಸುವುದು</div>
+            <div class="content">ಮಾದರಿಯು ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಉತ್ತರವನ್ನು "ಹುಡುಕುವುದಿಲ್ಲ". ಅದು ತರಬೇತಿಯ ಸಮಯದಲ್ಲಿ ಬೃಹತ್ ಪ್ರಮಾಣದ ಪಠ್ಯದಲ್ಲಿ ಕಂಡ ಮಾದರಿಗಳ ಆಧಾರದ ಮೇಲೆ, ತನಗೆ ಗೊತ್ತಿರುವ ಪ್ರತಿಯೊಂದು ಸಂಭವನೀಯ ಮುಂದಿನ ಪದದ ಸಂಭವನೀಯತೆಯನ್ನು ಪದೇ ಪದೇ, ಒಂದೊಂದೇ ಪದವಾಗಿ — ಈ ಪದ, ನಂತರ ಮುಂದಿನದು, ನಂತರ ಇನ್ನೊಂದು — ಲೆಕ್ಕಹಾಕುತ್ತದೆ.</div>
+          </div>
+          <div class="sim-step" data-step="5">
+            <div class="label">ಹಂತ 5 — ನಿಮ್ಮ ಉತ್ತರ</div>
+            <div class="content">ಆ ಊಹಿಸಿದ ಪದ-ತುಣುಕುಗಳನ್ನು ಮತ್ತೆ ಓದಬಹುದಾದ ವಾಕ್ಯಗಳಾಗಿ ಜೋಡಿಸಿ ನಿಮ್ಮ ಪರದೆಗೆ ಕಳುಹಿಸಲಾಗುತ್ತದೆ. ಈ ಸಂಪೂರ್ಣ ಪ್ರಕ್ರಿಯೆ — ಟೋಕನ್‌ಗಳಿಂದ ಸಂಖ್ಯೆಗಳಿಗೆ, ಪದರಗಳಿಗೆ, ಊಹೆಗಳಿಗೆ, ಪಠ್ಯಕ್ಕೆ — ಒಂದು ಸೆಕೆಂಡಿಗಿಂತ ಕಡಿಮೆ ಸಮಯದಲ್ಲಿ ನಡೆಯುತ್ತದೆ.
+              <div class="sim-output" id="simOutput"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="history">
+      <div class="kicker">ಅಧ್ಯಾಯ 02 · ಮೂಲಗಳು</div>
+      <h2>AI ನಿಜವಾಗಿ ಎಲ್ಲಿಂದ ಬಂತು?</h2>
+      <p class="intro">AI ಇತ್ತೀಚಿನ ಆವಿಷ್ಕಾರವಲ್ಲ — ಇದಕ್ಕೆ 70 ವರ್ಷಗಳಿಗಿಂತ ಹೆಚ್ಚು ಇತಿಹಾಸವಿದೆ. ಇದು ನಿಧಾನವಾಗಿ ಬೆಳೆಯಿತು, ಬಹುತೇಕ ಕೈಬಿಡಲಾಗಿದ್ದ ಅವಧಿಗಳ ಮೂಲಕ ಸಾಗಿತು, ಮತ್ತು ಕಳೆದ ದಶಕದಲ್ಲಿ ಮಾತ್ರ ಇಂದು ನೀವು ಬಳಸುವ ರೂಪಕ್ಕೆ ಬಂತು.</p>
+      <div class="timeline">
+        <div class="tl-item"><span class="tl-year">1950</span><h4>ಅಲನ್ ಟ್ಯೂರಿಂಗ್ "ಯಂತ್ರಗಳು ಯೋಚಿಸಬಲ್ಲವೇ?" ಎಂದು ಕೇಳುತ್ತಾರೆ</h4><p>ಬ್ರಿಟಿಷ್ ಗಣಿತಜ್ಞ ಅಲನ್ ಟ್ಯೂರಿಂಗ್, ಯಂತ್ರದ ಸಂಭಾಷಣೆಯನ್ನು ಮನುಷ್ಯನದೆಂದು ತಪ್ಪಾಗಿ ಭಾವಿಸಬಹುದೇ ಎಂದು ನಿರ್ಣಯಿಸಲು ಒಂದು ಪರೀಕ್ಷೆಯನ್ನು — ನಂತರ ಟ್ಯೂರಿಂಗ್ ಟೆಸ್ಟ್ ಎಂದು ಕರೆಯಲಾಯಿತು — ಪ್ರಸ್ತಾಪಿಸಿದರು. ಈ ಪ್ರಶ್ನೆಯೇ ಈ ಕ್ಷೇತ್ರವನ್ನು ಆರಂಭಿಸಿತೆಂದು ವ್ಯಾಪಕವಾಗಿ ಪರಿಗಣಿಸಲಾಗಿದೆ.</p></div>
+        <div class="tl-item"><span class="tl-year">1956</span><h4>"ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆ" ಪದ ಸೃಷ್ಟಿಯಾಗುತ್ತದೆ</h4><p>ಅಮೆರಿಕದ ಡಾರ್ಟ್‌ಮೌತ್ ಕಾಲೇಜಿನಲ್ಲಿ ನಡೆದ ಕಾರ್ಯಾಗಾರದಲ್ಲಿ, ಸಂಶೋಧಕರಾದ ಜಾನ್ ಮೆಕಾರ್ಥಿ, ಮಾರ್ವಿನ್ ಮಿನ್ಸ್ಕಿ ಮತ್ತು ಇತರರು ಈ ಕ್ಷೇತ್ರಕ್ಕೆ ಔಪಚಾರಿಕವಾಗಿ "ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆ" ಎಂದು ಹೆಸರಿಟ್ಟು, ವೇಗದ ಪ್ರಗತಿಯನ್ನು ಭವಿಷ್ಯ ನುಡಿದರು.</p></div>
+        <div class="tl-item"><span class="tl-year">1960ರ–70ರ ದಶಕ</span><h4>ಆರಂಭಿಕ ನಿಯಮ-ಆಧಾರಿತ ವ್ಯವಸ್ಥೆಗಳು</h4><p>ಆರಂಭಿಕ AI "ಇದಾದರೆ, ಅದು" ಎಂಬ ಕೈಯಾರೆ ಬರೆದ ನಿಯಮಗಳ ಮೂಲಕ ಕೆಲಸ ಮಾಡುತ್ತಿತ್ತು. ಈ ವ್ಯವಸ್ಥೆಗಳು ಸಂಕುಚಿತ ಒಗಟುಗಳನ್ನು ಪರಿಹರಿಸಬಲ್ಲವಾಗಿದ್ದವು ಆದರೆ ಅನಿರೀಕ್ಷಿತ ಯಾವುದೇ ವಿಷಯದಲ್ಲಿ ಕುಸಿಯುತ್ತಿದ್ದವು, ಏಕೆಂದರೆ ಪ್ರತಿಯೊಂದು ನಿಯಮವನ್ನೂ ಮನುಷ್ಯನೇ ಬರೆಯಬೇಕಿತ್ತು.</p></div>
+        <div class="tl-item"><span class="tl-year">1970ರ ಮತ್ತು 1980ರ ದಶಕ</span><h4>"AI ಚಳಿಗಾಲಗಳು"</h4><p>ಪ್ರಗತಿಯು ಭರವಸೆಗಳಿಗಿಂತ ಬಹಳ ಹಿಂದೆ ಬಿತ್ತು. ಸಂಶೋಧಕರು ಈಗ "AI ಚಳಿಗಾಲಗಳು" ಎಂದು ಕರೆಯುವ ಅವಧಿಗಳಲ್ಲಿ ಎರಡು ಬಾರಿ ಧನಸಹಾಯ ಬತ್ತಿಹೋಯಿತು — ಪ್ರಚಾರ ಮತ್ತು ವಾಸ್ತವತೆ ಬೇರೆಯಾಗಿ ಸಾಗಿದ್ದ ನೆನಪುಗಳು.</p></div>
+        <div class="tl-item"><span class="tl-year">1997</span><h4>ಡೀಪ್ ಬ್ಲೂ ವಿಶ್ವ ಚೆಸ್ ಚಾಂಪಿಯನ್‌ ಅನ್ನು ಸೋಲಿಸುತ್ತದೆ</h4><p>IBM ನ ಡೀಪ್ ಬ್ಲೂ ವಿಶ್ವ ಚೆಸ್ ಚಾಂಪಿಯನ್ ಗ್ಯಾರಿ ಕಾಸ್ಪರೊವ್ ಅವರನ್ನು ಸೋಲಿಸಿತು, ಸ್ಪಷ್ಟವಾಗಿ ವ್ಯಾಖ್ಯಾನಿತ ಆಟದಲ್ಲಿ ಯಂತ್ರವು ಮಾನವ ಪರಿಣತನಿಗಿಂತ ಹೆಚ್ಚು ಲೆಕ್ಕಾಚಾರ ಮಾಡಬಲ್ಲದೆಂದು ತೋರಿಸಿತು.</p></div>
+        <div class="tl-item"><span class="tl-year">2012</span><h4>ಡೀಪ್ ಲರ್ನಿಂಗ್ ಬೆಳವಣಿಗೆ ಪಡೆಯುತ್ತದೆ</h4><p>AlexNet ಎಂಬ ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್, ImageNet ಎಂಬ ಸ್ಪರ್ಧೆಯಲ್ಲಿ ಫೋಟೋಗಳಲ್ಲಿನ ವಸ್ತುಗಳನ್ನು ಗುರುತಿಸುವಲ್ಲಿ ಹಳೆಯ ವಿಧಾನಗಳಿಗಿಂತ ಗಣನೀಯವಾಗಿ ಉತ್ತಮ ಸಾಧನೆ ತೋರಿತು — ಹೆಚ್ಚು ಡೇಟಾ ಮತ್ತು ಹೆಚ್ಚು ವೇಗದ ಕಂಪ್ಯೂಟರ್ ಚಿಪ್‌ಗಳಿಂದ (GPUಗಳು) ಬಲಗೊಂಡ ಆಧುನಿಕ "ಡೀಪ್ ಲರ್ನಿಂಗ್" ಯುಗದ ಆರಂಭವೆಂದು ಈ ಕ್ಷಣವನ್ನು ವ್ಯಾಪಕವಾಗಿ ಪರಿಗಣಿಸಲಾಗಿದೆ.</p></div>
+        <div class="tl-item"><span class="tl-year">2017</span><h4>ಟ್ರಾನ್ಸ್‌ಫಾರ್ಮರ್ ಪರಿಚಯಿಸಲಾಗುತ್ತದೆ</h4><p>Google ನ ಸಂಶೋಧಕರು ಮೊದಲೇ ವಿವರಿಸಿದ ಅಟೆನ್ಶನ್ ಯಾಂತ್ರಿಕತೆಯನ್ನು ಪರಿಚಯಿಸುವ ಪ್ರಬಂಧದಲ್ಲಿ "ಟ್ರಾನ್ಸ್‌ಫಾರ್ಮರ್" ಎಂಬ ವಿನ್ಯಾಸವನ್ನು ಪ್ರಕಟಿಸಿದರು. ಇಂದಿನ ಬಹುತೇಕ ಪ್ರಮುಖ AI ಚಾಟ್‌ಬಾಟ್‌ಗಳ ಆಧಾರವಾಗಿರುವುದು ಈ ಒಂದೇ ವಿನ್ಯಾಸ.</p></div>
+        <div class="tl-item"><span class="tl-year">2022</span><h4>ChatGPT ಸಾರ್ವಜನಿಕರನ್ನು ತಲುಪುತ್ತದೆ</h4><p>OpenAI ಸಾರ್ವಜನಿಕರಿಗೆ ChatGPT ಬಿಡುಗಡೆ ಮಾಡಿತು, ಮೊದಲ ಬಾರಿಗೆ ಇಂಟರ್ನೆಟ್ ಸಂಪರ್ಕ ಹೊಂದಿರುವ ಯಾರಿಗಾದರೂ ಸುಧಾರಿತ ಸಂಭಾಷಣಾ AI ಲಭ್ಯವಾಗುವಂತೆ ಮಾಡಿತು — AI ಪ್ರಯೋಗಾಲಯದ ವಿಷಯದಿಂದ ಮನೆಮಾತಾಗಿ ಬದಲಾದ ಕ್ಷಣ ಇದು.</p></div>
+        <div class="tl-item"><span class="tl-year">2023–ಇಂದಿನವರೆಗೆ</span><h4>ಬಹು-ಮಾದರಿಗಳ ಯುಗ</h4><p>OpenAI, Google, Anthropic, Meta ಮತ್ತು ಇತರ ಹಲವಾರು ಕಂಪನಿಗಳು ಈಗ ಪಠ್ಯ, ಚಿತ್ರಗಳು, ಆಡಿಯೋ ಮತ್ತು ವೀಡಿಯೋ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬಲ್ಲ, ಮತ್ತು ನಿಮ್ಮ ಪರವಾಗಿ ಸಾಧನಗಳನ್ನು ಬಳಸುವ ಏಜೆಂಟ್‌ಗಳಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸಬಲ್ಲ ಹೆಚ್ಚು ಹೆಚ್ಚು ಸಮರ್ಥ ಮಾದರಿಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡುತ್ತಿವೆ.</p></div>
+      </div>
+    </section>
+
+    <section id="components">
+      <div class="kicker">ಅಧ್ಯಾಯ 03 · AI ಯಾವುದರಿಂದ ಮಾಡಲ್ಪಟ್ಟಿದೆ</div>
+      <h2>ಪ್ರತಿ AI ವ್ಯವಸ್ಥೆಯ ಹಿಂದಿನ ನಾಲ್ಕು ಘಟಕಗಳು</h2>
+      <p class="intro">ಜನಪ್ರಿಯ ಪದಗಳನ್ನು ತೆಗೆದುಹಾಕಿದರೆ, ಎಷ್ಟೇ ಸುಧಾರಿತವಾಗಿದ್ದರೂ ಪ್ರತಿ AI ವ್ಯವಸ್ಥೆಯನ್ನೂ ಇದೇ ನಾಲ್ಕು ಘಟಕಗಳಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ.</p>
+      <div class="accordion" id="accordion">
+        <div class="acc-item open">
+          <div class="acc-head"><h3>1. ಡೇಟಾ — AI ಕಲಿಯುವ ಅನುಭವ</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">ಕಚ್ಚಾ ಸಾಮಗ್ರಿ</span><p>ಡೇಟಾ ಎಂದರೆ ಪುಸ್ತಕಗಳು, ವೆಬ್‌ಸೈಟ್‌ಗಳು, ಫೋಟೋಗಳು, ಸೆನ್ಸರ್‌ಗಳು ಮತ್ತಿತರ ಮೂಲಗಳಿಂದ ಸಂಗ್ರಹಿಸಿದ ಪಠ್ಯ, ಚಿತ್ರಗಳು, ಶಬ್ದ ಅಥವಾ ಸಂಖ್ಯೆಗಳು. ಮಾದರಿಯ ಜ್ಞಾನವು ಸಂಪೂರ್ಣವಾಗಿ ಅದು ತರಬೇತಿ ಪಡೆದ ಡೇಟಾದಿಂದ ರೂಪುಗೊಳ್ಳುತ್ತದೆ — ಅದಕ್ಕಿಂತ ಹೆಚ್ಚೂ ಇಲ್ಲ, ಕಡಿಮೆಯೂ ಇಲ್ಲ. ಕೆಟ್ಟ ಅಥವಾ ಸಂಕುಚಿತ ಡೇಟಾ ಪಕ್ಷಪಾತಿ ಅಥವಾ ಸೀಮಿತ ಮಾದರಿಯನ್ನು ಸೃಷ್ಟಿಸುತ್ತದೆ, ಆದ್ದರಿಂದಲೇ "ಯಾವ ಡೇಟಾ ಬಳಸಲಾಗಿತ್ತು" ಎಂಬುದು AI ಯಲ್ಲಿ ಅತ್ಯಂತ ಮುಖ್ಯ ಪ್ರಶ್ನೆಗಳಲ್ಲಿ ಒಂದು.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>2. ಅಲ್ಗಾರಿದಂಗಳು — ಕಲಿಕೆಯ ನಿಯಮಗಳು</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">ಪಾಕವಿಧಾನ</span><p>ಅಲ್ಗಾರಿದಂ ಎಂದರೆ ಡೇಟಾವನ್ನು ನೋಡುತ್ತಿರುವಾಗ ಕಂಪ್ಯೂಟರ್ ತನ್ನನ್ನು ಹೇಗೆ ಸರಿಹೊಂದಿಸಿಕೊಳ್ಳಬೇಕು ಎಂದು ತಿಳಿಸುವ ನಿಖರ ಗಣಿತದ ಹಂತಗಳ ಸಮೂಹ, ಇದರಿಂದ ಅದರ ಊಹೆಗಳು ಕಾಲಕ್ರಮೇಣ ಉತ್ತಮಗೊಳ್ಳುತ್ತವೆ. ವಿಭಿನ್ನ ಅಲ್ಗಾರಿದಂಗಳು ವಿಭಿನ್ನ ಸಮಸ್ಯೆಗಳಿಗೆ ಸೂಕ್ತ — ಕೆಲವು ಚಿತ್ರಗಳಲ್ಲಿನ ಮಾದರಿಗಳನ್ನು ಗುರುತಿಸುವಲ್ಲಿ ಚೆನ್ನಾಗಿವೆ, ಇತರವು ಭಾಷೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವಲ್ಲಿ.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>3. ಮಾದರಿಗಳು — "ತರಬೇತಿ ಪಡೆದ ಮೆದುಳು"</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">ಫಲಿತಾಂಶ</span><p>ಒಂದು ಅಲ್ಗಾರಿದಂ ಡೇಟಾದಿಂದ ಕಲಿಯುವುದನ್ನು ಮುಗಿಸಿದ ನಂತರ ನಿಮಗೆ ಸಿಗುವುದೇ ಮಾದರಿ — <b>ಪ್ಯಾರಾಮೀಟರ್‌ಗಳು</b> ಎಂದು ಕರೆಯಲ್ಪಡುವ ಲಕ್ಷಾಂತರ ಅಥವಾ ಶತಕೋಟಿ ಆಂತರಿಕ ಸಂಖ್ಯೆಗಳು, ಅವು ಒಟ್ಟಾಗಿ ವ್ಯವಸ್ಥೆ "ಕಲಿತ" ಎಲ್ಲವನ್ನೂ ಪ್ರತಿನಿಧಿಸುತ್ತವೆ. ಒಂದು ಮಾದರಿಗೆ "175 ಶತಕೋಟಿ ಪ್ಯಾರಾಮೀಟರ್‌ಗಳಿವೆ" ಎಂದು ಜನರು ಹೇಳಿದಾಗ, ಅಷ್ಟು ಹೊಂದಿಸಬಹುದಾದ ಸಂಖ್ಯೆಗಳು ಅದರ ಜ್ಞಾನವನ್ನು ರೂಪಿಸುತ್ತವೆ ಎಂದು ಅರ್ಥ.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>4. ಕಂಪ್ಯೂಟ್ — ವಿದ್ಯುತ್ ಮತ್ತು ಹಾರ್ಡ್‌ವೇರ್</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><span class="tag">ಶಕ್ತಿ</span><p>ದೊಡ್ಡ ಮಾದರಿಯ ತರಬೇತಿಗೆ ಸಾಮಾನ್ಯವಾಗಿ GPU (ಗ್ರಾಫಿಕ್ಸ್ ಪ್ರೊಸೆಸಿಂಗ್ ಯುನಿಟ್) ಎಂಬ ವಿಶೇಷ ಚಿಪ್‌ಗಳಿಂದ, ದೈತ್ಯ ಡೇಟಾ ಸೆಂಟರ್‌ಗಳಲ್ಲಿ ವಾರಗಟ್ಟಲೆ ಚಾಲನೆಯಾಗುವ ಬೃಹತ್ ಕಂಪ್ಯೂಟಿಂಗ್ ಶಕ್ತಿ ಬೇಕಾಗುತ್ತದೆ. ಆದ್ದರಿಂದಲೇ ಅತಿದೊಡ್ಡ AI ಮಾದರಿಗಳನ್ನು ನಿರ್ಮಿಸುವುದು ಪ್ರಸ್ತುತ ಕೆಲವೇ ಉತ್ತಮ-ಹಣಕಾಸಿನ ಕಂಪನಿಗಳಿಗೆ ಸೀಮಿತವಾಗಿದೆ — ಆದರೆ ಈಗಾಗಲೇ ತರಬೇತಿ ಪಡೆದ ಮಾದರಿಯನ್ನು ಬಳಸಲು ಬಹಳ ಕಡಿಮೆ ಶಕ್ತಿ ಸಾಕು, ಆದ್ದರಿಂದಲೇ ಅದು ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ ಚಲಿಸಬಲ್ಲದು.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="types">
+      <div class="kicker">ಅಧ್ಯಾಯ 04 · ಯಂತ್ರಗಳು ನಿಜವಾಗಿ ಹೇಗೆ ಕಲಿಯುತ್ತವೆ</div>
+      <h2>ಯಂತ್ರಕ್ಕೆ ಕಲಿಸಬಹುದಾದ ಮೂರು ವಿಧಾನಗಳು</h2>
+      <p class="intro">ಎಲ್ಲಾ AI ಒಂದೇ ರೀತಿಯಲ್ಲಿ ಕಲಿಯುವುದಿಲ್ಲ. ಪ್ರತಿ ಟ್ಯಾಬ್ ಕ್ಲಿಕ್ ಮಾಡಿ, ಪ್ರತಿಯೊಂದಕ್ಕೂ ದೈನಂದಿನ ಉದಾಹರಣೆಯೊಂದಿಗೆ ಯಂತ್ರಕ್ಕೆ ಹೇಗೆ ತರಬೇತಿ ನೀಡಬಹುದೆಂದು ನೋಡಿ.</p>
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="t1">ಸೂಪರ್‌ವೈಸ್ಡ್ ಲರ್ನಿಂಗ್</button>
+        <button class="tab-btn" data-tab="t2">ಅನ್‌ಸೂಪರ್‌ವೈಸ್ಡ್ ಲರ್ನಿಂಗ್</button>
+        <button class="tab-btn" data-tab="t3">ರೀಇನ್‌ಫೋರ್ಸ್‌ಮೆಂಟ್ ಲರ್ನಿಂಗ್</button>
+      </div>
+      <div class="tab-panel active" id="t1">
+        <h3>ಸೂಪರ್‌ವೈಸ್ಡ್ ಲರ್ನಿಂಗ್ — ಉತ್ತರ ಕೀಲಿಯೊಂದಿಗೆ ಕಲಿಕೆ</h3>
+        <p>ಈಗಾಗಲೇ ಸರಿಯಾದ ಉತ್ತರ ಜೋಡಿಸಿರುವ ಅನೇಕ ಉದಾಹರಣೆಗಳನ್ನು ಯಂತ್ರಕ್ಕೆ ತೋರಿಸಲಾಗುತ್ತದೆ, ಮತ್ತು ಅದು ಒಂದನ್ನೊಂದಕ್ಕೆ ಜೋಡಿಸುವ ಮಾದರಿಯನ್ನು ಕಲಿಯುತ್ತದೆ. ಉತ್ತರ ಕೀಲಿ ಬಲಗಡೆಯೇ ಇರುವ ನೂರಾರು ಅಭ್ಯಾಸ ಪ್ರಶ್ನೆಗಳನ್ನು ಬಿಡಿಸಿದಂತೆ ಇದು.</p>
+        <div class="example">ಉದಾಹರಣೆ: AI ಗೆ "ಬೆಕ್ಕು" ಅಥವಾ "ನಾಯಿ" ಎಂದು ಲೇಬಲ್ ಮಾಡಿದ 10,000 ಫೋಟೋಗಳನ್ನು ತೋರಿಸುವುದು, ಅದು ಹೊಸ, ಕಾಣದ ಫೋಟೋವನ್ನು ಸ್ವಂತವಾಗಿ ಸರಿಯಾಗಿ ಲೇಬಲ್ ಮಾಡುವವರೆಗೆ.</div>
+      </div>
+      <div class="tab-panel" id="t2">
+        <h3>ಅನ್‌ಸೂಪರ್‌ವೈಸ್ಡ್ ಲರ್ನಿಂಗ್ — ಉತ್ತರ ಕೀಲಿಯಿಲ್ಲದೆ ಮಾದರಿಗಳನ್ನು ಕಂಡುಹಿಡಿಯುವುದು</h3>
+        <p>ಯಂತ್ರಕ್ಕೆ ಯಾವುದೇ ಲೇಬಲ್ ಇಲ್ಲದ ಡೇಟಾ ನೀಡಿ ತನ್ನದೇ ರಚನೆಯನ್ನು ಕಂಡುಹಿಡಿಯಲು ಕೇಳಲಾಗುತ್ತದೆ — ಗುಂಪುಗಳ ಅರ್ಥವನ್ನು ತಿಳಿಸದೆಯೇ ಸಮಾನ ವಿಷಯಗಳನ್ನು ಒಟ್ಟಿಗೆ ಗುಂಪುಗೂಡಿಸುವುದು.</p>
+        <div class="example">ಉದಾಹರಣೆ: ಶಾಪಿಂಗ್ ಆ್ಯಪ್ ಒಂದು ಗ್ರಾಹಕರನ್ನು "ಬಜೆಟ್ ಶಾಪರ್‌ಗಳು" ಮತ್ತು "ಪ್ರೀಮಿಯಂ ಶಾಪರ್‌ಗಳು" ಎಂದು ಕೇವಲ ಖರೀದಿ ಮಾದರಿಗಳಿಂದ ವಿಂಗಡಿಸುವುದು, ಆ ಗುಂಪುಗಳನ್ನು ಮೊದಲೇ ಯಾರೂ ವ್ಯಾಖ್ಯಾನಿಸದೆ.</div>
+      </div>
+      <div class="tab-panel" id="t3">
+        <h3>ರೀಇನ್‌ಫೋರ್ಸ್‌ಮೆಂಟ್ ಲರ್ನಿಂಗ್ — ಪ್ರಯತ್ನ, ತಪ್ಪು ಮತ್ತು ಬಹುಮಾನದ ಮೂಲಕ ಕಲಿಕೆ</h3>
+        <p>ಯಂತ್ರವು ಒಂದು ಪರಿಸರದಲ್ಲಿ ಕ್ರಿಯೆಗಳನ್ನು ಮಾಡುತ್ತದೆ ಮತ್ತು ಫಲಿತಾಂಶದ ಆಧಾರದ ಮೇಲೆ ಬಹುಮಾನ ಅಥವಾ ದಂಡ ಪಡೆಯುತ್ತದೆ, ಕ್ರಮೇಣ ಕಾಲಕ್ರಮೇಣ ಹೆಚ್ಚು ಬಹುಮಾನ ಗಳಿಸುವ ತಂತ್ರವನ್ನು ಕಲಿಯುತ್ತದೆ — ಒಬ್ಬ ವ್ಯಕ್ತಿ ವೀಡಿಯೋ ಗೇಮ್ ಅನ್ನು ಪದೇ ಪದೇ ಆಡಿ ಕಲಿಯುವಂತೆ.</p>
+        <div class="example">ಉದಾಹರಣೆ: AI ಒಂದು ತಂತ್ರದ ಆಟವನ್ನು ತನ್ನ ವಿರುದ್ಧವೇ ಲಕ್ಷಾಂತರ ಪಂದ್ಯಗಳನ್ನು ಆಡುವ ಮೂಲಕ ಕಲಿಯುವುದು, ಪ್ರತಿ ಗೆಲುವು ಮತ್ತು ಸೋಲಿನ ನಂತರ ಸುಧಾರಿಸುವುದು. ಬಹುಮಾನ ಮತ್ತು ತಿದ್ದುಪಡಿ ಎಂಬ ಇದೇ ಕಲ್ಪನೆಯನ್ನು RLHF (ಮಾನವ ಪ್ರತಿಕ್ರಿಯೆಯಿಂದ ರೀಇನ್‌ಫೋರ್ಸ್‌ಮೆಂಟ್ ಲರ್ನಿಂಗ್) ಎಂಬ ತಂತ್ರದ ಮೂಲಕ ಚಾಟ್‌ಬಾಟ್‌ಗಳನ್ನು ಹೆಚ್ಚು ಸಹಾಯಕ ಮತ್ತು ವಿನಯಶೀಲವಾಗಿಸಲೂ ಬಳಸಲಾಗುತ್ತದೆ.</div>
+      </div>
+    </section>
+
+    <section id="subjects">
+      <div class="kicker">ಅಧ್ಯಾಯ 05 · AI ಯ ಒಳಗಿನ ಶಕ್ತಿ</div>
+      <h2>AI ಒಳಗೆ ಅಡಗಿರುವ ವಿಷಯಗಳು — ಭಯವಿಲ್ಲದೆ ವಿವರಿಸಲಾಗಿದೆ</h2>
+      <p class="intro">AI ಬಳಸಲು ಅಥವಾ ಪರಿಕಲ್ಪನಾತ್ಮಕವಾಗಿ ಆಳವಾಗಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಇವುಗಳಲ್ಲಿ ಪರಿಣತಿ ಪಡೆಯುವ ಅಗತ್ಯವಿಲ್ಲ. ಆದರೆ ನೀವು ಮುಂದೆ ಹೋಗಲು ಬಯಸಿದರೆ, ಇವು ಅದು ಸೆಳೆದುಕೊಳ್ಳುವ ವಿಷಯಗಳು — ಮತ್ತು ಸರಳ ಪದಗಳಲ್ಲಿ, ಏಕೆ.</p>
+      <div>
+        <span class="subject-pill"><span class="dot"></span>ಸಂಖ್ಯಾಶಾಸ್ತ್ರ ಮತ್ತು ಸಂಭವನೀಯತೆ</span>
+        <span class="subject-pill"><span class="dot"></span>ಲೀನಿಯರ್ ಆಲ್ಜಿಬ್ರಾ</span>
+        <span class="subject-pill"><span class="dot"></span>ಕಲನಶಾಸ್ತ್ರ</span>
+        <span class="subject-pill"><span class="dot"></span>ಕಂಪ್ಯೂಟರ್ ಪ್ರೋಗ್ರಾಮಿಂಗ್</span>
+        <span class="subject-pill"><span class="dot"></span>ಭಾಷಾಶಾಸ್ತ್ರ</span>
+        <span class="subject-pill"><span class="dot"></span>ಕಾಗ್ನಿಟಿವ್ ಸೈನ್ಸ್</span>
+        <span class="subject-pill"><span class="dot"></span>ತತ್ವಶಾಸ್ತ್ರ ಮತ್ತು ನೀತಿಶಾಸ್ತ್ರ</span>
+        <span class="subject-pill"><span class="dot"></span>ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್ ಮತ್ತು ಹಾರ್ಡ್‌ವೇರ್</span>
+      </div>
+      <div class="grid2">
+        <div class="card"><h3>ಸಂಖ್ಯಾಶಾಸ್ತ್ರ ಮತ್ತು ಸಂಭವನೀಯತೆ</h3><p>AI ಗೆ ಯಾವುದೂ ಖಚಿತವಾಗಿ ತಿಳಿದಿರುವುದು ಅಪರೂಪ — ಅದು ಸಂಭವನೀಯತೆಗಳಲ್ಲಿ ವ್ಯವಹರಿಸುತ್ತದೆ. ಸಂಭವನೀಯತೆ ಎಂದರೆ ಸರಳವಾಗಿ "ಎಷ್ಟು ಸಾಧ್ಯತೆ" ಎಂಬ ಗಣಿತ, ಮತ್ತು ಇದೇ AI ಗೆ ಯಾವುದನ್ನಾದರೂ ಖಚಿತವಾಗಿ ಹೇಳುವ ಬದಲು "ಈ ಪದವೇ ಮುಂದಿನದಾಗಿ ಹೆಚ್ಚು ಸಾಧ್ಯತೆ" ಎಂದು ಹೇಳಲು ಅವಕಾಶ ನೀಡುತ್ತದೆ.</p></div>
+        <div class="card"><h3>ಲೀನಿಯರ್ ಆಲ್ಜಿಬ್ರಾ</h3><p>ಒಂದೇ ಬಾರಿಗೆ ಸಂಖ್ಯೆಗಳ ದೊಡ್ಡ ಗ್ರಿಡ್‌ಗಳೊಂದಿಗೆ (ಮ್ಯಾಟ್ರಿಸಸ್ ಮತ್ತು ವೆಕ್ಟರ್‌ಗಳು ಎಂದು ಕರೆಯಲಾಗುತ್ತದೆ) ಕೆಲಸ ಮಾಡುವ ಗಣಿತ ಇದು. AI ಪದಗಳು, ಪಿಕ್ಸೆಲ್‌ಗಳು, ಶಬ್ದಗಳು — ಎಲ್ಲವನ್ನೂ ಸಂಖ್ಯೆ-ಪಟ್ಟಿಗಳಾಗಿ ಪರಿವರ್ತಿಸುವುದರಿಂದ, ಒಳಗಿನ ಭಾರೀ ಕೆಲಸವನ್ನು ಮಾಡುವ ಯಂತ್ರಾಂಗ ಇದೇ.</p></div>
+        <div class="card"><h3>ಕಲನಶಾಸ್ತ್ರ</h3><p>ಮಾದರಿಗೆ ತರಬೇತಿ ನೀಡುವುದೆಂದರೆ ಅದರ ತಪ್ಪುಗಳನ್ನು ಸ್ವಲ್ಪ ಕಡಿಮೆ ಮಾಡಲು ಲಕ್ಷಾಂತರ ಸಂಖ್ಯೆಗಳನ್ನು ನಿರಂತರವಾಗಿ ಸ್ವಲ್ಪ ಸ್ವಲ್ಪ ಸರಿಪಡಿಸುತ್ತಿರುವುದು. ಪ್ರತಿ ಸಂಖ್ಯೆಯನ್ನು ಯಾವ ದಿಕ್ಕಿನಲ್ಲಿ ಮತ್ತು ಎಷ್ಟು ಸರಿಪಡಿಸಬೇಕೆಂದು ನಿಖರವಾಗಿ ಲೆಕ್ಕಹಾಕುವ ಸಾಧನವೇ ಕಲನಶಾಸ್ತ್ರ.</p></div>
+        <div class="card"><h3>ಕಂಪ್ಯೂಟರ್ ಪ್ರೋಗ್ರಾಮಿಂಗ್</h3><p>ಇದೆಲ್ಲವನ್ನೂ ಚಲಾಯಿಸುವ ಸೂಚನೆಗಳನ್ನು ಯಾರಾದರೂ ಬರೆಯಬೇಕು. ಇಂದು AI ನಿರ್ಮಿಸಲು ಅತಿ ಸಾಮಾನ್ಯವಾಗಿ ಬಳಸುವ ಪ್ರೋಗ್ರಾಮಿಂಗ್ ಭಾಷೆ ಪೈಥಾನ್, ಹೆಚ್ಚಾಗಿ ಇದನ್ನು ಆರಂಭಿಕರಿಗೆ ತುಲನಾತ್ಮಕವಾಗಿ ಸುಲಭ ಎಂದು ಪರಿಗಣಿಸಲಾಗುವುದರಿಂದ.</p></div>
+        <div class="card"><h3>ಭಾಷಾಶಾಸ್ತ್ರ</h3><p>ಮಾನವ ಭಾಷೆ ಹೇಗೆ ರಚಿತವಾಗಿದೆ ಎಂಬುದರ ಅಧ್ಯಯನ — ವ್ಯಾಕರಣ, ಅರ್ಥ, ಸಂದರ್ಭ — ಭಾಷೆ-ಆಧಾರಿತ AI ಸ್ವಾಭಾವಿಕವಾಗಿ ಓದುವಂತೆ ಪಠ್ಯವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ಸೃಷ್ಟಿಸಲು ಹೇಗೆ ವಿನ್ಯಾಸಗೊಳಿಸಲಾಗಿದೆ ಎಂಬುದನ್ನು ರೂಪಿಸುತ್ತದೆ.</p></div>
+        <div class="card"><h3>ಕಾಗ್ನಿಟಿವ್ ಸೈನ್ಸ್</h3><p>ಮಾನವ ಮನಸ್ಸು ಹೇಗೆ ಯೋಚಿಸುತ್ತದೆ, ಗ್ರಹಿಸುತ್ತದೆ ಮತ್ತು ನೆನಪಿಟ್ಟುಕೊಳ್ಳುತ್ತದೆ ಎಂಬುದರ ಅಧ್ಯಯನ. ಆರಂಭಿಕ AI ಸಂಶೋಧಕರು ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ವಿನ್ಯಾಸಗೊಳಿಸುವಾಗ ಮೆದುಳಿನ ಬಗ್ಗೆ — ನರಕೋಶಗಳಂತಹ — ಕಲ್ಪನೆಗಳನ್ನು ಸಡಿಲವಾಗಿ ಎರವಲು ಪಡೆದರು, ಆದರೂ ಆಧುನಿಕ AI ನಿಜವಾದ ಮೆದುಳಿಗಿಂತ ಸಾಕಷ್ಟು ಭಿನ್ನವಾಗಿ ಕೆಲಸ ಮಾಡುತ್ತದೆ.</p></div>
+        <div class="card"><h3>ತತ್ವಶಾಸ್ತ್ರ ಮತ್ತು ನೀತಿಶಾಸ್ತ್ರ</h3><p>ನ್ಯಾಯ, ಸತ್ಯ, ಜವಾಬ್ದಾರಿ, ಮತ್ತು ಯಂತ್ರವು ಏನು ಮಾಡಬೇಕು ಅಥವಾ ಮಾಡಬಾರದು ಎಂಬ ಪ್ರಶ್ನೆಗಳು AI ಹೇಗೆ ವಿನ್ಯಾಸಗೊಂಡಿದೆ ಮತ್ತು ನಿಯಂತ್ರಿಸಲ್ಪಡುತ್ತದೆ ಎಂಬುದರ ಕೇಂದ್ರದಲ್ಲಿವೆ — ಇದೊಂದು ಕ್ಷೇತ್ರ, ಎರಡನೇ ಆಲೋಚನೆಯಲ್ಲ.</p></div>
+        <div class="card"><h3>ಎಲೆಕ್ಟ್ರಾನಿಕ್ಸ್ ಮತ್ತು ಹಾರ್ಡ್‌ವೇರ್</h3><p>ಭೌತಿಕ ಚಿಪ್‌ಗಳು, ವೈರಿಂಗ್ ಮತ್ತು ಶಕ್ತಿಯಿಲ್ಲದೆ ಇವಾವುದೂ ಚಲಿಸುವುದಿಲ್ಲ. ವೇಗವಾದ, ಹೆಚ್ಚು ದಕ್ಷ ಕಂಪ್ಯೂಟರ್ ಚಿಪ್‌ಗಳ ವಿನ್ಯಾಸ ಯಾವುದೇ ಸಮಯದಲ್ಲಿ AI ಎಷ್ಟು ಸಮರ್ಥವಾಗಿದೆ ಎಂಬುದನ್ನು ನೇರವಾಗಿ ರೂಪಿಸುತ್ತದೆ.</p></div>
+      </div>
+    </section>
+
+    <section id="training">
+      <div class="kicker">ಅಧ್ಯಾಯ 06 · ಮಾದರಿಯನ್ನು ನಿರ್ಮಿಸುವುದು</div>
+      <h2>ChatGPT ನಂತಹ ಮಾದರಿಗೆ ನಿಜವಾಗಿ ಹೇಗೆ ತರಬೇತಿ ನೀಡಲಾಗುತ್ತದೆ</h2>
+      <p class="intro">ಸಾಮಾನ್ಯವಾಗಿ ನಡೆಯುವ ಕ್ರಮದಲ್ಲಿ ನಿಜವಾದ ಉತ್ಪಾದನಾ ಪ್ರಕ್ರಿಯೆಯ ಚಿಕ್ಕ, ಪ್ರಾಮಾಣಿಕ ವಿವರಣೆ.</p>
+      <div class="roadmap">
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಬೃಹತ್ ಪ್ರಮಾಣದ ಪಠ್ಯ ಸಂಗ್ರಹಿಸುವುದು</h4><p>ಮಾದರಿಗೆ ಮಾನವ ಭಾಷೆ ಮತ್ತು ಜ್ಞಾನದ ವಿಶಾಲ ಪರಿಚಯ ನೀಡಲು ಸಾರ್ವಜನಿಕವಾಗಿ ಲಭ್ಯವಿರುವ ಪುಸ್ತಕಗಳು, ವೆಬ್‌ಸೈಟ್‌ಗಳು, ಲೇಖನಗಳು ಮತ್ತು ಕೋಡ್ ಅನ್ನು — ಸಾಮಾನ್ಯವಾಗಿ ನೂರಾರು ಶತಕೋಟಿ ಪದಗಳನ್ನು — ಸಂಗ್ರಹಿಸಲಾಗುತ್ತದೆ.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಡೇಟಾವನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸಿ ಫಿಲ್ಟರ್ ಮಾಡುವುದು</h4><p>ತರಬೇತಿ ಆರಂಭವಾಗುವ ಮೊದಲು ನಕಲಿ, ಕಳಪೆ-ಗುಣಮಟ್ಟದ, ಅಥವಾ ಹಾನಿಕಾರಕ ಕಂಟೆಂಟ್ ಅನ್ನು ಸಾಧ್ಯವಾದಷ್ಟು ಫಿಲ್ಟರ್ ಮಾಡಲಾಗುತ್ತದೆ, ಏಕೆಂದರೆ ಮಾದರಿಯು ತಾನು ಓದುವುದರಲ್ಲಿ ಇರುವ ಯಾವುದೇ ಮಾದರಿಗಳನ್ನು ಹೀರಿಕೊಳ್ಳುತ್ತದೆ.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಪೂರ್ವ-ತರಬೇತಿ — ಮುಂದಿನ ಪದವನ್ನು ಊಹಿಸಲು ಕಲಿಸುವುದು</h4><p>ಕೊನೆಯ ಪದ ಮರೆಮಾಡಿದ ಪಠ್ಯವನ್ನು ಮಾದರಿಗೆ ಪದೇ ಪದೇ ತೋರಿಸಲಾಗುತ್ತದೆ, ಮತ್ತು ಕಾಣೆಯಾದ ಪದವನ್ನು ಊಹಿಸುವಲ್ಲಿ ಚೆನ್ನಾಗಿ ಚೆನ್ನಾಗಿ ಆಗುವವರೆಗೆ ಅದು ತನ್ನ ಆಂತರಿಕ ಸಂಖ್ಯೆಗಳನ್ನು ಸರಿಹೊಂದಿಸುತ್ತದೆ. ಶತಕೋಟಿ ಬಾರಿ ಪುನರಾವರ್ತಿಸಿದ ಈ ಒಂದೇ ಸರಳ ಕೆಲಸವೇ ಅದಕ್ಕೆ ವ್ಯಾಕರಣ, ಸತ್ಯಗಳು, ತರ್ಕ ಮಾದರಿಗಳು ಮತ್ತು ಶೈಲಿಯನ್ನು ಕಲಿಸುತ್ತದೆ.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಗುಣಮಟ್ಟದ ಉದಾಹರಣೆಗಳ ಮೇಲೆ ಫೈನ್-ಟ್ಯೂನ್ ಮಾಡುವುದು</h4><p>ಆನಂತರ ಮಾದರಿಗೆ "ಯಾವುದೇ ಇಂಟರ್ನೆಟ್ ಪಠ್ಯ ಊಹಿಸುವುದು" ಎಂಬುದರಿಂದ "ಸಹಾಯಕ ಸಹಾಯಕನಂತೆ ಉತ್ತರಿಸುವುದು" ಕಡೆಗೆ ಬದಲಾಯಿಸಲು, ಒಳ್ಳೆಯ, ಸಹಾಯಕಾರಿ ಉತ್ತರಗಳ ಸಣ್ಣ, ಎಚ್ಚರಿಕೆಯಿಂದ ಬರೆದ ಉದಾಹರಣೆಗಳ ಮೇಲೆ ಮತ್ತಷ್ಟು ತರಬೇತಿ ನೀಡಲಾಗುತ್ತದೆ.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಮಾನವ ಪ್ರತಿಕ್ರಿಯೆಯೊಂದಿಗೆ ಹೊಂದಿಸುವುದು</h4><p>ಮಾನವ ಪರಿಶೀಲಕರು ಮಾದರಿಯ ವಿಭಿನ್ನ ಪ್ರತಿಕ್ರಿಯೆಗಳಿಗೆ ರೇಟಿಂಗ್ ನೀಡುತ್ತಾರೆ, ಮತ್ತು ಜನರು ಹೆಚ್ಚು ರೇಟ್ ಮಾಡಿದ್ದನ್ನು ಹೆಚ್ಚು ಉತ್ಪಾದಿಸಲು ಮಾದರಿಯನ್ನು ಸರಿಹೊಂದಿಸಲಾಗುತ್ತದೆ — ಕೇವಲ ನಿರರ್ಗಳವಾಗಿರುವುದಲ್ಲ, ಹೆಚ್ಚು ಸಹಾಯಕಾರಿ, ಪ್ರಾಮಾಣಿಕ ಮತ್ತು ಸುರಕ್ಷಿತವಾಗಿರಲು ಇದು ಕಲಿಸುತ್ತದೆ.</p></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಪರೀಕ್ಷಿಸಿ ಬಿಡುಗಡೆ ಮಾಡುವುದು</h4><p>ಸಾರ್ವಜನಿಕ ಬಿಡುಗಡೆಗೆ ಮೊದಲು, ಮಾದರಿಯನ್ನು ನಿಖರತೆ, ಸುರಕ್ಷತೆ ಮತ್ತು ಪಕ್ಷಪಾತಕ್ಕಾಗಿ ಪರೀಕ್ಷಿಸಲಾಗುತ್ತದೆ, ನಂತರ ಅದನ್ನು — ನಿಮ್ಮನ್ನೂ ಒಳಗೊಂಡಂತೆ — ಲಕ್ಷಾಂತರ ಜನರು ಪ್ರಶ್ನೆ ಟೈಪ್ ಮಾಡುವುದಕ್ಕೆ ಪ್ರತಿಕ್ರಿಯಿಸುವ ಸರ್ವರ್‌ಗಳಲ್ಲಿ ನಿಯೋಜಿಸಲಾಗುತ್ತದೆ.</p></div></div>
+      </div>
+    </section>
+
+    <section id="life">
+      <div class="kicker">ಅಧ್ಯಾಯ 07 · ಕೇವಲ ಚಾಟ್‌ಬಾಟ್‌ಗಳಲ್ಲ</div>
+      <h2>ನೀವು ಬಹುಶಃ ಈಗಾಗಲೇ ಬಳಸುತ್ತಿರುವ AI</h2>
+      <p class="intro">AI ಎಂದರೆ ಕೇವಲ ಚಾಟ್‌ಬಾಟ್‌ಗಳಲ್ಲ. ನೀವು ಪ್ರತಿ ವಾರ ಬಳಸುವ ವಿಷಯಗಳ ಒಳಗೆ ಅದು ಈಗಾಗಲೇ ಮೌನವಾಗಿ ಚಲಿಸುತ್ತಿದೆ.</p>
+      <div class="grid3">
+        <div class="card"><h3>ಧ್ವನಿ ಟೈಪಿಂಗ್ ಮತ್ತು ಅನುವಾದ</h3><p>Google Translate ಮತ್ತು ಧ್ವನಿ-ಇಂದ-ಪಠ್ಯ ಸಾಧನಗಳು ಮಾತನ್ನು ಪಠ್ಯಕ್ಕೆ ಪರಿವರ್ತಿಸಲು ಮತ್ತು ಭಾಷೆಗಳ ನಡುವೆ ಅನುವಾದಿಸಲು — ನೀವು ಸ್ವತಃ ಚೆನ್ನಾಗಿ ಓದಲಾಗದ ಭಾಷೆಗಳೂ ಸೇರಿದಂತೆ — AI ಬಳಸುತ್ತವೆ.</p></div>
+        <div class="card"><h3>ಫೋಟೋ ಗುರುತಿಸುವಿಕೆ</h3><p>ನಿಮ್ಮ ಫೋನ್‌ನ ಕ್ಯಾಮೆರಾ ಆ್ಯಪ್ ಮುಖಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಗುರುತಿಸುವುದು, ಅಥವಾ Google Photos ನಲ್ಲಿ "ಬೀಚ್" ಎಂದು ಹುಡುಕಿ ನಿಮ್ಮ ಬೀಚ್ ಫೋಟೋಗಳನ್ನು ಕಂಡುಹಿಡಿಯುವುದು, ಇದು AI ದೃಶ್ಯ ಮಾದರಿಗಳನ್ನು ಗುರುತಿಸುವುದೇ.</p></div>
+        <div class="card"><h3>ಶಿಫಾರಸುಗಳು</h3><p>YouTube, Instagram, ಮತ್ತು Spotify ಎಲ್ಲವೂ ನೀವು ಮತ್ತು ಸಮಾನ ಬಳಕೆದಾರರು ಮೊದಲು ತೊಡಗಿಸಿಕೊಂಡಿದ್ದ ಮಾದರಿಗಳ ಆಧಾರದ ಮೇಲೆ, ನೀವು ಮುಂದೆ ಏನನ್ನು ವೀಕ್ಷಿಸಬಹುದು ಅಥವಾ ಕೇಳಬಹುದು ಎಂದು ಊಹಿಸಲು AI ಬಳಸುತ್ತವೆ.</p></div>
+        <div class="card"><h3>ನಕ್ಷೆಗಳು ಮತ್ತು ನ್ಯಾವಿಗೇಷನ್</h3><p>Google Maps ನಂತಹ ಆ್ಯಪ್‌ಗಳು ಲಕ್ಷಾಂತರ ಇತರ ಜನರ ಲೈವ್ ಪ್ರಯಾಣಗಳ ಮಾದರಿಗಳ ಆಧಾರದ ಮೇಲೆ ಟ್ರಾಫಿಕ್ ಊಹಿಸಲು ಮತ್ತು ವೇಗದ ಮಾರ್ಗ ಸೂಚಿಸಲು AI ಬಳಸುತ್ತವೆ.</p></div>
+        <div class="card"><h3>ಬ್ಯಾಂಕಿಂಗ್ ಮತ್ತು ವಂಚನೆ ಪರಿಶೀಲನೆ</h3><p>ಬ್ಯಾಂಕುಗಳು ನಿಮ್ಮ ಸಾಮಾನ್ಯ ಖರ್ಚಿನ ಮಾದರಿಗೆ ಹೊಂದದ ಅಸಾಮಾನ್ಯ ವಹಿವಾಟುಗಳನ್ನು ಗುರುತಿಸಲು AI ಬಳಸುತ್ತವೆ, ನೈಜ ಸಮಯದಲ್ಲಿ ವಂಚನೆ ಹಿಡಿಯಲು ಸಹಾಯ ಮಾಡುತ್ತವೆ.</p></div>
+        <div class="card"><h3>ಆರೋಗ್ಯ ಸ್ಕ್ರೀನಿಂಗ್</h3><p>AI ಸಾಧನಗಳು X-ray ನಂತಹ ವೈದ್ಯಕೀಯ ಚಿತ್ರಗಳನ್ನು ರೋಗದ ಆರಂಭಿಕ ಚಿಹ್ನೆಗಳಿಗಾಗಿ ಸ್ಕ್ಯಾನ್ ಮಾಡುವ ಮೂಲಕ ವೈದ್ಯರಿಗೆ ಸಹಾಯ ಮಾಡುತ್ತವೆ, ಹೆಚ್ಚಿನ ಮಾನವ ಗಮನ ಬೇಕಾದ ಪ್ರದೇಶಗಳನ್ನು ಗುರುತಿಸುತ್ತವೆ.</p></div>
+      </div>
+    </section>
+
+    <section id="risks">
+      <div class="kicker">ಅಧ್ಯಾಯ 08 · ಅನಾನುಕೂಲಗಳ ಬಗ್ಗೆ ಪ್ರಾಮಾಣಿಕವಾಗಿರುವುದು</div>
+      <h2>AI ಎಲ್ಲಿ ತಪ್ಪುತ್ತದೆ, ಮತ್ತು ಅದು ಏಕೆ ಮುಖ್ಯ</h2>
+      <p class="intro">AI ಅನ್ನು ಸರಿಯಾಗಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದೆಂದರೆ ಅದರ ಪ್ರಭಾವಶಾಲಿ ಭಾಗಗಳಷ್ಟೇ ಅಲ್ಲ, ಅದರ ನಿಜವಾದ ಮಿತಿಗಳನ್ನೂ ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದು.</p>
+      <div class="accordion">
+        <div class="acc-item open">
+          <div class="acc-head"><h3>ಇದು ಆತ್ಮವಿಶ್ವಾಸದಿಂದ ತಪ್ಪಾಗಬಹುದು</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>AI ಸತ್ಯಗಳನ್ನು ಪರಿಶೀಲಿಸುವ ಬದಲು ಸಾಧ್ಯತೆಯಿರುವ ಪಠ್ಯವನ್ನು ಊಹಿಸುವುದರಿಂದ, ಇದು ಸಂಪೂರ್ಣ ಆತ್ಮವಿಶ್ವಾಸದಿಂದ ಹೇಳಲಾದ ತಪ್ಪು ಮಾಹಿತಿಯನ್ನು ಉತ್ಪಾದಿಸಬಹುದು — ಇದನ್ನು ಸಾಮಾನ್ಯವಾಗಿ "ಹ್ಯಾಲುಸಿನೇಶನ್" ಎಂದು ಕರೆಯಲಾಗುತ್ತದೆ. ಮುಖ್ಯವಾದ ಯಾವುದನ್ನಾದರೂ ಯಾವಾಗಲೂ ಇನ್ನೊಂದು ಮೂಲದಿಂದ ಪರಿಶೀಲಿಸಿ.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>ಇದು ಮಾನವ ಪಕ್ಷಪಾತವನ್ನು ಆನುವಂಶಿಕವಾಗಿ ಪಡೆಯಬಹುದು</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>ಅದು ಕಲಿತ ಡೇಟಾದಲ್ಲಿ ಲಿಂಗ, ಜಾತಿ, ಧರ್ಮ, ಅಥವಾ ಜನಾಂಗದ ಬಗ್ಗೆ ಅನ್ಯಾಯದ ಮಾದರಿಗಳಿದ್ದರೆ, ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ಸರಿಪಡಿಸದ ಹೊರತು ಮಾದರಿಯು ಆ ಮಾದರಿಗಳನ್ನು ಪುನರಾವರ್ತಿಸಬಹುದು ಅಥವಾ ಇನ್ನಷ್ಟು ಹೆಚ್ಚಿಸಬಹುದು.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>ಇದು ಉದ್ಯೋಗಗಳ ಮೇಲೆ ಪರಿಣಾಮ ಬೀರುತ್ತದೆ, ನಿಜವಾದವುಗಳ ಮೇಲೆ</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>ಬರವಣಿಗೆಯಿಂದ ಮೂಲಭೂತ ಗ್ರಾಹಕ ಸೇವೆಯಿಂದ ಸರಳ ಕೋಡಿಂಗ್‌ವರೆಗೆ — AI ಅನೇಕ ಉದ್ಯೋಗಗಳ ಭಾಗಗಳನ್ನು ಸ್ವಯಂಚಾಲಿತಗೊಳಿಸುತ್ತಿದೆ. ಇದು ನಿಜವಾಗಿಯೂ ಅಡ್ಡಿಪಡಿಸುತ್ತಿದೆ, ಆದರೆ AI ವ್ಯವಸ್ಥೆಗಳನ್ನು ನಿರ್ಮಿಸುವ, ಪರಿಶೀಲಿಸುವ ಮತ್ತು ನಿರ್ದೇಶಿಸುವ ಸಂಪೂರ್ಣ ಹೊಸ ಪಾತ್ರಗಳನ್ನೂ ಸೃಷ್ಟಿಸುತ್ತಿದೆ.</p></div></div>
+        </div>
+        <div class="acc-item">
+          <div class="acc-head"><h3>ಗೌಪ್ಯತೆ ಮತ್ತು ದುರುಪಯೋಗ</h3><span class="plus">+</span></div>
+          <div class="acc-body"><div class="acc-body-inner"><p>ಮನವರಿಕೆಯಾಗುವ ನಕಲಿ ಚಿತ್ರಗಳು, ಆಡಿಯೋ, ಅಥವಾ ಪಠ್ಯ (ಕೆಲವೊಮ್ಮೆ "ಡೀಪ್‌ಫೇಕ್‌ಗಳು" ಎಂದು ಕರೆಯಲಾಗುತ್ತದೆ) ಸೃಷ್ಟಿಸಲು AI ದುರುಪಯೋಗಪಡಿಸಬಹುದು, ಮತ್ತು ಸಂಪೂರ್ಣ ಒಪ್ಪಿಗೆಯಿಲ್ಲದೆ ವೈಯಕ್ತಿಕ ಡೇಟಾದ ಮೇಲೆ ತರಬೇತಿ ಪಡೆಯಬಹುದು. ಆದ್ದರಿಂದಲೇ AI ನಿಯಂತ್ರಣ ಮತ್ತು ನೀತಿಶಾಸ್ತ್ರ ಈಗ ಒಂದು ಗಂಭೀರ, ಸಕ್ರಿಯ ಕ್ಷೇತ್ರ, ಅಡಿಟಿಪ್ಪಣಿಯಲ್ಲ.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="kicker">ಅಧ್ಯಾಯ 09 · ಇಲ್ಲಿಂದ ಮುಂದೆ ಎಲ್ಲಿಗೆ</div>
+      <h2>ನಿಜವಾದ ಆರಂಭಿಕ ಮಾರ್ಗ — ಶೂನ್ಯ ಪೂರ್ವಸಿದ್ಧತೆ</h2>
+      <p class="intro">ಇಂಗ್ಲಿಷ್ ನಿರರ್ಗಳವಿಲ್ಲದೆ ಮತ್ತು ಯಾವುದೇ ಪೂರ್ವ ಅಧ್ಯಯನವಿಲ್ಲದೆ ನಿಜವಾಗಿ ತಿಳುವಳಿಕೆಯನ್ನು ನಿರ್ಮಿಸುವ ಪ್ರಾಯೋಗಿಕ ಕ್ರಮ. ನಿಮ್ಮ ಸ್ವಂತ ವೇಗದಲ್ಲಿ ಸಾಗಿ — ಇಲ್ಲಿ ಯಾವುದೇ ಗಡುವು ಇಲ್ಲ.</p>
+      <div class="roadmap">
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ನಿಮ್ಮ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ AI ಚಾಟ್‌ಬಾಟ್‌ನೊಂದಿಗೆ ಮಾತನಾಡಿ</h4><p>ಯಾವುದೇ ಉಚಿತ AI ಚಾಟ್ ಆ್ಯಪ್ ತೆರೆದು ಹಿಂದಿ, ಮರಾಠಿ, ಅಥವಾ ನಿಮಗೆ ಆರಾಮದಾಯಕವಾದ ಯಾವುದೇ ಭಾಷೆಯಲ್ಲಿ ಟೈಪ್ ಮಾಡಿ ಅಥವಾ ಮಾತನಾಡಿ. ನಿಮಗೆ ಕುತೂಹಲವಿರುವ ಯಾವುದನ್ನಾದರೂ ಸರಳ ಪದಗಳಲ್ಲಿ ವಿವರಿಸಲು ಕೇಳಿ. ಇದೊಂದೇ ವೇಗವಾಗಿ ನಿಜವಾದ ಪರಿಚಯವನ್ನು ನಿರ್ಮಿಸುತ್ತದೆ.</p><span class="chip">ವೆಚ್ಚ: ಉಚಿತ · ಸಮಯ: ಇಂದೇ</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಈ ಮಾರ್ಗದರ್ಶಿಯ 1–4 ಅಧ್ಯಾಯಗಳನ್ನು ಮತ್ತೆ ಓದಿ</h4><p>"ನೀವು ಪ್ರಶ್ನೆ ಟೈಪ್ ಮಾಡಿದಾಗ ಏನಾಗುತ್ತದೆ," "AI ಎಲ್ಲಿಂದ ಬಂತು," "ಮೂಲ ಘಟಕಗಳು," ಮತ್ತು "ಯಂತ್ರಗಳು ಹೇಗೆ ಕಲಿಯುತ್ತವೆ" ಗೆ ಮತ್ತೆ ಬನ್ನಿ. ಅವುಗಳನ್ನು ನಿಧಾನವಾಗಿ ಓದಿ, ಅಗತ್ಯವಿದ್ದರೆ ದಿನಕ್ಕೊಂದು ಅಧ್ಯಾಯ. ವೇಗವಲ್ಲ, ತಿಳುವಳಿಕೆಯೇ ಗುರಿ.</p><span class="chip">ವೆಚ್ಚ: ಉಚಿತ · ಸಮಯ: ಈ ವಾರ</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>YouTube ನಲ್ಲಿ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಆರಂಭಿಕರ ವೀಡಿಯೋಗಳನ್ನು ನೋಡಿ</h4><p>"AI ಎಂದರೇನು" ಅಥವಾ ನಿಮ್ಮ ಭಾಷೆಯ ಸಮಾನ ಪದವನ್ನು ಹುಡುಕಿ. ಅನೇಕ ಸೃಷ್ಟಿಕರ್ತರು AI ಪರಿಕಲ್ಪನೆಗಳನ್ನು ಸರಳ, ಮಾತನಾಡುವ ಪದಗಳಲ್ಲಿ ದೃಶ್ಯಗಳೊಂದಿಗೆ ವಿವರಿಸುತ್ತಾರೆ — ಓದುವ ಅಗತ್ಯವಿಲ್ಲ.</p><span class="chip">ವೆಚ್ಚ: ಉಚಿತ · ಸಮಯ: ನಿರಂತರ</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>"ಪ್ರಾಂಪ್ಟಿಂಗ್" ಅಭ್ಯಾಸ ಮಾಡಿ — AI ಗೆ ಚೆನ್ನಾಗಿ ಕೇಳುವುದು</h4><p>ಪ್ರಾಂಪ್ಟಿಂಗ್ ಎಂದರೆ ಸರಳವಾಗಿ ಉಪಯುಕ್ತ ಉತ್ತರಗಳನ್ನು ಪಡೆಯಲು AI ಗೆ ಸ್ಪಷ್ಟ, ನಿರ್ದಿಷ್ಟ ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳುವ ಕೌಶಲ್ಯ. ಇದೊಂದೇ ಇಂದು ನಿಜವಾದ, ಉದ್ಯೋಗ ಪಡೆಯಬಹುದಾದ ಕೌಶಲ್ಯ, ಮತ್ತು ಯಾವುದೇ ಕೋಡಿಂಗ್ ಅಗತ್ಯವಿಲ್ಲ.</p><span class="chip">ವೆಚ್ಚ: ಉಚಿತ · ಸಮಯ: 2–3 ವಾರಗಳು</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>AI ಮೂಲಕವೇ ಕ್ರಮೇಣ ಮೂಲಭೂತ ಇಂಗ್ಲಿಷ್ ಕಲಿಯಿರಿ</h4><p>ಹೊಸ ಇಂಗ್ಲಿಷ್ ಪದಗಳನ್ನು ನಿಮ್ಮ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ವಿವರಿಸಲು AI ಚಾಟ್‌ಬಾಟ್ ಅನ್ನು ಕೇಳಿ. ತರಗತಿಯಿಲ್ಲದೆ, ಬಳಕೆಯ ಮೂಲಕವೇ ನೀವು ಶಬ್ದಕೋಶವನ್ನು ಸ್ವಾಭಾವಿಕವಾಗಿ ಹೀರಿಕೊಳ್ಳುತ್ತೀರಿ.</p><span class="chip">ವೆಚ್ಚ: ಉಚಿತ · ಸಮಯ: ತಿಂಗಳುಗಟ್ಟಲೆ, ಕ್ರಮೇಣ</span></div></div>
+        <div class="rm-step"><div class="rm-num"></div><div><h4>ಕುತೂಹಲವಿದ್ದರೆ ಮಾತ್ರ — ಒಂದು ಆರಂಭಿಕ ಪೈಥಾನ್ ಪಾಠ ಪ್ರಯತ್ನಿಸಿ</h4><p>ನೀವು ಸಿದ್ಧರಾದಾಗ, ಯಾವುದೇ ಪೂರ್ವ ಜ್ಞಾನ ಊಹಿಸದ ಆರಂಭಿಕರ ಕೋಡಿಂಗ್ ಪಾಠಗಳನ್ನು ಉಚಿತ ಪ್ಲಾಟ್‌ಫಾರ್ಮ್‌ಗಳು ನೀಡುತ್ತವೆ. ಈ ಹಂತ ಐಚ್ಛಿಕ, AI ಅನ್ನು "ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು" ಅಗತ್ಯವಿಲ್ಲ.</p><span class="chip">ವೆಚ್ಚ: ಉಚಿತ · ಸಮಯ: ಸಿದ್ಧವಾದಾಗ</span></div></div>
+      </div>
+    </section>
+
+    <section id="glossary">
+      <div class="kicker">ಉಲ್ಲೇಖ</div>
+      <h2>ಸರಳ ಭಾಷೆಯ ಪದಕೋಶ</h2>
+      <p class="intro">ಈ ಮಾರ್ಗದರ್ಶಿಯಲ್ಲಿ ಬಳಸಿದ ಪ್ರತಿಯೊಂದು ತಾಂತ್ರಿಕ ಪದವನ್ನೂ, ಸರಳವಾಗಿ ವ್ಯಾಖ್ಯಾನಿಸಿ, ಒಂದೇ ಸ್ಥಳದಲ್ಲಿ.</p>
+      <dl class="glossary">
+        <div class="gterm"><dt>ಅಲ್ಗಾರಿದಂ (Algorithm)</dt><dd>ಸಮಸ್ಯೆಯನ್ನು ಪರಿಹರಿಸಲು ಅಥವಾ ಡೇಟಾದಿಂದ ಕಲಿಯಲು ಕಂಪ್ಯೂಟರ್ ಅನುಸರಿಸುವ ನಿಖರ ಹಂತಗಳ ಸಮೂಹ.</dd></div>
+        <div class="gterm"><dt>ಕೃತಕ ಬುದ್ಧಿಮತ್ತೆ (AI)</dt><dd>ಭಾಷೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವುದು ಅಥವಾ ಚಿತ್ರಗಳನ್ನು ಗುರುತಿಸುವಂತಹ, ಸಾಮಾನ್ಯವಾಗಿ ಮಾನವ ಬುದ್ಧಿಮತ್ತೆ ಅಗತ್ಯವಿರುವ ಕೆಲಸಗಳನ್ನು ಮಾಡಲು ವಿನ್ಯಾಸಗೊಳಿಸಿದ ಕಂಪ್ಯೂಟರ್ ವ್ಯವಸ್ಥೆಗಳು.</dd></div>
+        <div class="gterm"><dt>ಅಟೆನ್ಶನ್ (Attention)</dt><dd>ಮುಂದಿನ ಪದವನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳುವಾಗ ಅಥವಾ ಸೃಷ್ಟಿಸುವಾಗ ಯಾವ ಹಿಂದಿನ ಪದಗಳು ಹೆಚ್ಚು ಮುಖ್ಯ ಎಂದು ಮಾದರಿಗೆ ಕಂಡುಹಿಡಿಯಲು ಅನುವು ಮಾಡುವ ತಂತ್ರ.</dd></div>
+        <div class="gterm"><dt>ಚಾಟ್‌ಬಾಟ್ (Chatbot)</dt><dd>ಒಬ್ಬ ವ್ಯಕ್ತಿಯೊಂದಿಗೆ ಪಠ್ಯ ಅಥವಾ ಧ್ವನಿ ಸಂಭಾಷಣೆ ನಡೆಸಲು ವಿನ್ಯಾಸಗೊಳಿಸಿದ ಪ್ರೋಗ್ರಾಂ.</dd></div>
+        <div class="gterm"><dt>ಡೀಪ್ ಲರ್ನಿಂಗ್ (Deep Learning)</dt><dd>ಅನೇಕ ಪದರಗಳಿರುವ ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬಳಸುವ ಮೆಷಿನ್ ಲರ್ನಿಂಗ್‌ನ ಒಂದು ವಿಧ, ಅತ್ಯಂತ ಸಂಕೀರ್ಣ ಮಾದರಿಗಳನ್ನು ಕಲಿಯಬಲ್ಲ ಸಾಮರ್ಥ್ಯವಿರುವುದು.</dd></div>
+        <div class="gterm"><dt>ಜನರೇಟಿವ್ AI (Generative AI)</dt><dd>ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಕಂಟೆಂಟ್ ಅನ್ನು ವಿಶ್ಲೇಷಿಸುವುದಕ್ಕಿಂತ ಹೊಸ ಕಂಟೆಂಟ್ — ಪಠ್ಯ, ಚಿತ್ರಗಳು, ಆಡಿಯೋ, ಅಥವಾ ವೀಡಿಯೋ — ಸೃಷ್ಟಿಸುವ AI.</dd></div>
+        <div class="gterm"><dt>GPU</dt><dd>ಗ್ರಾಫಿಕ್ಸ್ ಪ್ರೊಸೆಸಿಂಗ್ ಯುನಿಟ್ — AI ತರಬೇತಿಗೆ ಬೇಕಾದ ವೇಗದ, ಪುನರಾವರ್ತಿತ ಗಣಿತದಲ್ಲಿ ವಿಶೇಷವಾಗಿ ಚೆನ್ನಾಗಿರುವ ಕಂಪ್ಯೂಟರ್ ಚಿಪ್.</dd></div>
+        <div class="gterm"><dt>ಹ್ಯಾಲುಸಿನೇಶನ್ (Hallucination)</dt><dd>ಸತ್ಯಗಳನ್ನು ಪರಿಶೀಲಿಸುವ ಬದಲು ಸಾಧ್ಯತೆಯಿರುವ ಪಠ್ಯವನ್ನು ಊಹಿಸುತ್ತಿರುವುದರಿಂದ, AI ಆತ್ಮವಿಶ್ವಾಸದಿಂದ ಏನಾದರೂ ಸುಳ್ಳನ್ನು ಹೇಳುವುದು.</dd></div>
+        <div class="gterm"><dt>ಲಾರ್ಜ್ ಲಾಂಗ್ವೇಜ್ ಮಾಡೆಲ್ (LLM)</dt><dd>ChatGPT ಹಿಂದಿನ ಮಾದರಿಗಳಂತೆ, ಮಾನವ ಭಾಷೆಯನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಮತ್ತು ಸೃಷ್ಟಿಸಲು ಬೃಹತ್ ಪ್ರಮಾಣದ ಪಠ್ಯದ ಮೇಲೆ ತರಬೇತಿ ಪಡೆದ AI ಮಾದರಿ.</dd></div>
+        <div class="gterm"><dt>ಮೆಷಿನ್ ಲರ್ನಿಂಗ್ (ML)</dt><dd>ಸ್ಥಿರ ನಿಯಮಗಳೊಂದಿಗೆ ಸ್ಪಷ್ಟವಾಗಿ ಪ್ರೋಗ್ರಾಮ್ ಮಾಡುವ ಬದಲು, ಡೇಟಾದಿಂದ ಕಲಿಯುವ ಮೂಲಕ ವ್ಯವಸ್ಥೆಗಳು ಕೆಲಸದಲ್ಲಿ ಸುಧಾರಿಸುವ AI ಯ ಒಂದು ಶಾಖೆ.</dd></div>
+        <div class="gterm"><dt>ಮಾದರಿ (Model)</dt><dd>ತರಬೇತಿಯ ಅಂತಿಮ ಫಲಿತಾಂಶ — ಕಂಪ್ಯೂಟರ್‌ಗೆ ಹೊಸ, ಕಾಣದ ಇನ್‌ಪುಟ್‌ನಲ್ಲಿ ಊಹೆಗಳನ್ನು ಮಾಡಲು ಅನುವು ಮಾಡುವ ಕಲಿತ ಸಂಖ್ಯೆಗಳ ಸಮೂಹ.</dd></div>
+        <div class="gterm"><dt>ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್ (Neural Network)</dt><dd>ಮೆದುಳಿನ ನರಕೋಶಗಳಿಂದ ಸಡಿಲವಾಗಿ ಪ್ರೇರಿತವಾದ, ಡೇಟಾದಲ್ಲಿ ಮಾದರಿಗಳನ್ನು ಕಂಡುಹಿಡಿಯಲು ಬಳಸುವ ಪದರಗಳ ಗಣಿತದ ರಚನೆ.</dd></div>
+        <div class="gterm"><dt>ಪ್ಯಾರಾಮೀಟರ್ (Parameter)</dt><dd>ಮಾದರಿಯ ಒಳಗೆ ಇರುವ ಅನೇಕ ಆಂತರಿಕ ಹೊಂದಿಸಬಹುದಾದ ಸಂಖ್ಯೆಗಳಲ್ಲಿ ಒಂದು, ಅವು ಒಟ್ಟಾಗಿ ಅದು ಕಲಿತದ್ದನ್ನು ಪ್ರತಿನಿಧಿಸುತ್ತವೆ.</dd></div>
+        <div class="gterm"><dt>ಪ್ರಾಂಪ್ಟ್ (Prompt)</dt><dd>ನೀವು AI ವ್ಯವಸ್ಥೆಗೆ ನೀಡುವ ಪ್ರಶ್ನೆ ಅಥವಾ ಸೂಚನೆ.</dd></div>
+        <div class="gterm"><dt>ಟೋಕನ್ (Token)</dt><dd>AI ಮಾದರಿ ಒಂದೇ ಘಟಕವಾಗಿ ಪ್ರಕ್ರಿಯೆಗೊಳಿಸುವ ಪಠ್ಯದ ಚಿಕ್ಕ ತುಣುಕು — ಸಾಮಾನ್ಯವಾಗಿ ಒಂದು ಪದ ಅಥವಾ ಪದದ ಭಾಗ.</dd></div>
+        <div class="gterm"><dt>ತರಬೇತಿ (Training)</dt><dd>ಮಾದರಿಗೆ ದೊಡ್ಡ ಪ್ರಮಾಣದ ಡೇಟಾವನ್ನು ತೋರಿಸುವ ಪ್ರಕ್ರಿಯೆ, ಇದರಿಂದ ಅದು ಮಾದರಿಗಳನ್ನು ಕಲಿತು ಕೆಲಸದಲ್ಲಿ ಸುಧಾರಿಸುತ್ತದೆ.</dd></div>
+        <div class="gterm"><dt>ಟ್ರಾನ್ಸ್‌ಫಾರ್ಮರ್ (Transformer)</dt><dd>2017ರಲ್ಲಿ ಪರಿಚಯಿಸಲಾದ, ಅಟೆನ್ಶನ್ ಯಾಂತ್ರಿಕತೆಯ ಸುತ್ತ ನಿರ್ಮಿತವಾದ, ಬಹುತೇಕ ಆಧುನಿಕ ಭಾಷಾ AI ಗೆ ಆಧಾರವಾಗಿರುವ ನ್ಯೂರಲ್ ನೆಟ್‌ವರ್ಕ್ ವಿನ್ಯಾಸ.</dd></div>
+        <div class="gterm"><dt>ವೆಕ್ಟರ್ / ಎಂಬೆಡಿಂಗ್ (Vector / Embedding)</dt><dd>ಒಂದು ಪದ, ಚಿತ್ರ, ಅಥವಾ ಇತರ ಡೇಟಾದ ತುಣುಕಿನ ಅರ್ಥವನ್ನು ಗಣಿತೀಯವಾಗಿ ಪ್ರತಿನಿಧಿಸಲು ಬಳಸುವ ಸಂಖ್ಯೆಗಳ ಪಟ್ಟಿ.</dd></div>
+      </dl>
+    </section>
+
+    <section class="sources" id="sources">
+      <div class="kicker">ಪಾರದರ್ಶಕತೆ</div>
+      <h2>ಇದನ್ನು ಎಲ್ಲಿಂದ ಸಂಕಲಿಸಲಾಗಿದೆ</h2>
+      <p class="intro">ಈ ಮಾರ್ಗದರ್ಶಿಗಾಗಿ ಮಾಡಿದ ಮನವಿಗೆ ಅನುಗುಣವಾಗಿ, ಇಲ್ಲಿರುವ ಪ್ರತಿಯೊಂದು ಸತ್ಯವನ್ನೂ AI ಯ ಇತಿಹಾಸ ಮತ್ತು ಕಾರ್ಯವಿಧಾನದ ಬಗ್ಗೆ ವ್ಯಾಪಕವಾಗಿ ಮತ್ತು ಸಾರ್ವಜನಿಕವಾಗಿ ದಾಖಲಿತ ಮಾಹಿತಿಯಿಂದ ಸಂಗ್ರಹಿಸಲಾಗಿದೆ — ಯಾವುದೇ ಖಾಸಗಿ, ಪೇವಾಲ್ ಹಿಂದಿನ, ಅಥವಾ ಕಲ್ಪಿತ ಮೂಲಗಳಿಲ್ಲ.</p>
+      <ul>
+        <li>ಸಾರ್ವಜನಿಕ ಕಂಪ್ಯೂಟರ್ ವಿಜ್ಞಾನ ಇತಿಹಾಸದ ಮೂಲಗಳಲ್ಲಿ ದಾಖಲಿತ ಡಾರ್ಟ್‌ಮೌತ್ ಕಾರ್ಯಾಗಾರ (1956) ಮತ್ತು ಟ್ಯೂರಿಂಗ್ ಟೆಸ್ಟ್ (1950) ಗಳ ಸಾಮಾನ್ಯ ಐತಿಹಾಸಿಕ ದಾಖಲೆ.</li>
+        <li>ImageNet ಸ್ಪರ್ಧೆಯ (2012) ಮತ್ತು ಡೀಪ್ ಲರ್ನಿಂಗ್‌ನ ಏರಿಕೆಯಲ್ಲಿ ಅದರ ಪಾತ್ರದ ಬಗ್ಗೆ ಸಾರ್ವಜನಿಕ ವರದಿ.</li>
+        <li>ಟ್ರಾನ್ಸ್‌ಫಾರ್ಮರ್ ವಾಸ್ತುಶಿಲ್ಪವನ್ನು ಪರಿಚಯಿಸಿದ ಸಾರ್ವಜನಿಕವಾಗಿ ಪ್ರಕಟಿತ ಸಂಶೋಧನಾ ಪ್ರಬಂಧ "Attention Is All You Need" (Google, 2017).</li>
+        <li>ChatGPT, Deep Blue, Gemini, ಮತ್ತು ಸಂಬಂಧಿತ ವ್ಯವಸ್ಥೆಗಳ ಬಗ್ಗೆ OpenAI, Google, Anthropic, ಮತ್ತು IBM ನಿಂದ ಸಾರ್ವಜನಿಕ ಉತ್ಪನ್ನ ಘೋಷಣೆಗಳು ಮತ್ತು ದಾಖಲೆಗಳು.</li>
+        <li>ಮುಕ್ತ ಶೈಕ್ಷಣಿಕ ಸಾಮಗ್ರಿಯಲ್ಲಿ ಒಳಗೊಂಡ, ಮೆಷಿನ್ ಲರ್ನಿಂಗ್‌ನಲ್ಲಿ ಸಾಮಾನ್ಯ, ವ್ಯಾಪಕವಾಗಿ ಬೋಧಿಸುವ ಪರಿಕಲ್ಪನೆಗಳು (ಸೂಪರ್‌ವೈಸ್ಡ್, ಅನ್‌ಸೂಪರ್‌ವೈಸ್ಡ್, ಮತ್ತು ರೀಇನ್‌ಫೋರ್ಸ್‌ಮೆಂಟ್ ಲರ್ನಿಂಗ್; RLHF).</li>
+      </ul>
+    </section>
+  </main>
+</div>
+
+<footer>
+  <div class="foot-grid">
+    <div>
+      <h4>ಎಲ್ಲರಿಗಾಗಿ AI</h4>
+      <p>AI ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ಯಾವುದೇ ಪೂರ್ವಸಿದ್ಧತೆ ಬೇಕಿಲ್ಲ — ಕುತೂಹಲ ಮಾತ್ರ ಸಾಕು ಎಂದು ಸಾಬೀತುಪಡಿಸಲು ನಿರ್ಮಿಸಿದ ಉಚಿತ, ಸರಳ ಭಾಷೆಯ ಮಾರ್ಗದರ್ಶಿ.</p>
+    </div>
+    <div>
+      <h4>ಈ ಪುಟವನ್ನು ಹೇಗೆ ಬಳಸುವುದು</h4>
+      <p>ಎಡಭಾಗದ ಮೆನು ಬಳಸಿ ಒಂದೊಂದೇ ಅಧ್ಯಾಯ ಓದಿ. ನಿಮಗೆ ಇಷ್ಟವಾದಷ್ಟು ಬಾರಿ ಮತ್ತೆ ಬನ್ನಿ — ಇಲ್ಲಿ ಏನೂ ಕಾಲಾವಧಿ ಮುಗಿಯುವುದಿಲ್ಲ.</p>
+    </div>
+  </div>
+  <div class="credit">
+    <span>ಸಂಗ್ರಹಿಸಿ ಸಂಕಲಿಸಿದವರು <strong>ಸುಜಿತ್ ಕುಲಕರ್ಣಿ</strong></span>
+    <span>ಸಂಪೂರ್ಣವಾಗಿ ಸಾರ್ವಜನಿಕವಾಗಿ ಲಭ್ಯವಿರುವ ಮೂಲಗಳಿಂದ ನಿರ್ಮಿಸಲಾಗಿದೆ</span>
+  </div>
+</footer>
+
+<script>
+  // progress bar
+  const progress = document.getElementById('progress');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = pct + '%';
+  });
+
+  // toc active state
+  const sections = document.querySelectorAll('main section, main .hero');
+  const tocLinks = document.querySelectorAll('nav.toc a');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting){
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const link = document.querySelector('nav.toc a[data-target="'+e.target.id+'"]');
+        if(link) link.classList.add('active');
+      }
+    });
+  }, {rootMargin: '-40% 0px -50% 0px'});
+  sections.forEach(s => { if(s.id) io.observe(s); });
+
+  // accordions
+  document.querySelectorAll('.acc-item').forEach(item => {
+    item.querySelector('.acc-head').addEventListener('click', () => {
+      item.classList.toggle('open');
+    });
+  });
+
+  // tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // simulator
+  const simBtn = document.getElementById('simBtn');
+  const simInput = document.getElementById('simInput');
+  const simSteps = document.querySelectorAll('.sim-step');
+  const tokenChips = document.getElementById('tokenChips');
+  const simOutput = document.getElementById('simOutput');
+
+  const sampleReplies = {
+    default: "ಇದೊಂದು ಪರಿಶೀಲಿಸಬೇಕಾದ ಒಳ್ಳೆಯ ಪ್ರಶ್ನೆ — ನಾನು ಕಲಿತ ಮಾದರಿಗಳಿಂದ ನಿರ್ಮಿಸಿದ ಸರಳ, ಸ್ಪಷ್ಟ ಉತ್ತರ ಇಲ್ಲಿದೆ."
+  };
+
+  function runSimulation(){
+    let text = simInput.value.trim();
+    if(!text) text = "ಚಂದ್ರ ಯಾವುದರಿಂದ ಮಾಡಲ್ಪಟ್ಟಿದೆ";
+    simSteps.forEach(s => s.classList.remove('show'));
+    tokenChips.innerHTML = '';
+    simOutput.innerHTML = '';
+
+    const words = text.split(/\s+/).filter(Boolean);
+    words.forEach((w, i) => {
+      const chip = document.createElement('span');
+      chip.className = 'token-chip';
+      chip.innerHTML = w.toLowerCase() + '<span class="id">#' + (1000 + i) + '</span>';
+      tokenChips.appendChild(chip);
+    });
+
+    let delay = 0;
+    simSteps.forEach((step) => {
+      setTimeout(() => step.classList.add('show'), delay);
+      delay += 550;
+    });
+
+    setTimeout(() => {
+      const reply = "ಇದೇ ರೀತಿಯ ಅನೇಕ ವಾಕ್ಯಗಳಿಂದ ಕಲಿತ ಮಾದರಿಗಳ ಆಧಾರದ ಮೇಲೆ, ಇಲ್ಲಿ ಸಂಭವನೀಯ, ಸಹಾಯಕಾರಿ ಉತ್ತರವಿದೆ: \"" + text + "\"";
+      let i = 0;
+      simOutput.innerHTML = '<span id="typedText"></span><span class="typing-cursor">&nbsp;</span>';
+      const typedEl = document.getElementById('typedText');
+      const t = setInterval(() => {
+        typedEl.textContent += reply[i];
+        i++;
+        if(i >= reply.length) clearInterval(t);
+      }, 12);
+    }, delay);
+  }
+
+  simBtn.addEventListener('click', runSimulation);
+  simInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') runSimulation(); });
+</script>
+</body>
+</html>
