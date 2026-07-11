@@ -1,0 +1,1293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps, Fully Mapped &mdash; From Bash to Production</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0A1B2E;
+    --navy-panel:#122A47;
+    --navy-panel-2:#0F2439;
+    --blue-line: rgba(140,180,255,0.14);
+    --accent-blue:#5B9BFF;
+    --accent-blue-soft: #8FC1FF;
+    --accent-amber:#FFB454;
+    --accent-green:#4ADE80;
+    --accent-pink:#FF7A9C;
+    --text-hi:#EAF2FF;
+    --text-mid:#B6C6E0;
+    --text-low:#7C90B0;
+    --border-soft: rgba(140,180,255,0.18);
+    --radius:10px;
+    --code-bg:#08151F;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--blue-line) 1px, transparent 1px) 0 0/44px 44px,
+      linear-gradient(90deg, var(--blue-line) 1px, transparent 1px) 0 0/44px 44px,
+      var(--navy-deep);
+    color:var(--text-hi);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.65;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk', sans-serif; letter-spacing:-0.01em; margin:0;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--accent-blue-soft);}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 24px;}
+  #rail{position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--accent-blue),var(--accent-amber)); z-index:999;}
+
+  nav{position:sticky; top:0; z-index:50; backdrop-filter: blur(10px); background:rgba(10,27,46,0.88); border-bottom:1px solid var(--border-soft);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; flex-wrap:wrap; gap:10px;}
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:600; font-size:15px;}
+  .navlinks{display:flex; gap:18px; font-size:12.5px; color:var(--text-mid); font-family:'IBM Plex Mono'; flex-wrap:wrap;}
+  .navlinks a{color:var(--text-mid); text-decoration:none; border-bottom:1px solid transparent; padding-bottom:2px;}
+  .navlinks a:hover{color:var(--accent-blue-soft); border-color:var(--accent-blue-soft);}
+  @media (max-width:900px){.navlinks{display:none;}}
+
+  header.hero{padding:92px 0 56px; position:relative; overflow:hidden;}
+  .eyebrow{font-family:'IBM Plex Mono'; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-amber); margin-bottom:18px; display:flex; align-items:center; gap:10px;}
+  .eyebrow::before{content:''; width:24px; height:1px; background:var(--accent-amber);}
+  .byline{font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-mid); margin-bottom:26px; display:flex; align-items:center; gap:10px;}
+  .byline strong{color:var(--accent-blue-soft); font-family:'Space Grotesk'; font-size:14px; letter-spacing:.01em;}
+  .byline::before{content:'BY'; font-size:10px; letter-spacing:.1em; color:var(--text-low); border:1px solid var(--border-soft); border-radius:4px; padding:2px 6px;}
+  h1.title{font-size:clamp(36px,6vw,60px); font-weight:700; max-width:840px; color:#fff;}
+  h1.title span{color:var(--accent-blue-soft);}
+  .subtitle{margin-top:20px; font-size:17px; color:var(--text-mid); max-width:660px;}
+
+  section{padding:68px 0; border-top:1px solid var(--border-soft);}
+  .kicker{font-family:'IBM Plex Mono'; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--accent-blue-soft); margin-bottom:10px;}
+  h2.h2{font-size:clamp(25px,3.5vw,35px); color:#fff; max-width:740px;}
+  .lede{color:var(--text-mid); max-width:700px; margin-top:14px; font-size:15.5px;}
+
+  /* dev vs ops */
+  .shift-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:20px; align-items:center; margin-top:34px;}
+  @media (max-width:760px){.shift-grid{grid-template-columns:1fr;}}
+  .shift-card{border:1px solid var(--border-soft); border-radius:var(--radius); padding:24px; background:var(--navy-panel-2);}
+  .shift-card h4{font-family:'IBM Plex Mono'; font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-low); margin-bottom:10px;}
+  .shift-card.dev h4{color:var(--accent-blue-soft);} .shift-card.ops h4{color:var(--accent-pink);}
+  .shift-card p{font-size:14px; color:var(--text-mid); margin:0;}
+  .shift-arrow{font-size:22px; color:var(--accent-amber); text-align:center; font-family:'IBM Plex Mono';}
+
+  .calms-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:32px;}
+  @media (max-width:900px){.calms-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.calms-grid{grid-template-columns:1fr;}}
+  .calms-card{border:1px solid var(--border-soft); border-radius:8px; padding:16px; background:var(--navy-panel-2); text-align:center;}
+  .calms-card .letter{font-family:'IBM Plex Mono'; font-size:26px; font-weight:700; color:var(--accent-blue-soft);}
+  .calms-card .lbl{font-size:12px; color:var(--text-hi); font-weight:600; margin-top:4px;}
+  .calms-card .desc{font-size:11px; color:var(--text-low); margin-top:6px;}
+
+  /* diagrams */
+  .flow-box{border:1px solid var(--border-soft); border-radius:var(--radius); padding:26px; background:var(--navy-panel-2); margin-top:30px; overflow-x:auto;}
+  svg.diagram text{font-family:'IBM Plex Sans'; fill:var(--text-hi);}
+  svg.diagram .lbl-mono{font-family:'IBM Plex Mono'; fill:var(--text-low);}
+  svg.diagram .box{fill:var(--navy-panel); stroke:var(--border-soft); stroke-width:1.2;}
+  svg.diagram .box-accent{fill:rgba(91,155,255,0.10); stroke:var(--accent-blue); stroke-width:1.4;}
+  svg.diagram .box-amber{fill:rgba(255,180,84,0.08); stroke:var(--accent-amber); stroke-width:1.2;}
+  svg.diagram .box-green{fill:rgba(74,222,128,0.08); stroke:var(--accent-green); stroke-width:1.2;}
+  svg.diagram path.edge{stroke:var(--text-low); stroke-width:1.4; fill:none;}
+  .diagram-caption{text-align:center; font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-low); margin-top:10px;}
+
+  /* concept / lifecycle table */
+  table.cmp{width:100%; border-collapse:collapse; margin-top:26px; font-size:14px;}
+  table.cmp th, table.cmp td{border:1px solid var(--border-soft); padding:12px 14px; text-align:left; vertical-align:top;}
+  table.cmp th{background:var(--navy-panel); font-family:'IBM Plex Mono'; font-size:11.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--accent-blue-soft);}
+  table.cmp td{color:var(--text-mid); background:var(--navy-panel-2);}
+  table.cmp td.hcell{color:var(--text-hi); font-weight:600; background:var(--navy-panel);}
+
+  /* code blocks */
+  .code-block{background:var(--code-bg); border:1px solid var(--border-soft); border-radius:8px; margin:16px 0; overflow:hidden;}
+  .code-head{display:flex; justify-content:space-between; align-items:center; padding:8px 14px; border-bottom:1px solid var(--border-soft); font-family:'IBM Plex Mono'; font-size:11px; color:var(--text-low); text-transform:uppercase; letter-spacing:.06em;}
+  .code-block pre{margin:0; padding:16px; overflow-x:auto; font-family:'IBM Plex Mono'; font-size:12.5px; line-height:1.65; color:#CDE3FF;}
+  .code-block .c{color:#7C90B0;} .code-block .k{color:#FFB454;} .code-block .s{color:#8FE3B0;} .code-block .p{color:#8FC1FF;}
+
+  /* accordion deep dive */
+  details.step{border:1px solid var(--border-soft); border-radius:8px; margin-top:14px; background:var(--navy-panel-2); overflow:hidden;}
+  details.step summary{list-style:none; cursor:pointer; padding:20px 22px; display:flex; align-items:center; gap:16px; font-family:'Space Grotesk'; font-weight:600; color:#fff; font-size:17px;}
+  details.step summary::-webkit-details-marker{display:none;}
+  details.step summary .num{font-family:'IBM Plex Mono'; color:var(--accent-amber); font-size:13px; flex:none; width:28px;}
+  details.step summary .tagline{font-family:'IBM Plex Sans'; font-weight:400; font-size:13px; color:var(--text-low); margin-top:4px;}
+  details.step summary .titlewrap{flex:1;}
+  details.step summary .chev{margin-left:auto; color:var(--text-low); transition:transform .2s; flex:none;}
+  details.step[open] summary .chev{transform:rotate(180deg);}
+  details.step .body{padding:0 22px 24px 66px; color:var(--text-mid); font-size:14.5px; border-top:1px solid var(--border-soft);}
+  details.step .body h5{font-family:'IBM Plex Mono'; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-blue-soft); margin:22px 0 10px;}
+  details.step .body h5:first-child{margin-top:20px;}
+  .toolrow{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;}
+  .tool{font-family:'IBM Plex Mono'; font-size:11.5px; padding:5px 12px; border-radius:999px; border:1px solid var(--border-soft); color:var(--text-hi); background:var(--navy-panel);}
+  .subskill-list{margin:0; padding-left:20px;}
+  .subskill-list li{margin-bottom:8px;}
+
+  /* tabs (deployment strategies) */
+  .tab-btns{display:flex; gap:8px; margin-top:30px; flex-wrap:wrap;}
+  .tab-btn{font-family:'IBM Plex Mono'; font-size:12px; padding:9px 16px; border-radius:999px; border:1px solid var(--border-soft); background:transparent; color:var(--text-mid); cursor:pointer;}
+  .tab-btn.active{background:var(--accent-blue); color:#04101F; border-color:var(--accent-blue); font-weight:600;}
+  .tab-panel{display:none; margin-top:22px; border:1px solid var(--border-soft); border-radius:var(--radius); padding:24px; background:var(--navy-panel-2);}
+  .tab-panel.active{display:block;}
+  .tab-panel .meta-row{display:flex; gap:24px; flex-wrap:wrap; margin-top:16px; font-size:13px;}
+  .tab-panel .meta-row div{flex:1; min-width:180px;}
+  .tab-panel .meta-row .lbl{font-family:'IBM Plex Mono'; font-size:11px; text-transform:uppercase; color:var(--accent-amber); margin-bottom:4px;}
+
+  /* myths */
+  .myth-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:30px;}
+  @media (max-width:760px){.myth-grid{grid-template-columns:1fr;}}
+  .myth{border:1px solid var(--border-soft); border-radius:var(--radius); padding:18px 20px; background:var(--navy-panel-2);}
+  .myth .x{color:var(--accent-pink); font-family:'IBM Plex Mono'; font-size:11px; text-transform:uppercase; margin-bottom:6px; display:block;}
+  .myth .check{color:var(--accent-green); font-family:'IBM Plex Mono'; font-size:11px; text-transform:uppercase; margin-bottom:6px; display:block;}
+  .myth p{margin:0; font-size:13.5px; color:var(--text-mid);}
+
+  /* beyond cards */
+  .beyond-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:32px;}
+  @media (max-width:820px){.beyond-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.beyond-grid{grid-template-columns:1fr;}}
+  .beyond-card{border:1px solid var(--border-soft); border-radius:var(--radius); padding:20px; background:var(--navy-panel-2);}
+  .beyond-card .tag{font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--accent-amber); letter-spacing:.06em; text-transform:uppercase;}
+  .beyond-card h4{font-size:16px; color:#fff; margin-top:8px;}
+  .beyond-card p{font-size:13px; color:var(--text-mid); margin-top:8px;}
+
+  /* glossary */
+  .gloss-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px 30px; margin-top:30px;}
+  @media (max-width:700px){.gloss-grid{grid-template-columns:1fr;}}
+  .gloss-item{border-bottom:1px solid var(--border-soft); padding-bottom:12px;}
+  .gloss-item dt{font-family:'IBM Plex Mono'; color:var(--accent-blue-soft); font-size:14px;}
+  .gloss-item dd{margin:6px 0 0; color:var(--text-mid); font-size:13.5px;}
+
+  .src-list{margin-top:22px; display:grid; gap:10px;}
+  .src-item{font-size:13px; color:var(--text-mid); border-left:2px solid var(--border-soft); padding-left:14px;}
+
+  .callout{border-left:3px solid var(--accent-amber); background:rgba(255,180,84,0.06); padding:16px 20px; border-radius:0 8px 8px 0; margin-top:26px; font-size:14px; color:var(--text-mid);}
+  .callout strong{color:var(--text-hi);}
+
+  footer{padding:60px 0 90px; text-align:center; color:var(--text-low); font-size:12.5px; font-family:'IBM Plex Mono';}
+  footer .credit{font-family:'Space Grotesk'; font-size:15px; color:var(--text-hi); margin-bottom:10px;}
+  footer .credit strong{color:var(--accent-blue-soft); font-weight:600;}
+  footer .credit .role{display:block; font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-low); margin-top:4px;}
+  ::selection{background:var(--accent-blue); color:#04101F;}
+
+  /* mode toggle */
+  body[data-mode="simple"] .tech-only{display:none !important;}
+  body[data-mode="tech"] .simple-only{display:none !important;}
+  .mode-toggle{display:flex; gap:2px; background:var(--navy-panel-2); border:1px solid var(--border-soft); border-radius:999px; padding:3px;}
+  .mode-btn{font-family:'IBM Plex Mono'; font-size:11px; padding:6px 12px; border-radius:999px; border:none; background:transparent; color:var(--text-mid); cursor:pointer; letter-spacing:.03em;}
+  .mode-btn.active{background:var(--accent-green); color:#04180C; font-weight:600;}
+
+  /* welcome / start here */
+  .welcome-box{border:1px solid var(--border-soft); border-radius:var(--radius); padding:28px; background:linear-gradient(135deg, rgba(74,222,128,0.07), rgba(91,155,255,0.05)); margin-top:36px;}
+  .welcome-box .q{font-family:'Space Grotesk'; font-size:20px; font-weight:600; color:#fff; margin-bottom:12px;}
+  .welcome-box p{font-size:15px; color:var(--text-mid); margin:10px 0;}
+  .welcome-box strong{color:var(--accent-green);}
+  .tldr{margin-top:20px; padding:18px 20px; border-left:3px solid var(--accent-green); background:rgba(74,222,128,0.06); border-radius:0 8px 8px 0;}
+  .tldr .lbl{font-family:'IBM Plex Mono'; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-green); margin-bottom:8px; display:block;}
+  .tldr p{margin:0; font-size:15px; color:var(--text-hi); line-height:1.7;}
+
+  /* analogy box */
+  .analogy-box{display:flex; gap:14px; padding:18px 20px; border:1px solid var(--border-soft); border-radius:8px; background:rgba(91,155,255,0.05); margin-top:18px;}
+  .analogy-box .icon{font-size:24px; flex:none;}
+  .analogy-box .txt{font-size:14.5px; color:var(--text-mid);}
+  .analogy-box .txt strong{color:var(--text-hi);}
+  .analogy-box .lbl{font-family:'IBM Plex Mono'; font-size:10.5px; text-transform:uppercase; letter-spacing:.08em; color:var(--accent-blue-soft); display:block; margin-bottom:4px;}
+
+  /* where devops sits */
+  .chain{display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:10px; margin-top:30px; font-family:'IBM Plex Mono'; font-size:12.5px;}
+  .chain span.node{padding:10px 16px; border:1px solid var(--border-soft); border-radius:8px; background:var(--navy-panel-2); color:var(--text-hi);}
+  .chain span.node.hl{border-color:var(--accent-green); color:var(--accent-green); font-weight:600;}
+  .chain span.arrow{color:var(--text-low);}
+
+  /* day in the life */
+  .story{border:1px solid var(--border-soft); border-radius:var(--radius); padding:30px; background:var(--navy-panel-2); margin-top:34px;}
+  .story .step{display:flex; gap:16px; padding:14px 0; border-bottom:1px solid var(--border-soft);}
+  .story .step:last-child{border-bottom:none;}
+  .story .step .tap{font-size:22px; flex:none; width:34px;}
+  .story .step p{margin:0; font-size:14.5px; color:var(--text-mid);}
+  .story .step strong{color:var(--accent-green);}
+
+  /* faq */
+  .faq-item{border:1px solid var(--border-soft); border-radius:8px; padding:16px 20px; margin-top:10px; background:var(--navy-panel-2);}
+  .faq-item .q{font-family:'Space Grotesk'; font-weight:600; color:#fff; font-size:15px;}
+  .faq-item .a{font-size:14px; color:var(--text-mid); margin-top:8px;}
+
+  .skip-note{font-size:13px; color:var(--text-low); font-style:italic; margin-top:16px;}
+</style>
+</head>
+<body>
+<div id="rail"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">DEVOPS &middot; DEEP MAP</div>
+    <div class="navlinks">
+      <a href="#start">Start Here</a>
+      <a href="#start">Start Here</a>
+      <a href="#why">Why</a>
+      <a href="#sits">Where It Sits</a>
+      <a href="#daylife">Day in the Life</a>
+      <a href="#path">The Full Path</a>
+      <a href="#myths">Myths</a>
+      <a href="#faq">FAQ</a>
+      <a href="#glossary">Glossary</a>
+    </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="simple" onclick="setMode('simple')">&#127793; Simple</button>
+      <button class="mode-btn" data-mode="tech" onclick="setMode('tech')">&#9881; Technical</button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">A working engineer's map, not a poster</div>
+    <div class="byline">Curated &amp; compiled by <strong>Sujit Kulkarni</strong></div>
+    <h1 class="title">DevOps, with the <span>machinery</span> left in.</h1>
+    <p class="subtitle">Real Dockerfiles, real Kubernetes manifests, real CI/CD pipelines, real IAM policy JSON &mdash; one continuous path from your very first command to where the field stands today, with the engine block left open the entire way.</p>
+
+    <div class="flow-box" style="margin-top:50px;">
+      <svg class="diagram" viewBox="0 0 900 340" width="100%">
+        <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7C90B0"/></marker></defs>
+        <!-- infinity loop as two circles of nodes -->
+        <g font-size="12.5" text-anchor="middle">
+          <circle cx="230" cy="170" r="110" fill="none" stroke="#3E6FBF" stroke-width="1.4"/>
+          <circle cx="620" cy="170" r="110" fill="none" stroke="#5B9BFF" stroke-width="1.4"/>
+          <text x="230" y="60" fill="#EAF2FF">Plan</text>
+          <text x="120" y="110" fill="#EAF2FF">Code</text>
+          <text x="120" y="235" fill="#EAF2FF">Build</text>
+          <text x="230" y="285" fill="#EAF2FF">Test</text>
+          <text x="340" y="235" fill="#EAF2FF">Release</text>
+          <text x="620" y="60" fill="#EAF2FF">Deploy</text>
+          <text x="740" y="110" fill="#EAF2FF">Operate</text>
+          <text x="740" y="235" fill="#EAF2FF">Monitor</text>
+          <text x="620" y="285" fill="#EAF2FF">Feedback</text>
+          <text x="425" y="175" fill="#FFB454" class="lbl-mono" font-size="11">CI / CD boundary</text>
+        </g>
+        <path class="edge" d="M330,170 C400,120 450,120 520,170" marker-end="url(#a1)"/>
+        <path class="edge" d="M520,170 C450,220 400,220 330,170" marker-end="url(#a1)" stroke-dasharray="3 4"/>
+      </svg>
+      <p class="diagram-caption">The DevOps infinite loop &mdash; everything below maps onto this cycle, start to finish, not a straight line.</p>
+    </div>
+  </div>
+</header>
+
+<section id="start">
+  <div class="wrap">
+    <div class="kicker">Read this first</div>
+    <div class="welcome-box">
+      <div class="q">Quick question before we start: do you have any background in tech or development?</div>
+      <p>If you just thought <strong>"not really, no"</strong> &mdash; good. This page was built for you specifically. Nothing below assumes you've written code, used a terminal, or know what a "server" actually is.</p>
+      <p>Every technical stage in this page has a plain-English explanation sitting right next to it &mdash; a comparison to something ordinary, like a restaurant kitchen or a shipping container. When the code and diagrams feel like too much, use the switch in the top-right corner. <strong>&#127793; Simple mode</strong> hides the technical detail and shows you only the plain-language version. <strong>&#9881; Technical mode</strong> brings back the real commands and configs, for whenever you're ready for them. You can flip it as often as you like &mdash; there's no wrong way to read this.</p>
+      <div class="tldr">
+        <span class="lbl">DevOps in three sentences</span>
+        <p>Software used to be built by one team and kept running by a completely separate team, and they didn't get along well. DevOps is a way of working &mdash; and a set of tools &mdash; that lets one team write code and safely get it in front of users automatically, often many times a day, instead of waiting months for a risky, manual release. Everything else on this page is really just the details of how that automation actually happens.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="kicker">01 &middot; First principles</div>
+    <h2 class="h2">Why DevOps exists</h2>
+    <p class="lede">Before CI/CD or Kubernetes existed, most engineering orgs ran on two teams with opposite incentives, throwing work over a wall between them.</p>
+
+    <div class="shift-grid">
+      <div class="shift-card dev"><h4>Development</h4><p>Rewarded for shipping features fast. Rarely on call. Limited visibility into production behavior once code is merged.</p></div>
+      <div class="shift-arrow">vs</div>
+      <div class="shift-card ops"><h4>Operations</h4><p>Rewarded for uptime. Treats every new deploy as risk. No say in how the code was written, only in whether it's allowed to ship.</p></div>
+    </div>
+
+    <p class="lede" style="margin-top:26px;">DevOps merges these incentives by giving one team ownership of the full lifecycle, backed by automation that makes "ship fast" and "stay stable" compatible instead of opposed. The <strong style="color:#fff;">CALMS</strong> framework is the most common way to describe what that actually requires:</p>
+
+    <div class="calms-grid">
+      <div class="calms-card"><div class="letter">C</div><div class="lbl">Culture</div><div class="desc">Shared ownership, blameless postmortems</div></div>
+      <div class="calms-card"><div class="letter">A</div><div class="lbl">Automation</div><div class="desc">Manual runbooks become pipelines</div></div>
+      <div class="calms-card"><div class="letter">L</div><div class="lbl">Lean</div><div class="desc">Small batches, short feedback loops</div></div>
+      <div class="calms-card"><div class="letter">M</div><div class="lbl">Measurement</div><div class="desc">Deploy frequency, MTTR, change fail rate</div></div>
+      <div class="calms-card"><div class="letter">S</div><div class="lbl">Sharing</div><div class="desc">No tribal knowledge, no tool silos</div></div>
+    </div>
+
+    <div class="callout"><strong>The four metrics that actually matter</strong> (from Google's DORA research): deployment frequency, lead time for changes, change failure rate, and time to restore service. Elite-performing teams deploy on demand, in under an hour, with under 15% of changes causing failures, and recover in under an hour when something breaks.</div>
+  </div>
+</section>
+
+<section id="sits">
+  <div class="wrap">
+    <div class="kicker">02 &middot; Orientation</div>
+    <h2 class="h2">Where DevOps actually sits</h2>
+    <p class="lede">Not a department. Not a job you can point to on an org chart with a box around it. Here's where it fits.</p>
+
+    <p class="lede" style="margin-top:24px;"><strong style="color:#fff;">In the journey from idea to something you actually use:</strong></p>
+    <div class="chain">
+      <span class="node">Idea / Product</span><span class="arrow">&rarr;</span>
+      <span class="node">Development<br>(writes the code)</span><span class="arrow">&rarr;</span>
+      <span class="node hl">DevOps<br>(gets it out safely)</span><span class="arrow">&rarr;</span>
+      <span class="node">Operations<br>(keeps it running)</span><span class="arrow">&rarr;</span>
+      <span class="node">You, the user</span>
+    </div>
+    <p class="lede" style="margin-top:20px;">DevOps is the bridge in the middle &mdash; it doesn't replace developers or operations staff, it's the practice (and the tooling) that connects them, so the handoff between "code is written" and "code is running in front of you" happens automatically instead of manually.</p>
+
+    <p class="lede" style="margin-top:34px;"><strong style="color:#fff;">Job titles people often confuse with each other:</strong></p>
+    <table class="cmp">
+      <tr><th>Title</th><th>In plain English, they focus on&hellip;</th></tr>
+      <tr><td class="hcell">Software Developer</td><td>Writing the actual features and logic of the application</td></tr>
+      <tr><td class="hcell">DevOps Engineer</td><td>Building the automation (pipelines, deployments) that gets that code live safely and repeatedly</td></tr>
+      <tr><td class="hcell">Site Reliability Engineer (SRE)</td><td>Keeping the live system up and fast, and formally managing how much risk it's allowed to take on</td></tr>
+      <tr><td class="hcell">Cloud Engineer</td><td>Setting up and managing the rented infrastructure (servers, storage, networking) the app runs on</td></tr>
+      <tr><td class="hcell">System Administrator (Sysadmin)</td><td>The older, more manual version of Operations &mdash; maintaining physical or virtual servers directly</td></tr>
+      <tr><td class="hcell">QA / Test Engineer</td><td>Making sure the software actually works correctly before it reaches anyone</td></tr>
+    </table>
+    <p class="skip-note simple-only">You don't need to memorize this table &mdash; the only thing worth remembering is that these are all different flavors of the same underlying goal: get good software to people, safely.</p>
+
+    <div class="analogy-box simple-only">
+      <div class="icon">&#127960;</div>
+      <div class="txt"><span class="lbl">Think of it like</span>Opening a restaurant. The <strong>chef</strong> (developer) creates the dish. <strong>DevOps</strong> is the kitchen system &mdash; tickets, prep stations, timing &mdash; that gets that dish from the chef's hands to the customer's table, hot, correctly, every single time, even during a packed Friday night. <strong>Operations</strong> is what keeps the whole restaurant open, lit, and running once the doors are open.</div>
+    </div>
+
+    <p class="lede" style="margin-top:30px;">You don't need a company with a dedicated "DevOps team" to be doing DevOps &mdash; at a small startup, one or two developers often do all of this themselves. At a large company, it may be an entire department. Either way, it's the same practice at a different scale, and it's now considered a standard part of how most software companies operate, not a specialty a few companies use.</p>
+  </div>
+</section>
+
+<section id="daylife">
+  <div class="wrap">
+    <div class="kicker">03 &middot; In practice</div>
+    <h2 class="h2">One tap on your phone, traced all the way through</h2>
+    <p class="lede">Here's everything above, told as one uninterrupted story instead of six separate topics. You open a food delivery app and tap "Order."</p>
+
+    <div class="story">
+      <div class="step"><span class="tap">&#128241;</span><p><strong>You tap "Order."</strong> That single tap turns into a request that has to travel to a computer somewhere and come back with a confirmation, in well under a second.</p></div>
+      <div class="step"><span class="tap">&#128187;</span><p><strong>The code that handles your order</strong> was written by a developer, saved and tracked using <strong>Git</strong> so nothing was ever lost or overwritten by a teammate working on the same feature.</p></div>
+      <div class="step"><span class="tap">&#9881;</span><p>Before it ever went live, that code passed through a <strong>CI/CD pipeline</strong> &mdash; an automatic assembly line that tested it, checked for bugs, and got it ready to ship, all without a human clicking "deploy" by hand.</p></div>
+      <div class="step"><span class="tap">&#128230;</span><p>The finished app was packaged with <strong>Docker</strong> &mdash; sealed into a container that runs identically whether it's on a test server or the real one, so nothing behaves unexpectedly once it's live.</p></div>
+      <div class="step"><span class="tap">&#127860;</span><p><strong>Kubernetes</strong> is running many copies of that container at once, because thousands of people are ordering food at the same moment you are &mdash; and if one copy crashes, it's replaced automatically, before anyone notices.</p></div>
+      <div class="step"><span class="tap">&#9729;&#65039;</span><p>All of this runs on rented computers inside <strong>AWS</strong> &mdash; the restaurant app's company doesn't own a single physical server; they rent exactly the amount of computing power they need, and it scales up automatically on a busy Friday night.</p></div>
+      <div class="step"><span class="tap">&#128200;</span><p>The moment your order confirmation comes back slower than usual, a <strong>monitoring</strong> dashboard somewhere lights up, and an engineer gets paged &mdash; often before you'd even think to complain.</p></div>
+      <div class="step"><span class="tap">&#9989;</span><p><strong>Your order confirms.</strong> Every stage above happened in the background, in well under a second, without you ever knowing any of it existed &mdash; until right now.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="path">
+  <div class="wrap">
+    <div class="kicker">04 &middot; The complete path</div>
+    <h2 class="h2">Every stage, start to finish, in one continuous line</h2>
+    <p class="lede">No separate "before" or "after" here &mdash; this is one sequence, from your very first command to where the field stands today. Each stage builds directly on the one before it.</p>
+
+    <details class="step" open>
+      <summary><span class="num">01</span><div class="titlewrap">Programming Fundamentals<div class="tagline">You need to read and write at least one language fluently</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128218;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>Learning the alphabet before writing sentences. Bash scripts, CI/CD pipelines, and Kubernetes tooling are all just programs underneath &mdash; without variables, loops, and functions already comfortable, every later stage doubles as a coding lesson you didn't sign up for.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Why this comes before Linux &amp; Bash</h5>
+        <p>Bash scripting, CI/CD pipelines, and Kubernetes tooling are all just programs. If variables, loops, functions, and conditionals aren't already second nature in some language, every later stage doubles as a programming lesson you didn't sign up for. Python and Go are the two languages DevOps tooling is overwhelmingly written in &mdash; Python for scripting and automation, Go for the tools themselves (Docker, Kubernetes, and Terraform are all written in Go).</p>
+        <h5>The specific skill that matters most here: structured data</h5>
+        <p>Almost every config file you'll touch later &mdash; Kubernetes manifests, GitHub Actions workflows, Terraform variables &mdash; is YAML or JSON. Being able to read and generate it programmatically, not just by hand, is what makes automation possible.</p>
+        <div class="code-block">
+          <div class="code-head"><span>read_config.py</span><span>python</span></div>
+          <pre><span class="k">import</span> yaml
+
+<span class="k">with</span> open(<span class="s">"deployment.yaml"</span>) <span class="k">as</span> f:
+    config = yaml.safe_load(f)
+
+replicas = config[<span class="s">"spec"</span>][<span class="s">"replicas"</span>]
+<span class="k">print</span>(<span class="s">f"Currently configured for {replicas} replicas"</span>)</pre>
+        </div>
+        <div class="toolrow"><span class="tool">Python or Go</span><span class="tool">functions &amp; control flow</span><span class="tool">JSON parsing</span><span class="tool">YAML parsing</span><span class="tool">package managers (pip / go mod)</span><span class="tool">error handling</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">02</span><div class="titlewrap">Computer Networking Basics<div class="tagline">You can't reason about Services, Ingress, or VPCs without this</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128231;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>The postal system. DNS is the address lookup that finds the right building. TCP is the delivery truck that guarantees your package actually arrives, in order, undamaged. HTTP is the letter inside the package &mdash; the actual message being exchanged.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The layers that matter in practice</h5>
+        <table class="cmp">
+          <tr><th>Layer</th><th>What it handles</th><th>Where you'll meet it later</th></tr>
+          <tr><td class="hcell">Application (L7)</td><td>HTTP, HTTPS, DNS</td><td>Kubernetes Ingress rules, ALB routing</td></tr>
+          <tr><td class="hcell">Transport (L4)</td><td>TCP (reliable) vs UDP (fast, no guarantee)</td><td>Kubernetes Services, load balancer health checks</td></tr>
+          <tr><td class="hcell">Network (L3)</td><td>IP addressing and routing</td><td>VPC subnets, pod-to-pod networking (CNI)</td></tr>
+        </table>
+        <h5>What actually happens when you load a page</h5>
+        <p><strong>DNS resolution</strong> turns a hostname into an IP &rarr; a <strong>TCP handshake</strong> (SYN, SYN-ACK, ACK) opens a connection &rarr; for HTTPS, a <strong>TLS handshake</strong> negotiates encryption &rarr; then the actual <strong>HTTP request/response</strong> happens. Every one of those steps is something you will debug directly later &mdash; a failed TLS handshake and a DNS misconfiguration look completely different in the logs.</p>
+        <div class="code-block">
+          <div class="code-head"><span>terminal</span><span>bash</span></div>
+          <pre><span class="c">$ curl -v https://api.example.com/health</span>
+<span class="c">*   Trying 93.184.216.34:443...</span>       <span class="c"># TCP connect</span>
+<span class="c">* Connected to api.example.com</span>
+<span class="c">* TLS handshake, negotiated TLSv1.3</span>   <span class="c"># TLS handshake</span>
+<span class="c">> GET /health HTTP/1.1</span>                <span class="c"># HTTP request</span>
+<span class="c">< HTTP/1.1 200 OK</span>                     <span class="c"># HTTP response</span></pre>
+        </div>
+        <div class="toolrow"><span class="tool">TCP vs UDP</span><span class="tool">DNS resolution</span><span class="tool">HTTP/HTTPS</span><span class="tool">TLS handshake</span><span class="tool">ports &amp; sockets</span><span class="tool">CIDR / subnetting</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">03</span><div class="titlewrap">Operating System Concepts<div class="tagline">The theory behind what Linux &amp; Bash makes hands-on</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127859;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A shared professional kitchen. Virtual memory gives every chef (process) their own private counter space, even though they're all working in the same kitchen at once, so one chef's mess never spills onto another's station.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Processes: the unit everything else is built on</h5>
+        <p>A process moves through states &mdash; <strong>Ready</strong> (waiting for CPU time) &rarr; <strong>Running</strong> &rarr; <strong>Waiting/Blocked</strong> (on I/O) &rarr; back to Ready, or <strong>Terminated</strong>. A container is, underneath, just a process with restricted visibility into the rest of the system, isolated using two Linux kernel features: <strong>namespaces</strong> (what it can see &mdash; its own filesystem, network, process list) and <strong>cgroups</strong> (how much it can use &mdash; CPU, memory limits). This is the literal mechanism behind the <span class="mono">resources.limits</span> field in the Kubernetes manifest from the Deep Dive section.</p>
+        <h5>Memory and the filesystem</h5>
+        <p><strong>Virtual memory</strong> gives every process its own private address space, mapped by the kernel onto physical RAM (and disk, via paging, when RAM is full) &mdash; this is why one process crashing rarely takes down another. The filesystem hierarchy (<span class="mono">/etc</span>, <span class="mono">/var</span>, <span class="mono">/proc</span>) is worth knowing by habit: <span class="mono">/proc</span> in particular is a live, virtual view into running processes that tools like <span class="mono">top</span> read directly.</p>
+        <div class="toolrow"><span class="tool">process states</span><span class="tool">namespaces &amp; cgroups</span><span class="tool">virtual memory</span><span class="tool">kernel vs user space</span><span class="tool">system calls</span><span class="tool">the /proc filesystem</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">04</span><div class="titlewrap">SDLC &amp; Agile / Scrum<div class="tagline">Understanding the problem DevOps was invented to solve</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127959;&#65039;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>Waterfall is building an entire house before anyone is allowed to move in. Agile is building it room by room, letting people move into each finished room immediately. DevOps is having the movers on standby the second a room is ready.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Three ways of organizing the work</h5>
+        <table class="cmp">
+          <tr><th>Model</th><th>Release cadence</th><th>Where DevOps fits</th></tr>
+          <tr><td class="hcell">Waterfall</td><td>Months to years, one big release</td><td>Doesn't &mdash; there's no room for continuous anything</td></tr>
+          <tr><td class="hcell">Agile / Scrum</td><td>1&ndash;4 week sprints, incremental releases</td><td>Sets the cadence; DevOps automates the delivery of each increment</td></tr>
+          <tr><td class="hcell">DevOps (continuous)</td><td>On demand, multiple times a day</td><td>The end state Agile was reaching toward</td></tr>
+        </table>
+        <h5>The Scrum ceremonies that feed the pipeline</h5>
+        <p><strong>Sprint planning</strong> decides what gets built; a <strong>daily standup</strong> surfaces blockers before they cost days; a <strong>sprint review</strong> demos what shipped; a <strong>retrospective</strong> is where the "Culture" and "Measurement" letters of CALMS actually get practiced &mdash; it's the recurring meeting where a team looks at its own deploy frequency and failure rate and decides what to automate next.</p>
+        <div class="toolrow"><span class="tool">sprints</span><span class="tool">backlog &amp; user stories</span><span class="tool">standups</span><span class="tool">retrospectives</span><span class="tool">Kanban boards</span><span class="tool">definition of done</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step" open>
+      <summary><span class="num">05</span><div class="titlewrap">Linux &amp; Bash<div class="tagline">Process model, permissions, and shell automation</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128663;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>Learning to drive before you learn to navigate a city. Linux is the "engine and controls" of almost every computer that runs software you use daily &mdash; and Bash is just typing instructions to that computer instead of clicking icons, the same way a stick-shift driver operates the pedals directly instead of relying on an automatic.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Sub-skills that make up this stage</h5>
+        <ul class="subskill-list">
+          <li><strong>Filesystem &amp; permissions:</strong> the <span class="mono">rwx</span> model, octal notation (<span class="mono">chmod 755</span>), ownership (<span class="mono">chown</span>), and why containers later run as non-root for security.</li>
+          <li><strong>Process management:</strong> <span class="mono">ps</span>, <span class="mono">top</span>/<span class="mono">htop</span>, signals (<span class="mono">SIGTERM</span> vs <span class="mono">SIGKILL</span>), and <span class="mono">systemd</span> units &mdash; the same signal handling matters later for graceful pod shutdowns in Kubernetes.</li>
+          <li><strong>Text processing:</strong> <span class="mono">grep</span>, <span class="mono">awk</span>, <span class="mono">sed</span>, <span class="mono">jq</span> for parsing logs and JSON output from cloud CLIs.</li>
+          <li><strong>Networking basics:</strong> <span class="mono">curl</span>, <span class="mono">dig</span>, <span class="mono">netstat</span>/<span class="mono">ss</span>, understanding ports and DNS resolution.</li>
+          <li><strong>Bash scripting:</strong> variables, loops, exit codes, and <span class="mono">set -euo pipefail</span> as a safety default for any script that will run unattended in a pipeline.</li>
+        </ul>
+        <h5>A script you'll actually write</h5>
+        <div class="code-block">
+          <div class="code-head"><span>deploy-check.sh</span><span>bash</span></div>
+          <pre><span class="c">#!/usr/bin/env bash</span>
+<span class="k">set</span> -euo pipefail
+
+<span class="c"># fail fast if disk usage is above threshold before a deploy</span>
+THRESHOLD=<span class="s">85</span>
+USAGE=$(df / | awk <span class="s">'NR==2{print $5}'</span> | tr -d <span class="s">'%'</span>)
+
+<span class="k">if</span> [ <span class="s">"$USAGE"</span> -gt <span class="s">"$THRESHOLD"</span> ]; <span class="k">then</span>
+  echo <span class="s">"Disk usage ${USAGE}% exceeds ${THRESHOLD}% &mdash; aborting deploy"</span>
+  <span class="k">exit</span> 1
+<span class="k">fi</span>
+echo <span class="s">"Disk OK ($USAGE%), continuing deploy"</span></pre>
+        </div>
+        <div class="toolrow"><span class="tool">chmod / chown</span><span class="tool">systemd</span><span class="tool">ps / top</span><span class="tool">grep / awk / sed</span><span class="tool">cron</span><span class="tool">SSH keys</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">06</span><div class="titlewrap">Git &amp; CI/CD<div class="tagline">Branching strategy, pipeline stages, and the testing pyramid</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128221;</div>
+          <div class="txt"><span class="lbl">Think of it like</span><strong>Git</strong> is Google Docs "version history" for code &mdash; you can always see who changed what, and undo it if needed. <strong>CI/CD</strong> is a factory assembly line: every time someone finishes their part, robots automatically inspect it and pass it along, instead of a manager manually checking every single item by hand.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Branching strategies (pick one, don't mix)</h5>
+        <table class="cmp">
+          <tr><th>Strategy</th><th>How it works</th><th>Best for</th></tr>
+          <tr><td class="hcell">Trunk-based</td><td>Everyone commits small changes directly to main, behind feature flags</td><td>Teams doing continuous deployment</td></tr>
+          <tr><td class="hcell">GitFlow</td><td>Long-lived develop/release/hotfix branches, formal release cuts</td><td>Versioned software with scheduled releases</td></tr>
+          <tr><td class="hcell">GitHub Flow</td><td>Short-lived feature branches merged via PR straight to main</td><td>Most SaaS teams &mdash; a middle ground</td></tr>
+        </table>
+        <h5>What CI actually runs, stage by stage</h5>
+        <div class="code-block">
+          <div class="code-head"><span>.github/workflows/ci.yml</span><span>yaml</span></div>
+          <pre><span class="p">name:</span> CI
+<span class="p">on:</span> [push, pull_request]
+<span class="p">jobs:</span>
+  <span class="p">build-test:</span>
+    <span class="p">runs-on:</span> ubuntu-latest
+    <span class="p">steps:</span>
+      - <span class="p">uses:</span> actions/checkout@v4
+      - <span class="p">name:</span> Install deps
+        <span class="p">run:</span> npm ci
+      - <span class="p">name:</span> Lint
+        <span class="p">run:</span> npm run lint
+      - <span class="p">name:</span> Unit tests
+        <span class="p">run:</span> npm test -- --coverage
+      - <span class="p">name:</span> Build Docker image
+        <span class="p">run:</span> docker build -t app:$&#123;&#123; github.sha &#125;&#125; .
+      - <span class="p">name:</span> Push to registry
+        <span class="p">run:</span> docker push app:$&#123;&#123; github.sha &#125;&#125;</pre>
+        </div>
+        <h5>The testing pyramid this pipeline enforces</h5>
+        <p>Many fast, cheap <strong>unit tests</strong> at the base &rarr; fewer <strong>integration tests</strong> in the middle &rarr; a small number of slow, expensive <strong>end-to-end tests</strong> at the top. A pipeline that inverts this (mostly E2E tests) is slow and flaky; that's a common early mistake.</p>
+        <div class="toolrow"><span class="tool">GitHub Actions</span><span class="tool">GitLab CI</span><span class="tool">Jenkins</span><span class="tool">CircleCI</span><span class="tool">feature flags</span><span class="tool">semantic versioning</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">07</span><div class="titlewrap">Docker<div class="tagline">Image layers, multi-stage builds, and why smaller images matter</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128667;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A shipping container. It doesn't matter if it's full of electronics, clothes, or furniture &mdash; the box is the same shape, so it fits on any ship, truck, or crane without anyone needing to repack it. <strong>Docker</strong> packages an app the same way: wherever it runs, it behaves exactly the same, because everything it needs travels inside the box with it.</div>
+        </div>
+        <div class="tech-only">
+        <h5>How image layers actually work</h5>
+        <p>Each instruction in a Dockerfile creates a cached, immutable layer. Docker reuses layers that haven't changed, so ordering matters: put things that change rarely (dependency installs) before things that change often (your source code) so rebuilds stay fast.</p>
+        <h5>A production-grade multi-stage Dockerfile</h5>
+        <div class="code-block">
+          <div class="code-head"><span>Dockerfile</span><span>docker</span></div>
+          <pre><span class="c"># ---- build stage ----</span>
+<span class="k">FROM</span> node:20-alpine <span class="k">AS</span> builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+<span class="c"># ---- runtime stage: only the compiled output ships ----</span>
+<span class="k">FROM</span> node:20-alpine
+WORKDIR /app
+RUN addgroup -S app && adduser -S app -G app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+USER app
+EXPOSE 3000
+CMD [<span class="s">"node"</span>, <span class="s">"dist/server.js"</span>]</pre>
+        </div>
+        <p>Two things doing real work here: the <strong>multi-stage build</strong> discards build tools and source maps so the final image is a fraction of the size, and <strong>USER app</strong> means the container never runs as root &mdash; the same permissions discipline from stage one, applied to a container.</p>
+        <div class="toolrow"><span class="tool">multi-stage builds</span><span class="tool">layer caching</span><span class="tool">.dockerignore</span><span class="tool">Docker Compose</span><span class="tool">image scanning (Trivy)</span><span class="tool">non-root user</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">08</span><div class="titlewrap">Kubernetes<div class="tagline">Declarative desired-state and self-healing at scale</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127860;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A restaurant manager during a dinner rush. If one cook gets overwhelmed, the manager pulls in another. If a cook walks out mid-shift, the manager replaces them immediately, without the customers ever noticing a gap. <strong>Kubernetes</strong> does exactly this for a program's many running copies &mdash; watching, restarting, and rebalancing automatically, all day, without a human standing over it.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The core idea: desired state, not commands</h5>
+        <p>You don't tell Kubernetes "start 3 containers." You declare "I want 3 replicas running, always" and a control loop continuously reconciles reality toward that state &mdash; restarting crashed pods, rescheduling them onto healthy nodes, all without a human intervening.</p>
+        <h5>A real Deployment + Service manifest</h5>
+        <div class="code-block">
+          <div class="code-head"><span>deployment.yaml</span><span>yaml</span></div>
+          <pre><span class="p">apiVersion:</span> apps/v1
+<span class="p">kind:</span> Deployment
+<span class="p">metadata:</span>
+  <span class="p">name:</span> api-server
+<span class="p">spec:</span>
+  <span class="p">replicas:</span> 3
+  <span class="p">selector:</span>
+    <span class="p">matchLabels:</span> &#123; app: api &#125;
+  <span class="p">template:</span>
+    <span class="p">metadata:</span>
+      <span class="p">labels:</span> &#123; app: api &#125;
+    <span class="p">spec:</span>
+      <span class="p">containers:</span>
+      - <span class="p">name:</span> api
+        <span class="p">image:</span> registry.example.com/api:1.4.2
+        <span class="p">resources:</span>
+          <span class="p">requests:</span> &#123; cpu: <span class="s">"250m"</span>, memory: <span class="s">"256Mi"</span> &#125;
+          <span class="p">limits:</span>   &#123; cpu: <span class="s">"500m"</span>, memory: <span class="s">"512Mi"</span> &#125;
+        <span class="p">readinessProbe:</span>
+          <span class="p">httpGet:</span> &#123; path: /healthz, port: 3000 &#125;
+<span class="p">---</span>
+<span class="p">apiVersion:</span> v1
+<span class="p">kind:</span> Service
+<span class="p">metadata:</span>
+  <span class="p">name:</span> api-service
+<span class="p">spec:</span>
+  <span class="p">selector:</span> &#123; app: api &#125;
+  <span class="p">ports:</span> [&#123; port: 80, targetPort: 3000 &#125;]
+  <span class="p">type:</span> ClusterIP</pre>
+        </div>
+        <p><strong>Why <span class="mono">requests</span> and <span class="mono">limits</span> exist:</strong> requests tell the scheduler how much capacity to reserve on a node; limits cap how much a runaway pod can consume. Skip these and one bad pod can starve every other workload on the node. <strong>Why <span class="mono">readinessProbe</span> matters:</strong> Kubernetes won't send traffic to a pod until it reports healthy &mdash; this is what makes rolling deploys zero-downtime.</p>
+        <h5>Service types &mdash; how traffic actually reaches a pod</h5>
+        <table class="cmp">
+          <tr><th>Type</th><th>What it does</th></tr>
+          <tr><td class="hcell">ClusterIP</td><td>Internal-only address, reachable from inside the cluster (default)</td></tr>
+          <tr><td class="hcell">NodePort</td><td>Opens a static port on every node, for simple external access</td></tr>
+          <tr><td class="hcell">LoadBalancer</td><td>Provisions a cloud load balancer (e.g. an AWS ELB) automatically</td></tr>
+          <tr><td class="hcell">Ingress</td><td>HTTP-aware routing layer &mdash; one entry point, path/host-based rules to many services</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">Deployments &amp; ReplicaSets</span><span class="tool">Services &amp; Ingress</span><span class="tool">ConfigMaps &amp; Secrets</span><span class="tool">Horizontal Pod Autoscaler</span><span class="tool">Helm charts</span><span class="tool">liveness/readiness probes</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">09</span><div class="titlewrap">Kubernetes Architecture Under the Hood<div class="tagline">What "restaurant manager" is actually doing, mechanically</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127959;&#65039;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A restaurant's back office. The <strong>control plane</strong> is the manager's office &mdash; a master reservation book (etcd) that stores "we promised 3 tables ready," a host (scheduler) who decides which table an order goes to, and a floor manager (controller manager) who notices if a table went empty and immediately reseats it. The <strong>worker nodes</strong> are the actual kitchen stations doing the cooking.</div>
+        </div>
+        <div class="tech-only">
+    <div class="flow-box tech-only">
+      <svg class="diagram" viewBox="0 0 1000 420" width="100%">
+        <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7C90B0"/></marker></defs>
+        <g transform="translate(20,30)">
+          <rect class="box-accent" width="420" height="330" rx="10"/>
+          <text x="210" y="30" text-anchor="middle" font-weight="700" font-size="15">Control Plane</text>
+          <g transform="translate(30,55)"><rect class="box" width="160" height="60" rx="6"/><text x="80" y="26" text-anchor="middle" font-size="12" font-weight="600">API Server</text><text x="80" y="44" text-anchor="middle" class="lbl-mono" font-size="10">front door for kubectl</text></g>
+          <g transform="translate(230,55)"><rect class="box" width="160" height="60" rx="6"/><text x="80" y="26" text-anchor="middle" font-size="12" font-weight="600">etcd</text><text x="80" y="44" text-anchor="middle" class="lbl-mono" font-size="10">cluster state store</text></g>
+          <g transform="translate(30,140)"><rect class="box" width="160" height="60" rx="6"/><text x="80" y="26" text-anchor="middle" font-size="12" font-weight="600">Scheduler</text><text x="80" y="44" text-anchor="middle" class="lbl-mono" font-size="10">picks which node</text></g>
+          <g transform="translate(230,140)"><rect class="box" width="160" height="60" rx="6"/><text x="80" y="26" text-anchor="middle" font-size="12" font-weight="600">Controller Mgr</text><text x="80" y="44" text-anchor="middle" class="lbl-mono" font-size="10">reconciles desired state</text></g>
+          <text x="210" y="245" text-anchor="middle" class="lbl-mono" font-size="11" fill="#FFB454">"3 replicas, always" is stored and enforced here</text>
+        </g>
+
+        <path class="edge" d="M440,195 L560,195" marker-end="url(#a2)"/>
+
+        <g transform="translate(560,30)">
+          <rect class="box" width="420" height="330" rx="10" stroke="#4ADE80"/>
+          <text x="210" y="30" text-anchor="middle" font-weight="700" font-size="15" fill="#4ADE80">Worker Node</text>
+          <g transform="translate(30,55)"><rect class="box" width="170" height="55" rx="6"/><text x="85" y="24" text-anchor="middle" font-size="12" font-weight="600">kubelet</text><text x="85" y="42" text-anchor="middle" class="lbl-mono" font-size="10">talks to API server</text></g>
+          <g transform="translate(220,55)"><rect class="box" width="170" height="55" rx="6"/><text x="85" y="24" text-anchor="middle" font-size="12" font-weight="600">kube-proxy</text><text x="85" y="42" text-anchor="middle" class="lbl-mono" font-size="10">routes Service traffic</text></g>
+          <g transform="translate(30,130)"><rect class="box-amber" width="360" height="150" rx="6"/><text x="180" y="26" text-anchor="middle" font-size="12" font-weight="600">Pods (your containers)</text>
+            <g transform="translate(20,45)"><rect class="box" width="100" height="70" rx="6"/><text x="50" y="40" text-anchor="middle" font-size="11">api-server</text></g>
+            <g transform="translate(135,45)"><rect class="box" width="100" height="70" rx="6"/><text x="50" y="40" text-anchor="middle" font-size="11">api-server</text></g>
+            <g transform="translate(250,45)"><rect class="box" width="100" height="70" rx="6"/><text x="50" y="40" text-anchor="middle" font-size="11">api-server</text></g>
+          </g>
+        </g>
+      </svg>
+      <p class="diagram-caption">Simplified single-node view &mdash; a real cluster runs several worker nodes, each with its own kubelet and pods, all reconciled by the same control plane.</p>
+    </div>
+    <p class="lede tech-only" style="margin-top:24px;">When you run <span class="mono">kubectl apply -f deployment.yaml</span>: the request hits the <strong>API server</strong>, gets written to <strong>etcd</strong>, the <strong>Scheduler</strong> assigns each pod to a node with enough free capacity, and each node's <strong>kubelet</strong> pulls the image and starts the container. If a pod dies, the <strong>Controller Manager</strong> notices the actual state no longer matches the desired 3 replicas and schedules a replacement &mdash; no human involved.</p>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">10</span><div class="titlewrap">Deployment Strategies<div class="tagline">"Deploy" isn't one action &mdash; it's a risk trade-off you choose</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128260;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>Four different ways to renovate a shop while staying open. Some strategies close the doors briefly (Recreate); some renovate one corner at a time with the shop still running (Rolling); some quietly build an entire twin shop next door and switch the sign over one day (Blue-Green); some let a few customers try the new layout before rolling it out to everyone (Canary).</div>
+        </div>
+        <div class="tech-only">
+        <p class="lede" style="margin-top:0;">Kubernetes supports all four natively or via add-ons.</p>
+        <div class="tab-btns">
+      <button class="tab-btn active" data-tab="d1">Recreate</button>
+      <button class="tab-btn" data-tab="d2">Rolling Update</button>
+      <button class="tab-btn" data-tab="d3">Blue-Green</button>
+      <button class="tab-btn" data-tab="d4">Canary</button>
+    </div>
+        <div class="tab-panel active" id="d1">
+          <p class="simple-only" style="color:var(--accent-green); font-size:13px; font-family:'IBM Plex Mono';">&#128161; Like turning every light in a building off, then back on &mdash; simple, but everyone's in the dark for a moment.</p>
+          <p class="tech-only">Every old pod is stopped, then every new pod is started. Simplest possible strategy.</p>
+          <div class="meta-row">
+            <div><div class="lbl">Downtime</div>Yes, brief but real</div>
+            <div><div class="lbl">Rollback speed</div>Slow &mdash; must redeploy old version</div>
+            <div><div class="lbl">Use when</div>Dev/staging environments, or apps that can't run two versions at once</div>
+          </div>
+        </div>
+        <div class="tab-panel" id="d2">
+          <p class="simple-only" style="color:var(--accent-green); font-size:13px; font-family:'IBM Plex Mono';">&#128161; Like changing a car's tires one at a time while it's still slowly rolling &mdash; never fully stopped, never all four off at once.</p>
+          <p class="tech-only">New pods start gradually while old pods are terminated one batch at a time; the <span class="mono">readinessProbe</span> from the manifest above is what makes this safe &mdash; traffic never hits a pod that isn't ready.</p>
+          <div class="meta-row">
+            <div><div class="lbl">Downtime</div>Zero, if configured correctly</div>
+            <div><div class="lbl">Rollback speed</div>Moderate &mdash; roll the update backward</div>
+            <div><div class="lbl">Use when</div>The default choice for most stateless services</div>
+          </div>
+        </div>
+        <div class="tab-panel" id="d3">
+          <p class="simple-only" style="color:var(--accent-green); font-size:13px; font-family:'IBM Plex Mono';">&#128161; Like building an identical twin restaurant next door, getting it fully ready, then handing all customers a flyer pointing them there at once.</p>
+          <p class="tech-only">Two full environments run side by side ("blue" = live, "green" = new). Traffic switches all at once via the load balancer or Service selector once green is verified.</p>
+          <div class="meta-row">
+            <div><div class="lbl">Downtime</div>Zero</div>
+            <div><div class="lbl">Rollback speed</div>Instant &mdash; just switch traffic back</div>
+            <div><div class="lbl">Use when</div>You need instant rollback and can afford double the infrastructure cost temporarily</div>
+          </div>
+        </div>
+        <div class="tab-panel" id="d4">
+          <p class="simple-only" style="color:var(--accent-green); font-size:13px; font-family:'IBM Plex Mono';">&#128161; Like a chef letting a few tables taste-test a new recipe before it goes on the full menu for everyone.</p>
+          <p class="tech-only">The new version gets a small slice of real traffic (e.g. 5%), monitored closely, then gradually increased if error rates and latency stay healthy.</p>
+          <div class="meta-row">
+            <div><div class="lbl">Downtime</div>Zero</div>
+            <div><div class="lbl">Rollback speed</div>Fast, and only a small fraction of users were ever affected</div>
+            <div><div class="lbl">Use when</div>High-traffic, high-risk changes where blast radius matters most</div>
+          </div>
+        </div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">11</span><div class="titlewrap">AWS Cloud<div class="tagline">IAM as the security foundation, and infrastructure as code</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127970;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>Renting office space instead of constructing your own building. You don't buy land, pour concrete, or wire electricity &mdash; a landlord (Amazon) already built all of that, and you just rent exactly the desks, power, and security you need, paying only for what you use, and calling to add more space the moment you need it.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The rule almost every AWS breach traces back to</h5>
+        <p>Over-permissioned IAM roles. The fix is the <strong>principle of least privilege</strong>: a role gets exactly the permissions it needs, nothing more, expressed as an explicit JSON policy rather than broad managed permissions.</p>
+        <div class="code-block">
+          <div class="code-head"><span>s3-read-policy.json</span><span>json</span></div>
+          <pre>&#123;
+  <span class="p">"Version"</span>: <span class="s">"2012-10-17"</span>,
+  <span class="p">"Statement"</span>: [&#123;
+    <span class="p">"Effect"</span>: <span class="s">"Allow"</span>,
+    <span class="p">"Action"</span>: [<span class="s">"s3:GetObject"</span>, <span class="s">"s3:ListBucket"</span>],
+    <span class="p">"Resource"</span>: [
+      <span class="s">"arn:aws:s3:::app-uploads"</span>,
+      <span class="s">"arn:aws:s3:::app-uploads/*"</span>
+    ]
+  &#125;]
+&#125;</pre>
+        </div>
+        <h5>Provisioning that infrastructure as code, not by hand</h5>
+        <div class="code-block">
+          <div class="code-head"><span>main.tf</span><span>terraform</span></div>
+          <pre><span class="p">resource</span> <span class="s">"aws_s3_bucket"</span> <span class="s">"uploads"</span> &#123;
+  <span class="p">bucket</span> = <span class="s">"app-uploads"</span>
+  <span class="p">tags</span> = &#123; Environment = <span class="s">"production"</span> &#125;
+&#125;
+
+<span class="p">resource</span> <span class="s">"aws_eks_cluster"</span> <span class="s">"main"</span> &#123;
+  <span class="p">name</span>     = <span class="s">"prod-cluster"</span>
+  <span class="p">role_arn</span> = aws_iam_role.eks.arn
+  <span class="p">vpc_config</span> &#123; subnet_ids = var.subnet_ids &#125;
+&#125;</pre>
+        </div>
+        <p>The point of Terraform here isn't the syntax &mdash; it's that infrastructure changes go through the same <strong>Git &amp; CI/CD</strong> pipeline from stage two: reviewed in a pull request, planned, and applied automatically, instead of someone clicking through the AWS console.</p>
+        <h5>Core services and what they're actually for</h5>
+        <table class="cmp">
+          <tr><th>Service</th><th>What it's for</th></tr>
+          <tr><td class="hcell">EC2</td><td>Rentable virtual machines &mdash; the raw compute layer</td></tr>
+          <tr><td class="hcell">S3</td><td>Object storage for files, backups, and static assets</td></tr>
+          <tr><td class="hcell">IAM</td><td>Who (or what) is allowed to do what, and to which resources</td></tr>
+          <tr><td class="hcell">VPC</td><td>Your own private, isolated network inside AWS</td></tr>
+          <tr><td class="hcell">EKS</td><td>Managed Kubernetes &mdash; AWS runs the control plane for you</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">IAM roles &amp; policies</span><span class="tool">EC2 / EKS</span><span class="tool">S3</span><span class="tool">VPC subnetting</span><span class="tool">Terraform</span><span class="tool">reserved &amp; spot instances</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">12</span><div class="titlewrap">Monitoring<div class="tagline">The three pillars of observability, and how alerts actually fire</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128663;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>The dashboard in your car &mdash; speed, fuel gauge, and that little engine warning light. It doesn't drive the car for you, but it tells you the instant something's wrong, so you can pull over and fix it before you break down on the highway. <strong>Monitoring</strong> is that dashboard for a piece of software, watched by engineers instead of a driver.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The three pillars</h5>
+        <table class="cmp">
+          <tr><th>Pillar</th><th>Answers</th><th>Example tool</th></tr>
+          <tr><td class="hcell">Metrics</td><td>"Is something wrong, and how bad?" &mdash; numeric time series</td><td>Prometheus</td></tr>
+          <tr><td class="hcell">Logs</td><td>"What exactly happened?" &mdash; discrete timestamped events</td><td>Loki / CloudWatch Logs</td></tr>
+          <tr><td class="hcell">Traces</td><td>"Where in the request did it go wrong?" &mdash; a request's path across services</td><td>Jaeger / X-Ray</td></tr>
+        </table>
+        <h5>A real alerting rule</h5>
+        <div class="code-block">
+          <div class="code-head"><span>alert-rules.yml</span><span>promql</span></div>
+          <pre><span class="p">alert:</span> HighErrorRate
+<span class="p">expr:</span> |
+  sum(rate(http_requests_total&#123;status=~<span class="s">"5.."</span>&#125;[5m]))
+  / sum(rate(http_requests_total[5m])) > 0.05
+<span class="p">for:</span> 10m
+<span class="p">labels:</span> &#123; severity: page &#125;
+<span class="p">annotations:</span>
+  <span class="p">summary:</span> <span class="s">"Error rate above 5% for 10 minutes"</span></pre>
+        </div>
+        <h5>SLI, SLO, and SLA &mdash; not the same thing</h5>
+        <p><strong>SLI</strong> (indicator): the raw measurement, e.g. request latency. <strong>SLO</strong> (objective): the internal target, e.g. "99.9% of requests under 300ms." <strong>SLA</strong> (agreement): the external, often contractual promise to a customer, usually looser than the SLO so there's margin before you breach it.</p>
+        <div class="toolrow"><span class="tool">Prometheus + Grafana</span><span class="tool">CloudWatch</span><span class="tool">PromQL</span><span class="tool">SLI / SLO / SLA</span><span class="tool">on-call &amp; paging</span><span class="tool">distributed tracing</span></div>
+        </div>
+      </div>
+    </details>
+    <details class="step">
+      <summary><span class="num">13</span><div class="titlewrap">GitOps<div class="tagline">Git becomes the single source of truth for infrastructure</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128221;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>An autopilot that constantly compares "where the plane should be" (Git) against "where the plane actually is" (the live cluster), and nudges it back on course automatically &mdash; instead of a pilot manually adjusting controls every few minutes.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The core idea: Git stops being just a record, and starts being the command</h5>
+        <p>Instead of running <span class="mono">kubectl apply</span> by hand, a controller like ArgoCD or Flux continuously watches a Git repo and reconciles the live cluster to match it. A deploy becomes a pull request; a rollback becomes <span class="mono">git revert</span>.</p>
+        <div class="code-block">
+          <div class="code-head"><span>application.yaml</span><span>argocd</span></div>
+          <pre><span class="p">apiVersion:</span> argoproj.io/v1alpha1
+<span class="p">kind:</span> Application
+<span class="p">spec:</span>
+  <span class="p">source:</span>
+    <span class="p">repoURL:</span> https://github.com/org/infra-repo
+    <span class="p">path:</span> apps/api-server
+  <span class="p">syncPolicy:</span>
+    <span class="p">automated:</span> &#123; prune: true, selfHeal: true &#125;</pre>
+        </div>
+        <h5>What reconciliation actually looks like in practice</h5>
+        <table class="cmp">
+          <tr><th>Git says</th><th>Cluster currently has</th><th>Controller does</th></tr>
+          <tr><td class="hcell">replicas: 3</td><td>3 pods running</td><td>Nothing &mdash; already matches</td></tr>
+          <tr><td class="hcell">replicas: 5 (just committed)</td><td>3 pods running</td><td>Scales up 2 more pods, unprompted</td></tr>
+          <tr><td class="hcell">replicas: 3</td><td>2 pods (someone manually deleted one)</td><td>Recreates the missing pod within minutes &mdash; <span class="mono">selfHeal: true</span> at work</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">ArgoCD</span><span class="tool">Flux</span><span class="tool">config drift detection</span><span class="tool">declarative deploys</span><span class="tool">reconciliation loop</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">14</span><div class="titlewrap">Site Reliability Engineering<div class="tagline">Error budgets turn "be reliable" into a number you can plan around</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#9878;&#65039;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A monthly spending allowance, but for downtime instead of money. You're allowed to "spend" a small, agreed amount of unreliability each month. Spend it wisely on bold changes; overspend it, and all new spending freezes until the budget resets.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The error budget, calculated</h5>
+        <p>If your SLO is 99.9% uptime, your <strong>error budget</strong> is the remaining 0.1% &mdash; about 43 minutes of downtime per month you're allowed to spend. The rule: as long as budget remains, ship features. Once it's exhausted, all engineering effort shifts to reliability until it recovers &mdash; replacing "reliability vs. velocity" arguments with a shared number both sides agree to.</p>
+        <div class="code-block">
+          <div class="code-head"><span>error-budget.txt</span><span>calc</span></div>
+          <pre>SLO target:        99.9%
+Allowed downtime:  (1 - 0.999) &times; 30 days = 43.2 minutes / month
+Consumed so far:   28 minutes (one incident, Tuesday)
+Remaining budget:  15.2 minutes &mdash; ship cautiously</pre>
+        </div>
+        <h5>How a blameless postmortem is actually run</h5>
+        <p>Four sections, always in this order: <strong>Timeline</strong> (exactly what happened, minute by minute) &rarr; <strong>Impact</strong> (who and what was affected, and for how long) &rarr; <strong>Root cause</strong> (what in the <em>system</em> allowed this &mdash; never "who" made the mistake) &rarr; <strong>Action items</strong> (specific, owned by one named person, with a due date). The "blameless" part isn't a courtesy &mdash; engineers who fear blame stop reporting near-misses, which is how small problems become large ones.</p>
+        <div class="toolrow"><span class="tool">error budgets</span><span class="tool">blameless postmortems</span><span class="tool">toil reduction</span><span class="tool">on-call rotations</span><span class="tool">incident commander</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">15</span><div class="titlewrap">DevSecOps<div class="tagline">Security scanning moves inside the pipeline, not after it</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128737;&#65039;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A security checkpoint built directly into the assembly line, instead of a separate inspector who only checks the finished product weeks later. A flaw gets caught and fixed while it's cheap, not after it's already shipped to the customer.</div>
+        </div>
+        <div class="tech-only">
+        <h5>"Shift left": catching problems as early as possible</h5>
+        <p>Three scan types get added directly as CI steps, each catching a different category of problem before it ever reaches a user:</p>
+        <table class="cmp">
+          <tr><th>Scan type</th><th>Catches</th><th>Example tool</th></tr>
+          <tr><td class="hcell">SAST</td><td>Bugs in your own source code (e.g. SQL injection patterns)</td><td>Semgrep, SonarQube</td></tr>
+          <tr><td class="hcell">SCA</td><td>Known CVEs in third-party dependencies</td><td>Snyk, npm audit</td></tr>
+          <tr><td class="hcell">Image scanning</td><td>Vulnerable OS packages baked into the container</td><td>Trivy</td></tr>
+          <tr><td class="hcell">IaC scanning</td><td>Misconfigured cloud resources, before they're ever created</td><td>Checkov, tfsec</td></tr>
+        </table>
+        <h5>What this looks like as an actual pipeline step</h5>
+        <div class="code-block">
+          <div class="code-head"><span>.github/workflows/ci.yml (security step)</span><span>yaml</span></div>
+          <pre>      - <span class="p">name:</span> Scan dependencies (SCA)
+        <span class="p">run:</span> npm audit --audit-level=high
+      - <span class="p">name:</span> Scan container image
+        <span class="p">run:</span> trivy image app:$&#123;&#123; github.sha &#125;&#125; --severity CRITICAL,HIGH --exit-code 1</pre>
+        </div>
+        <p><span class="mono">--exit-code 1</span> is what makes this real: a critical vulnerability fails the build outright instead of producing a report nobody reads.</p>
+        <div class="toolrow"><span class="tool">SAST / SCA</span><span class="tool">Trivy / Snyk</span><span class="tool">CVE scanning</span><span class="tool">policy as code (OPA)</span><span class="tool">shift-left security</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">16</span><div class="titlewrap">Platform Engineering<div class="tagline">A self-service layer so product teams don't need to learn Kubernetes</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127970;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A hotel front desk. A guest doesn't need to know how the plumbing, electrical wiring, or key-card system works &mdash; they fill out one check-in form and get a working room. Platform engineering builds that front desk for developers, hiding the Kubernetes and AWS plumbing behind it.</div>
+        </div>
+        <div class="tech-only">
+        <h5>What a "golden path" actually looks like</h5>
+        <p>Once an org has 20+ services, every team re-learning Kubernetes YAML and IAM policy from scratch doesn't scale. A platform team builds a portal (often Backstage) where a developer fills out a short form, and the platform generates the repo, pipeline, and deployment target &mdash; already wired up with the guardrails from earlier stages baked in by default.</p>
+        <div class="code-block">
+          <div class="code-head"><span>service-request.yaml (filled out by a product team)</span><span>yaml</span></div>
+          <pre><span class="p">name:</span> checkout-api
+<span class="p">language:</span> node
+<span class="p">database:</span> postgres
+<span class="p">exposePublicly:</span> true
+<span class="p">team:</span> payments</pre>
+        </div>
+        <h5>Who owns what</h5>
+        <table class="cmp">
+          <tr><th>Layer</th><th>Owned by</th></tr>
+          <tr><td class="hcell">Application code &amp; business logic</td><td>Product team</td></tr>
+          <tr><td class="hcell">CI/CD templates, guardrails, base infrastructure</td><td>Platform team</td></tr>
+          <tr><td class="hcell">The self-service portal itself</td><td>Platform team</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">Backstage</span><span class="tool">golden paths</span><span class="tool">self-service provisioning</span><span class="tool">internal developer platform (IDP)</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">17</span><div class="titlewrap">Chaos Engineering<div class="tagline">Breaking things on purpose, before they break by accident</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128293;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A fire drill. You don't wait for a real fire to find out if the evacuation plan actually works &mdash; you deliberately run the drill, find the gaps while nothing's actually burning, and fix them.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Testing whether a system stays healthy, not just whether it is healthy</h5>
+        <p>Monitoring tells you a system <em>is</em> healthy right now. Chaos engineering tests whether it <em>stays</em> healthy when something fails &mdash; always run with a defined blast radius and a rollback plan, first in staging, eventually in production.</p>
+        <div class="code-block">
+          <div class="code-head"><span>pod-kill-experiment.yaml</span><span>chaos-mesh</span></div>
+          <pre><span class="p">apiVersion:</span> chaos-mesh.org/v1alpha1
+<span class="p">kind:</span> PodChaos
+<span class="p">spec:</span>
+  <span class="p">action:</span> pod-kill
+  <span class="p">mode:</span> one
+  <span class="p">selector:</span>
+    <span class="p">labelSelectors:</span> &#123; app: api &#125;
+  <span class="p">scheduler:</span> &#123; cron: <span class="s">"@every 2h"</span> &#125;</pre>
+        </div>
+        <h5>The four experiment types most teams start with</h5>
+        <table class="cmp">
+          <tr><th>Experiment</th><th>Tests</th></tr>
+          <tr><td class="hcell">Pod / instance termination</td><td>Does the replica count and self-healing actually recover traffic?</td></tr>
+          <tr><td class="hcell">Network latency injection</td><td>Do timeouts and retries behave correctly under slow conditions?</td></tr>
+          <tr><td class="hcell">Resource exhaustion</td><td>What happens when CPU or memory limits are hit under load?</td></tr>
+          <tr><td class="hcell">Dependency failure simulation</td><td>Does the system degrade gracefully when a downstream service is down?</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">Chaos Mesh / Litmus</span><span class="tool">game days</span><span class="tool">blast radius</span><span class="tool">steady-state hypothesis</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">18</span><div class="titlewrap">FinOps<div class="tagline">Cloud spend becomes an engineering metric, not just a finance line item</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128176;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>The difference between a taxi, a leased car, and a bulk train ticket. Same destination, wildly different price depending on how predictable and flexible your commitment is &mdash; cloud compute pricing works the same way.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The three FinOps phases</h5>
+        <table class="cmp">
+          <tr><th>Phase</th><th>What happens</th></tr>
+          <tr><td class="hcell">Inform</td><td>Get visibility into what's being spent, and by which team or service</td></tr>
+          <tr><td class="hcell">Optimize</td><td>Right-size instances, commit to reserved capacity, shift eligible work to spot</td></tr>
+          <tr><td class="hcell">Operate</td><td>Make cost governance continuous and automated, not a quarterly fire drill</td></tr>
+        </table>
+        <h5>Why the same resources.requests field from earlier is also a cost lever</h5>
+        <p>Over-requesting Kubernetes resources reserves (and pays for) capacity nobody uses. The purchase type you run it on matters just as much:</p>
+        <table class="cmp">
+          <tr><th>Purchase type</th><th>Relative cost vs. on-demand</th><th>Best for</th></tr>
+          <tr><td class="hcell">On-demand</td><td>Baseline (100%)</td><td>Unpredictable, short-term workloads</td></tr>
+          <tr><td class="hcell">Reserved (1&ndash;3yr commit)</td><td>Meaningfully cheaper</td><td>Steady, predictable baseline load</td></tr>
+          <tr><td class="hcell">Spot</td><td>Cheapest, but can be interrupted</td><td>Batch jobs, fault-tolerant workloads</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">right-sizing</span><span class="tool">reserved vs spot instances</span><span class="tool">cost allocation tags</span><span class="tool">showback / chargeback</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">19</span><div class="titlewrap">Microservices &amp; Service Mesh<div class="tagline">When one service becomes fifty, traffic itself needs infrastructure</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128268;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A big office building's internal phone and mail system, added <em>after</em> the company outgrew one room where everyone just talked directly. A service mesh handles the routing, retries, and security between services, without any one team having to build it themselves.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Splitting one app into many creates a new problem</h5>
+        <p>Dozens of services now need retries, timeouts, mutual TLS, and traffic routing between each other. A <strong>service mesh</strong> (Istio, Linkerd) solves this by injecting a <strong>sidecar</strong> proxy into every pod that handles this traffic transparently, without changing application code.</p>
+        <div class="code-block">
+          <div class="code-head"><span>virtualservice.yaml</span><span>istio</span></div>
+          <pre><span class="p">apiVersion:</span> networking.istio.io/v1beta1
+<span class="p">kind:</span> VirtualService
+<span class="p">spec:</span>
+  <span class="p">hosts:</span> [api-service]
+  <span class="p">http:</span>
+  - <span class="p">route:</span>
+    - &#123; destination: &#123; host: api-service, subset: v2 &#125;, weight: 10 &#125;
+    - &#123; destination: &#123; host: api-service, subset: v1 &#125;, weight: 90 &#125;</pre>
+        </div>
+        <p>This is Canary deployment (stage 10) expressed as mesh-level traffic splitting &mdash; 10% of requests to the new version &mdash; with no change to the application itself.</p>
+        <h5>The trade-off nobody mentions upfront</h5>
+        <table class="cmp">
+          <tr><th></th><th>Monolith</th><th>Microservices</th></tr>
+          <tr><td class="hcell">Deploying</td><td>One unit, simpler to reason about</td><td>Independent per service, but many moving parts</td></tr>
+          <tr><td class="hcell">Scaling</td><td>Scale the whole thing, even unused parts</td><td>Scale exactly the part under load</td></tr>
+          <tr><td class="hcell">Debugging</td><td>One process, one stack trace</td><td>A request crosses a network many times &mdash; distributed tracing becomes mandatory</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">Istio / Linkerd</span><span class="tool">sidecar proxies</span><span class="tool">mutual TLS</span><span class="tool">circuit breaking</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">20</span><div class="titlewrap">Multi-Cloud Architecture<div class="tagline">Not being locked to one provider's APIs</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#127760;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>Being able to fill your car up at any gas station, instead of a car that only accepts fuel from one brand. It costs a little more to build for that flexibility, but you're never stuck if one supplier raises prices or has an outage.</div>
+        </div>
+        <div class="tech-only">
+        <h5>What actually moves between clouds, and what doesn't</h5>
+        <p>The AWS-specific Terraform from stage 11 is still AWS-specific code. Multi-cloud architecture uses the same Terraform <em>workflow</em> against multiple providers, and leans on Kubernetes as the common abstraction &mdash; a Deployment manifest looks identical whether it's running on EKS (AWS), GKE (Google), or AKS (Azure). What doesn't move: provider-specific managed services (like a proprietary database) have no direct equivalent elsewhere.</p>
+        <div class="code-block">
+          <div class="code-head"><span>providers.tf</span><span>terraform</span></div>
+          <pre><span class="p">provider</span> <span class="s">"aws"</span>    &#123; region = <span class="s">"us-east-1"</span> &#125;
+<span class="p">provider</span> <span class="s">"google"</span> &#123; project = <span class="s">"prod-project"</span>, region = <span class="s">"us-central1"</span> &#125;</pre>
+        </div>
+        <h5>Single cloud vs. multi-cloud</h5>
+        <table class="cmp">
+          <tr><th>Approach</th><th>Trade-off</th></tr>
+          <tr><td class="hcell">Single cloud</td><td>Simpler, cheaper, deep access to managed services &mdash; but full vendor lock-in</td></tr>
+          <tr><td class="hcell">Multi-cloud</td><td>Avoids lock-in and enables regional/pricing flexibility &mdash; at the cost of real operational complexity</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">Terraform providers</span><span class="tool">Kubernetes as abstraction</span><span class="tool">vendor lock-in</span><span class="tool">cross-cloud networking</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">21</span><div class="titlewrap">Advanced Kubernetes: Operators &amp; CRDs<div class="tagline">Teaching Kubernetes to manage things it doesn't know about natively</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#129302;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>The difference between handing someone a furniture assembly manual (a one-time template) versus hiring a live-in handyman who watches the furniture forever and re-tightens loose screws automatically, forever, without being asked twice.</div>
+        </div>
+        <div class="tech-only">
+        <h5>What a CRD and an Operator actually do</h5>
+        <p>A <strong>Custom Resource Definition (CRD)</strong> extends the Kubernetes API with your own object type. An <strong>Operator</strong> is a controller that watches those objects and takes action &mdash; the same reconciliation loop that manages Deployments, but for anything you define, like automated database backups.</p>
+        <div class="code-block">
+          <div class="code-head"><span>postgres-crd.yaml</span><span>yaml</span></div>
+          <pre><span class="p">apiVersion:</span> postgres-operator.io/v1
+<span class="p">kind:</span> PostgresCluster
+<span class="p">spec:</span>
+  <span class="p">replicas:</span> 3
+  <span class="p">backupSchedule:</span> <span class="s">"0 2 * * *"</span></pre>
+        </div>
+        <h5>Why not just use a Helm chart instead?</h5>
+        <table class="cmp">
+          <tr><th></th><th>Helm chart</th><th>Operator</th></tr>
+          <tr><td class="hcell">What it is</td><td>A template, applied once</td><td>A live controller, running continuously</td></tr>
+          <tr><td class="hcell">Handles Day-2 ops</td><td>No &mdash; you re-run it manually for changes</td><td>Yes &mdash; backups, upgrades, failover happen automatically</td></tr>
+          <tr><td class="hcell">Best for</td><td>Simple, mostly-static applications</td><td>Stateful systems needing ongoing operational logic (databases, message queues)</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">CRDs</span><span class="tool">Operators</span><span class="tool">controller-runtime</span><span class="tool">OperatorHub</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">22</span><div class="titlewrap">MLOps<div class="tagline">The same discipline, applied to machine learning models</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#129504;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A recipe that can quietly go stale. A trained model doesn't just need shipping like software &mdash; it needs to be watched, because the "ingredients" (real-world data) keep slowly changing after the recipe was written.</div>
+        </div>
+        <div class="tech-only">
+        <h5>The same concepts, wearing different names</h5>
+        <table class="cmp">
+          <tr><th>DevOps concept</th><th>MLOps equivalent</th></tr>
+          <tr><td class="hcell">Git for code</td><td>Data &amp; model versioning (DVC, MLflow)</td></tr>
+          <tr><td class="hcell">CI/CD pipeline</td><td>Training pipeline &mdash; retrain, evaluate, register</td></tr>
+          <tr><td class="hcell">Docker image / artifact</td><td>Versioned model in a model registry</td></tr>
+          <tr><td class="hcell">Monitoring alert</td><td>Data/model drift detection, not just uptime</td></tr>
+        </table>
+        <h5>A minimal training pipeline, stage by stage</h5>
+        <div class="code-block">
+          <div class="code-head"><span>training-pipeline.yml</span><span>yaml</span></div>
+          <pre><span class="p">stages:</span>
+  - <span class="p">validate_data:</span>   check schema, nulls, class balance
+  - <span class="p">train:</span>           fit model on training split
+  - <span class="p">evaluate:</span>        score against a held-out test set
+  - <span class="p">register:</span>        promote to registry only if it beats the current champion
+  - <span class="p">deploy_canary:</span>   route 5% of live traffic to the new model</pre>
+        </div>
+        <div class="toolrow"><span class="tool">MLflow</span><span class="tool">model registry</span><span class="tool">feature stores</span><span class="tool">drift detection</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">23</span><div class="titlewrap">Compliance &amp; Governance at Scale<div class="tagline">Making guardrails provable to an auditor, not just present</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128203;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>A building inspector who doesn't just take your word that the wiring is safe &mdash; they want the permit, the inspection report, and the signed paperwork. "We're careful" isn't evidence; a paper trail is.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Policy as code: guardrails the cluster enforces itself</h5>
+        <p>Frameworks like SOC 2 and ISO 27001 require proof, not just good intentions. <strong>Policy as code</strong> tools enforce rules automatically instead of relying on manual review.</p>
+        <div class="code-block">
+          <div class="code-head"><span>no-privileged-pods.rego</span><span>opa-gatekeeper</span></div>
+          <pre><span class="k">package</span> k8s.privileged
+
+deny[msg] &#123;
+  input.review.object.spec.containers[_].securityContext.privileged == <span class="k">true</span>
+  msg := <span class="s">"Privileged containers are not allowed"</span>
+&#125;</pre>
+        </div>
+        <p>This policy runs automatically &mdash; a Deployment requesting privileged access is rejected at <span class="mono">kubectl apply</span> time, before it ever runs.</p>
+        <h5>What an auditor actually asks to see</h5>
+        <table class="cmp">
+          <tr><th>Evidence type</th><th>Where it comes from</th></tr>
+          <tr><td class="hcell">Access reviews</td><td>IAM policy exports (stage 11), reviewed on a schedule</td></tr>
+          <tr><td class="hcell">Change management</td><td>Every deploy traceable to a reviewed pull request (stage 06)</td></tr>
+          <tr><td class="hcell">Encryption proof</td><td>TLS everywhere in transit, encrypted storage at rest</td></tr>
+          <tr><td class="hcell">Incident records</td><td>The blameless postmortems from stage 14</td></tr>
+        </table>
+        <div class="toolrow"><span class="tool">SOC 2 / ISO 27001</span><span class="tool">OPA / Gatekeeper</span><span class="tool">audit logging</span><span class="tool">least privilege reviews</span></div>
+        </div>
+      </div>
+    </details>
+
+    <details class="step">
+      <summary><span class="num">24</span><div class="titlewrap">The Career Path: Engineer to Principal<div class="tagline">What actually changes as you go senior</div></div><span class="chev">&#9660;</span></summary>
+      <div class="body">
+        <div class="analogy-box simple-only">
+          <div class="icon">&#128200;</div>
+          <div class="txt"><span class="lbl">Think of it like</span>The difference between cooking one great meal, running a kitchen well every night, designing the menu system for a whole restaurant chain, and setting the food-safety standard every restaurant in the chain follows. Same underlying skill, an ever-widening circle of impact.</div>
+        </div>
+        <div class="tech-only">
+        <h5>Scope of impact, level by level</h5>
+        <table class="cmp">
+          <tr><th>Level</th><th>Scope of impact</th><th>Typical work</th></tr>
+          <tr><td class="hcell">Junior / Mid</td><td>One service or pipeline</td><td>Writes the Dockerfiles, CI jobs, and K8s manifests from stages 05&ndash;12</td></tr>
+          <tr><td class="hcell">Senior</td><td>A team's whole system</td><td>Chooses deployment strategy (stage 10), owns incident response, mentors</td></tr>
+          <tr><td class="hcell">Staff</td><td>Multiple teams / the platform</td><td>Builds the Platform Engineering layer (stage 16) other teams self-serve from</td></tr>
+          <tr><td class="hcell">Principal</td><td>Org-wide technical direction</td><td>Sets the reliability, cost, and security standards every team inherits</td></tr>
+        </table>
+        <h5>The one thing that actually differentiates each level</h5>
+        <p>Not raw technical knowledge &mdash; a junior and a principal engineer both know what a Kubernetes Service does. What changes is how much manual, repeated work you've eliminated for <em>other people</em>, and how far that impact reaches beyond your own keyboard.</p>
+        <div class="toolrow"><span class="tool">technical leadership</span><span class="tool">mentorship</span><span class="tool">org-wide standards</span><span class="tool">platform thinking</span></div>
+        </div>
+      </div>
+    </details>
+
+    <div class="callout"><strong>The loop never really closes.</strong> Stage 24 doesn't end the path &mdash; the discipline it describes is what keeps rewriting stages 01 through 23 as tools, teams, and scale change. That's the whole shape of this field: not a finish line, a loop that keeps tightening.</div>
+  </div>
+</section>
+
+<section id="myths">
+  <div class="wrap">
+    <div class="kicker">05 &middot; Corrections</div>
+    <h2 class="h2">What DevOps is not</h2>
+    <div class="myth-grid">
+      <div class="myth"><span class="x">Myth</span><p>DevOps is a job title, like "backend developer."</p></div>
+      <div class="myth"><span class="check">Reality</span><p>It's a set of practices. "DevOps Engineer" is a common title for someone who builds the automation, but the practices are meant to be shared team-wide.</p></div>
+      <div class="myth"><span class="x">Myth</span><p>Installing Docker and Kubernetes <em>is</em> DevOps.</p></div>
+      <div class="myth"><span class="check">Reality</span><p>Those are tools that make the practices possible. The goal &mdash; fast, safe, collaborative delivery &mdash; can fail even with every tool correctly installed.</p></div>
+      <div class="myth"><span class="x">Myth</span><p>Every project needs Kubernetes.</p></div>
+      <div class="myth"><span class="check">Reality</span><p>Kubernetes solves problems at scale, at the cost of real operational complexity. Plenty of production systems run happily on a single server with Docker Compose.</p></div>
+      <div class="myth"><span class="x">Myth</span><p>More monitoring alerts equal better reliability.</p></div>
+      <div class="myth"><span class="check">Reality</span><p>Over-alerting causes alert fatigue, where engineers start ignoring pages. A smaller number of well-tuned, actionable alerts beats hundreds of noisy ones.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="wrap">
+    <div class="kicker">06 &middot; Common questions</div>
+    <h2 class="h2">Frequently asked, honestly answered</h2>
+
+    <div class="faq-item">
+      <div class="q">Do I need to know how to code to understand DevOps?</div>
+      <div class="a">To understand the concepts on this page, no &mdash; that's the whole point of the analogies and the Simple mode toggle. To actually do DevOps work day-to-day, yes, eventually you'll need to read and write code and scripts, since it's the tool used to automate everything described here.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Is DevOps only relevant to huge tech companies?</div>
+      <div class="a">No. A two-person startup benefits from the same automation just as much as a company with thousands of engineers &mdash; often more, since there's no spare person available to do things manually.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">What's the actual difference between a developer and a DevOps engineer?</div>
+      <div class="a">A developer mostly writes the features inside the application. A DevOps engineer mostly writes the automation that gets that application safely in front of users and keeps it running &mdash; the pipelines, the infrastructure, the monitoring. In small teams, the same person often does both.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Do I have to learn everything on this page before I can call myself a "DevOps person"?</div>
+      <div class="a">No. Most working engineers build this up gradually, on real projects, over months or years &mdash; not all at once. Depth in the first few stages (Linux &amp; Bash, Git &amp; CI/CD) matters far more early on than rushing to touch every stage.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">Is "the cloud" just someone else's computer?</div>
+      <div class="a">Essentially, yes &mdash; that's a well-known (only half-joking) way engineers describe it. AWS, Google Cloud, and Azure own enormous data centers full of physical machines, and "the cloud" is you renting a slice of that hardware instead of buying and maintaining your own.</div>
+    </div>
+    <div class="faq-item">
+      <div class="q">What happens if I never learn any of this?</div>
+      <div class="a">If you're not planning to build or ship software yourself, nothing &mdash; you'll simply keep benefiting from it invisibly, the way the "Day in the Life" story above describes. This page exists so that when you hear these words in a meeting, an article, or from a friend in tech, they're no longer a wall of jargon.</div>
+    </div>
+  </div>
+</section>
+
+<section id="glossary">
+  <div class="wrap">
+    <div class="kicker">07 &middot; Reference</div>
+    <h2 class="h2">Glossary</h2>
+    <dl class="gloss-grid">
+      <div class="gloss-item"><dt>Idempotent</dt><dd>Running an operation multiple times has the same effect as running it once &mdash; the core property that makes "desired state" tooling safe to re-apply.</dd></div>
+      <div class="gloss-item"><dt>Immutable infrastructure</dt><dd>Servers and containers are never patched in place; a change means building and deploying a new one, then discarding the old.</dd></div>
+      <div class="gloss-item"><dt>Blast radius</dt><dd>How much of the system is affected if a given change or failure goes wrong.</dd></div>
+      <div class="gloss-item"><dt>Sidecar</dt><dd>A helper container running alongside the main one in a pod, handling a cross-cutting concern like logging or proxying.</dd></div>
+      <div class="gloss-item"><dt>Service mesh</dt><dd>An infrastructure layer (e.g. Istio) that handles service-to-service traffic, retries, and encryption without changing application code.</dd></div>
+      <div class="gloss-item"><dt>Horizontal scaling</dt><dd>Adding more instances of something to handle more load, versus vertical scaling (making one instance bigger).</dd></div>
+      <div class="gloss-item"><dt>Artifact</dt><dd>A versioned, immutable build output &mdash; a Docker image, a compiled binary &mdash; produced once and promoted unchanged through environments.</dd></div>
+      <div class="gloss-item"><dt>MTTR</dt><dd>Mean time to recovery &mdash; how long it takes to restore service after an incident starts.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="kicker">08 &middot; Further reading</div>
+    <h2 class="h2">Official references for everything above</h2>
+    <div class="src-list">
+      <div class="src-item">Kubernetes documentation &mdash; kubernetes.io/docs/concepts</div>
+      <div class="src-item">AWS Well-Architected Framework &mdash; docs.aws.amazon.com/wellarchitected</div>
+      <div class="src-item">Docker documentation &mdash; docs.docker.com/build/building/best-practices</div>
+      <div class="src-item">Google Cloud &mdash; DORA DevOps research (deployment frequency, lead time, MTTR, change failure rate) &mdash; dora.dev</div>
+      <div class="src-item">Google SRE Book &mdash; sre.google/sre-book/table-of-contents</div>
+      <div class="src-item">Prometheus documentation (PromQL, alerting) &mdash; prometheus.io/docs</div>
+    </div>
+    <p style="margin-top:20px; font-size:13px; color:var(--text-low);">Sourced and adapted for this learning page &middot; verify current tool versions, pricing, and API syntax independently before using in production.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="credit">Curated &amp; compiled by <strong>Sujit Kulkarni</strong><span class="role">Author &middot; Instructional Design</span></div>
+  Content sourced and adapted for this learning page &middot; configs shown are illustrative and simplified for teaching &mdash; review and harden before production use
+</footer>
+
+<script>
+  document.body.setAttribute('data-mode', 'simple');
+  function setMode(mode){
+    document.body.setAttribute('data-mode', mode);
+    document.querySelectorAll('.mode-btn').forEach(b=>b.classList.toggle('active', b.dataset.mode === mode));
+  }
+  const rail = document.getElementById('rail');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    rail.style.width = pct + '%';
+  });
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
