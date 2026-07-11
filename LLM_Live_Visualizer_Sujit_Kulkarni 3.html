@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>LLM Live Visualizer — Sujit Kulkarni</title>
+<style>
+:root{
+  --cyan:#00f5ff;--purple:#a855f7;--green:#00ff87;--orange:#ff6b35;
+  --pink:#ff006e;--yellow:#ffd700;--bg:#020408;--card:#0a1628;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;min-height:-webkit-fill-available;overflow:hidden;background:var(--bg);
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',system-ui,sans-serif;
+  color:#e2e8f0;-webkit-font-smoothing:antialiased}
+
+/* BG CANVAS */
+#bgCanvas{position:fixed;inset:0;z-index:0}
+
+/* MAIN LAYOUT */
+#app{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column}
+
+/* HEADER */
+#header{
+  background:rgba(2,4,8,0.9);border-bottom:1px solid rgba(0,245,255,0.15);
+  padding:0.6rem 1.2rem;display:flex;align-items:center;justify-content:space-between;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);flex-shrink:0
+}
+.logo{font-size:clamp(0.75rem,2vw,1rem);font-weight:700;letter-spacing:0.15em;
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.author{
+  font-size:clamp(0.7rem,1.5vw,0.85rem);font-weight:800;letter-spacing:0.12em;
+  color:#fff;
+  text-shadow:0 0 8px var(--cyan),0 0 20px var(--cyan),0 0 40px var(--cyan);
+  animation:glowPulse 2s ease-in-out infinite
+}
+@keyframes glowPulse{
+  0%,100%{text-shadow:0 0 8px var(--cyan),0 0 20px var(--cyan),0 0 40px var(--cyan)}
+  50%{text-shadow:0 0 12px #fff,0 0 30px var(--cyan),0 0 60px var(--cyan),0 0 80px var(--purple)}
+}
+
+/* STAGE PIPELINE */
+#pipeline{
+  background:rgba(2,4,8,0.8);border-bottom:1px solid rgba(255,255,255,0.06);
+  padding:0.4rem 0.8rem;display:flex;align-items:center;gap:0.25rem;
+  overflow-x:auto;flex-shrink:0;scrollbar-width:none
+}
+#pipeline::-webkit-scrollbar{display:none}
+.pstep{
+  display:flex;align-items:center;gap:0.2rem;padding:0.28rem 0.6rem;
+  border:1px solid rgba(255,255,255,0.08);border-radius:20px;
+  font-size:0.58rem;letter-spacing:0.1em;color:rgba(255,255,255,0.3);
+  white-space:nowrap;transition:all 0.4s;text-transform:uppercase;flex-shrink:0
+}
+.pstep.active{
+  color:#000;font-weight:700;border-color:transparent;
+  box-shadow:0 0 16px currentColor
+}
+.pstep.done{color:var(--green);border-color:rgba(0,255,135,0.3)}
+.parr{color:rgba(255,255,255,0.15);font-size:0.6rem;flex-shrink:0}
+
+/* VIZ AREA */
+#vizArea{
+  flex:1;position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center
+}
+
+/* FLOATING TOKENS */
+.ftoken{
+  position:absolute;padding:0.3rem 0.65rem;border-radius:8px;
+  font-size:clamp(0.65rem,1.5vw,0.82rem);font-weight:700;
+  pointer-events:none;z-index:50;white-space:nowrap;
+  border:1px solid rgba(255,255,255,0.2);
+  transition:transform 0.05s;will-change:transform,opacity,left,top
+}
+
+/* NEURAL NET CANVAS */
+#nnCanvas{position:absolute;inset:0;z-index:5}
+
+/* STAGE OVERLAY PANELS */
+.stage-panel{
+  position:absolute;border-radius:16px;padding:1rem 1.2rem;
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+  border:1px solid rgba(255,255,255,0.1);
+  display:none;z-index:40;max-width:320px;
+  background:rgba(10,22,40,0.88)
+}
+.stage-panel.show{display:block;animation:panelIn 0.4s ease}
+@keyframes panelIn{from{opacity:0;transform:scale(0.9)}to{opacity:1;transform:scale(1)}}
+.sp-title{font-size:0.72rem;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;margin-bottom:0.6rem}
+.sp-body{font-size:0.68rem;color:rgba(255,255,255,0.7);line-height:1.6}
+
+/* EMBED VIZ */
+#embedPanel{top:10%;right:2%;width:200px}
+.embed-bar-row{display:flex;align-items:center;gap:0.4rem;margin:0.25rem 0}
+.eb-label{font-size:0.6rem;color:rgba(255,255,255,0.6);width:40px;text-align:right;flex-shrink:0}
+.eb-track{flex:1;height:8px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden}
+.eb-fill{height:100%;border-radius:4px;transition:width 0.8s ease}
+.eb-val{font-size:0.58rem;font-family:monospace;color:rgba(255,255,255,0.5);width:38px}
+
+/* ATTENTION MATRIX */
+#attPanel{top:10%;left:2%;width:220px}
+.att-grid{display:grid;gap:2px;margin-top:0.5rem}
+.att-cell{border-radius:2px;width:100%;aspect-ratio:1;transition:background 0.5s}
+
+/* LOGIT PANEL */
+#logitPanel{bottom:18%;right:2%;width:220px}
+.logit-row{display:flex;align-items:center;gap:0.4rem;margin:0.22rem 0}
+.logit-word{font-size:0.65rem;color:rgba(255,255,255,0.8);width:70px;text-align:right;flex-shrink:0}
+.logit-track{flex:1;height:10px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden}
+.logit-fill{height:100%;border-radius:5px;transition:width 0.7s ease}
+.logit-pct{font-size:0.6rem;font-family:monospace;color:rgba(255,255,255,0.5);width:32px}
+
+/* OUTPUT PANEL */
+#outputPanel{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:min(500px,90vw);background:rgba(10,22,40,0.95);
+  border:1px solid var(--green);border-radius:20px;
+  padding:1.4rem 1.6rem;z-index:60;display:none;
+  backdrop-filter:blur(30px);-webkit-backdrop-filter:blur(30px);
+  box-shadow:0 0 40px rgba(0,255,135,0.2)
+}
+#outputPanel.show{display:block;animation:panelIn 0.5s ease}
+#outputTitle{font-size:0.72rem;font-weight:700;color:var(--green);letter-spacing:0.15em;margin-bottom:0.8rem}
+#outputText{font-size:0.88rem;color:#e2e8f0;line-height:1.7;min-height:60px}
+#outputCursor{display:inline-block;width:2px;height:1em;background:var(--green);animation:blink 0.7s infinite;vertical-align:middle}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+#outputMeta{margin-top:0.8rem;font-size:0.65rem;color:rgba(255,255,255,0.4);border-top:1px solid rgba(255,255,255,0.08);padding-top:0.6rem}
+
+/* BOTTOM STATUS */
+#statusBar{
+  background:rgba(2,4,8,0.92);border-top:1px solid rgba(255,255,255,0.06);
+  padding:0.5rem 1.2rem;flex-shrink:0;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)
+}
+#statusText{
+  font-size:clamp(0.68rem,1.8vw,0.82rem);font-weight:600;
+  color:#fff;letter-spacing:0.05em;line-height:1.5;text-align:center
+}
+#statusSub{font-size:0.6rem;color:rgba(255,255,255,0.4);text-align:center;margin-top:0.2rem}
+
+/* INPUT */
+#inputZone{
+  background:rgba(2,4,8,0.95);border-top:1px solid rgba(0,245,255,0.12);
+  padding:0.65rem 1rem;flex-shrink:0;
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)
+}
+#inputRow{display:flex;gap:0.6rem;align-items:center}
+#promptInput{
+  flex:1;background:rgba(0,245,255,0.05);
+  border:1px solid rgba(0,245,255,0.2);
+  color:var(--cyan);font-family:inherit;font-size:0.85rem;
+  padding:0.55rem 1rem;border-radius:10px;outline:none;
+  caret-color:var(--cyan);-webkit-appearance:none;
+  transition:border-color 0.3s,box-shadow 0.3s
+}
+#promptInput:focus{border-color:var(--cyan);box-shadow:0 0 12px rgba(0,245,255,0.2)}
+#promptInput::placeholder{color:rgba(0,245,255,0.3)}
+#runBtn{
+  background:linear-gradient(135deg,var(--cyan),var(--purple));
+  color:#000;border:none;font-family:inherit;font-weight:800;
+  font-size:0.82rem;padding:0.55rem 1.3rem;border-radius:10px;
+  cursor:pointer;letter-spacing:0.05em;white-space:nowrap;
+  -webkit-appearance:none;transition:filter 0.2s
+}
+#runBtn:active{filter:brightness(1.2)}
+#runBtn:disabled{opacity:0.3;cursor:not-allowed}
+#footNote{font-size:0.58rem;color:rgba(255,255,255,0.2);text-align:center;margin-top:0.3rem}
+
+/* PARTICLE TRAIL */
+.particle{
+  position:absolute;border-radius:50%;pointer-events:none;z-index:30;
+  will-change:transform,opacity
+}
+
+/* MATRIX OVERLAY */
+#matOverlay{position:absolute;inset:0;z-index:2;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+
+<div id="app">
+  <div id="header">
+    <div class="logo">⬡ LLM LIVE NEURAL VISUALIZER</div>
+    <div class="author">✦ Created by Sujit Kulkarni</div>
+  </div>
+
+  <div id="pipeline">
+    <div class="pstep" id="ps0" style="--c:#00f5ff">📥 Input</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps1" style="--c:#a855f7">🔤 Tokenize</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps2" style="--c:#f59e0b">📐 Embed</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps3" style="--c:#ff6b35">👁 Attention</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps4" style="--c:#ff006e">🧠 Transform</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps5" style="--c:#ff0066">📊 Logits</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps6" style="--c:#00ff87">⚡ Softmax</div>
+    <div class="parr">›</div>
+    <div class="pstep" id="ps7" style="--c:#00f5ff">💬 Output</div>
+  </div>
+
+  <div id="vizArea">
+    <canvas id="nnCanvas"></canvas>
+    <canvas id="matOverlay"></canvas>
+
+    <!-- Embed Panel -->
+    <div class="stage-panel" id="embedPanel">
+      <div class="sp-title" style="color:#f59e0b">📐 Embedding Vectors</div>
+      <div class="sp-body">Each token → 768-dim float vector</div>
+      <div id="embedBars" style="margin-top:0.6rem"></div>
+    </div>
+
+    <!-- Attention Panel -->
+    <div class="stage-panel" id="attPanel">
+      <div class="sp-title" style="color:#ff6b35">👁 Self-Attention Q·Kᵀ</div>
+      <div class="sp-body">Every token attends to every other</div>
+      <div id="attGrid" class="att-grid" style="margin-top:0.6rem"></div>
+    </div>
+
+    <!-- Logit Panel -->
+    <div class="stage-panel" id="logitPanel">
+      <div class="sp-title" style="color:#ff006e">📊 Vocabulary Logits</div>
+      <div class="sp-body">Scores across 50,257 tokens</div>
+      <div id="logitRows" style="margin-top:0.5rem"></div>
+    </div>
+
+    <!-- Output Panel -->
+    <div id="outputPanel">
+      <div id="outputTitle">💬 GENERATED RESPONSE</div>
+      <div id="outputText"><span id="outputCursor"></span></div>
+      <div id="outputMeta"></div>
+    </div>
+  </div>
+
+  <div id="statusBar">
+    <div id="statusText">✦ Enter your prompt below and watch it flow through the neural network live</div>
+    <div id="statusSub">Tokenization → Embeddings → Attention → Transformer → Softmax → Output</div>
+  </div>
+
+  <div id="inputZone">
+    <div id="inputRow">
+      <input id="promptInput" placeholder="Type any prompt e.g. Why is the sky blue?" maxlength="100"/>
+      <button id="runBtn" onclick="startDemo()">▶ RUN</button>
+    </div>
+    <div id="footNote">✦ Created by Sujit Kulkarni · Powered by your browser · Works on all devices</div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════
+// BG MATRIX RAIN
+// ═══════════════════════════════
+(function(){
+  var c=document.getElementById('bgCanvas');
+  var ctx=c.getContext('2d');
+  var W,H,cols,drops;
+  var CHARS='01アイウエカキ∑∂∇λσπ∞≈ABCDEF0110';
+  function resize(){
+    W=c.width=window.innerWidth;
+    H=c.height=window.innerHeight;
+    cols=Math.floor(W/16);
+    drops=[];
+    for(var i=0;i<cols;i++)drops[i]=Math.random()*H/16;
+  }
+  resize();
+  window.addEventListener('resize',resize);
+  setInterval(function(){
+    ctx.fillStyle='rgba(2,4,8,0.07)';
+    ctx.fillRect(0,0,W,H);
+    for(var i=0;i<cols;i++){
+      var ch=CHARS[Math.floor(Math.random()*CHARS.length)];
+      var alpha=0.15+Math.random()*0.25;
+      if(i%3===0)ctx.fillStyle='rgba(0,245,255,'+alpha+')';
+      else if(i%3===1)ctx.fillStyle='rgba(168,85,247,'+alpha+')';
+      else ctx.fillStyle='rgba(0,255,135,'+alpha+')';
+      ctx.font='12px monospace';
+      ctx.fillText(ch,i*16,drops[i]*16);
+      if(drops[i]*16>H&&Math.random()>0.96)drops[i]=0;
+      drops[i]+=0.4;
+    }
+  },50);
+})();
+
+// ═══════════════════════════════
+// NEURAL NET CANVAS
+// ═══════════════════════════════
+var nnC=document.getElementById('nnCanvas');
+var nnCtx=nnC.getContext('2d');
+var matC=document.getElementById('matOverlay');
+var matCtx=matC.getContext('2d');
+var nnW,nnH;
+var LAYERS=[3,5,7,7,5,3];
+var nodePos=[];
+var activeLayer=-1;
+var signalParticles=[];
+
+function resizeNN(){
+  var viz=document.getElementById('vizArea');
+  nnW=nnC.width=matC.width=viz.offsetWidth||window.innerWidth;
+  nnH=nnC.height=matC.height=viz.offsetHeight||(window.innerHeight-200);
+  buildNodePositions();
+}
+
+function buildNodePositions(){
+  nodePos=[];
+  var margin=nnW*0.08;
+  var usableW=nnW-margin*2;
+  LAYERS.forEach(function(cnt,li){
+    var lx=margin+li*(usableW/(LAYERS.length-1));
+    var layer=[];
+    for(var ni=0;ni<cnt;ni++){
+      var ly=nnH*0.15+ni*(nnH*0.7/(cnt-1||1));
+      layer.push({x:lx,y:ly});
+    }
+    nodePos.push(layer);
+  });
+}
+
+var nnAnimT=0;
+var LAYER_COLORS=['#00f5ff','#a855f7','#f59e0b','#ff6b35','#ff006e','#00ff87'];
+
+function drawNN(){
+  nnCtx.clearRect(0,0,nnW,nnH);
+
+  // Draw edges
+  for(var li=0;li<LAYERS.length-1;li++){
+    nodePos[li].forEach(function(n1){
+      nodePos[li+1].forEach(function(n2){
+        var baseAlpha=li===activeLayer?0.35:0.06;
+        var pulse=Math.abs(Math.sin(nnAnimT*0.8+li*0.5))*0.15;
+        var alpha=baseAlpha+pulse;
+        nnCtx.strokeStyle=li===activeLayer
+          ?hexAlpha(LAYER_COLORS[li],alpha)
+          :'rgba(255,255,255,'+alpha+')';
+        nnCtx.lineWidth=li===activeLayer?1.5:0.5;
+        nnCtx.beginPath();
+        nnCtx.moveTo(n1.x,n1.y);
+        nnCtx.lineTo(n2.x,n2.y);
+        nnCtx.stroke();
+      });
+    });
+  }
+
+  // Draw nodes
+  nodePos.forEach(function(layer,li){
+    layer.forEach(function(n){
+      var isActive=li===activeLayer;
+      var r=isActive?7:4;
+      var glow=isActive?20:6;
+      var col=LAYER_COLORS[li];
+      // Glow
+      var grad=nnCtx.createRadialGradient(n.x,n.y,0,n.x,n.y,glow);
+      grad.addColorStop(0,hexAlpha(col,isActive?0.8:0.3));
+      grad.addColorStop(1,hexAlpha(col,0));
+      nnCtx.fillStyle=grad;
+      nnCtx.beginPath();
+      nnCtx.arc(n.x,n.y,glow,0,Math.PI*2);
+      nnCtx.fill();
+      // Core
+      nnCtx.fillStyle=isActive?col:hexAlpha(col,0.6);
+      nnCtx.beginPath();
+      nnCtx.arc(n.x,n.y,r+(isActive?Math.sin(nnAnimT*3)*1.5:0),0,Math.PI*2);
+      nnCtx.fill();
+    });
+  });
+
+  // Signal particles
+  signalParticles=signalParticles.filter(function(sp){
+    sp.progress+=sp.speed;
+    if(sp.progress>=1)return false;
+    var t=sp.progress;
+    var x=sp.x1+(sp.x2-sp.x1)*t;
+    var y=sp.y1+(sp.y2-sp.y1)*t;
+    var alpha=Math.sin(t*Math.PI)*0.9;
+    nnCtx.fillStyle=hexAlpha(sp.color,alpha);
+    nnCtx.beginPath();
+    nnCtx.arc(x,y,3,0,Math.PI*2);
+    nnCtx.fill();
+    // Trail
+    nnCtx.fillStyle=hexAlpha(sp.color,alpha*0.3);
+    nnCtx.beginPath();
+    nnCtx.arc(x-(sp.x2-sp.x1)*0.08,y-(sp.y2-sp.y1)*0.08,2,0,Math.PI*2);
+    nnCtx.fill();
+    return true;
+  });
+
+  nnAnimT+=0.04;
+}
+
+function hexAlpha(hex,a){
+  var r=parseInt(hex.slice(1,3),16);
+  var g=parseInt(hex.slice(3,5),16);
+  var b=parseInt(hex.slice(5,7),16);
+  return 'rgba('+r+','+g+','+b+','+a+')';
+}
+
+function fireSignals(layerIdx){
+  if(layerIdx>=LAYERS.length-1)return;
+  nodePos[layerIdx].forEach(function(n1,ni){
+    nodePos[layerIdx+1].forEach(function(n2){
+      if(Math.random()>0.4)return;
+      signalParticles.push({
+        x1:n1.x,y1:n1.y,x2:n2.x,y2:n2.y,
+        progress:Math.random()*0.3,
+        speed:0.018+Math.random()*0.018,
+        color:LAYER_COLORS[layerIdx]
+      });
+    });
+  });
+}
+
+// Main animation loop
+function animLoop(){
+  requestAnimationFrame(animLoop);
+  drawNN();
+}
+
+window.addEventListener('resize',function(){
+  setTimeout(resizeNN,100);
+});
+
+// Init after layout
+window.addEventListener('load',function(){
+  setTimeout(function(){resizeNN();animLoop();},200);
+});
+
+// ═══════════════════════════════
+// FLOATING TOKEN SYSTEM
+// ═══════════════════════════════
+var floatingTokens=[];
+var TOKEN_COLORS=['#00f5ff','#a855f7','#f59e0b','#ff6b35','#ff006e','#00ff87','#ff00aa','#00ffcc'];
+
+function createFloatingToken(text,color,startX,startY){
+  var el=document.createElement('div');
+  el.className='ftoken';
+  el.textContent=text;
+  el.style.background='rgba(10,22,40,0.92)';
+  el.style.color=color;
+  el.style.borderColor=color;
+  el.style.boxShadow='0 0 12px '+color+'66,inset 0 0 8px '+color+'11';
+  el.style.left=startX+'px';
+  el.style.top=startY+'px';
+  el.style.opacity='0';
+  el.style.transform='scale(0.5)';
+  document.getElementById('vizArea').appendChild(el);
+  var ft={el:el,x:startX,y:startY,vx:0,vy:0,targetX:startX,targetY:startY,opacity:0,phase:'appear',color:color};
+  floatingTokens.push(ft);
+  return ft;
+}
+
+function removeAllTokens(){
+  floatingTokens.forEach(function(ft){
+    if(ft.el&&ft.el.parentNode)ft.el.parentNode.removeChild(ft.el);
+  });
+  floatingTokens=[];
+}
+
+// ═══════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════
+var PIPELINE_COLORS=['#00f5ff','#a855f7','#f59e0b','#ff6b35','#ff006e','#ff006e','#00ff87','#00f5ff'];
+
+function setPipeline(idx){
+  for(var i=0;i<8;i++){
+    var el=document.getElementById('ps'+i);
+    if(!el)continue;
+    el.classList.remove('active','done');
+    if(i<idx){el.classList.add('done');el.style.color='';el.style.background='';el.style.boxShadow='';}
+    else if(i===idx){
+      el.classList.add('active');
+      el.style.color='#000';
+      el.style.background=PIPELINE_COLORS[i];
+      el.style.boxShadow='0 0 14px '+PIPELINE_COLORS[i];
+    } else {
+      el.style.color='';el.style.background='';el.style.boxShadow='';
+    }
+  }
+}
+
+function setStatus(main,sub,color){
+  var el=document.getElementById('statusText');
+  el.textContent=main;
+  el.style.color=color||'#fff';
+  el.style.textShadow=color?'0 0 12px '+color:'none';
+  if(sub!==undefined)document.getElementById('statusSub').textContent=sub||'';
+}
+
+function showPanel(id){
+  ['embedPanel','attPanel','logitPanel'].forEach(function(pid){
+    var p=document.getElementById(pid);
+    if(p){p.classList.remove('show');}
+  });
+  if(id){
+    var panel=document.getElementById(id);
+    if(panel)panel.classList.add('show');
+  }
+}
+
+// ═══════════════════════════════
+// TOKENIZER
+// ═══════════════════════════════
+function tokenize(text){
+  var vocab={
+    'the':262,'is':318,'sky':6766,'blue':4171,'why':1521,'are':389,'you':345,'hello':31373,
+    'what':644,'how':703,'can':460,'do':466,'i':72,'a':257,'in':287,'and':290,'of':286,
+    'to':284,'it':340,'for':329,'on':319,'that':326,'was':373,'he':339,'with':351,
+    'as':355,'at':357,'be':307,'this':428,'from':422,'or':393,'an':281,'but':475
+  };
+  var words=text.toLowerCase().replace(/[^a-z0-9\s'?!.,]/g,'').split(/\s+/).filter(Boolean);
+  var tokens=[];
+  words.forEach(function(w){
+    var clean=w.replace(/[^a-z0-9]/g,'');
+    if(!clean)return;
+    if(clean.length<=5){
+      tokens.push({text:clean,id:vocab[clean]||(Math.floor(Math.random()*45000)+1000)});
+    } else {
+      var half=Math.ceil(clean.length/2);
+      tokens.push({text:clean.slice(0,half),id:vocab[clean.slice(0,half)]||(Math.floor(Math.random()*45000)+1000)});
+      tokens.push({text:'##'+clean.slice(half),id:Math.floor(Math.random()*45000)+1000});
+    }
+  });
+  if(!tokens.length)tokens.push({text:text.slice(0,8),id:9999});
+  return tokens.slice(0,10);
+}
+
+// ═══════════════════════════════
+// EMBEDDING PANEL
+// ═══════════════════════════════
+function buildEmbedPanel(tokens){
+  var container=document.getElementById('embedBars');
+  container.innerHTML='';
+  var dims=['man/wom','royal','animal','place','time','size','color','action'];
+  dims.forEach(function(dim,di){
+    var val=Math.random();
+    var row=document.createElement('div');
+    row.className='embed-bar-row';
+    var cols=['#00f5ff','#a855f7','#f59e0b','#ff6b35','#ff006e','#00ff87','#00ffcc','#ff00aa'];
+    row.innerHTML='<div class="eb-label">'+dim+'</div>'
+      +'<div class="eb-track"><div class="eb-fill" style="width:0;background:'+cols[di]+'" data-w="'+Math.round(val*100)+'%"></div></div>'
+      +'<div class="eb-val">'+(val*2-1).toFixed(2)+'</div>';
+    container.appendChild(row);
+    setTimeout(function(){row.querySelector('.eb-fill').style.width=Math.round(val*100)+'%';},di*80+100);
+  });
+}
+
+// ═══════════════════════════════
+// ATTENTION PANEL
+// ═══════════════════════════════
+function buildAttentionPanel(tokens){
+  var n=Math.min(tokens.length,6);
+  var grid=document.getElementById('attGrid');
+  grid.style.gridTemplateColumns='repeat('+(n+1)+',1fr)';
+  grid.innerHTML='';
+  var blank=document.createElement('div');blank.style.cssText='font-size:0.5rem;color:transparent';blank.textContent='·';grid.appendChild(blank);
+  tokens.slice(0,n).forEach(function(t){
+    var h=document.createElement('div');
+    h.style.cssText='font-size:0.5rem;color:rgba(255,107,53,0.8);text-align:center;padding:1px';
+    h.textContent=t.text.replace('##','').slice(0,3);
+    grid.appendChild(h);
+  });
+  for(var i=0;i<n;i++){
+    var rl=document.createElement('div');
+    rl.style.cssText='font-size:0.5rem;color:rgba(255,107,53,0.8);display:flex;align-items:center;justify-content:flex-end;padding-right:2px';
+    rl.textContent=tokens[i].text.replace('##','').slice(0,3);
+    grid.appendChild(rl);
+    for(var j=0;j<n;j++){
+      var v=Math.random();
+      if(i===j)v=0.65+Math.random()*0.35;
+      var cell=document.createElement('div');
+      cell.className='att-cell';
+      cell.style.background='rgba(255,107,53,0)';
+      grid.appendChild(cell);
+      (function(c,val){
+        setTimeout(function(){
+          c.style.background='rgba(255,107,53,'+val.toFixed(2)+')';
+        },Math.random()*400+100);
+      })(cell,v);
+    }
+  }
+}
+
+// ═══════════════════════════════
+// LOGIT PANEL
+// ═══════════════════════════════
+var VOCAB_WORDS=['the','sky','is','blue','because','light','scatters','atmosphere','sun','wavelength','appears','color','reason','due'];
+function buildLogitPanel(topToken){
+  var rows=document.getElementById('logitRows');
+  rows.innerHTML='';
+  var scores=[];
+  VOCAB_WORDS.forEach(function(w){
+    var s=Math.random()*0.35;
+    if(w===topToken)s=0.72+Math.random()*0.25;
+    scores.push({w:w,s:s});
+  });
+  scores.sort(function(a,b){return b.s-a.s;});
+  var top=scores.slice(0,7);
+  var sum=top.reduce(function(a,b){return a+b.s;},0);
+  var barCols=['#00ff87','#00f5ff','#a855f7','#f59e0b','#ff6b35','#ff006e','#ff00aa'];
+  top.forEach(function(item,i){
+    var pct=Math.round(item.s/sum*100);
+    var row=document.createElement('div');
+    row.className='logit-row';
+    row.innerHTML='<div class="logit-word">'+item.w+'</div>'
+      +'<div class="logit-track"><div class="logit-fill" style="width:0;background:'+barCols[i]+'"></div></div>'
+      +'<div class="logit-pct">'+pct+'%</div>';
+    rows.appendChild(row);
+    setTimeout(function(){row.querySelector('.logit-fill').style.width=pct+'%';},i*90+80);
+  });
+}
+
+// ═══════════════════════════════
+// RESPONSE GENERATOR
+// ═══════════════════════════════
+function generateResponse(txt){
+  var t=txt.toLowerCase();
+  if(/sky|blue/.test(t))return"The sky appears blue because of Rayleigh scattering. When sunlight enters Earth's atmosphere, shorter blue wavelengths scatter much more than longer red wavelengths, making the sky look blue to our eyes.";
+  if(/hello|hi|hey/.test(t))return"Hello! I processed your greeting through "+tokenize(txt).length+" tokens, converted each to a 768-dimensional embedding vector, ran multi-head self-attention, and sampled this response via softmax over my vocabulary.";
+  if(/how.*work|neural|llm|gpt|transformer/.test(t))return"I work by: (1) tokenizing your text into sub-word pieces, (2) embedding each token into high-dimensional vector space, (3) running self-attention so every token can attend to every other, (4) passing through stacked transformer blocks, then (5) sampling the next token from a softmax probability distribution.";
+  if(/what.*you|who.*you/.test(t))return"I am a Transformer-based Large Language Model. My architecture includes an embedding layer, positional encodings, "+tokenize(txt).length*12+" self-attention heads across 12 layers, feed-forward networks with residual connections, and a language model head projecting to 50,257 vocabulary logits.";
+  var toks=tokenize(txt);
+  return"Your prompt was split into "+toks.length+" tokens, each embedded into 768-dimensional space, processed through 12 transformer blocks with 12 attention heads each, scored across 50,257 vocabulary tokens via a linear projection, and this response was sampled token by token using top-p nucleus sampling.";
+}
+
+// ═══════════════════════════════
+// MAIN DEMO
+// ═══════════════════════════════
+var demoRunning=false;
+
+function startDemo(){
+  var txt=document.getElementById('promptInput').value.trim();
+  if(!txt){setStatus('⚠ Please enter a prompt first!','',['#ff006e']);return;}
+  if(demoRunning)return;
+  demoRunning=true;
+  document.getElementById('runBtn').disabled=true;
+  document.getElementById('outputPanel').classList.remove('show');
+  showPanel(null);
+  removeAllTokens();
+  activeLayer=-1;
+
+  var tokens=tokenize(txt);
+  var resp=generateResponse(txt);
+  var W=nnW||window.innerWidth;
+  var H=nnH||(window.innerHeight-200);
+
+  // ── STEP 0: INPUT ──
+  setPipeline(0);
+  setStatus('① INPUT — Prompt received: "'+txt.slice(0,40)+(txt.length>40?'...':'')+'"','Reading '+txt.length+' characters into the system buffer...','#00f5ff');
+  activeLayer=0;
+
+  // ── STEP 1: TOKENIZE (t=800ms) ──
+  setTimeout(function(){
+    setPipeline(1);
+    setStatus('② TOKENIZING — Breaking text into '+tokens.length+' BPE sub-word tokens with vocabulary IDs','Each word → sub-word pieces → integer ID from 50,257 token vocabulary','#a855f7');
+    activeLayer=0;
+    fireSignals(0);
+
+    // Spawn tokens floating from left center
+    tokens.forEach(function(tok,i){
+      setTimeout(function(){
+        var startX=W*0.05;
+        var startY=H*0.2+i*(H*0.6/Math.max(tokens.length-1,1));
+        var ft=createFloatingToken(tok.text+' ['+tok.id+']',TOKEN_COLORS[i%TOKEN_COLORS.length],startX,startY);
+        // Animate in
+        setTimeout(function(){
+          ft.el.style.transition='all 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+          ft.el.style.opacity='1';
+          ft.el.style.transform='scale(1)';
+        },50);
+      },i*180);
+    });
+  },800);
+
+  // ── STEP 2: EMBEDDINGS (t=800 + tokens*180 + 600) ──
+  var embedStart=800+tokens.length*180+600;
+  setTimeout(function(){
+    setPipeline(2);
+    setStatus('③ EMBEDDING — Converting each token to a 768-dimensional semantic vector','Similar meanings cluster nearby in this high-dimensional space','#f59e0b');
+    activeLayer=1;
+    fireSignals(1);
+    buildEmbedPanel(tokens);
+    showPanel('embedPanel');
+
+    // Float tokens toward neural net layer 1
+    var layer1X=nodePos.length>1&&nodePos[1].length>0?nodePos[1][0].x:W*0.28;
+    tokens.forEach(function(tok,i){
+      if(!floatingTokens[i])return;
+      var ft=floatingTokens[i];
+      var targetY=nnH*0.15+i*(nnH*0.7/Math.max(tokens.length-1,1));
+      setTimeout(function(){
+        ft.el.style.transition='all 0.9s cubic-bezier(0.4,0,0.2,1)';
+        ft.el.style.left=(layer1X-40)+'px';
+        ft.el.style.top=targetY+'px';
+        ft.el.style.opacity='0.7';
+        ft.el.style.transform='scale(0.85)';
+        ft.el.style.color='#f59e0b';
+        ft.el.style.borderColor='#f59e0b';
+        ft.el.style.boxShadow='0 0 10px #f59e0b66';
+      },i*100);
+    });
+  },embedStart);
+
+  // ── STEP 3: ATTENTION ──
+  var attnStart=embedStart+1800;
+  setTimeout(function(){
+    setPipeline(3);
+    setStatus('④ SELF-ATTENTION — Every token attends to every other token in Q·Kᵀ matrix',''+tokens.length+'×'+tokens.length+' attention matrix computed across 12 heads in parallel','#ff6b35');
+    activeLayer=2;
+    fireSignals(1);fireSignals(2);
+    buildAttentionPanel(tokens);
+    showPanel('attPanel');
+
+    // Tokens cross-connect visually — move them to center
+    var midX=W*0.45;
+    tokens.forEach(function(tok,i){
+      if(!floatingTokens[i])return;
+      var ft=floatingTokens[i];
+      var spread=(i-(tokens.length-1)/2)*30;
+      setTimeout(function(){
+        ft.el.style.transition='all 1s cubic-bezier(0.4,0,0.2,1)';
+        ft.el.style.left=(midX+spread)+'px';
+        ft.el.style.top=(H*0.3+spread*0.5)+'px';
+        ft.el.style.opacity='0.85';
+        ft.el.style.transform='scale(0.9)';
+        ft.el.style.color='#ff6b35';
+        ft.el.style.borderColor='#ff6b35';
+        ft.el.style.boxShadow='0 0 14px #ff6b3566';
+      },i*80);
+    });
+  },attnStart);
+
+  // ── STEP 4: TRANSFORMER ──
+  var transStart=attnStart+2000;
+  setTimeout(function(){
+    setPipeline(4);
+    setStatus('⑤ TRANSFORMER ×12 BLOCKS — LayerNorm → MultiHead Attention → FFN → Residual Add','12 stacked transformer blocks, each refining the contextual representation','#ff006e');
+    showPanel(null);
+
+    var layerCycle=[2,3,4];
+    layerCycle.forEach(function(li,i){
+      setTimeout(function(){
+        activeLayer=li;
+        fireSignals(li);
+        // Tokens march through network layers
+        tokens.forEach(function(tok,ti){
+          if(!floatingTokens[ti])return;
+          var ft=floatingTokens[ti];
+          var lx=nodePos[li]&&nodePos[li].length>0?nodePos[li][0].x:W*0.6;
+          setTimeout(function(){
+            ft.el.style.transition='all 0.7s ease';
+            ft.el.style.left=(lx-35)+'px';
+            ft.el.style.color='#ff006e';
+            ft.el.style.borderColor='#ff006e';
+            ft.el.style.boxShadow='0 0 12px #ff006e66';
+            ft.el.style.opacity='0.6';
+            ft.el.style.transform='scale(0.75)';
+          },ti*60);
+        });
+      },i*700);
+    });
+  },transStart);
+
+  // ── STEP 5: LOGITS ──
+  var logitsStart=transStart+2400;
+  setTimeout(function(){
+    setPipeline(5);
+    setStatus('⑥ LOGITS — Final hidden state × LM head [768×50257] → raw token scores','Projecting context vector onto full vocabulary to score every possible next token','#ff006e');
+    activeLayer=4;
+    fireSignals(4);
+    var topToken='sky';
+    try{
+      var rw=resp.split(' ');
+      if(rw.length>1)topToken=rw[Math.min(2,rw.length-1)];
+    }catch(e){}
+    buildLogitPanel(topToken);
+    showPanel('logitPanel');
+
+    // Tokens converge to output side
+    tokens.forEach(function(tok,i){
+      if(!floatingTokens[i])return;
+      var ft=floatingTokens[i];
+      var lx=nodePos[4]?nodePos[4][0].x:W*0.8;
+      setTimeout(function(){
+        ft.el.style.transition='all 0.8s ease';
+        ft.el.style.left=(lx-30)+'px';
+        ft.el.style.top=(H*0.4)+'px';
+        ft.el.style.opacity='0.4';
+        ft.el.style.transform='scale(0.6)';
+      },i*50);
+    });
+  },logitsStart);
+
+  // ── STEP 6: SOFTMAX ──
+  var softStart=logitsStart+1600;
+  setTimeout(function(){
+    setPipeline(6);
+    setStatus('⑦ SOFTMAX — eᶻ/Σeᶻ converts logits → probabilities summing to 1.0','Top-p nucleus sampling selects the next token from this distribution','#00ff87');
+    activeLayer=5;
+    fireSignals(5);
+    // Fade out all tokens
+    floatingTokens.forEach(function(ft){
+      ft.el.style.transition='all 0.5s ease';
+      ft.el.style.opacity='0';
+      ft.el.style.transform='scale(0.3)';
+    });
+  },softStart);
+
+  // ── STEP 7: OUTPUT ──
+  var outputStart=softStart+1200;
+  setTimeout(function(){
+    setPipeline(7);
+    setStatus('⑧ OUTPUT — Autoregressive token-by-token generation in progress...','Each generated token is fed back as input for the next prediction','#00f5ff');
+    activeLayer=-1;
+    showPanel(null);
+    removeAllTokens();
+
+    var outPanel=document.getElementById('outputPanel');
+    var outText=document.getElementById('outputText');
+    var outMeta=document.getElementById('outputMeta');
+    outText.innerHTML='<span id="outputCursor"></span>';
+    outMeta.textContent='';
+    outPanel.classList.add('show');
+
+    var ci=0;
+    var cursor=document.getElementById('outputCursor');
+    var typer=setInterval(function(){
+      if(ci<resp.length){
+        var textNode=document.createTextNode(resp[ci]);
+        outText.insertBefore(textNode,cursor);
+        if(ci%6===0)fireSignals(Math.floor(Math.random()*5));
+        ci++;
+      } else {
+        clearInterval(typer);
+        if(cursor)cursor.style.display='none';
+        outMeta.textContent='✓ '+tokens.length+' tokens processed · '+resp.split(' ').length+' words generated · '+LAYERS.reduce(function(a,b){return a+b;},0)+' neurons fired';
+        setStatus('✓ Complete — '+tokens.length+' tokens → '+resp.split(' ').length+' output words generated successfully','Try another prompt to see the full journey again','#00ff87');
+        demoRunning=false;
+        document.getElementById('runBtn').disabled=false;
+      }
+    },22);
+  },outputStart);
+}
+
+// Enter key
+document.getElementById('promptInput').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&!demoRunning)startDemo();
+});
+</script>
+</body>
+</html>
