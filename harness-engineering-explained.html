@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Engineering, Explained From First Principles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-deep:#0A1B2E;
+    --navy-panel:#122A47;
+    --navy-panel-2:#0F2439;
+    --blue-line: rgba(140,180,255,0.14);
+    --accent-blue:#5B9BFF;
+    --accent-blue-soft: #8FC1FF;
+    --accent-amber:#FFB454;
+    --text-hi:#EAF2FF;
+    --text-mid:#B6C6E0;
+    --text-low:#7C90B0;
+    --border-soft: rgba(140,180,255,0.18);
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      linear-gradient(var(--blue-line) 1px, transparent 1px) 0 0/44px 44px,
+      linear-gradient(90deg, var(--blue-line) 1px, transparent 1px) 0 0/44px 44px,
+      var(--navy-deep);
+    color:var(--text-hi);
+    font-family:'IBM Plex Sans', sans-serif;
+    line-height:1.6;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk', sans-serif; letter-spacing:-0.01em; margin:0;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  a{color:var(--accent-blue-soft);}
+  .wrap{max-width:1040px; margin:0 auto; padding:0 24px;}
+
+  /* Top progress rail */
+  #rail{position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--accent-blue),var(--accent-amber)); z-index:999; transition:width .1s linear;}
+
+  nav{
+    position:sticky; top:0; z-index:50;
+    backdrop-filter: blur(10px);
+    background:rgba(10,27,46,0.85);
+    border-bottom:1px solid var(--border-soft);
+  }
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:14px 24px;}
+  .brand{display:flex; align-items:center; gap:10px; font-family:'Space Grotesk'; font-weight:600; font-size:15px;}
+  .brand .buckle{width:16px;height:16px;position:relative;}
+  .navlinks{display:flex; gap:22px; font-size:13px; color:var(--text-mid); font-family:'IBM Plex Mono';}
+  .navlinks a{color:var(--text-mid); text-decoration:none; border-bottom:1px solid transparent; padding-bottom:2px;}
+  .navlinks a:hover{color:var(--accent-blue-soft); border-color:var(--accent-blue-soft);}
+  @media (max-width:760px){.navlinks{display:none;}}
+
+  /* HERO */
+  header.hero{padding:96px 0 60px; position:relative; overflow:hidden;}
+  .eyebrow{font-family:'IBM Plex Mono'; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--accent-amber); margin-bottom:18px; display:flex; align-items:center; gap:10px;}
+  .eyebrow::before{content:''; width:24px; height:1px; background:var(--accent-amber);}
+  .byline{font-family:'IBM Plex Mono'; font-size:13px; color:var(--text-mid); margin-bottom:26px; display:flex; align-items:center; gap:10px;}
+  .byline strong{color:var(--accent-blue-soft); font-family:'Space Grotesk'; font-size:14px; letter-spacing:.01em;}
+  .byline::before{content:'BY'; font-size:10px; letter-spacing:.1em; color:var(--text-low); border:1px solid var(--border-soft); border-radius:4px; padding:2px 6px;}
+  h1.title{font-size:clamp(38px,6vw,64px); font-weight:700; max-width:820px; color:#fff;}
+  h1.title span{color:var(--accent-blue-soft);}
+  .subtitle{margin-top:20px; font-size:18px; color:var(--text-mid); max-width:640px;}
+  .hero-diagram{margin-top:64px;}
+
+  /* nested circles -> harness animation */
+  .nest-wrap{display:flex; align-items:center; justify-content:center; padding:20px 0 10px;}
+  svg.nest{width:100%; max-width:760px; height:auto;}
+  .nest circle{fill:none; stroke-width:1.4;}
+  .nest .lbl{font-family:'IBM Plex Mono'; font-size:12px; fill:var(--text-mid);}
+  .nest .lbl-strong{fill:var(--accent-blue-soft); font-weight:600;}
+  .pulse{animation:pulse 3.2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.55;}50%{opacity:1;}}
+
+  section{padding:70px 0; border-top:1px solid var(--border-soft);}
+  .kicker{font-family:'IBM Plex Mono'; font-size:12px; text-transform:uppercase; letter-spacing:.12em; color:var(--accent-blue-soft); margin-bottom:10px;}
+  h2.h2{font-size:clamp(26px,3.6vw,36px); color:#fff; max-width:720px;}
+  .lede{color:var(--text-mid); max-width:680px; margin-top:14px; font-size:16px;}
+
+  /* Validation panel */
+  .val-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:32px;}
+  @media (max-width:800px){.val-grid{grid-template-columns:1fr;}}
+  .val-card{border:1px solid var(--border-soft); border-radius:var(--radius); padding:20px; background:var(--navy-panel-2);}
+  .val-card h4{font-size:14px; font-family:'IBM Plex Mono'; text-transform:uppercase; letter-spacing:.06em; margin-bottom:12px; display:flex; gap:8px; align-items:center;}
+  .dot{width:9px;height:9px;border-radius:50%; display:inline-block;}
+  .dot.g{background:#4ADE80;} .dot.a{background:#FFB454;} .dot.b{background:#7C90B0;}
+  .val-card ul{margin:0; padding-left:18px; font-size:14.5px; color:var(--text-mid);}
+  .val-card li{margin-bottom:8px;}
+
+  /* Glossary tooltip term */
+  .term{border-bottom:1px dashed var(--accent-blue-soft); cursor:help; position:relative; color:var(--text-hi);}
+  .term .tip{
+    display:none; position:absolute; bottom:130%; left:50%; transform:translateX(-50%);
+    width:240px; background:var(--navy-panel); border:1px solid var(--border-soft); border-radius:8px;
+    padding:12px 14px; font-size:13px; color:var(--text-mid); font-family:'IBM Plex Sans'; z-index:20; box-shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+  .term:hover .tip{display:block;}
+
+  /* Foundation concept cards */
+  .concept-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:34px;}
+  @media (max-width:900px){.concept-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:560px){.concept-grid{grid-template-columns:1fr;}}
+  .concept-card{
+    border:1px solid var(--border-soft); border-radius:var(--radius); padding:22px 18px;
+    background:linear-gradient(180deg, var(--navy-panel), var(--navy-panel-2));
+    position:relative; overflow:hidden;
+  }
+  .concept-card .tag{font-family:'IBM Plex Mono'; font-size:11px; color:var(--accent-amber); letter-spacing:.08em;}
+  .concept-card h3{margin-top:8px; font-size:20px; color:#fff;}
+  .concept-card p{font-size:14px; color:var(--text-mid); margin-top:10px;}
+  .concept-card .idx{position:absolute; top:14px; right:16px; font-family:'IBM Plex Mono'; color:var(--text-low); font-size:12px;}
+  .arrow-row{display:flex; align-items:center; justify-content:center; gap:8px; color:var(--text-low); font-family:'IBM Plex Mono'; font-size:12px; margin:14px 0;}
+
+  /* Flow diagrams */
+  .flow-box{border:1px solid var(--border-soft); border-radius:var(--radius); padding:26px; background:var(--navy-panel-2); margin-top:30px; overflow-x:auto;}
+  svg.diagram text{font-family:'IBM Plex Sans'; fill:var(--text-hi);}
+  svg.diagram .lbl-mono{font-family:'IBM Plex Mono'; fill:var(--text-low);}
+  svg.diagram .box{fill:var(--navy-panel); stroke:var(--border-soft); stroke-width:1.2;}
+  svg.diagram .box-accent{fill:rgba(91,155,255,0.10); stroke:var(--accent-blue); stroke-width:1.4;}
+  svg.diagram .box-fb{fill:rgba(255,180,84,0.08); stroke:var(--accent-amber); stroke-width:1.2;}
+  svg.diagram line, svg.diagram path.edge{stroke:var(--text-low); stroke-width:1.4; fill:none; marker-end:url(#arrow);}
+
+  /* Comparison table */
+  table.cmp{width:100%; border-collapse:collapse; margin-top:30px; font-size:14.5px;}
+  table.cmp th, table.cmp td{border:1px solid var(--border-soft); padding:14px 16px; text-align:left; vertical-align:top;}
+  table.cmp th{background:var(--navy-panel); font-family:'IBM Plex Mono'; font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--accent-blue-soft);}
+  table.cmp td{color:var(--text-mid); background:var(--navy-panel-2);}
+  table.cmp td.hcell{color:var(--text-hi); font-weight:600; background:var(--navy-panel);}
+  .tab-btns{display:flex; gap:8px; margin-top:30px; flex-wrap:wrap;}
+  .tab-btn{font-family:'IBM Plex Mono'; font-size:12.5px; padding:9px 16px; border-radius:999px; border:1px solid var(--border-soft); background:transparent; color:var(--text-mid); cursor:pointer; transition:.15s;}
+  .tab-btn.active{background:var(--accent-blue); color:#04101F; border-color:var(--accent-blue); font-weight:600;}
+  .tab-panel{display:none; margin-top:22px; border:1px solid var(--border-soft); border-radius:var(--radius); padding:22px; background:var(--navy-panel-2);}
+  .tab-panel.active{display:block;}
+
+  /* From/To mindset shift */
+  .shift-grid{display:grid; grid-template-columns:1fr auto 1fr; gap:20px; align-items:center; margin-top:34px;}
+  @media (max-width:760px){.shift-grid{grid-template-columns:1fr;}}
+  .shift-card{border:1px solid var(--border-soft); border-radius:var(--radius); padding:26px; background:var(--navy-panel-2);}
+  .shift-card.to{border-color:var(--accent-blue); background:rgba(91,155,255,0.06);}
+  .shift-card h4{font-family:'IBM Plex Mono'; font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-low); margin-bottom:10px;}
+  .shift-card.to h4{color:var(--accent-blue-soft);}
+  .shift-quote{font-size:16px; color:var(--text-hi); font-style:italic; margin-bottom:16px;}
+  .shift-card ul{margin:0; padding-left:18px; color:var(--text-mid); font-size:14px;}
+  .shift-arrow{font-size:26px; color:var(--accent-amber); text-align:center;}
+
+  /* Checklist */
+  .checklist{margin-top:30px; display:grid; gap:10px;}
+  .check-item{display:flex; gap:14px; align-items:flex-start; padding:14px 16px; border:1px solid var(--border-soft); border-radius:8px; background:var(--navy-panel-2);}
+  .check-item .ck{width:22px;height:22px;border-radius:50%; background:var(--accent-blue); color:#04101F; flex:none; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; margin-top:2px;}
+  .check-item p{margin:0; font-size:14.5px; color:var(--text-mid);}
+
+  /* Playbook accordion */
+  details.step{border:1px solid var(--border-soft); border-radius:8px; margin-top:12px; background:var(--navy-panel-2); overflow:hidden;}
+  details.step summary{list-style:none; cursor:pointer; padding:18px 20px; display:flex; align-items:center; gap:16px; font-family:'Space Grotesk'; font-weight:600; color:#fff; font-size:16px;}
+  details.step summary::-webkit-details-marker{display:none;}
+  details.step summary .num{font-family:'IBM Plex Mono'; color:var(--accent-amber); font-size:14px; flex:none; width:26px;}
+  details.step summary .chev{margin-left:auto; color:var(--text-low); transition:transform .2s;}
+  details.step[open] summary .chev{transform:rotate(180deg);}
+  details.step .body{padding:0 20px 20px 62px; color:var(--text-mid); font-size:14.5px;}
+  details.step .feedback-tag{display:inline-block; margin-top:10px; font-family:'IBM Plex Mono'; font-size:11px; color:var(--accent-blue-soft); border:1px solid var(--border-soft); border-radius:999px; padding:4px 10px;}
+
+  /* glossary */
+  .gloss-grid{display:grid; grid-template-columns:1fr 1fr; gap:12px 30px; margin-top:30px;}
+  @media (max-width:700px){.gloss-grid{grid-template-columns:1fr;}}
+  .gloss-item{border-bottom:1px solid var(--border-soft); padding-bottom:12px;}
+  .gloss-item dt{font-family:'IBM Plex Mono'; color:var(--accent-blue-soft); font-size:14px;}
+  .gloss-item dd{margin:6px 0 0; color:var(--text-mid); font-size:14px;}
+
+  /* sources */
+  .src-list{margin-top:26px; display:grid; gap:10px;}
+  .src-item{font-size:13.5px; color:var(--text-mid); border-left:2px solid var(--border-soft); padding-left:14px;}
+  .src-item a{word-break:break-all;}
+
+  footer{padding:60px 0 90px; text-align:center; color:var(--text-low); font-size:13px; font-family:'IBM Plex Mono';}
+  footer .credit{font-family:'Space Grotesk'; font-size:15px; color:var(--text-hi); margin-bottom:10px;}
+  footer .credit strong{color:var(--accent-blue-soft); font-weight:600;}
+  footer .credit .role{display:block; font-family:'IBM Plex Mono'; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:var(--text-low); margin-top:4px;}
+
+  .callout{border-left:3px solid var(--accent-amber); background:rgba(255,180,84,0.06); padding:16px 20px; border-radius:0 8px 8px 0; margin-top:26px; font-size:14.5px; color:var(--text-mid);}
+  .callout strong{color:var(--text-hi);}
+
+  ::selection{background:var(--accent-blue); color:#04101F;}
+</style>
+</head>
+<body>
+<div id="rail"></div>
+
+<nav>
+  <div class="wrap">
+    <div class="brand">
+      <svg class="buckle" viewBox="0 0 24 24"><path d="M3 3 L21 21 M21 3 L3 21" stroke="#5B9BFF" stroke-width="2.4" stroke-linecap="round"/></svg>
+      HARNESS ENGINEERING
+    </div>
+    <div class="navlinks">
+      <a href="#validation">Validation</a>
+      <a href="#foundations">Foundations</a>
+      <a href="#topic">The Topic</a>
+      <a href="#diagrams">System View</a>
+      <a href="#sources">Sources</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">A learning page on modern AI systems</div>
+    <div class="byline">Curated &amp; compiled by <strong>Sujit Kulkarni</strong></div>
+    <h1 class="title">From talking to a model,<br>to building a <span>system</span> around it.</h1>
+    <p class="subtitle">This page starts at the very beginning &mdash; what AI, machine learning, deep learning, and neural networks actually are &mdash; and walks up to a newer idea called <strong>Harness Engineering</strong>: the practice of building the reliable infrastructure that surrounds a language model in production.</p>
+
+    <div class="hero-diagram">
+      <div class="nest-wrap">
+        <svg class="nest" viewBox="0 0 760 300">
+          <defs>
+            <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7C90B0"/></marker>
+          </defs>
+          <circle class="pulse" cx="150" cy="150" r="120" stroke="#3E6FBF"/>
+          <circle class="pulse" cx="150" cy="150" r="90" stroke="#5B9BFF" style="animation-delay:.3s"/>
+          <circle class="pulse" cx="150" cy="150" r="60" stroke="#8FC1FF" style="animation-delay:.6s"/>
+          <circle class="pulse" cx="150" cy="150" r="30" stroke="#EAF2FF" style="animation-delay:.9s"/>
+          <text x="150" y="35" text-anchor="middle" class="lbl">AI</text>
+          <text x="150" y="68" text-anchor="middle" class="lbl">Machine Learning</text>
+          <text x="150" y="98" text-anchor="middle" class="lbl">Deep Learning</text>
+          <text x="150" y="150" text-anchor="middle" class="lbl lbl-strong">Neural<tspan x="150" dy="14">Networks</tspan></text>
+
+          <path class="edge" d="M280,150 L400,150" />
+          <text x="340" y="140" text-anchor="middle" class="lbl-mono" style="font-size:10px">powers</text>
+
+          <!-- harness X icon -->
+          <g transform="translate(430,90)">
+            <rect x="0" y="0" width="120" height="120" rx="10" class="box-accent"/>
+            <path d="M25,20 L95,100 M95,20 L25,100" stroke="#5B9BFF" stroke-width="6" stroke-linecap="round"/>
+            <circle cx="25" cy="20" r="7" fill="#EAF2FF"/><circle cx="95" cy="20" r="7" fill="#EAF2FF"/>
+            <circle cx="25" cy="100" r="7" fill="#EAF2FF"/><circle cx="95" cy="100" r="7" fill="#EAF2FF"/>
+          </g>
+          <text x="490" y="228" text-anchor="middle" class="lbl lbl-strong">Harness</text>
+
+          <path class="edge" d="M580,150 L660,150" />
+          <g transform="translate(660,105)">
+            <rect x="0" y="0" width="90" height="90" rx="10" class="box"/>
+            <text x="45" y="50" text-anchor="middle" class="lbl">LLM(s)</text>
+          </g>
+        </svg>
+      </div>
+      <p style="text-align:center; font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-low); margin-top:6px;">Illustration &middot; conceptual nesting, not to scale &middot; built for this page</p>
+    </div>
+  </div>
+</header>
+
+<section id="validation">
+  <div class="wrap">
+    <div class="kicker">01 &middot; Source check</div>
+    <h2 class="h2">What's confirmed, and what isn't</h2>
+    <p class="lede">Before explaining anything, here is an honest breakdown of what is well established, what is still unsettled, and what should be read as illustration rather than literal fact.</p>
+
+    <div class="val-grid">
+      <div class="val-card">
+        <h4><span class="dot g"></span>Clearly established</h4>
+        <ul>
+          <li>This page covers one connected idea: a definition of Harness Engineering, a "Mindset Shift" from tactical prompting to engineered systems, a checklist for when you actually need a harness, a three-way comparison (Prompt / Context / Harness Engineering), the "Three Levels of AI Enablement," a 5-step playbook, and two system-flow diagrams.</li>
+          <li>The core flow is consistent throughout: Input &rarr; Harness &rarr; LLM &rarr; Outcome, and the fuller version: Data Sources / APIs &amp; Tools / User Input / Business Rules &rarr; AI System (Harness: Guardrails, Evaluation, Orchestration, Monitoring, Optimization, Context layer) &rarr; LLM(s) &rarr; Outcomes (Reliable, Scalable, Secure, Measurable) &rarr; Feedback Loop (Measure &rarr; Learn &rarr; Improve) back into the system.</li>
+        </ul>
+      </div>
+      <div class="val-card">
+        <h4><span class="dot a"></span>Uncertain</h4>
+        <ul>
+          <li>"Harness Engineering" is a genuinely emerging, informally-defined industry term rather than a standardized academic concept &mdash; different practitioners describe its exact scope slightly differently.</li>
+          <li>Because the term is still settling, treat any single definition (including the one used here) as a current best framing rather than a fixed standard.</li>
+        </ul>
+      </div>
+      <div class="val-card">
+        <h4><span class="dot b"></span>Illustration only</h4>
+        <ul>
+          <li>The blue climbing-harness / safety-harness graphic used throughout this page is a visual metaphor for "the structure that holds an AI system together" &mdash; it is not a technical diagram and carries no literal engineering meaning.</li>
+          <li>The brain icon used for "LLM(s)" is a common stand-in for "the model's reasoning core." Real large language models do not resemble brains; this is purely illustrative shorthand used across the AI industry.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="foundations">
+  <div class="wrap">
+    <div class="kicker">02 &middot; Foundations first</div>
+    <h2 class="h2">AI, ML, DL, and Neural Networks &mdash; the nesting dolls</h2>
+    <p class="lede">Every box in the original diagrams &mdash; "AI System," "LLM(s)," "Neural" anything &mdash; rests on four ideas that build on each other like nesting dolls: <span class="term">AI<span class="tip">The broadest term: machines built to mimic human-like problem-solving, reasoning, and learning.</span></span> contains <span class="term">ML<span class="tip">Machine Learning: systems that improve at a task by learning patterns from data, instead of being explicitly programmed rule by rule.</span></span>, which contains <span class="term">DL<span class="tip">Deep Learning: a form of ML that uses neural networks with many layers to learn directly from large, messy, unstructured data.</span></span>, which is built out of <span class="term">Neural Networks<span class="tip">Layered, brain-inspired computing structures made of connected "neurons" that pass signals and adjust their strength during training.</span></span>. This is IBM's own framing, and it is the clearest public explanation available.</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <span class="idx">01</span>
+        <span class="tag">BROADEST</span>
+        <h3>Artificial Intelligence</h3>
+        <p>AI is the broadest of the four terms, used to describe machines that mimic human intelligence and human cognitive functions like problem-solving and learning, using prediction and automation to handle tasks people used to do by hand, such as recognizing speech or translating language.</p>
+      </div>
+      <div class="concept-card">
+        <span class="idx">02</span>
+        <span class="tag">SUBSET OF AI</span>
+        <h3>Machine Learning</h3>
+        <p>Machine learning is a subset of AI that allows a system to make predictions and improve by learning from data, rather than being explicitly guessed or hard-coded. A recommendation engine that improves as you use it is a classic example.</p>
+      </div>
+      <div class="concept-card">
+        <span class="idx">03</span>
+        <span class="tag">SUBSET OF ML</span>
+        <h3>Deep Learning</h3>
+        <p>Deep learning is a subset of machine learning that automates much of the feature-extraction work and can learn directly from large, unstructured data such as raw text or images, at the cost of needing far more data and compute than classic ML.</p>
+      </div>
+      <div class="concept-card">
+        <span class="idx">04</span>
+        <span class="tag">THE BACKBONE</span>
+        <h3>Neural Networks</h3>
+        <p>Neural networks are a subset of machine learning that form the backbone of deep learning, made of layered, connected "neurons" that pass a signal forward only once it crosses a threshold, loosely mirroring how brain cells fire.</p>
+      </div>
+    </div>
+
+    <div class="arrow-row">AI &rarr; contains &rarr; ML &rarr; contains &rarr; DL &rarr; is built from &rarr; Neural Networks &rarr; today, at large scale, that gives us an <strong style="color:var(--accent-blue-soft)">LLM</strong></div>
+
+    <div class="callout">
+      <strong>Where does an LLM fit?</strong> A Large Language Model (LLM) &mdash; the "brain" icon in the original slides &mdash; is a very large neural network, trained with deep learning techniques on massive amounts of text, that predicts and generates language. It sits at the tip of this nesting-doll chain: it is a neural network, which makes it deep learning, which makes it machine learning, which makes it AI.
+    </div>
+  </div>
+</section>
+
+<section id="topic">
+  <div class="wrap">
+    <div class="kicker">03 &middot; The topic in the pictures</div>
+    <h2 class="h2">What is Harness Engineering?</h2>
+    <p class="lede">Once you have a powerful LLM, a new problem appears: the raw model, on its own, is not reliable enough to run a real business process. It can be inconsistent, get things wrong, or say things it shouldn't. The model contributes reasoning ability; the harness provides the structure, reliability, and execution control around it &mdash; and two teams using the exact same model can get very different results depending on how well that surrounding system is built.</p>
+
+    <p class="lede" style="margin-top:18px;">As shown in the original diagram, the idea is simple: an <strong>Input</strong> passes through a <strong>Harness</strong> (the engineered layer of guardrails, checks, and orchestration) before it ever reaches the <strong>LLM</strong>, and the LLM's response passes back through that same harness before it becomes a trustworthy <strong>Outcome</strong>.</p>
+
+    <div class="flow-box">
+      <svg class="diagram" viewBox="0 0 900 200" width="100%">
+        <defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7C90B0"/></marker></defs>
+        <g transform="translate(20,55)"><rect class="box" width="150" height="90" rx="8"/><text x="75" y="50" text-anchor="middle">Input</text></g>
+        <path class="edge" d="M170,100 L235,100" marker-end="url(#arrow2)"/>
+        <g transform="translate(235,45)"><rect class="box-accent" width="170" height="110" rx="8"/><text x="85" y="55" text-anchor="middle" font-weight="600">Harness</text><text x="85" y="80" text-anchor="middle" class="lbl-mono" style="font-size:11px">guardrails &middot; orchestration &middot; evals</text></g>
+        <path class="edge" d="M405,100 L470,100" marker-end="url(#arrow2)"/>
+        <g transform="translate(470,55)"><rect class="box" width="150" height="90" rx="8"/><text x="75" y="50" text-anchor="middle">LLM</text></g>
+        <path class="edge" d="M620,100 L685,100" marker-end="url(#arrow2)"/>
+        <g transform="translate(685,45)"><rect class="box" width="180" height="110" rx="8" stroke="#4ADE80"/><text x="90" y="55" text-anchor="middle" font-weight="600">Outcome</text><text x="90" y="80" text-anchor="middle" class="lbl-mono" style="font-size:11px">reliable &middot; measurable</text></g>
+      </svg>
+      <p style="text-align:center; font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-low); margin-top:10px;">Sourced from the slide "What is Harness Engineering?"</p>
+    </div>
+
+    <div class="callout">
+      <strong>Where this term comes from.</strong> "Harness engineering" is a fast-emerging, industry-coined term, not an official academic field. Field reports and write-ups describe it as building a structured system around an LLM, using prompts, tools, middleware, and evaluation to guide the model toward reliable outputs instead of only changing the model itself. Commentary on its rise notes the term gained wide traction in early 2026, discussed by teams at OpenAI, Anthropic, LangChain, Thoughtworks, and HumanLayer, converging on the idea that an AI agent's reliability depends less on the model and more on the system built around it. Because usage is still settling, treat the exact definition as evolving rather than fixed.
+    </div>
+
+    <h3 style="margin-top:52px; font-size:22px; color:#fff;">Three levels of AI enablement</h3>
+    <p class="lede">The original deck frames Harness Engineering as the third and most complete of three layers people use to get useful work out of an AI model. Click each to see how they build on one another.</p>
+
+    <div class="tab-btns" id="tabBtns">
+      <button class="tab-btn active" data-tab="t1">1. Prompt Engineering</button>
+      <button class="tab-btn" data-tab="t2">2. Context Engineering</button>
+      <button class="tab-btn" data-tab="t3">3. Harness Engineering</button>
+    </div>
+    <div class="tab-panel active" id="t1">
+      <strong style="color:#fff;">Focus:</strong> Crafting the right instructions to get better responses from the model.<br><br>
+      <strong style="color:#fff;">Key question:</strong> "What should I ask?"<br><br>
+      <strong style="color:#fff;">Scope:</strong> A single interaction &mdash; e.g. rewriting one prompt for clarity. <strong style="color:#fff;">Outcome:</strong> Better individual responses.
+    </div>
+    <div class="tab-panel" id="t2">
+      <strong style="color:#fff;">Focus:</strong> Providing the right information, data, and memory the model relies on.<br><br>
+      <strong style="color:#fff;">Key question:</strong> "What should the model know?"<br><br>
+      <strong style="color:#fff;">Scope:</strong> The information layer &mdash; e.g. adding documents or memory. <strong style="color:#fff;">Outcome:</strong> More accurate, relevant responses.
+    </div>
+    <div class="tab-panel" id="t3">
+      <strong style="color:#fff;">Focus:</strong> Building and optimizing the whole system around the model to ensure reliability, scalability, and impact.<br><br>
+      <strong style="color:#fff;">Key question:</strong> "How do we make it work reliably at scale?"<br><br>
+      <strong style="color:#fff;">Scope:</strong> End-to-end system &mdash; e.g. adding evaluations, guardrails, monitoring, orchestration, and feedback. <strong style="color:#fff;">Outcome:</strong> Reliable, scalable business impact.
+    </div>
+
+    <table class="cmp" style="margin-top:34px;">
+      <tr><th></th><th>Prompt Engineering</th><th>Context Engineering</th><th>Harness Engineering</th></tr>
+      <tr><td class="hcell">Primary focus</td><td>Craft better prompts</td><td>Provide right context</td><td>Build &amp; run reliable AI systems</td></tr>
+      <tr><td class="hcell">Scope</td><td>Single interaction</td><td>Information layer</td><td>End-to-end system</td></tr>
+      <tr><td class="hcell">Key question</td><td>What should I ask?</td><td>What should the model know?</td><td>How do we make it work reliably at scale?</td></tr>
+      <tr><td class="hcell">Outcome</td><td>Better responses</td><td>More accurate, relevant responses</td><td>Reliable, scalable business impact</td></tr>
+      <tr><td class="hcell">Example</td><td>Rewriting a prompt for clarity</td><td>Adding documents or memory</td><td>Adding evaluations, guardrails, monitoring, orchestration &amp; feedback</td></tr>
+    </table>
+    <p style="font-family:'IBM Plex Mono'; font-size:13px; color:var(--accent-blue-soft); margin-top:16px; text-align:center;">Prompt = moment.&nbsp;&nbsp; Context = foundation.&nbsp;&nbsp; Harness = system.</p>
+
+    <h3 style="margin-top:56px; font-size:22px; color:#fff;">The mindset shift: from prompts to production</h3>
+    <div class="shift-grid">
+      <div class="shift-card">
+        <h4>From</h4>
+        <p class="shift-quote">"How do I get the model to say the right thing?"</p>
+        <ul><li>Tactical</li><li>One-off</li><li>Manual</li><li>Hard to scale</li></ul>
+      </div>
+      <div class="shift-arrow">&rarr;</div>
+      <div class="shift-card to">
+        <h4>To</h4>
+        <p class="shift-quote">"How do I build a system that consistently delivers the right outcomes?"</p>
+        <ul><li>Strategic</li><li>Repeatable</li><li>Automated</li><li>Built to scale</li></ul>
+      </div>
+    </div>
+    <p class="lede" style="margin-top:22px;"><strong style="color:#fff;">Harness Engineering turns AI from a capability into a competitive advantage</strong> &mdash; the same message closes the original slide deck.</p>
+
+    <h3 style="margin-top:56px; font-size:22px; color:#fff;">When you actually need a harness</h3>
+    <div class="checklist">
+      <div class="check-item"><span class="ck">&#10003;</span><p>When your AI system moves beyond a prototype</p></div>
+      <div class="check-item"><span class="ck">&#10003;</span><p>When reliability, safety, and compliance matter</p></div>
+      <div class="check-item"><span class="ck">&#10003;</span><p>When multiple models, tools, or data sources are involved</p></div>
+      <div class="check-item"><span class="ck">&#10003;</span><p>When you need to monitor, evaluate, and improve continuously</p></div>
+      <div class="check-item"><span class="ck">&#10003;</span><p>When users depend on your AI for real work</p></div>
+      <div class="check-item"><span class="ck">&#10003;</span><p>When cost, latency, and scalability impact your bottom line</p></div>
+    </div>
+    <p style="text-align:center; margin-top:16px; font-family:'IBM Plex Mono'; font-size:13px; color:var(--accent-amber);">"If the stakes are real, you need a harness."</p>
+
+    <h3 style="margin-top:56px; font-size:22px; color:#fff;">The Harness Engineering playbook, in five parts</h3>
+    <p class="lede">Each part below is one panel from the original playbook slide. Expand any step to see what it does.</p>
+
+    <details class="step" open>
+      <summary><span class="num">01</span>Guardrails &amp; Safety<span class="chev">&#9660;</span></summary>
+      <div class="body">Define policies, filters, and controls to ensure the AI system is safe, secure, and compliant before anything reaches a user. This corresponds to the "Guardrails &amp; safety" box in the full system diagram.</div>
+    </details>
+    <details class="step">
+      <summary><span class="num">02</span>Evaluation &amp; Testing<span class="chev">&#9660;</span></summary>
+      <div class="body">Continuously test quality, correctness, and performance using a mix of automated checks and human review, catching regressions before they reach production.</div>
+    </details>
+    <details class="step">
+      <summary><span class="num">03</span>Orchestration &amp; Workflows<span class="chev">&#9660;</span></summary>
+      <div class="body">Design the multi-step workflows and tool use that let the model actually solve real-world problems, rather than answering a single isolated question.</div>
+    </details>
+    <details class="step">
+      <summary><span class="num">04</span>Monitoring &amp; Observability<span class="chev">&#9660;</span></summary>
+      <div class="body">Track behavior, detect issues, and understand how the system is performing once it's live &mdash; you cannot improve what you cannot see.</div>
+    </details>
+    <details class="step">
+      <summary><span class="num">05</span>Cost &amp; Latency Optimization<span class="chev">&#9660;</span></summary>
+      <div class="body">Optimize model choice, caching, routing, and infrastructure so the system stays fast and affordable at scale.
+        <div class="feedback-tag">&#8635; feeds into: Feedback Loop &mdash; Learn, iterate, and continuously improve</div>
+      </div>
+    </details>
+  </div>
+</section>
+
+<section id="diagrams">
+  <div class="wrap">
+    <div class="kicker">04 &middot; System view</div>
+    <h2 class="h2">How it all comes together</h2>
+    <p class="lede">This is the full picture, sourced from the slide series with the same logic: everything that feeds in on the left, the harness layer that does the work in the middle, and the outcomes on the right &mdash; with a feedback loop that constantly measures, learns, and improves the whole system.</p>
+
+    <div class="flow-box">
+      <svg class="diagram" viewBox="0 0 1000 620" width="100%">
+        <defs><marker id="arrow3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7C90B0"/></marker></defs>
+
+        <!-- Inputs -->
+        <text x="20" y="30" class="lbl-mono" style="font-size:12px">INPUTS</text>
+        <g transform="translate(20,45)"><rect class="box" width="200" height="52" rx="6"/><text x="100" y="32" text-anchor="middle" font-size="13">Data Sources</text></g>
+        <g transform="translate(20,110)"><rect class="box" width="200" height="52" rx="6"/><text x="100" y="32" text-anchor="middle" font-size="13">APIs &amp; Tools</text></g>
+        <g transform="translate(20,175)"><rect class="box" width="200" height="52" rx="6"/><text x="100" y="32" text-anchor="middle" font-size="13">User Input</text></g>
+        <g transform="translate(20,240)"><rect class="box" width="200" height="52" rx="6"/><text x="100" y="32" text-anchor="middle" font-size="13">Business Rules</text></g>
+
+        <path class="edge" d="M220,71 L270,175" marker-end="url(#arrow3)"/>
+        <path class="edge" d="M220,136 L270,175" marker-end="url(#arrow3)"/>
+        <path class="edge" d="M220,201 L270,175" marker-end="url(#arrow3)"/>
+        <path class="edge" d="M220,266 L270,175" marker-end="url(#arrow3)"/>
+
+        <!-- AI System / Harness -->
+        <g transform="translate(270,45)">
+          <rect class="box-accent" width="440" height="330" rx="10"/>
+          <text x="220" y="34" text-anchor="middle" font-weight="700" font-size="16">AI System (Harness)</text>
+          <g transform="translate(20,55)"><rect class="box" width="130" height="80" rx="6"/><text x="65" y="30" text-anchor="middle" font-size="12" font-weight="600">Guardrails</text><text x="65" y="50" text-anchor="middle" class="lbl-mono" font-size="10">policies, filters</text></g>
+          <g transform="translate(155,55)"><rect class="box" width="130" height="80" rx="6"/><text x="65" y="30" text-anchor="middle" font-size="12" font-weight="600">Evaluation</text><text x="65" y="50" text-anchor="middle" class="lbl-mono" font-size="10">automated + human</text></g>
+          <g transform="translate(290,55)"><rect class="box" width="130" height="80" rx="6"/><text x="65" y="30" text-anchor="middle" font-size="12" font-weight="600">Orchestration</text><text x="65" y="50" text-anchor="middle" class="lbl-mono" font-size="10">multi-step flows</text></g>
+
+          <path class="edge" d="M85,135 L220,175" marker-end="url(#arrow3)"/>
+          <path class="edge" d="M220,135 L220,175" marker-end="url(#arrow3)"/>
+          <path class="edge" d="M355,135 L220,175" marker-end="url(#arrow3)"/>
+
+          <g transform="translate(120,175)"><rect class="box" width="200" height="46" rx="6"/><text x="100" y="29" text-anchor="middle" font-weight="700" font-size="13">LLM(s)</text></g>
+
+          <path class="edge" d="M220,221 L85,255" marker-end="url(#arrow3)"/>
+          <path class="edge" d="M220,221 L220,255" marker-end="url(#arrow3)"/>
+          <path class="edge" d="M220,221 L355,255" marker-end="url(#arrow3)"/>
+
+          <g transform="translate(20,255)"><rect class="box" width="130" height="60" rx="6"/><text x="65" y="26" text-anchor="middle" font-size="12" font-weight="600">Monitoring</text><text x="65" y="44" text-anchor="middle" class="lbl-mono" font-size="10">detect issues</text></g>
+          <g transform="translate(155,255)"><rect class="box" width="130" height="60" rx="6"/><text x="65" y="26" text-anchor="middle" font-size="12" font-weight="600">Optimization</text><text x="65" y="44" text-anchor="middle" class="lbl-mono" font-size="10">cost, speed</text></g>
+          <g transform="translate(290,255)"><rect class="box" width="130" height="60" rx="6"/><text x="65" y="26" text-anchor="middle" font-size="12" font-weight="600">Context layer</text><text x="65" y="44" text-anchor="middle" class="lbl-mono" font-size="10">memory, retrieval</text></g>
+        </g>
+
+        <path class="edge" d="M710,210 L780,210" marker-end="url(#arrow3)"/>
+
+        <!-- Outcomes -->
+        <g transform="translate(780,45)">
+          <rect class="box" width="200" height="330" rx="10" stroke="#4ADE80"/>
+          <text x="100" y="34" text-anchor="middle" font-weight="700" font-size="15" fill="#4ADE80">Outcomes</text>
+          <g transform="translate(30,55)"><rect class="box" width="140" height="42" rx="6"/><text x="70" y="27" text-anchor="middle" font-size="12">Reliable</text></g>
+          <g transform="translate(30,110)"><rect class="box" width="140" height="42" rx="6"/><text x="70" y="27" text-anchor="middle" font-size="12">Scalable</text></g>
+          <g transform="translate(30,165)"><rect class="box" width="140" height="42" rx="6"/><text x="70" y="27" text-anchor="middle" font-size="12">Secure</text></g>
+          <g transform="translate(30,220)"><rect class="box" width="140" height="42" rx="6"/><text x="70" y="27" text-anchor="middle" font-size="12">Measurable</text></g>
+        </g>
+
+        <!-- Feedback loop -->
+        <path class="edge" d="M880,375 L880,440" marker-end="url(#arrow3)"/>
+        <text x="895" y="410" class="lbl-mono" font-size="11">outputs feed back</text>
+        <g transform="translate(260,440)"><rect class="box-fb" width="480" height="70" rx="8"/><text x="240" y="28" text-anchor="middle" font-weight="700" font-size="14" fill="#FFB454">FEEDBACK LOOP</text><text x="240" y="50" text-anchor="middle" font-size="12">Measure &rarr; Learn &rarr; Improve</text></g>
+
+        <path class="edge" d="M260,475 C120,475 40,400 40,290 C40,250 90,225 130,215" marker-end="url(#arrow3)"/>
+      </svg>
+      <p style="text-align:center; font-family:'IBM Plex Mono'; font-size:12px; color:var(--text-low); margin-top:10px;">Sourced from the slides "How it all comes together" &amp; "A Guide to Harness Engineering" &mdash; same logic and flow, no steps added or removed.</p>
+    </div>
+
+    <div class="callout" style="margin-top:30px;">
+      <strong>Why the feedback loop matters.</strong> Every outcome (reliable, scalable, secure, measurable) is measured, and what's learned from that measurement flows back into the inputs and the harness itself &mdash; guardrails get tightened, evaluations get updated, and the system keeps improving instead of staying static. This closed loop is what separates a one-off prompt from an engineered system.
+    </div>
+
+    <h3 style="margin-top:56px; font-size:22px; color:#fff;">Glossary</h3>
+    <p class="lede">Plain-English definitions of the recurring technical words on this page.</p>
+    <dl class="gloss-grid">
+      <div class="gloss-item"><dt>Model</dt><dd>The trained mathematical system (here, an LLM) that takes an input and produces an output, such as text.</dd></div>
+      <div class="gloss-item"><dt>Training</dt><dd>The process of showing a model large amounts of data so it can learn patterns and adjust its internal parameters.</dd></div>
+      <div class="gloss-item"><dt>Data</dt><dd>The examples &mdash; text, numbers, images &mdash; a model learns from, and later, the real-world information it processes when in use.</dd></div>
+      <div class="gloss-item"><dt>Prediction</dt><dd>The model's best guess at an output (such as the next word) given a particular input.</dd></div>
+      <div class="gloss-item"><dt>Layer</dt><dd>One stage of processing inside a neural network; deep learning models stack many layers to learn complex patterns.</dd></div>
+      <div class="gloss-item"><dt>Algorithm</dt><dd>The step-by-step method a system follows to learn from data or to make a decision.</dd></div>
+      <div class="gloss-item"><dt>Guardrail</dt><dd>A rule or filter that stops an AI system from producing unsafe, incorrect, or non-compliant output.</dd></div>
+      <div class="gloss-item"><dt>Orchestration</dt><dd>Coordinating multiple steps, tools, or models so they work together toward one task.</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="kicker">05 &middot; Sources</div>
+    <h2 class="h2">Where the factual claims on this page come from</h2>
+    <p class="lede">Foundational AI/ML/DL/NN definitions are drawn from IBM's public explainer. Claims about "Harness Engineering" as an emerging industry term are drawn from recent independent technical write-ups, since no single standards body currently defines it.</p>
+    <div class="src-list">
+      <div class="src-item">IBM Data and AI Team, <em>"AI vs. Machine Learning vs. Deep Learning vs. Neural Networks"</em> &mdash; <a href="https://www.ibm.com/think/topics/ai-vs-machine-learning-vs-deep-learning-vs-neural-networks" target="_blank" rel="noopener">ibm.com/think/topics/ai-vs-machine-learning-vs-deep-learning-vs-neural-networks</a></div>
+      <div class="src-item">Plaban Nayak, <em>"Harness Engineering: Building the Operating System for Autonomous Agents"</em>, The AI Forum (Medium) &mdash; <a href="https://medium.com/the-ai-forum/harness-engineering-building-the-operating-system-for-autonomous-agents-1e20c105f689" target="_blank" rel="noopener">medium.com/the-ai-forum/harness-engineering...</a></div>
+      <div class="src-item"><em>"Harness Engineering: The Emerging Discipline of Making AI Agents Reliable"</em>, DEV Community &mdash; <a href="https://dev.to/truongpx396/harness-engineering-the-emerging-discipline-of-making-ai-agents-reliable-42gf" target="_blank" rel="noopener">dev.to/truongpx396/harness-engineering...</a></div>
+      <div class="src-item"><em>"AI Harness Engineering: The Missing Layer Behind Reliable LLM Applications"</em>, DEV Community &mdash; <a href="https://dev.to/lightningdev123/ai-harness-engineering-the-missing-layer-behind-reliable-llm-applications-4919" target="_blank" rel="noopener">dev.to/lightningdev123/ai-harness-engineering...</a></div>
+      <div class="src-item">Martin Fowler, <em>"Harness engineering for coding agent users"</em> &mdash; <a href="https://martinfowler.com/articles/harness-engineering.html" target="_blank" rel="noopener">martinfowler.com/articles/harness-engineering.html</a></div>
+    </div>
+    <p style="margin-top:24px; font-size:13px; color:var(--text-low);">Note: "Harness Engineering" is a term still being actively defined by practitioners as of 2026. Where sources disagreed on precise scope, this page favored the framing that matched the original diagram deck rather than any single source's terminology.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="credit">Curated &amp; compiled by <strong>Sujit Kulkarni</strong><span class="role">Author &middot; Instructional Design</span></div>
+  Built as a learning resource &middot; diagrams sourced and expanded from the original slide series &middot; verify current terminology independently before citing in formal work
+</footer>
+
+<script>
+  // scroll progress
+  const rail = document.getElementById('rail');
+  window.addEventListener('scroll', () => {
+    const h = document.documentElement;
+    const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    rail.style.width = pct + '%';
+  });
+
+  // tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
