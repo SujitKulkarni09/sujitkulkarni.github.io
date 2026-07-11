@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Prompt Credits Wheel &mdash; 16 Rules, Gamified</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#05060F;
+    --panel:#0C0E22;
+    --panel-2:#10122A;
+    --line: rgba(140,170,255,0.14);
+    --border: rgba(140,170,255,0.22);
+    --cyan:#2FE6E6;
+    --cyan-soft: #8FF6F6;
+    --magenta:#FF3FA4;
+    --gold:#FFC857;
+    --gold-soft:#FFE0A3;
+    --text-hi:#F3F6FF;
+    --text-mid:#A6AFD6;
+    --text-low:#6C74A0;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 1200px 700px at 20% -10%, rgba(47,230,230,0.08), transparent 60%),
+      radial-gradient(ellipse 1000px 800px at 90% 10%, rgba(255,63,164,0.07), transparent 55%),
+      radial-gradient(ellipse 900px 700px at 50% 100%, rgba(255,200,87,0.05), transparent 55%),
+      var(--void);
+    color:var(--text-hi);
+    font-family:'Space Grotesk', sans-serif;
+    line-height:1.65;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,h4{font-family:'Orbitron', sans-serif; letter-spacing:.01em; margin:0;}
+  .mono{font-family:'JetBrains Mono', monospace;}
+  a{color:var(--cyan-soft);}
+  .wrap{max-width:1120px; margin:0 auto; padding:0 24px;}
+
+  /* starfield ambience */
+  .stars{position:fixed; inset:0; pointer-events:none; z-index:0; opacity:.5;
+    background-image:
+      radial-gradient(1.5px 1.5px at 20px 30px, white, transparent),
+      radial-gradient(1px 1px at 90px 120px, white, transparent),
+      radial-gradient(1.5px 1.5px at 160px 60px, white, transparent),
+      radial-gradient(1px 1px at 230px 180px, white, transparent),
+      radial-gradient(1.5px 1.5px at 300px 40px, white, transparent),
+      radial-gradient(1px 1px at 380px 150px, white, transparent);
+    background-repeat:repeat; background-size:420px 220px;
+    animation: drift 60s linear infinite;
+  }
+  @keyframes drift{from{background-position:0 0;} to{background-position:-420px 220px;}}
+
+  /* nav */
+  nav{position:sticky; top:0; z-index:80; backdrop-filter: blur(12px); background:rgba(5,6,15,0.78); border-bottom:1px solid var(--line);}
+  nav .wrap{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; flex-wrap:wrap; gap:10px;}
+  .brand{font-family:'Orbitron'; font-weight:700; font-size:14px; letter-spacing:.08em; background:linear-gradient(90deg,var(--cyan),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .navlinks{display:flex; gap:20px; font-family:'JetBrains Mono'; font-size:12px; color:var(--text-mid);}
+  .navlinks a{color:var(--text-mid); text-decoration:none;}
+  .navlinks a:hover{color:var(--cyan-soft);}
+  @media (max-width:760px){.navlinks{display:none;}}
+
+  /* hero */
+  header.hero{position:relative; z-index:2; padding:90px 0 40px; text-align:center;}
+  .hero-badge{display:inline-flex; align-items:center; gap:8px; font-family:'JetBrains Mono'; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); border:1px solid rgba(255,200,87,0.35); background:rgba(255,200,87,0.06); padding:7px 16px; border-radius:999px; margin-bottom:26px;}
+  .hero-badge::before{content:'&#9679;'; color:var(--gold); animation:pulse 2s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+  h1.title{font-size:clamp(34px,6.4vw,72px); font-weight:900; line-height:1.04; background:linear-gradient(115deg,#fff 10%,var(--cyan-soft) 45%,var(--gold-soft) 80%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .hero-sub{margin:22px auto 0; max-width:620px; font-size:17px; color:var(--text-mid);}
+  .byline-hero{margin-top:28px; display:inline-flex; align-items:center; gap:10px; font-family:'JetBrains Mono'; font-size:13px; color:var(--text-mid); border:1px solid var(--border); padding:9px 18px; border-radius:999px; background:var(--panel);}
+  .byline-hero strong{font-family:'Orbitron'; font-weight:700; font-size:13px; color:var(--cyan-soft); letter-spacing:.02em;}
+
+  section{position:relative; z-index:2; padding:70px 0; border-top:1px solid var(--line);}
+  .kicker{font-family:'JetBrains Mono'; font-size:11.5px; text-transform:uppercase; letter-spacing:.14em; color:var(--gold); margin-bottom:12px;}
+  h2.h2{font-size:clamp(26px,3.6vw,38px); color:#fff; max-width:760px;}
+  .lede{color:var(--text-mid); max-width:700px; margin-top:14px; font-size:16px;}
+
+  /* from-scratch teaching */
+  .anatomy-grid{display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-top:36px;}
+  @media (max-width:900px){.anatomy-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:520px){.anatomy-grid{grid-template-columns:1fr;}}
+  .anatomy-card{border:1px solid var(--border); border-radius:var(--radius); padding:20px 16px; background:linear-gradient(180deg,var(--panel),var(--panel-2)); position:relative; overflow:hidden;}
+  .anatomy-card::before{content:''; position:absolute; top:0; left:0; right:0; height:2px; background:linear-gradient(90deg,var(--cyan),var(--magenta));}
+  .anatomy-card .glyph{font-size:22px;}
+  .anatomy-card h4{margin-top:10px; font-size:14px; color:#fff; letter-spacing:.02em;}
+  .anatomy-card p{font-size:12.5px; color:var(--text-mid); margin-top:8px;}
+
+  .transform-panel{margin-top:44px; border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; background:var(--panel);}
+  .transform-row{display:grid; grid-template-columns:1fr auto 1fr; align-items:stretch;}
+  @media (max-width:760px){.transform-row{grid-template-columns:1fr;}}
+  .transform-cell{padding:26px 24px;}
+  .transform-cell.bad{background:rgba(255,63,164,0.05);}
+  .transform-cell.good{background:rgba(47,230,230,0.05);}
+  .transform-lbl{font-family:'JetBrains Mono'; font-size:11px; text-transform:uppercase; letter-spacing:.1em; margin-bottom:10px; display:block;}
+  .transform-cell.bad .transform-lbl{color:var(--magenta);}
+  .transform-cell.good .transform-lbl{color:var(--cyan-soft);}
+  .transform-cell p{font-size:14.5px; color:var(--text-hi); font-style:italic; margin:0;}
+  .transform-arrow{display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--gold); padding:0 18px;}
+  @media (max-width:760px){.transform-arrow{padding:12px 0; transform:rotate(90deg);}}
+
+  /* wheel section */
+  .wheel-stage{display:flex; flex-direction:column; align-items:center; margin-top:50px;}
+  .wheel-perspective{perspective:1400px; padding:20px;}
+  .wheel-outer{position:relative; width:min(560px, 88vw); height:min(560px, 88vw);}
+  .wheel-glow{position:absolute; inset:-40px; border-radius:50%; background:radial-gradient(circle, rgba(47,230,230,0.18), transparent 70%); filter:blur(20px); animation:glowpulse 4s ease-in-out infinite;}
+  @keyframes glowpulse{0%,100%{opacity:.5;}50%{opacity:1;}}
+  .pointer{position:absolute; top:-6px; left:50%; transform:translateX(-50%); z-index:20; width:0; height:0; border-left:16px solid transparent; border-right:16px solid transparent; border-top:26px solid var(--gold); filter:drop-shadow(0 0 8px rgba(255,200,87,0.8));}
+  .wheel{position:absolute; inset:0; border-radius:50%; transition: transform 4.5s cubic-bezier(0.15,0.85,0.25,1); box-shadow: 0 0 0 3px rgba(255,255,255,0.06), 0 0 60px rgba(47,230,230,0.25), 0 30px 70px -20px rgba(0,0,0,0.7), inset 0 0 60px rgba(0,0,0,0.5); background:var(--panel);}
+  .wheel::after{content:''; position:absolute; inset:0; border-radius:50%; pointer-events:none; background: radial-gradient(circle at 35% 28%, rgba(255,255,255,0.22), rgba(255,255,255,0.04) 35%, transparent 60%); mix-blend-mode:overlay;}
+  .segment{position:absolute; inset:0; cursor:pointer;}
+  .segment .fill{position:absolute; inset:0; transition: filter .2s; pointer-events:none;}
+  .segment:hover .fill{filter:brightness(1.35);}
+  .segment .label{position:absolute; left:50%; top:50%; font-family:'JetBrains Mono'; font-size:10.5px; font-weight:600; color:#04101A; white-space:nowrap; pointer-events:none; letter-spacing:.02em;}
+  .segment .num{position:absolute; left:50%; top:50%; font-family:'Orbitron'; font-size:13px; font-weight:800; color:rgba(4,16,26,0.55); pointer-events:none;}
+  .segment:focus-visible{outline:2px solid var(--gold); outline-offset:-2px;}
+  .hub{position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:150px; height:150px; border-radius:50%; z-index:15; cursor:pointer; border:none;
+    background: radial-gradient(circle at 35% 30%, #1a1d3f, #05060F 70%);
+    box-shadow: 0 0 0 3px var(--gold), 0 0 40px rgba(255,200,87,0.5), inset 0 0 20px rgba(0,0,0,0.6);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+  }
+  .hub .spin-txt{font-family:'Orbitron'; font-weight:800; font-size:17px; color:var(--gold-soft); letter-spacing:.06em;}
+  .hub .spin-sub{font-family:'JetBrains Mono'; font-size:9px; color:var(--text-mid); letter-spacing:.08em; text-transform:uppercase;}
+  .hub:hover{filter:brightness(1.15);}
+  .hub:active{transform:translate(-50%,-50%) scale(0.96);}
+
+  .wheel-hint{margin-top:34px; font-family:'JetBrains Mono'; font-size:12.5px; color:var(--text-low); text-align:center; max-width:420px;}
+  .wheel-hint strong{color:var(--gold);}
+
+  /* detail modal */
+  .modal-backdrop{position:fixed; inset:0; background:rgba(5,6,15,0.82); backdrop-filter: blur(6px); z-index:200; display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 16px;}
+  .modal-backdrop.open{display:flex;}
+  .modal{width:100%; max-width:780px; background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--border); border-radius:20px; box-shadow:0 30px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(47,230,230,0.1); animation: rise .35s cubic-bezier(0.2,0.9,0.3,1);}
+  @keyframes rise{from{opacity:0; transform:translateY(24px) scale(.98);} to{opacity:1; transform:translateY(0) scale(1);}}
+  .modal-head{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:30px 32px 20px; border-bottom:1px solid var(--line);}
+  .modal-head .num-badge{font-family:'Orbitron'; font-weight:800; font-size:13px; color:var(--gold); border:1px solid rgba(255,200,87,0.4); border-radius:8px; padding:4px 10px; display:inline-block; margin-bottom:10px;}
+  .modal-head h3{font-size:26px; color:#fff;}
+  .modal-head .tagline{font-size:14px; color:var(--text-mid); margin-top:8px;}
+  .modal-close{flex:none; width:36px; height:36px; border-radius:50%; border:1px solid var(--border); background:var(--panel); color:var(--text-mid); font-size:16px; cursor:pointer; display:flex; align-items:center; justify-content:center;}
+  .modal-close:hover{color:var(--magenta); border-color:var(--magenta);}
+  .modal-body{padding:26px 32px 34px;}
+  .modal-section-lbl{font-family:'JetBrains Mono'; font-size:11px; text-transform:uppercase; letter-spacing:.12em; color:var(--cyan-soft); margin:26px 0 14px;}
+  .modal-section-lbl:first-child{margin-top:0;}
+  .steps-list{list-style:none; margin:0; padding:0; counter-reset:step;}
+  .steps-list li{counter-increment:step; display:flex; gap:14px; padding:10px 0; border-bottom:1px solid var(--line); font-size:14.5px; color:var(--text-mid);}
+  .steps-list li:last-child{border-bottom:none;}
+  .steps-list li::before{content:counter(step); flex:none; width:26px; height:26px; border-radius:50%; background:rgba(47,230,230,0.12); border:1px solid rgba(47,230,230,0.4); color:var(--cyan-soft); font-family:'JetBrains Mono'; font-size:12px; display:flex; align-items:center; justify-content:center;}
+  .prompt-list{display:grid; gap:10px;}
+  .prompt-card{border:1px solid var(--line); border-radius:10px; padding:14px 16px; background:rgba(255,255,255,0.02); font-family:'JetBrains Mono'; font-size:12.5px; color:var(--text-hi); display:flex; gap:12px; align-items:flex-start;}
+  .prompt-card .pnum{flex:none; color:var(--gold); font-weight:600;}
+  .modal-footer-note{margin-top:26px; padding:14px 16px; border-left:2px solid var(--gold); background:rgba(255,200,87,0.05); font-size:12.5px; color:var(--text-mid); border-radius:0 8px 8px 0;}
+
+  .callout{border-left:3px solid var(--cyan); background:rgba(47,230,230,0.06); padding:16px 20px; border-radius:0 10px 10px 0; margin-top:26px; font-size:14px; color:var(--text-mid);}
+  .callout strong{color:var(--text-hi);}
+
+  footer{position:relative; z-index:2; padding:60px 0 90px; text-align:center;}
+  footer .credit{font-family:'Orbitron'; font-weight:700; font-size:16px; color:#fff; margin-bottom:8px;}
+  footer .credit strong{background:linear-gradient(90deg,var(--cyan),var(--gold)); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  footer .role{display:block; font-family:'JetBrains Mono'; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-low); margin-top:6px;}
+  footer .fine{margin-top:20px; font-family:'JetBrains Mono'; font-size:11.5px; color:var(--text-low); max-width:520px; margin-left:auto; margin-right:auto;}
+
+  ::selection{background:var(--cyan); color:#04101A;}
+  @media (prefers-reduced-motion: reduce){
+    .stars, .wheel-glow, .hero-badge::before{animation:none;}
+    .wheel{transition:none;}
+  }
+</style>
+</head>
+<body>
+<div class="stars"></div>
+<nav>
+  <div class="wrap">
+    <div class="brand">&#9670; PROMPT CREDITS WHEEL</div>
+    <div class="navlinks">
+      <a href="#scratch">Learn From Scratch</a>
+      <a href="#wheel-section">Spin The Wheel</a>
+      <a href="#sources">Sources</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="hero-badge">16 Rules &middot; Gamified &middot; Zero Prerequisites</div>
+    <h1 class="title">Stop Wasting Credits.<br>Start Landing Answers.</h1>
+    <p class="hero-sub">Spin the wheel, land on a rule, and get the full breakdown &mdash; step by step, with five real prompts you can use today. Learn to draft a prompt from scratch below, no experience required.</p>
+    <div class="byline-hero">Curated &amp; Compiled by <strong>Sujit Kulkarni</strong></div>
+  </div>
+</header>
+
+<section id="scratch">
+  <div class="wrap">
+    <div class="kicker">Before you spin</div>
+    <h2 class="h2">How to draft a prompt, from absolute zero</h2>
+    <p class="lede">A prompt is just an instruction to an AI model, written in plain language. The difference between a weak one and a strong one almost always comes down to five ingredients &mdash; include them, and most of the 16 rules on the wheel become second nature.</p>
+
+    <div class="anatomy-grid">
+      <div class="anatomy-card"><div class="glyph">&#127917;</div><h4>Role</h4><p>Who should the AI act as? "Act as a resume coach" narrows every answer that follows.</p></div>
+      <div class="anatomy-card"><div class="glyph">&#128204;</div><h4>Context</h4><p>What background does it need? Audience, situation, anything that isn't obvious from the question alone.</p></div>
+      <div class="anatomy-card"><div class="glyph">&#127919;</div><h4>Task</h4><p>The exact action, stated as a verb: write, summarize, compare, list, critique.</p></div>
+      <div class="anatomy-card"><div class="glyph">&#128441;&#65039;</div><h4>Format</h4><p>How should the answer look? Length, structure, bullet points vs. prose, tone.</p></div>
+      <div class="anatomy-card"><div class="glyph">&#128064;</div><h4>Example</h4><p>Show, don't just tell. One good example removes most of the guesswork.</p></div>
+    </div>
+
+    <div class="transform-panel">
+      <div class="transform-row">
+        <div class="transform-cell bad">
+          <span class="transform-lbl">&#10060; Vague prompt</span>
+          <p>"Help me with my resume."</p>
+        </div>
+        <div class="transform-arrow">&rarr;</div>
+        <div class="transform-cell good">
+          <span class="transform-lbl">&#9989; Specific prompt</span>
+          <p>"Act as a resume coach for a mid-level marketing role. Review this resume, list the 3 weakest bullet points, and rewrite each in under 20 words, focused on measurable results: [paste resume]"</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout"><strong>That's it.</strong> Role, Context, Task, Format, Example &mdash; you don't need all five every time, but the more of them you include, the fewer follow-up messages (and credits) it takes to get what you actually wanted. Every rule on the wheel below is really just a different way of applying these five ingredients well.</div>
+  </div>
+</section>
+<section id="wheel-section">
+  <div class="wrap">
+    <div class="kicker">The lucky draw</div>
+    <h2 class="h2">Spin for a rule, or pick one yourself</h2>
+    <p class="lede">Hit the center hub to let the wheel choose &mdash; or click straight into any of the 16 segments if you already know what you want to learn.</p>
+
+    <div class="wheel-stage">
+      <div class="wheel-perspective">
+        <div class="wheel-outer" id="wheelOuter">
+          <div class="wheel-glow"></div>
+          <div class="pointer"></div>
+          <div class="wheel" id="wheel"></div>
+          <button class="hub" id="spinBtn">
+            <span class="spin-txt">SPIN</span>
+            <span class="spin-sub">Lucky Draw</span>
+          </button>
+        </div>
+      </div>
+      <p class="wheel-hint"><strong>Tip:</strong> every segment is clickable on its own &mdash; the spin button is just for when you want the wheel to decide for you.</p>
+    </div>
+  </div>
+</section>
+
+<section id="sources">
+  <div class="wrap">
+    <div class="kicker">Transparency</div>
+    <h2 class="h2">Where this is grounded</h2>
+    <p class="lede">Every rule and every prompting technique on this page reflects widely and publicly documented prompt-engineering guidance &mdash; the same core practices covered in major AI providers' own public prompting guides and open educational material. No private or paywalled sources were used.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="credit">Curated &amp; Compiled by <strong>Sujit Kulkarni</strong><span class="role">Author &middot; Instructional Design</span></div>
+    <p class="fine">Built as a free learning resource &middot; techniques described are general prompting best practices, not specific to any one platform's internal mechanics &middot; verify current product features independently.</p>
+  </div>
+</footer>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div>
+        <span class="num-badge" id="modalNum">RULE 01</span>
+        <h3 id="modalTitle">Title</h3>
+        <p class="tagline" id="modalTagline">Tagline</p>
+      </div>
+      <button class="modal-close" id="modalClose">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-lbl">&#9881; How to actually apply this</div>
+      <ol class="steps-list" id="modalSteps"></ol>
+      <div class="modal-section-lbl">&#128172; Five real-world prompts</div>
+      <div class="prompt-list" id="modalPrompts"></div>
+      <div class="modal-footer-note" id="modalNote"></div>
+    </div>
+  </div>
+</div>
+<script>
+const RULES = [
+  { title:"Start a New Chat", short:"New Chat", tagline:"Use a fresh conversation for a fresh topic. It helps the model focus.",
+    steps:[
+      "Notice when your next question is a genuine topic shift, not a follow-up.",
+      "Open a new conversation instead of continuing an unrelated thread.",
+      "Remember old context isn't free \u2014 it gets re-read on every message in that thread.",
+      "If anything from the old chat is still relevant, carry over a short summary, not the full history."
+    ],
+    prompts:[
+      "Starting fresh \u2014 I'm now working on a Python data pipeline, unrelated to our earlier marketing discussion.",
+      "New topic: help me plan a 3-day itinerary for Kyoto, Japan.",
+      "Ignore prior context. I want to draft a resignation letter from scratch.",
+      "Let's begin a new thread focused only on debugging this SQL query.",
+      "Fresh chat \u2014 I need help naming a new SaaS product for freelancers."
+    ]},
+  { title:"Be Specific", short:"Be Specific", tagline:"Give clear instructions. Vague prompts waste credits on guesswork.",
+    steps:[
+      "State the exact outcome you want, not a vague direction like \u201chelp with this.\u201d",
+      "Include format, length, audience, and tone whenever they matter.",
+      "Replace open verbs like \u201chelp with\u201d with a concrete action verb: write, list, compare.",
+      "Add constraints up front, rather than correcting the output after the fact."
+    ],
+    prompts:[
+      "Write a 150-word LinkedIn post announcing our product launch, confident but not salesy.",
+      "List 5 pros and 5 cons of remote work for a 10-person software team, in bullet points.",
+      "Rewrite this paragraph to be more concise, keeping the meaning intact.",
+      "Generate 3 subject lines for a re-engagement email, each under 8 words.",
+      "Explain recursion to a 10-year-old using a real-world analogy, in 3 sentences."
+    ]},
+  { title:"Summarize Long Prompts", short:"Summarize", tagline:"Keep your input concise. Avoid pasting entire long articles.",
+    steps:[
+      "Before pasting a long document, pull out only the section that's relevant.",
+      "State your goal first, then attach just the material needed to support it.",
+      "If a source is long, summarize it yourself in 3\u20135 lines before pasting it in.",
+      "Ask for a summary of your own long draft instead of re-pasting the whole thing."
+    ],
+    prompts:[
+      "Here is a 3-sentence summary of a 10-page report: [summary]. Draft an executive brief from it.",
+      "Summarize this article in 5 bullet points before we discuss it further.",
+      "I'll paste only section 2 of this contract, which is what I need help with.",
+      "Condense this meeting transcript into 3 action items.",
+      "Give me the key numbers only from this financial report, not the full narrative."
+    ]},
+  { title:"Use System Prompts", short:"System Prompt", tagline:"Define the model's role once. Saves repeating instructions every message.",
+    steps:[
+      "Decide the AI's role once, right at the start of the conversation.",
+      "State expertise level, tone, and boundaries in a single setup message.",
+      "Stop repeating \u201cyou are a helpful assistant\u201d in every follow-up.",
+      "Only update the role when the task itself genuinely changes."
+    ],
+    prompts:[
+      "You are a senior copywriter specializing in B2B SaaS. Write in a confident, jargon-free tone from now on.",
+      "Act as a Python code reviewer. Point out bugs and style issues, but don't rewrite the whole function unless asked.",
+      "You are a patient math tutor for a 9th grader. Explain step by step and check understanding before moving on.",
+      "Take the role of a skeptical investor reviewing my pitch deck. Ask hard questions.",
+      "You are an editor for a legal newsletter. Flag anything factually risky or unclear."
+    ]},
+  { title:"One Task Per Message", short:"One Task", tagline:"Break down complex requests. Don't ask for multiple things at once.",
+    steps:[
+      "Check whether your message actually contains two or more separate asks.",
+      "Split multi-part requests into separate, sequential messages.",
+      "Wait for one response before sending the next task.",
+      "Save multi-step prompts for tasks that are genuinely one connected process."
+    ],
+    prompts:[
+      "First: outline a blog post about AI ethics. (Then, separately: write the introduction.)",
+      "Just fix the syntax errors in this code \u2014 don't refactor anything else yet.",
+      "Only give me the title options for now. We'll pick one before writing the content.",
+      "Step one: list the ingredients for this recipe. I'll ask for instructions next.",
+      "Just translate this sentence to Spanish. Nothing else for now."
+    ]},
+  { title:"Monitor Credit Usage", short:"Monitor Usage", tagline:"Check usage in settings. Avoid unexpected limits.",
+    steps:[
+      "Check your usage dashboard or settings panel on a regular basis.",
+      "Notice which request types consume the most \u2014 usually long context or long outputs.",
+      "Set a personal budget or reminder before starting a heavy task.",
+      "Adjust your habits \u2014 shorter prompts, new chats \u2014 based on what you observe."
+    ],
+    prompts:[
+      "Before we continue, summarize what we've discussed so far in under 50 words.",
+      "Give me the shortest version of this answer that still fully addresses my question.",
+      "Is there a more efficient way to ask for this kind of analysis?",
+      "Just answer yes or no, then a one-line explanation only.",
+      "Give me only the changed lines of code, not the full file again."
+    ]},
+  { title:"Request Summaries", short:"Summaries", tagline:"Request short summaries for long outputs. Uses fewer response tokens.",
+    steps:[
+      "After a long response, ask for a condensed version of it.",
+      "Specify exactly how short you want it \u2014 a sentence, a few bullets.",
+      "Use the summary for skimming, the full version only when you actually need it.",
+      "Make this a habit for any output that runs over a page long."
+    ],
+    prompts:[
+      "Summarize your last answer in 3 bullet points.",
+      "Give me a one-sentence TL;DR of this explanation.",
+      "Condense this into a short paragraph I could send in an email.",
+      "What are the top 3 takeaways from what you just wrote?",
+      "Summarize only the action items, skip the reasoning."
+    ]},
+  { title:"Provide Samples", short:"Samples", tagline:"Give 1\u20132 examples of what you want. It reduces trial-and-error.",
+    steps:[
+      "Find or write 1\u20132 examples of the output style you're after.",
+      "Include them directly inside your prompt as a reference.",
+      "Point out specifically what you like about the example.",
+      "Ask the model to match tone or structure \u2014 not just the topic."
+    ],
+    prompts:[
+      "Here's an example of the tone I want: [sample]. Write a similar paragraph about our new feature.",
+      "Match this email's structure exactly, just change the topic.",
+      "Here are 2 headlines I like: [examples]. Generate 5 more in that same style.",
+      "Follow this code's formatting conventions exactly.",
+      "This is our brand voice: [sample copy]. Write our About page in this voice."
+    ]},
+  { title:"Cut Old Context", short:"Cut Context", tagline:"Delete old, irrelevant information from a conversation to keep it focused.",
+    steps:[
+      "Periodically review what's still actually relevant in a long conversation.",
+      "Explicitly tell the model to disregard outdated instructions or facts.",
+      "Restate only the current, correct context when something changes.",
+      "Start a new chat entirely once old context outweighs the new topic."
+    ],
+    prompts:[
+      "Disregard the earlier budget numbers \u2014 here are the updated ones.",
+      "Forget the previous draft entirely. We're starting this section over with a new approach.",
+      "That requirement changed. Treat only this new instruction as current.",
+      "Ignore the earlier examples \u2014 they're no longer relevant to this next part.",
+      "Reset your assumptions about the target audience \u2014 it's now enterprise, not consumer."
+    ]},
+  { title:"Use Prompt Templates", short:"Templates", tagline:"Save and reuse good prompts. Stops you from typing them out again.",
+    steps:[
+      "Notice the prompts you write often \u2014 emails, summaries, code reviews.",
+      "Save a reusable version with blanks for the details that change.",
+      "Store your templates somewhere easy to copy from.",
+      "Refine a template over time as you learn what actually works."
+    ],
+    prompts:[
+      "Template: \u2018Write a [tone] email to [audience] about [topic], under [length] words.\u2019",
+      "Template: \u2018Review this [language] code for [concern].\u2019",
+      "Template: \u2018Summarize this in [format] for a [audience].\u2019",
+      "Template: \u2018Generate [number] name ideas for a [type] business in [industry].\u2019",
+      "Template: \u2018Explain [concept] using an analogy about [subject].\u2019"
+    ]},
+  { title:"Upload Context Files", short:"Upload Files", tagline:"Upload docs instead of retyping instructions. Keeps prompts shorter and consistent.",
+    steps:[
+      "Gather the reference material \u2014 docs, spreadsheets, transcripts \u2014 beforehand.",
+      "Upload the file directly instead of retyping or pasting large chunks.",
+      "Point to a specific section, or ask a targeted question about it.",
+      "Reuse the uploaded file across follow-up questions in the same chat."
+    ],
+    prompts:[
+      "I've uploaded our style guide \u2014 write this announcement following it exactly.",
+      "Using the attached spreadsheet, calculate the average monthly growth rate.",
+      "Refer to the uploaded contract \u2014 does clause 4.2 conflict with clause 7.1?",
+      "Based on the uploaded transcript, list every question the customer asked.",
+      "Using the attached resume, tailor a cover letter for this job posting."
+    ]},
+  { title:"Clarify Ambiguity", short:"Clarify", tagline:"Ask the model to ask you clarifying questions first. Saves wasted responses.",
+    steps:[
+      "For any complex request, invite clarifying questions before it proceeds.",
+      "Answer those questions clearly before expecting a final output.",
+      "Treat the clarifying round as saving time, not adding an extra step.",
+      "Use this especially for open-ended creative or strategic tasks."
+    ],
+    prompts:[
+      "Before you write anything, ask me any clarifying questions about the audience and goal.",
+      "What do you need to know from me before you can plan this marketing campaign well?",
+      "Ask me 3 questions that would help you write a better version of this.",
+      "What's unclear or missing from this brief before you start?",
+      "Check your understanding of the requirement back to me before drafting the code."
+    ]},
+  { title:"Give Exact Word Counts", short:"Word Counts", tagline:"Specify the output length. Limits response size.",
+    steps:[
+      "Decide your target length before asking for the output.",
+      "State it as a specific number, not \u201cshort\u201d or \u201cbrief.\u201d",
+      "Give a range if some flexibility helps \u2014 \u201c150\u2013200 words.\u201d",
+      "Ask for a trim or expansion if the first draft misses the mark."
+    ],
+    prompts:[
+      "Write this product description in exactly 75 words.",
+      "Summarize the meeting in no more than 50 words.",
+      "Give me a bio between 40 and 60 words for a conference speaker page.",
+      "Trim this paragraph down to under 30 words without losing the main point.",
+      "Write 3 taglines, each under 6 words."
+    ]},
+  { title:"Rephrase Instead of Retry", short:"Rephrase", tagline:"If a response is wrong, tell the model how to fix it instead of restarting.",
+    steps:[
+      "When a response misses the mark, identify exactly what's wrong with it.",
+      "Tell the model precisely what to change, not just \u201ctry again.\u201d",
+      "Reference the specific part of the output that needs fixing.",
+      "Build on the existing draft rather than discarding it entirely."
+    ],
+    prompts:[
+      "This is close, but make the tone more casual and cut the third paragraph.",
+      "The code logic is right, but rename these variables to be more descriptive.",
+      "Keep the structure, but replace the introduction with a stronger hook.",
+      "This is too long \u2014 cut it by half while keeping the key points.",
+      "Good draft, just fix the math in point 3 \u2014 the percentage is wrong."
+    ]},
+  { title:"Learn Prompt Engineering", short:"Learn PE", tagline:"Master simple prompting rules for better, more efficient results.",
+    steps:[
+      "Study the core structure of a strong prompt: role, task, context, format.",
+      "Practice rewriting a vague request into a specific one.",
+      "Review your own past prompts for what worked and what didn't.",
+      "Read a model provider's own public prompting guide for platform-specific tips."
+    ],
+    prompts:[
+      "Rewrite this vague request into a specific, well-structured prompt: \u2018help me with my resume.\u2019",
+      "What's missing from this prompt that's causing a weak response?",
+      "Turn this into a prompt with a clear role, task, and format: \u2018write something about marketing.\u2019",
+      "Critique this prompt and suggest 2 improvements.",
+      "Show me 3 versions of the same request, from vague to highly specific."
+    ]},
+  { title:"Request Critique First", short:"Critique First", tagline:"Have the model find what's weak before improving it. Better inputs mean better outputs.",
+    steps:[
+      "Before asking for a rewrite, ask for a critique of the current draft.",
+      "Have it identify weaknesses without fixing them yet.",
+      "Review the critique and decide what's actually worth addressing.",
+      "Then ask for a revision that targets only those specific weaknesses."
+    ],
+    prompts:[
+      "Critique this essay's structure and argument \u2014 don't rewrite it yet.",
+      "What are the 3 biggest weaknesses in this pitch deck outline?",
+      "Review this code for design flaws before I ask you to refactor it.",
+      "What's unclear or unconvincing about this proposal? List it, don't fix it yet.",
+      "Give me honest feedback on this cover letter before I ask for edits."
+    ]}
+];
+
+/* ---------- Wheel generation ---------- */
+const N = RULES.length;
+const SLICE = 360 / N;
+const palette = ['#2FE6E6','#FF3FA4','#FFC857','#7C5CFF'];
+
+function pointAt(angleDeg, radiusPct){
+  const rad = (angleDeg - 90) * Math.PI / 180; // -90 so 0deg = top... adjust below
+  return null;
+}
+// angle convention: 0deg = top (12 o'clock), increases clockwise
+function xy(angleDeg, radiusPct){
+  const rad = angleDeg * Math.PI / 180;
+  const x = 50 + radiusPct * Math.sin(rad);
+  const y = 50 - radiusPct * Math.cos(rad);
+  return [x, y];
+}
+
+const wheelEl = document.getElementById('wheel');
+let html = '';
+for (let i = 0; i < N; i++){
+  const startA = i * SLICE;
+  const endA = (i + 1) * SLICE;
+  const midA = startA + SLICE / 2;
+  const steps = 6;
+  let pts = ['50% 50%'];
+  for (let s = 0; s <= steps; s++){
+    const a = startA + (endA - startA) * (s / steps);
+    const [x, y] = xy(a, 50);
+    pts.push(`${x.toFixed(2)}% ${y.toFixed(2)}%`);
+  }
+  const clip = `polygon(${pts.join(',')})`;
+  const color = palette[i % palette.length];
+
+  const [lx, ly] = xy(midA, 33);
+  let rot = midA;
+  if (rot > 90 && rot < 270) rot += 180;
+
+  const [nx, ny] = xy(midA, 45);
+
+  html += `<div class="segment" data-index="${i}" tabindex="0" role="button" aria-label="${RULES[i].title}" style="clip-path:${clip}">
+    <div class="fill" style="background:${color}; clip-path:${clip};"></div>
+    <div class="label" style="left:${lx}%; top:${ly}%; transform:translate(-50%,-50%) rotate(${rot}deg);">${RULES[i].short}</div>
+    <div class="num" style="left:${nx}%; top:${ny}%; transform:translate(-50%,-50%);">${i+1}</div>
+  </div>`;
+}
+wheelEl.innerHTML = html;
+
+/* ---------- Modal ---------- */
+const backdrop = document.getElementById('modalBackdrop');
+const modalNum = document.getElementById('modalNum');
+const modalTitle = document.getElementById('modalTitle');
+const modalTagline = document.getElementById('modalTagline');
+const modalSteps = document.getElementById('modalSteps');
+const modalPrompts = document.getElementById('modalPrompts');
+const modalNote = document.getElementById('modalNote');
+
+function openModal(index){
+  const r = RULES[index];
+  modalNum.textContent = 'RULE ' + String(index + 1).padStart(2, '0');
+  modalTitle.textContent = r.title;
+  modalTagline.textContent = r.tagline;
+  modalSteps.innerHTML = r.steps.map(s => `<li>${s}</li>`).join('');
+  modalPrompts.innerHTML = r.prompts.map((p, idx) => `<div class="prompt-card"><span class="pnum">${idx+1}.</span><span>${p}</span></div>`).join('');
+  modalNote.innerHTML = `<strong>Why it works:</strong> this rule is really the Role / Context / Task / Format / Example framework from above, applied to one specific habit \u2014 use it alongside the other 15 for compounding results.`;
+  backdrop.classList.add('open');
+}
+function closeModal(){
+  backdrop.classList.remove('open');
+}
+document.getElementById('modalClose').addEventListener('click', closeModal);
+backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+document.querySelectorAll('.segment').forEach(seg => {
+  seg.addEventListener('click', () => openModal(parseInt(seg.dataset.index, 10)));
+  seg.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openModal(parseInt(seg.dataset.index, 10)); }
+  });
+});
+
+/* ---------- Spin logic ---------- */
+let currentRotation = 0;
+let spinning = false;
+const spinBtn = document.getElementById('spinBtn');
+
+spinBtn.addEventListener('click', () => {
+  if (spinning) return;
+  spinning = true;
+  const winner = Math.floor(Math.random() * N);
+  const amid = winner * SLICE + SLICE / 2;
+  const jitter = (Math.random() * (SLICE * 0.6)) - (SLICE * 0.3);
+  const desiredMod = (((-(amid + jitter)) % 360) + 360) % 360;
+  const extraTurns = 360 * 6;
+  const baseline = currentRotation - (currentRotation % 360);
+  const newRotation = baseline + extraTurns + desiredMod;
+  currentRotation = newRotation;
+  wheelEl.style.transform = `rotate(${newRotation}deg)`;
+
+  const onEnd = () => {
+    wheelEl.removeEventListener('transitionend', onEnd);
+    spinning = false;
+    openModal(winner);
+  };
+  wheelEl.addEventListener('transitionend', onEnd);
+});
+</script>
+</body>
+</html>
