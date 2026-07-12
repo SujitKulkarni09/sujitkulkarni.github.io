@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>सबके लिए AI — शून्य से शुरू करने वाली गाइड, सुजीत कुलकर्णी द्वारा</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi:ital@0;1&family=Hind:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EE;
+    --ink:#1C1B18;
+    --ink-soft:#514C42;
+    --teal:#0E6E63;
+    --teal-deep:#0A4C44;
+    --saffron:#D98A1E;
+    --line:#E2D9C6;
+    --card:#FFFFFF;
+    --max:920px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Hind',sans-serif;
+    font-size:18px;
+    line-height:1.75;
+  }
+  h1,h2,h3,h4{
+    font-family:'Tiro Devanagari Hindi',serif;
+    font-weight:400;
+    line-height:1.3;
+    color:var(--teal-deep);
+    margin:0 0 .5em;
+  }
+  a{color:var(--teal);}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px;}
+
+  /* ---- top bar ---- */
+  header.top{
+    position:sticky;top:0;z-index:50;
+    background:rgba(250,246,238,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{
+    max-width:var(--max);margin:0 auto;padding:14px 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{font-family:'Tiro Devanagari Hindi',serif;font-size:1.15rem;color:var(--teal-deep);}
+  .brand span{color:var(--saffron);}
+  nav.toc{
+    display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.85rem;
+  }
+  nav.toc a{color:var(--ink-soft);text-decoration:none;white-space:nowrap;}
+  nav.toc a:hover{color:var(--teal);}
+  .toc-toggle{display:none;background:none;border:1px solid var(--line);border-radius:8px;padding:8px 12px;font-family:'Hind';font-size:.9rem;color:var(--ink);}
+
+  /* ---- hero ---- */
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line);}
+  .eyebrow{
+    display:inline-block;font-size:.8rem;letter-spacing:.06em;color:var(--saffron);
+    border:1px solid var(--saffron);border-radius:999px;padding:4px 14px;margin-bottom:20px;
+  }
+  h1.headline{font-size:clamp(2rem,5vw,3.1rem);max-width:14ch;}
+  h1.headline em{font-style:normal;color:var(--saffron);}
+  .lede{font-size:1.15rem;color:var(--ink-soft);max-width:62ch;margin-top:18px;}
+  .credit{margin-top:26px;font-size:.9rem;color:var(--ink-soft);}
+  .credit b{color:var(--ink);}
+
+  /* ---- intro cards ---- */
+  .intro{padding:56px 0;border-bottom:1px solid var(--line);}
+  .callout{
+    background:var(--card);border:1px solid var(--line);border-right:5px solid var(--teal);
+    padding:22px 26px;border-radius:10px;margin:24px 0;font-size:1.05rem;color:var(--ink-soft);
+  }
+  .three{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:30px;}
+  .three .card{
+    background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;
+  }
+  .three .card h3{font-size:1.05rem;color:var(--teal-deep);}
+  .three .card p{font-size:.95rem;color:var(--ink-soft);margin:0;}
+  @media (max-width:760px){.three{grid-template-columns:1fr;}}
+
+  /* ---- chapter shell ---- */
+  .chapter{padding:60px 0;border-bottom:1px solid var(--line);}
+  .chapter:nth-of-type(odd){background:#F3EEE0;}
+  .kicker{
+    font-family:'Hind';font-weight:600;font-size:.8rem;letter-spacing:.1em;
+    color:var(--saffron);text-transform:uppercase;margin-bottom:8px;
+  }
+  .chapter h2{font-size:clamp(1.5rem,3.4vw,2.1rem);max-width:24ch;}
+  .chapter-lede{color:var(--ink-soft);max-width:66ch;margin-bottom:30px;}
+
+  /* ---- simulator ---- */
+  .sim-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;}
+  .sim-steps{counter-reset:step;margin-top:10px;}
+  .sim-step{
+    position:relative;padding:16px 0 16px 46px;border-top:1px dashed var(--line);
+  }
+  .sim-step:first-child{border-top:none;}
+  .sim-step::before{
+    counter-increment:step;content:counter(step);
+    position:absolute;left:0;top:16px;
+    width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:600;
+  }
+  .sim-step h4{font-size:1.02rem;margin-bottom:4px;color:var(--ink);}
+  .sim-step p{margin:0;color:var(--ink-soft);font-size:.98rem;}
+  .sim-step b{color:var(--teal-deep);}
+
+  /* ---- timeline ---- */
+  .timeline{border-right:2px solid var(--line);padding-right:26px;margin-right:6px;}
+  .tl-item{position:relative;padding-bottom:34px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::after{
+    content:'';position:absolute;right:-31px;top:6px;width:12px;height:12px;
+    border-radius:50%;background:var(--saffron);border:2px solid var(--paper);
+  }
+  .tl-year{font-family:'Tiro Devanagari Hindi',serif;color:var(--saffron);font-size:1.05rem;}
+  .tl-item h4{margin:2px 0 6px;font-size:1.15rem;}
+  .tl-item p{margin:0;color:var(--ink-soft);}
+
+  /* ---- ingredients grid ---- */
+  .ing-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:760px){.ing-grid{grid-template-columns:1fr;}}
+  .ing{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;}
+  .ing .tag{font-size:.78rem;color:var(--teal);font-weight:600;letter-spacing:.04em;}
+  .ing h3{font-size:1.15rem;margin:4px 0 8px;}
+  .ing p{margin:0;color:var(--ink-soft);font-size:.97rem;}
+
+  /* ---- tabs ---- */
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px;}
+  .tab-btn{
+    background:var(--card);border:1px solid var(--line);border-radius:999px;
+    padding:9px 18px;font-family:'Hind';font-size:.92rem;cursor:pointer;color:var(--ink-soft);
+  }
+  .tab-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+  .tab-panel{display:none;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px;}
+  .tab-panel.active{display:block;}
+  .tab-panel h3{font-size:1.1rem;}
+  .tab-panel .ex{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line);font-size:.95rem;color:var(--ink-soft);}
+  .tab-panel .ex b{color:var(--teal-deep);}
+
+  /* ---- subjects chips ---- */
+  .chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:22px;}
+  .chip{
+    background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;
+    font-size:.9rem;color:var(--ink-soft);
+  }
+  .subj-list{display:grid;gap:16px;}
+  .subj{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px 22px;}
+  .subj h4{margin:0 0 6px;font-size:1.05rem;}
+  .subj p{margin:0;color:var(--ink-soft);}
+
+  /* ---- training steps ---- */
+  .train-grid{display:grid;gap:16px;}
+  .train-step{
+    display:grid;grid-template-columns:44px 1fr;gap:16px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:18px 20px;align-items:start;
+  }
+  .train-num{
+    width:44px;height:44px;border-radius:10px;background:var(--teal-deep);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-family:'Tiro Devanagari Hindi';font-size:1.1rem;
+  }
+  .train-step h4{margin:0 0 6px;font-size:1.05rem;}
+  .train-step p{margin:0;color:var(--ink-soft);font-size:.96rem;}
+
+  /* ---- daily life grid ---- */
+  .life-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  @media (max-width:760px){.life-grid{grid-template-columns:1fr 1fr;}}
+  @media (max-width:520px){.life-grid{grid-template-columns:1fr;}}
+  .life-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .life-card h4{font-size:1rem;margin:0 0 6px;color:var(--teal-deep);}
+  .life-card p{margin:0;font-size:.92rem;color:var(--ink-soft);}
+
+  /* ---- accordion ---- */
+  .acc-item{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:12px;overflow:hidden;}
+  .acc-head{
+    width:100%;text-align:right;background:none;border:none;padding:18px 20px;
+    font-family:'Hind';font-size:1.02rem;font-weight:600;color:var(--ink);
+    display:flex;justify-content:space-between;align-items:center;cursor:pointer;
+  }
+  .acc-head .plus{color:var(--saffron);font-size:1.3rem;transition:transform .2s;}
+  .acc-item.open .plus{transform:rotate(45deg);}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+  .acc-body p{margin:0;padding:0 20px 18px;color:var(--ink-soft);font-size:.97rem;}
+
+  /* ---- roadmap ---- */
+  .road{display:grid;gap:14px;}
+  .road-step{
+    display:grid;grid-template-columns:auto 1fr;gap:18px;background:var(--card);
+    border:1px solid var(--line);border-radius:12px;padding:18px 20px;
+  }
+  .road-step .n{
+    font-family:'Tiro Devanagari Hindi';font-size:1.3rem;color:var(--saffron);
+    border-left:2px solid var(--line);padding-left:16px;
+  }
+  .road-step h4{margin:0 0 6px;font-size:1.05rem;}
+  .road-step p{margin:0 0 8px;color:var(--ink-soft);font-size:.95rem;}
+  .road-meta{font-size:.82rem;color:var(--teal);}
+
+  /* ---- glossary ---- */
+  .gloss{display:grid;grid-template-columns:1fr 1fr;gap:16px 30px;}
+  @media (max-width:760px){.gloss{grid-template-columns:1fr;}}
+  .gloss dt{font-family:'Tiro Devanagari Hindi';color:var(--teal-deep);font-size:1.05rem;}
+  .gloss dd{margin:2px 0 14px;color:var(--ink-soft);font-size:.95rem;}
+
+  /* ---- sources ---- */
+  .sources ul{padding-right:20px;color:var(--ink-soft);font-size:.95rem;}
+  .sources li{margin-bottom:10px;}
+
+  footer{padding:50px 0 60px;text-align:center;}
+  footer h3{font-size:1.4rem;}
+  footer p{color:var(--ink-soft);max-width:50ch;margin:10px auto 0;}
+  .footer-credit{margin-top:30px;font-size:.85rem;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">सबके लिए <span>AI</span></div>
+    <nav class="toc">
+      <a href="#start">शुरुआत</a>
+      <a href="#why">क्यों ज़रूरी</a>
+      <a href="#simulator">क्या होता है</a>
+      <a href="#history">इतिहास</a>
+      <a href="#components">तत्व</a>
+      <a href="#types">सीखने के तरीके</a>
+      <a href="#subjects">विषय</a>
+      <a href="#training">प्रशिक्षण</a>
+      <a href="#life">रोज़मर्रा में AI</a>
+      <a href="#risks">सीमाएं व जोखिम</a>
+      <a href="#roadmap">सीखने की राह</a>
+      <a href="#glossary">शब्दकोश</a>
+      <a href="#sources">स्रोत</a>
+    </nav>
+  </div>
+</header>
+
+<section class="hero" id="start">
+  <div class="wrap">
+    <span class="eyebrow">शून्य से शुरू होने वाला कोर्स</span>
+    <h1 class="headline">आपके जीवन के सबसे ज़रूरी <em>आविष्कार</em> को समझने के लिए किसी डिग्री की ज़रूरत नहीं है।</h1>
+    <p class="lede">यह आर्टिफिशियल इंटेलिजेंस (AI) की एक पूरी, सरल-भाषा गाइड है — उस व्यक्ति के लिए बनाई गई है जिसके पास शुरुआत में कुछ भी नहीं है, यहाँ तक कि आत्मविश्वास भी नहीं। कोई पूर्व ज्ञान ज़रूरी नहीं। कोई भी शब्द बिना समझाए नहीं छोड़ा गया। बस "AI है क्या" से लेकर यह सचमुच कैसे काम करता है, यह समझने तक का एक साफ़ रास्ता।</p>
+    <p class="credit">संकलन एवं संपादन: <b>सुजीत कुलकर्णी</b> · पूरी तरह सार्वजनिक रूप से उपलब्ध जानकारी पर आधारित</p>
+  </div>
+</section>
+
+<section class="intro" id="why">
+  <div class="wrap">
+    <div class="kicker">शुरू करने से पहले</div>
+    <h2>इसे सीखने के लिए किसी शैक्षणिक पृष्ठभूमि की ज़रूरत नहीं है।</h2>
+    <p class="chapter-lede">यह गाइड जानबूझकर उस पाठक के लिए बनाई गई है जिसकी कोई औपचारिक स्कूली शिक्षा नहीं, अंग्रेज़ी पर पकड़ नहीं, और कंप्यूटर या पढ़ाई-लिखाई का कोई पूर्व अनुभव नहीं है। ध्यान से पढ़िए: <b>इनमें से कुछ भी AI समझने से आपको रोकता नहीं है।</b> AI को केवल डिग्रीधारी लोगों के लिए नहीं बनाया गया — इसे आख़िरकार हर किसी के इस्तेमाल के लिए बनाया गया, उन लोगों के लिए भी जो पढ़-लिख नहीं सकते। यही वजह है कि वॉइस असिस्टेंट, अनुवाद ऐप और तस्वीर-आधारित टूल मौजूद हैं।</p>
+    <div class="callout">जिज्ञासा ही एकमात्र शर्त है। बाकी सब कुछ — अंग्रेज़ी, गणित, कोडिंग — रास्ते में उठाया जाने वाला एक औज़ार है, कोई ऐसा फाटक नहीं जिसे पहले पार करना ज़रूरी हो।</div>
+    <div class="three">
+      <div class="card">
+        <h3>अंग्रेज़ी नहीं आती? शुरुआत के लिए कोई दिक़्क़त नहीं।</h3>
+        <p>आज के हर बड़े AI टूल (ChatGPT, Google Gemini, WhatsApp AI) में आवाज़ से बात की जा सकती है, और वे हिंदी, मराठी, तमिल और दर्जनों अन्य भाषाओं में आवाज़ या अनुवादित लिखित जवाब देते हैं। AI की अवधारणाएं पाठक अपनी भाषा में सबसे पहले सीख सकता है।</p>
+      </div>
+      <div class="card">
+        <h3>स्कूल नहीं गए? यह भी ठीक है।</h3>
+        <p>पहली सोचने वाली मशीनें बनाने वाले लोग गणितज्ञ, इलेक्ट्रीशियन और शौक़िया लोग थे — कई के पास कंप्यूटर विज्ञान की कोई औपचारिक ट्रेनिंग नहीं थी, क्योंकि तब यह क्षेत्र अस्तित्व में ही नहीं था। इसे जिज्ञासु लोगों ने एक-एक क़दम करके बनाया — और इसे उसी तरह समझा भी जा सकता है।</p>
+      </div>
+      <div class="card">
+        <h3>कोई दिशा नहीं मिल रही? यह गाइड आपको एक देगी।</h3>
+        <p>AI आज उन चंद कौशलों में से एक है जहाँ विषय की बुनियादी समझ — कोडिंग भी नहीं — असली काम के दरवाज़े खोल देती है: कंटेंट जाँचना, डेटा लेबलिंग, प्रॉम्प्ट लिखना, AI-सहायता वाली ग्राहक सेवा। यह गाइड एक असली शुरुआती रास्ते पर ख़त्म होती है।</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="simulator">
+  <div class="wrap">
+    <div class="kicker">अध्याय 01 · मूल विचार</div>
+    <h2>जब आप AI से सवाल टाइप करते हैं, तब असल में होता क्या है?</h2>
+    <p class="chapter-lede">बाक़ी सब कुछ समझने से पहले यह सबसे ज़रूरी बात है। नीचे दिए गए चरण-दर-चरण विवरण में देखिए कि ChatGPT जैसा AI सिस्टम आपके वाक्य से जवाब तक पहुँचने में पर्दे के पीछे असल में क्या करता है।</p>
+    <div class="sim-box">
+      <div class="sim-steps">
+        <div class="sim-step">
+          <h4>चरण 1 — टोकनाइज़िंग</h4>
+          <p>आपके वाक्य को छोटे-छोटे टुकड़ों में तोड़ा जाता है जिन्हें <b>टोकन</b> कहते हैं — आमतौर पर पूरे शब्द या शब्द के हिस्से। कंप्यूटर अक्षरों को उस तरह नहीं पढ़ सकते जिस तरह आप पढ़ते हैं; उन्हें पहले हर चीज़ को गिनती लायक़ इकाइयों में काटना पड़ता है।</p>
+        </div>
+        <div class="sim-step">
+          <h4>चरण 2 — शब्द नहीं, संख्याएं</h4>
+          <p>हर टोकन को संख्याओं की एक लंबी सूची में बदला जाता है, जिसे <b>वेक्टर एम्बेडिंग</b> कहते हैं। यह संख्या-सूची टोकन के अर्थ को दर्शाती है — मिलते-जुलते तरीक़े से इस्तेमाल होने वाले शब्दों की संख्याएं भी मिलती-जुलती होती हैं। AI कभी असल में "पढ़ता" नहीं — वह हमेशा सिर्फ़ संख्याओं से हिसाब लगाता है।</p>
+        </div>
+        <div class="sim-step">
+          <h4>चरण 3 — न्यूरल नेटवर्क</h4>
+          <p>ये संख्याएं गणितीय परतों के एक विशाल ढेर से गुज़रती हैं, जिसे <b>न्यूरल नेटवर्क</b> कहते हैं — जो दिमाग़ के न्यूरॉन्स से हल्की-सी प्रेरणा लेता है। आजकल के AI चैटबॉट <b>ट्रांसफ़ॉर्मर</b> नाम की एक डिज़ाइन इस्तेमाल करते हैं, जो यह पहचानने में ख़ासतौर पर अच्छी होती है कि वाक्य के पहले वाले कौन-से शब्द अगले शब्द को समझने के लिए सबसे ज़्यादा मायने रखते हैं — इस तरकीब को <b>अटेंशन</b> कहते हैं।</p>
+        </div>
+        <div class="sim-step">
+          <h4>चरण 4 — अनुमान, जानकारी नहीं</h4>
+          <p>मॉडल किसी डेटाबेस में जाकर जवाब नहीं "ढूँढ़ता"। वह हर संभावित अगले शब्द की संभावना का हिसाब बार-बार लगाता है, एक बार में एक शब्द — यह शब्द, फिर अगला, फिर उससे अगला — उन पैटर्न के आधार पर जो उसने प्रशिक्षण के दौरान भारी मात्रा में टेक्स्ट में देखे थे।</p>
+        </div>
+        <div class="sim-step">
+          <h4>चरण 5 — आपका जवाब</h4>
+          <p>अनुमानित शब्द-टुकड़ों को फिर से जोड़कर पढ़ने लायक़ वाक्य बनाए जाते हैं और आपकी स्क्रीन पर भेजे जाते हैं। टोकन से संख्या, परतों से अनुमान और अनुमान से टेक्स्ट तक की यह पूरी प्रक्रिया एक सेकंड से भी कम समय में हो जाती है।</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="history">
+  <div class="wrap">
+    <div class="kicker">अध्याय 02 · उत्पत्ति</div>
+    <h2>AI असल में आया कहाँ से?</h2>
+    <p class="chapter-lede">AI कोई हाल का आविष्कार नहीं है — यह 70 साल से ज़्यादा पुराना है। यह धीरे-धीरे बढ़ा, ऐसे दौर से गुज़रा जब इसे लगभग छोड़ ही दिया गया था, और पिछले एक दशक में ही वह बना जो आज आप इस्तेमाल करते हैं।</p>
+    <div class="timeline">
+      <div class="tl-item"><div class="tl-year">1950</div><h4>ऐलन ट्यूरिंग ने पूछा "क्या मशीनें सोच सकती हैं?"</h4><p>ब्रिटिश गणितज्ञ ऐलन ट्यूरिंग ने एक परीक्षण प्रस्तावित किया — जिसे बाद में ट्यूरिंग टेस्ट कहा गया — यह जाँचने के लिए कि क्या किसी मशीन की बातचीत को इंसान की बातचीत समझ लिया जा सकता है। इसी सवाल को इस क्षेत्र की शुरुआत माना जाता है।</p></div>
+      <div class="tl-item"><div class="tl-year">1956</div><h4>"आर्टिफिशियल इंटेलिजेंस" शब्द गढ़ा गया</h4><p>अमेरिका के डार्टमाउथ कॉलेज में एक कार्यशाला में शोधकर्ता जॉन मैकार्थी, मार्विन मिन्स्की और अन्य ने इस क्षेत्र को औपचारिक रूप से "आर्टिफिशियल इंटेलिजेंस" नाम दिया और तेज़ प्रगति की भविष्यवाणी की।</p></div>
+      <div class="tl-item"><div class="tl-year">1960 का दशक–70 का दशक</div><h4>शुरुआती नियम-आधारित सिस्टम</h4><p>शुरुआती AI हाथ से लिखे गए नियमों पर काम करता था — "यह हो तो वह करो।" ये सिस्टम सीमित पहेलियाँ सुलझा सकते थे लेकिन किसी भी अनपेक्षित चीज़ पर बिखर जाते थे, क्योंकि हर नियम इंसान को ख़ुद लिखना पड़ता था।</p></div>
+      <div class="tl-item"><div class="tl-year">1970 और 1980 का दशक</div><h4>"AI विंटर"</h4><p>प्रगति वादों से कहीं कम रही। फंडिंग दो बार बुरी तरह घट गई, जिन दौरों को शोधकर्ता आज "AI विंटर" कहते हैं — यह याद दिलाता है कि प्रचार और असलियत में कितनी दूरी आ गई थी।</p></div>
+      <div class="tl-item"><div class="tl-year">1997</div><h4>Deep Blue ने विश्व शतरंज चैंपियन को हराया</h4><p>IBM के Deep Blue ने विश्व शतरंज चैंपियन गैरी कास्पारोव को हराया, यह दिखाते हुए कि एक अच्छी तरह परिभाषित खेल में मशीन इंसानी विशेषज्ञ से बेहतर हिसाब लगा सकती है।</p></div>
+      <div class="tl-item"><div class="tl-year">2012</div><h4>डीप लर्निंग की उड़ान शुरू हुई</h4><p>AlexNet नाम के एक न्यूरल नेटवर्क ने ImageNet नाम की एक प्रतियोगिता में तस्वीरों में चीज़ें पहचानने में पुराने तरीक़ों से काफ़ी बेहतर प्रदर्शन किया — इस पल को आधुनिक "डीप लर्निंग" युग की शुरुआत माना जाता है, जिसे ज़्यादा डेटा और बहुत तेज़ कंप्यूटर चिप्स (GPU) ने ताक़त दी।</p></div>
+      <div class="tl-item"><div class="tl-year">2017</div><h4>ट्रांसफ़ॉर्मर की शुरुआत</h4><p>Google के शोधकर्ताओं ने एक शोध-पत्र में "ट्रांसफ़ॉर्मर" नाम की डिज़ाइन प्रकाशित की, जिसमें ऊपर बताया गया अटेंशन तंत्र पेश किया गया। यही एक डिज़ाइन आज लगभग हर बड़े AI चैटबॉट के आधार में है।</p></div>
+      <div class="tl-item"><div class="tl-year">2022</div><h4>ChatGPT आम जनता तक पहुँचा</h4><p>OpenAI ने ChatGPT को आम जनता के लिए जारी किया, जिससे पहली बार इंटरनेट कनेक्शन रखने वाला कोई भी व्यक्ति उन्नत बातचीत करने वाले AI तक पहुँच सका — यही वह पल है जब AI लैब के विषय से घर-घर का शब्द बन गया।</p></div>
+      <div class="tl-item"><div class="tl-year">2023–अब तक</div><h4>बहु-मॉडल युग</h4><p>OpenAI, Google, Anthropic, Meta जैसी कई कंपनियाँ अब लगातार ज़्यादा सक्षम मॉडल जारी कर रही हैं जो टेक्स्ट, तस्वीरें, आवाज़ और वीडियो समझते हैं, और आपकी ओर से टूल इस्तेमाल करने वाले एजेंट की तरह काम कर सकते हैं।</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="components">
+  <div class="wrap">
+    <div class="kicker">अध्याय 03 · AI किससे बना है</div>
+    <h2>हर AI सिस्टम के पीछे चार तत्व</h2>
+    <p class="chapter-lede">बड़े-बड़े शब्दों को हटा दें तो चाहे कोई भी AI सिस्टम कितना भी उन्नत क्यों न हो, वह इन्हीं चार तत्वों से बना होता है।</p>
+    <div class="ing-grid">
+      <div class="ing"><div class="tag">कच्चा माल</div><h3>1. डेटा — वह अनुभव जिससे AI सीखता है</h3><p>डेटा किताबों, वेबसाइटों, तस्वीरों, सेंसर जैसी जगहों से जुटाया गया टेक्स्ट, तस्वीरें, आवाज़ या संख्याएं होती हैं। मॉडल का ज्ञान पूरी तरह उस डेटा से तय होता है जिस पर उसे प्रशिक्षित किया गया — न कम, न ज़्यादा। ख़राब या सीमित डेटा एक पक्षपाती या सीमित मॉडल बनाता है, यही वजह है कि "किस डेटा का इस्तेमाल हुआ" AI का सबसे ज़रूरी सवालों में से एक है।</p></div>
+      <div class="ing"><div class="tag">रेसिपी</div><h3>2. एल्गोरिद्म — सीखने के नियम</h3><p>एल्गोरिद्म गणितीय क़दमों का एक सटीक सेट है जो कंप्यूटर को बताता है कि डेटा देखते हुए ख़ुद को कैसे बदले, ताकि उसके अनुमान समय के साथ बेहतर होते जाएं। अलग-अलग समस्याओं के लिए अलग एल्गोरिद्म बेहतर होते हैं — कुछ तस्वीरों में पैटर्न पहचानने में अच्छे होते हैं, कुछ भाषा समझने में।</p></div>
+      <div class="ing"><div class="tag">नतीजा</div><h3>3. मॉडल — "प्रशिक्षित दिमाग़"</h3><p>मॉडल वह है जो एल्गोरिद्म के डेटा से सीखना ख़त्म करने के बाद मिलता है — करोड़ों या अरबों आंतरिक संख्याएं, जिन्हें <b>पैरामीटर</b> कहते हैं, जो मिलकर वह सब दर्शाती हैं जो सिस्टम ने "सीखा" है। जब लोग कहते हैं किसी मॉडल में "17.5 करोड़ पैरामीटर" हैं, तो उनका मतलब उतनी ही एडजस्ट होने वाली संख्याओं से होता है जो उसके ज्ञान को बनाती हैं।</p></div>
+      <div class="ing"><div class="tag">ताक़त</div><h3>4. कंप्यूट — बिजली और हार्डवेयर</h3><p>बड़े मॉडल को प्रशिक्षित करने के लिए भारी कंप्यूटिंग शक्ति चाहिए होती है, आमतौर पर GPU (ग्राफ़िक्स प्रोसेसिंग यूनिट) नाम की ख़ास चिप्स से, जो विशाल डेटा सेंटरों में हफ़्तों चलती हैं। यही वजह है कि सबसे बड़े AI मॉडल बनाना फ़िलहाल गिनी-चुनी अच्छी फंडिंग वाली कंपनियों तक सीमित है — हालाँकि पहले से प्रशिक्षित मॉडल इस्तेमाल करने में बहुत कम बिजली लगती है, इसीलिए यह आपके फ़ोन पर चल सकता है।</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="types">
+  <div class="wrap">
+    <div class="kicker">अध्याय 04 · मशीनें असल में कैसे सीखती हैं</div>
+    <h2>मशीन को सिखाने के तीन तरीक़े</h2>
+    <p class="chapter-lede">हर AI एक ही तरीक़े से नहीं सीखता। हर टैब पर क्लिक करके देखें कि मशीन को कैसे प्रशिक्षित किया जा सकता है, हर एक के लिए रोज़मर्रा की एक मिसाल के साथ।</p>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="t1">सुपरवाइज़्ड लर्निंग</button>
+      <button class="tab-btn" data-tab="t2">अनसुपरवाइज़्ड लर्निंग</button>
+      <button class="tab-btn" data-tab="t3">रीइनफ़ोर्समेंट लर्निंग</button>
+    </div>
+    <div class="tab-panel active" id="t1">
+      <h3>सुपरवाइज़्ड लर्निंग — उत्तर-कुंजी के साथ सीखना</h3>
+      <p>मशीन को कई ऐसी मिसालें दिखाई जाती हैं जिनके साथ सही जवाब पहले से जुड़ा होता है, और वह उन दोनों को जोड़ने वाला पैटर्न सीखती है। यह उन सैकड़ों अभ्यास सवालों को हल करने जैसा है जहाँ उत्तर-कुंजी सामने ही रखी हो।</p>
+      <div class="ex"><b>मिसाल:</b> किसी AI को "बिल्ली" या "कुत्ता" लेबल वाली 10,000 तस्वीरें दिखाना, जब तक वह किसी नई, अनदेखी तस्वीर को ख़ुद सही लेबल न कर सके।</div>
+    </div>
+    <div class="tab-panel" id="t2">
+      <h3>अनसुपरवाइज़्ड लर्निंग — बिना उत्तर-कुंजी के पैटर्न ढूँढ़ना</h3>
+      <p>मशीन को बिना किसी लेबल का डेटा दिया जाता है और उसे ख़ुद अपनी संरचना ढूँढ़ने को कहा जाता है — मिलती-जुलती चीज़ों को एक साथ रखना, बिना यह बताए कि उन समूहों का मतलब क्या है।</p>
+      <div class="ex"><b>मिसाल:</b> एक शॉपिंग ऐप ग्राहकों को सिर्फ़ ख़रीदारी के पैटर्न से "बजट में ख़रीदने वाले" और "प्रीमियम ख़रीदार" जैसे समूहों में बाँट देता है, बिना किसी के पहले से यह समूह तय किए।</div>
+    </div>
+    <div class="tab-panel" id="t3">
+      <h3>रीइनफ़ोर्समेंट लर्निंग — कोशिश, ग़लती और इनाम से सीखना</h3>
+      <p>मशीन किसी माहौल में क़दम उठाती है और नतीजे के हिसाब से इनाम या सज़ा पाती है, धीरे-धीरे वह रणनीति सीखती जाती है जिससे समय के साथ सबसे ज़्यादा इनाम मिले — कुछ हद तक वैसे ही जैसे कोई इंसान बार-बार खेलकर कोई वीडियो गेम सीखता है।</p>
+      <div class="ex"><b>मिसाल:</b> एक AI लाखों मुक़ाबले ख़ुद के ख़िलाफ़ खेलकर रणनीति वाला खेल खेलना सीखता है, हर जीत-हार के बाद बेहतर होता जाता है। यही इनाम-और-सुधार वाला विचार चैटबॉट को ज़्यादा मददगार और शिष्ट बनाने के लिए भी इस्तेमाल होता है, जिसे RLHF (इंसानी फ़ीडबैक से रीइनफ़ोर्समेंट लर्निंग) कहते हैं।</div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="subjects">
+  <div class="wrap">
+    <div class="kicker">अध्याय 05 · AI के भीतर छिपी ताक़त</div>
+    <h2>AI के अंदर छिपे विषय — बिना किसी डर के समझाए गए</h2>
+    <p class="chapter-lede">AI को इस्तेमाल करने या गहराई से समझने के लिए इन सब में महारत हासिल करना ज़रूरी नहीं है। लेकिन अगर आप कभी आगे जाना चाहें, तो ये वे विषय हैं जिनसे AI अपनी ताक़त लेता है — और सरल शब्दों में, क्यों।</p>
+    <div class="chips">
+      <span class="chip">सांख्यिकी व प्रायिकता</span><span class="chip">लीनियर अलजेब्रा</span><span class="chip">कैलकुलस</span><span class="chip">कंप्यूटर प्रोग्रामिंग</span><span class="chip">भाषाविज्ञान</span><span class="chip">कॉग्निटिव साइंस</span><span class="chip">दर्शनशास्त्र व नैतिकता</span><span class="chip">इलेक्ट्रॉनिक्स व हार्डवेयर</span>
+    </div>
+    <div class="subj-list">
+      <div class="subj"><h4>सांख्यिकी व प्रायिकता</h4><p>AI शायद ही किसी चीज़ को पक्के तौर पर जानता है — वह संभावनाओं में सोचता है। प्रायिकता बस "कितना संभव है" का गणित है, और यही AI को "यह शब्द सबसे संभावित अगला शब्द है" कहने लायक़ बनाता है, न कि किसी बात को पक्का मान लेने लायक़।</p></div>
+      <div class="subj"><h4>लीनियर अलजेब्रा</h4><p>यह एक साथ संख्याओं की बड़ी-बड़ी तालिकाओं (जिन्हें मैट्रिक्स और वेक्टर कहते हैं) के साथ काम करने का गणित है। चूँकि AI हर चीज़ — शब्द, पिक्सेल, आवाज़ — को संख्या-सूचियों में बदल देता है, इसलिए यही मशीनरी नीचे सारा भारी काम करती है।</p></div>
+      <div class="subj"><h4>कैलकुलस</h4><p>किसी मॉडल को प्रशिक्षित करने का मतलब है लगातार करोड़ों संख्याओं को थोड़ा-थोड़ा हिलाना ताकि उसकी ग़लतियाँ कम हों। कैलकुलस ही वह औज़ार है जो यह हिसाब लगाता है कि हर संख्या को किस दिशा में और कितना हिलाना है।</p></div>
+      <div class="subj"><h4>कंप्यूटर प्रोग्रामिंग</h4><p>यह सब चलाने के निर्देश किसी को लिखने पड़ते हैं। Python आज AI बनाने में सबसे ज़्यादा इस्तेमाल होने वाली प्रोग्रामिंग भाषा है, मुख्य रूप से इसलिए क्योंकि इसे शुरुआती लोगों के लिए अपेक्षाकृत आसान माना जाता है।</p></div>
+      <div class="subj"><h4>भाषाविज्ञान</h4><p>इंसानी भाषा किस तरह बनी है — व्याकरण, अर्थ, संदर्भ — इसका अध्ययन तय करता है कि भाषा-आधारित AI को स्वाभाविक लगने वाला टेक्स्ट समझने और बनाने के लिए कैसे डिज़ाइन किया जाए।</p></div>
+      <div class="subj"><h4>कॉग्निटिव साइंस</h4><p>इंसानी दिमाग़ कैसे सोचता, महसूस करता और याद रखता है, इसका अध्ययन। शुरुआती AI शोधकर्ताओं ने न्यूरल नेटवर्क डिज़ाइन करते समय दिमाग़ से जुड़े विचारों — जैसे न्यूरॉन्स — से हल्की प्रेरणा ली, हालाँकि आधुनिक AI असली दिमाग़ से काफ़ी अलग तरीक़े से काम करता है।</p></div>
+      <div class="subj"><h4>दर्शनशास्त्र व नैतिकता</h4><p>निष्पक्षता, सच्चाई, ज़िम्मेदारी और मशीन को क्या करने या न करने की इजाज़त होनी चाहिए, जैसे सवाल AI को डिज़ाइन और नियंत्रित करने के केंद्र में हैं — यह एक पूरा क्षेत्र है, कोई बाद का जोड़ नहीं।</p></div>
+      <div class="subj"><h4>इलेक्ट्रॉनिक्स व हार्डवेयर</h4><p>भौतिक चिप्स, तारों और बिजली के बिना इनमें से कुछ भी नहीं चलता। तेज़, ज़्यादा कारगर कंप्यूटर चिप्स की डिज़ाइन सीधे तय करती है कि किसी भी समय AI क्या कर सकता है।</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="training">
+  <div class="wrap">
+    <div class="kicker">अध्याय 06 · मॉडल बनाना</div>
+    <h2>ChatGPT जैसा मॉडल असल में कैसे प्रशिक्षित होता है</h2>
+    <p class="chapter-lede">असली उत्पादन प्रक्रिया का एक संक्षिप्त, ईमानदार वर्णन, उसी क्रम में जिसमें यह आमतौर पर होता है।</p>
+    <div class="train-grid">
+      <div class="train-step"><div class="train-num">1</div><div><h4>भारी मात्रा में टेक्स्ट जुटाना</h4><p>सार्वजनिक रूप से उपलब्ध किताबें, वेबसाइटें, लेख और कोड जुटाए जाते हैं — अक्सर सैकड़ों अरब शब्द — ताकि मॉडल को इंसानी भाषा और ज्ञान का व्यापक अनुभव मिले।</p></div></div>
+      <div class="train-step"><div class="train-num">2</div><div><h4>डेटा साफ़ और फ़िल्टर करना</h4><p>प्रशिक्षण शुरू होने से पहले जितना हो सके दोहराई हुई, ख़राब क्वालिटी या हानिकारक सामग्री को हटाया जाता है, क्योंकि मॉडल वही पैटर्न सीखेगा जो उसे पढ़ने को मिलेगा।</p></div></div>
+      <div class="train-step"><div class="train-num">3</div><div><h4>प्री-ट्रेनिंग — अगला शब्द अनुमानित करना सिखाना</h4><p>मॉडल को बार-बार ऐसा टेक्स्ट दिखाया जाता है जिसका आख़िरी शब्द छिपा होता है, और वह अपनी आंतरिक संख्याओं को तब तक बदलता है जब तक वह छूटे हुए शब्द का अनुमान बेहतर से बेहतर न लगाने लगे। यही एक सीधा काम, अरबों बार दोहराया गया, उसे व्याकरण, तथ्य, तर्क के पैटर्न और शैली सिखाता है।</p></div></div>
+      <div class="train-step"><div class="train-num">4</div><div><h4>अच्छी मिसालों पर फ़ाइन-ट्यून करना</h4><p>इसके बाद मॉडल को छोटे, ध्यान से लिखे गए अच्छे और मददगार जवाबों की मिसालों पर आगे प्रशिक्षित किया जाता है, ताकि वह "किसी भी इंटरनेट टेक्स्ट का अनुमान लगाने" से "एक मददगार सहायक की तरह जवाब देने" की ओर बढ़े।</p></div></div>
+      <div class="train-step"><div class="train-num">5</div><div><h4>इंसानी फ़ीडबैक से संरेखित करना</h4><p>इंसानी समीक्षक मॉडल के अलग-अलग जवाबों को रेटिंग देते हैं, और मॉडल को इस तरह एडजस्ट किया जाता है कि वह ज़्यादा वैसे ही जवाब दे जिन्हें लोगों ने ऊँची रेटिंग दी — उसे केवल धाराप्रवाह नहीं, बल्कि ज़्यादा मददगार, ईमानदार और सुरक्षित बनाना सिखाया जाता है।</p></div></div>
+      <div class="train-step"><div class="train-num">6</div><div><h4>जाँचना और जारी करना</h4><p>सार्वजनिक रिलीज़ से पहले मॉडल की सटीकता, सुरक्षा और पक्षपात के लिए जाँच की जाती है, फिर उसे उन सर्वरों पर तैनात किया जाता है जो लाखों लोगों — आपसहित — के सवालों का जवाब देते हैं।</p></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="life">
+  <div class="wrap">
+    <div class="kicker">अध्याय 07 · सिर्फ़ चैटबॉट नहीं</div>
+    <h2>AI जो आप शायद पहले से इस्तेमाल कर रहे हैं</h2>
+    <p class="chapter-lede">AI सिर्फ़ चैटबॉट नहीं है। यह पहले से ही चुपचाप उन चीज़ों के अंदर चल रहा है जिन्हें आप शायद हर हफ़्ते इस्तेमाल करते हैं।</p>
+    <div class="life-grid">
+      <div class="life-card"><h4>आवाज़ से टाइपिंग व अनुवाद</h4><p>Google Translate और वॉइस-टू-टेक्स्ट टूल आवाज़ को टेक्स्ट में बदलने और भाषाओं के बीच अनुवाद के लिए AI इस्तेमाल करते हैं — यहाँ तक कि उन भाषाओं में भी जिन्हें आप ख़ुद अच्छी तरह पढ़ नहीं पाते।</p></div>
+      <div class="life-card"><h4>तस्वीर पहचान</h4><p>आपके फ़ोन के कैमरा ऐप का चेहरे ख़ुद पहचानना, या Google Photos पर "beach" खोजने से आपकी समुद्र-किनारे की तस्वीरें मिल जाना — यह AI का दृश्य पैटर्न पहचानना है।</p></div>
+      <div class="life-card"><h4>सिफ़ारिशें</h4><p>YouTube, Instagram और Spotify सभी AI का इस्तेमाल यह अनुमान लगाने के लिए करते हैं कि आप आगे क्या देखना या सुनना पसंद करेंगे, इसके आधार पर कि आपने और मिलते-जुलते उपयोगकर्ताओं ने पहले किस तरह की चीज़ों में दिलचस्पी दिखाई।</p></div>
+      <div class="life-card"><h4>नक़्शे व नेविगेशन</h4><p>Google Maps जैसे ऐप ट्रैफ़िक का अनुमान लगाने और सबसे तेज़ रास्ता सुझाने के लिए AI का इस्तेमाल करते हैं, जो लाखों दूसरे लोगों की लाइव यात्राओं के पैटर्न पर आधारित होता है।</p></div>
+      <div class="life-card"><h4>बैंकिंग व धोखाधड़ी जाँच</h4><p>बैंक ऐसे असामान्य लेन-देन को पहचानने के लिए AI इस्तेमाल करते हैं जो आपके सामान्य ख़र्च के पैटर्न से मेल नहीं खाते, जिससे धोखाधड़ी को तुरंत पकड़ने में मदद मिलती है।</p></div>
+      <div class="life-card"><h4>स्वास्थ्य जाँच</h4><p>AI टूल डॉक्टरों की मदद करते हैं एक्स-रे जैसी मेडिकल तस्वीरों को स्कैन करके बीमारी के शुरुआती संकेत ढूँढ़ने में, और उन जगहों को चिन्हित करने में जिन पर इंसानी ध्यान की ज़्यादा ज़रूरत है।</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="risks">
+  <div class="wrap">
+    <div class="kicker">अध्याय 08 · कमियों के बारे में ईमानदारी</div>
+    <h2>AI कहाँ ग़लत होता है, और यह क्यों मायने रखता है</h2>
+    <p class="chapter-lede">AI को सही तरीक़े से समझने का मतलब है उसकी असली सीमाएं भी समझना — न कि सिर्फ़ प्रभावशाली हिस्से।</p>
+
+    <div class="acc-item open">
+      <button class="acc-head"><span>यह पूरे भरोसे के साथ ग़लत भी हो सकता है</span><span class="plus">＋</span></button>
+      <div class="acc-body"><p>चूँकि AI तथ्य जाँचने की बजाय संभावित-लगने वाला टेक्स्ट अनुमानित करता है, इसलिए वह पूरे भरोसे के साथ ग़लत जानकारी दे सकता है — जिसे अक्सर "हैलुसिनेशन" कहा जाता है। कोई भी ज़रूरी बात हमेशा किसी और स्रोत से जाँच लें।</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head"><span>यह इंसानी पूर्वाग्रह विरासत में पा सकता है</span><span class="plus">＋</span></button>
+      <div class="acc-body"><p>अगर जिस डेटा से इसने सीखा उसमें लिंग, जाति, धर्म या नस्ल को लेकर अनुचित पैटर्न मौजूद हों, तो मॉडल जान-बूझकर ठीक न किए जाने पर उन पैटर्न को दोहरा सकता है या और भी बढ़ा सकता है।</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head"><span>यह नौकरियों को प्रभावित करता है, असली नौकरियों को</span><span class="plus">＋</span></button>
+      <div class="acc-body"><p>AI कई नौकरियों के हिस्सों को स्वचालित कर रहा है — लिखने से लेकर बुनियादी ग्राहक सेवा और साधारण कोडिंग तक। यह वाक़ई बाधा डालने वाला है, लेकिन यह AI सिस्टम बनाने, जाँचने और चलाने के इर्द-गिर्द बिल्कुल नई भूमिकाएं भी बना रहा है।</p></div>
+    </div>
+    <div class="acc-item">
+      <button class="acc-head"><span>निजता और दुरुपयोग</span><span class="plus">＋</span></button>
+      <div class="acc-body"><p>AI का इस्तेमाल असली-जैसी नक़ली तस्वीरें, आवाज़ या टेक्स्ट (कभी-कभी "डीपफ़ेक" कहलाते हैं) बनाने में और बिना पूरी सहमति के निजी डेटा पर प्रशिक्षित करने में ग़लत तरीक़े से हो सकता है। यही वजह है कि AI नियमन और नैतिकता अब एक गंभीर, सक्रिय क्षेत्र है, कोई हाशिये की बात नहीं।</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="roadmap">
+  <div class="wrap">
+    <div class="kicker">अध्याय 09 · यहाँ से आगे कहाँ जाना है</div>
+    <h2>एक असली शुरुआती रास्ता — कोई पूर्व शर्त नहीं</h2>
+    <p class="chapter-lede">यह मानते हुए कि अंग्रेज़ी पर पकड़ नहीं है और कोई पहले की पढ़ाई नहीं हुई, समझ बनाने के लिए एक व्यावहारिक क्रम। अपनी रफ़्तार से चलें — यहाँ कोई डेडलाइन नहीं है।</p>
+    <div class="road">
+      <div class="road-step"><div class="n">1</div><div><h4>अपनी भाषा में किसी AI चैटबॉट से बात करें</h4><p>कोई भी मुफ़्त AI चैट ऐप खोलें और हिंदी, मराठी या जिस भाषा में आप सहज हों, उसमें बस टाइप करें या बोलें। किसी ऐसी बात के बारे में पूछें जिसमें आपकी दिलचस्पी है, सरल शब्दों में। इतना करने से ही तेज़ी से असली जान-पहचान बनती है।</p><div class="road-meta">लागत: मुफ़्त · समय: आज ही</div></div></div>
+      <div class="road-step"><div class="n">2</div><div><h4>इस गाइड के अध्याय 1–4 फिर से पढ़ें</h4><p>"जब आप सवाल टाइप करते हैं तब क्या होता है", "AI कहाँ से आया", "मूल तत्व" और "मशीनें कैसे सीखती हैं" पर वापस आएं। धीरे-धीरे पढ़ें, ज़रूरत हो तो एक दिन में एक अध्याय। लक्ष्य समझ है, रफ़्तार नहीं।</p><div class="road-meta">लागत: मुफ़्त · समय: इस हफ़्ते</div></div></div>
+      <div class="road-step"><div class="n">3</div><div><h4>अपनी भाषा में YouTube पर शुरुआती वीडियो देखें</h4><p>"AI क्या है" या अपनी भाषा में इसका समकक्ष खोजें। कई क्रिएटर सरल, बोली जाने वाली भाषा में तस्वीरों के साथ AI की अवधारणाएं समझाते हैं — पढ़ने की ज़रूरत नहीं।</p><div class="road-meta">लागत: मुफ़्त · समय: लगातार</div></div></div>
+      <div class="road-step"><div class="n">4</div><div><h4>"प्रॉम्प्टिंग" — अच्छे से पूछना — का अभ्यास करें</h4><p>प्रॉम्प्टिंग बस AI से साफ़, स्पष्ट सवाल पूछकर काम के जवाब पाने का कौशल है। यह अकेला ही आज एक असली, रोज़गार दिलाने वाला कौशल है, और इसमें कोई कोडिंग नहीं चाहिए।</p><div class="road-meta">लागत: मुफ़्त · समय: 2–3 हफ़्ते</div></div></div>
+      <div class="road-step"><div class="n">5</div><div><h4>ख़ुद AI के ज़रिए धीरे-धीरे बुनियादी अंग्रेज़ी सीखें</h4><p>किसी AI चैटबॉट से नए अंग्रेज़ी शब्द अपनी भाषा में समझाने को कहें, जैसे-जैसे आप आगे बढ़ें। आप बिना किसी क्लासरूम के, इस्तेमाल के ज़रिए स्वाभाविक रूप से शब्द सीखते जाएंगे।</p><div class="road-meta">लागत: मुफ़्त · समय: महीनों में, धीरे-धीरे</div></div></div>
+      <div class="road-step"><div class="n">6</div><div><h4>दिलचस्पी हो तभी — एक शुरुआती Python पाठ आज़माएं</h4><p>अगर और जब आप तैयार हों, मुफ़्त प्लेटफ़ॉर्म बिना किसी पूर्व ज्ञान के शुरुआती कोडिंग पाठ देते हैं। यह क़दम वैकल्पिक है, AI "समझने" के लिए ज़रूरी नहीं।</p><div class="road-meta">लागत: मुफ़्त · समय: जब भी तैयार हों</div></div></div>
+    </div>
+  </div>
+</section>
+
+<section class="chapter" id="glossary">
+  <div class="wrap">
+    <div class="kicker">संदर्भ</div>
+    <h2>सरल-भाषा शब्दकोश</h2>
+    <p class="chapter-lede">इस गाइड में इस्तेमाल हुआ हर तकनीकी शब्द, सरल भाषा में, एक जगह परिभाषित।</p>
+    <dl class="gloss">
+      <dt>एल्गोरिद्म</dt><dd>क़दमों का एक सटीक सेट जिसे कंप्यूटर किसी समस्या को हल करने या डेटा से सीखने के लिए अपनाता है।</dd>
+      <dt>आर्टिफ़िशियल इंटेलिजेंस (AI)</dt><dd>ऐसे कंप्यूटर सिस्टम जो सामान्यतः इंसानी बुद्धि की ज़रूरत वाले काम करने के लिए बनाए गए हैं, जैसे भाषा समझना या तस्वीरें पहचानना।</dd>
+      <dt>अटेंशन</dt><dd>एक तकनीक जो किसी मॉडल को यह पहचानने देती है कि अगले शब्द को समझने या बनाने में पहले के कौन-से शब्द सबसे ज़्यादा मायने रखते हैं।</dd>
+      <dt>चैटबॉट</dt><dd>एक ऐसा प्रोग्राम जो किसी व्यक्ति से टेक्स्ट या आवाज़ में बातचीत करने के लिए बनाया गया है।</dd>
+      <dt>डीप लर्निंग</dt><dd>मशीन लर्निंग का एक प्रकार जो कई परतों वाले न्यूरल नेटवर्क का इस्तेमाल करता है, जो बहुत जटिल पैटर्न सीखने में सक्षम है।</dd>
+      <dt>जनरेटिव AI</dt><dd>ऐसा AI जो सिर्फ़ मौजूदा सामग्री का विश्लेषण करने के बजाय नई सामग्री — टेक्स्ट, तस्वीरें, आवाज़ या वीडियो — बनाता है।</dd>
+      <dt>GPU</dt><dd>ग्राफ़िक्स प्रोसेसिंग यूनिट — एक कंप्यूटर चिप जो उस तरह के तेज़, बार-बार दोहराए जाने वाले गणित में ख़ासतौर पर अच्छी होती है जिसकी AI प्रशिक्षण को ज़रूरत होती है।</dd>
+      <dt>हैलुसिनेशन</dt><dd>जब कोई AI पूरे भरोसे के साथ कोई ग़लत बात कहता है, क्योंकि वह तथ्य जाँचने की बजाय संभावित-लगता टेक्स्ट अनुमानित कर रहा होता है।</dd>
+      <dt>लार्ज लैंग्वेज मॉडल (LLM)</dt><dd>एक AI मॉडल जो भारी मात्रा में टेक्स्ट पर प्रशिक्षित है ताकि इंसानी भाषा समझ और बना सके, जैसे ChatGPT के पीछे के मॉडल।</dd>
+      <dt>मशीन लर्निंग (ML)</dt><dd>AI की एक शाखा जिसमें सिस्टम तय नियमों के साथ प्रोग्राम किए जाने के बजाय डेटा से सीखकर किसी काम में बेहतर होते जाते हैं।</dd>
+      <dt>मॉडल</dt><dd>प्रशिक्षण का अंतिम नतीजा — सीखी गई संख्याओं का एक सेट जो कंप्यूटर को नए, अनदेखे इनपुट पर अनुमान लगाने देता है।</dd>
+      <dt>न्यूरल नेटवर्क</dt><dd>दिमाग़ के न्यूरॉन्स से हल्की-सी प्रेरणा लेकर बना परतों वाला गणितीय ढाँचा, जो डेटा में पैटर्न ढूँढ़ने के लिए इस्तेमाल होता है।</dd>
+      <dt>पैरामीटर</dt><dd>किसी मॉडल के अंदर मौजूद कई एडजस्ट होने वाली आंतरिक संख्याओं में से एक, जो मिलकर दर्शाती हैं कि उसने क्या सीखा है।</dd>
+      <dt>प्रॉम्प्ट</dt><dd>वह सवाल या निर्देश जो आप किसी AI सिस्टम को देते हैं।</dd>
+      <dt>टोकन</dt><dd>टेक्स्ट का एक छोटा टुकड़ा — अक्सर एक शब्द या शब्द का हिस्सा — जिसे कोई AI मॉडल एक इकाई के तौर पर प्रोसेस करता है।</dd>
+      <dt>प्रशिक्षण (ट्रेनिंग)</dt><dd>किसी मॉडल को भारी मात्रा में डेटा दिखाने की प्रक्रिया ताकि वह पैटर्न सीख सके और किसी काम में बेहतर हो सके।</dd>
+      <dt>ट्रांसफ़ॉर्मर</dt><dd>2017 में पेश किया गया न्यूरल नेटवर्क डिज़ाइन, जो आज के ज़्यादातर भाषा AI का आधार है और अटेंशन तंत्र पर बना है।</dd>
+      <dt>वेक्टर / एम्बेडिंग</dt><dd>संख्याओं की एक सूची जो किसी शब्द, तस्वीर या डेटा के किसी टुकड़े के अर्थ को गणितीय रूप से दर्शाती है।</dd>
+    </dl>
+  </div>
+</section>
+
+<section class="chapter sources" id="sources">
+  <div class="wrap">
+    <div class="kicker">पारदर्शिता</div>
+    <h2>यह जानकारी कहाँ से संकलित की गई</h2>
+    <p class="chapter-lede">इस गाइड के अनुरोध के अनुरूप, यहाँ हर तथ्य AI के इतिहास और कार्यप्रणाली के बारे में व्यापक रूप से और सार्वजनिक रूप से दस्तावेज़ीकृत जानकारी से लिया गया है — कोई निजी, पेवॉल वाला या गढ़ा हुआ स्रोत नहीं।</p>
+    <ul>
+      <li>डार्टमाउथ वर्कशॉप (1956) और ट्यूरिंग टेस्ट (1950) का सामान्य ऐतिहासिक रिकॉर्ड, जैसा कि सार्वजनिक कंप्यूटर विज्ञान इतिहास स्रोतों में दर्ज है।</li>
+      <li>ImageNet प्रतियोगिता (2012) और डीप लर्निंग के उभार में उसकी भूमिका पर सार्वजनिक रिपोर्टिंग।</li>
+      <li>सार्वजनिक रूप से प्रकाशित शोध-पत्र "Attention Is All You Need" (Google, 2017), जिसने ट्रांसफ़ॉर्मर आर्किटेक्चर पेश किया।</li>
+      <li>ChatGPT, Deep Blue, Gemini और संबंधित सिस्टम को लेकर OpenAI, Google, Anthropic और IBM की सार्वजनिक उत्पाद घोषणाएं और दस्तावेज़।</li>
+      <li>सुपरवाइज़्ड, अनसुपरवाइज़्ड और रीइनफ़ोर्समेंट लर्निंग; RLHF जैसी मशीन लर्निंग की व्यापक रूप से पढ़ाई जाने वाली अवधारणाएं, जैसा कि खुली शैक्षणिक सामग्री में शामिल हैं।</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <h3>सबके लिए AI</h3>
+    <p>एक मुफ़्त, सरल-भाषा गाइड — यह साबित करने के लिए बनाई गई कि AI समझने की कोई पूर्व शर्त नहीं होती, सिर्फ़ जिज्ञासा होती है।</p>
+    <p style="margin-top:26px;font-family:'Tiro Devanagari Hindi';font-size:1.1rem;color:var(--teal-deep);">इस पेज को कैसे इस्तेमाल करें</p>
+    <p>बाईं ओर के मेन्यू से एक-एक अध्याय पढ़ें। जितनी बार चाहें वापस आएं — यहाँ कुछ भी समाप्ति की तारीख़ नहीं रखता।</p>
+    <p class="footer-credit">संकलन एवं संपादन: सुजीत कुलकर्णी · पूरी तरह सार्वजनिक रूप से उपलब्ध स्रोतों पर आधारित</p>
+  </div>
+</footer>
+
+<script>
+  // Tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).classList.add('active');
+    });
+  });
+  // Accordion
+  document.querySelectorAll('.acc-head').forEach(head=>{
+    const item = head.parentElement;
+    const body = item.querySelector('.acc-body');
+    if(item.classList.contains('open')){ body.style.maxHeight = body.scrollHeight+'px'; }
+    head.addEventListener('click',()=>{
+      const isOpen = item.classList.contains('open');
+      document.querySelectorAll('.acc-item').forEach(i=>{
+        i.classList.remove('open');
+        i.querySelector('.acc-body').style.maxHeight = 0;
+      });
+      if(!isOpen){
+        item.classList.add('open');
+        body.style.maxHeight = body.scrollHeight+'px';
+      }
+    });
+  });
+</script>
+</body>
+</html>
