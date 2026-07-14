@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The New AI Roles — Galaxy</title>
+<style>
+  :root{
+    --ink:#f4f1e6;
+    --sub: rgba(244,241,230,0.6);
+    --hud: #7fe8c9;
+    /* Futuristic font stacks — system/OS fonts only, no external font files.
+       Named sci-fi faces are tried first; if a device doesn't have them,
+       it falls through to safe built-in fonts, so nothing ever fails to load. */
+    --font-display: 'Orbitron','Eurostile','Bank Gothic','Michroma','Audiowide','Segoe UI Semibold','Segoe UI',sans-serif;
+    --font-mono: 'Consolas','SFMono-Regular','Menlo','Cascadia Code','Courier New',monospace;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; padding:0; height:100%; width:100%;
+    background:#020308;
+    color:var(--ink);
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow:hidden;
+  }
+  #app{ position:relative; width:100vw; height:100vh; }
+
+  header{
+    position:absolute; top:0; left:0; right:0; z-index:20;
+    text-align:center; padding:18px 16px 10px; pointer-events:none;
+    background: linear-gradient(180deg, rgba(2,3,8,0.9), rgba(2,3,8,0));
+  }
+  header h1{
+    margin:0; font-size: clamp(22px, 4vw, 36px); font-weight:800; letter-spacing:0.04em;
+    font-family: var(--font-display); text-transform:uppercase;
+  }
+  header h1 .hi{
+    background: linear-gradient(90deg,#8fd9ff,#7fe8c9);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 30px rgba(127,232,201,0.25);
+  }
+  header .byline{ margin:4px 0 2px; font-size:12px; letter-spacing:.12em; color: var(--sub); font-family: var(--font-mono); text-transform:uppercase; }
+  header .byline b{ color:#ffd9a8; font-weight:700; }
+  header .tagline{ margin:5px 0 0; font-size:12.5px; color: var(--sub); }
+
+  .view-toggle{
+    pointer-events:auto; display:inline-flex; gap:6px; margin-top:12px;
+    background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.12);
+    border-radius:999px; padding:4px;
+  }
+  .view-toggle button{
+    border:none; background:transparent; color: var(--sub);
+    font-size:11.5px; font-weight:700; padding:7px 15px; border-radius:999px;
+    cursor:pointer; transition: all .25s ease;
+    font-family: var(--font-display); letter-spacing:.06em; text-transform:uppercase;
+  }
+  .view-toggle button.active{ background: linear-gradient(90deg,#8fd9ff,#7fe8c9); color:#020308; }
+
+  #galaxyView{ position:absolute; inset:0; }
+  #c{ position:absolute; inset:0; display:block; touch-action:none; }
+
+  /* HUD sci-fi dressing, all pure CSS, no external assets */
+  #scanlines{
+    position:absolute; inset:0; z-index:3; pointer-events:none;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0px, rgba(255,255,255,0.025) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode: overlay;
+  }
+  #vignette{
+    position:absolute; inset:0; z-index:3; pointer-events:none;
+    box-shadow: inset 0 0 180px 60px rgba(0,0,0,0.75);
+  }
+  .corner{ position:absolute; width:26px; height:26px; z-index:6; pointer-events:none; opacity:0.55; }
+  .corner.tl{ top:14px; left:14px; border-top:2px solid var(--hud); border-left:2px solid var(--hud); }
+  .corner.tr{ top:14px; right:14px; border-top:2px solid var(--hud); border-right:2px solid var(--hud); }
+  .corner.bl{ bottom:14px; left:14px; border-bottom:2px solid var(--hud); border-left:2px solid var(--hud); }
+  .corner.br{ bottom:14px; right:14px; border-bottom:2px solid var(--hud); border-right:2px solid var(--hud); }
+
+  #hudReadout{
+    position:absolute; top:90px; left:16px; z-index:10;
+    font-family: var(--font-mono);
+    font-size:11px; color: var(--hud); letter-spacing:1.5px;
+    background: rgba(4,8,14,0.4); border:1px solid rgba(127,232,201,0.25);
+    border-radius:8px; padding:8px 12px; line-height:1.6;
+    pointer-events:none; text-shadow:0 0 6px rgba(127,232,201,0.5);
+  }
+
+  #labels{ position:absolute; inset:0; pointer-events:none; z-index:5; overflow:hidden; }
+  .node-label{
+    position:absolute; transform:translate(-50%,-50%);
+    white-space:nowrap; pointer-events:auto; cursor:pointer;
+    transition: opacity .35s ease; will-change:left,top;
+  }
+  .node-label.role{
+    font-family: var(--font-display);
+    letter-spacing:2px; text-transform:uppercase;
+    font-size: 13px; font-weight:700; padding:5px 12px; border-radius:999px;
+    background: rgba(4,8,16,0.55); border:1px solid currentColor;
+    backdrop-filter: blur(3px);
+    text-shadow: 0 0 10px currentColor;
+  }
+  .node-label.role .n{
+    display:block; font-family: var(--font-mono); text-transform:none;
+    letter-spacing:.02em; font-size:9.5px; font-weight:400; color:var(--sub); margin-top:2px; text-shadow:none;
+  }
+  .node-label.skill{
+    font-family: var(--font-mono);
+    font-size:11.5px; font-weight:500; letter-spacing:.02em; padding:3px 9px; border-radius:8px;
+    background: rgba(4,8,16,0.65); border:1px solid currentColor;
+    text-shadow: 0 0 6px currentColor;
+  }
+  @keyframes popIn{
+    0%{ opacity:0; transform:translate(-50%,-50%) scale(0.35); }
+    65%{ opacity:1; transform:translate(-50%,-50%) scale(1.18); }
+    100%{ opacity:1; transform:translate(-50%,-50%) scale(1); }
+  }
+  .node-label.skill.popped{ animation: popIn .5s cubic-bezier(.34,1.56,.64,1) forwards; }
+  .node-label.hub{
+    font-family: var(--font-display); letter-spacing:3px; font-size:12px;
+    color:#7fe8c9; text-transform:uppercase; text-shadow:0 0 14px rgba(127,232,201,0.8);
+  }
+
+  #hud{
+    position:absolute; left:0; right:0; bottom:0; z-index:20;
+    display:flex; flex-direction:column; align-items:center; gap:9px;
+    padding: 8px 12px 14px; pointer-events:none;
+    background: linear-gradient(0deg, rgba(2,3,8,0.9), rgba(2,3,8,0));
+  }
+  #roleButtons{ display:flex; flex-wrap:wrap; justify-content:center; gap:7px; pointer-events:auto; }
+  .pill{
+    border:1px solid rgba(255,255,255,0.16); background: rgba(255,255,255,0.05);
+    color: var(--ink); font-size:11px; font-weight:700; padding:7px 13px; border-radius:999px;
+    cursor:pointer; display:flex; align-items:center; gap:6px; transition: all .25s ease;
+    font-family: var(--font-display); letter-spacing:.03em; text-transform:uppercase;
+  }
+  .pill .sw{ width:8px; height:8px; border-radius:50%; }
+  .pill:hover{ background: rgba(255,255,255,0.12); }
+  .pill.active{ background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); }
+  #hint{ font-size:11px; color: var(--sub); letter-spacing:.03em; font-family: var(--font-mono); }
+
+  /* ---------- REMOTE CONTROL DOCK ---------- */
+  #remoteHandle{
+    position:absolute; z-index:22; right:12px; top:calc(50% - 148px);
+    width:32px; height:32px; border-radius:50%;
+    background: rgba(4,8,16,0.6); border:1px solid rgba(127,232,201,0.35);
+    color:var(--hud); font-family: var(--font-mono); font-size:14px; font-weight:700;
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer; pointer-events:auto; text-shadow:0 0 6px rgba(127,232,201,0.6);
+  }
+  #remote{
+    position:absolute; z-index:20; right:12px; top:50%; transform:translateY(-50%) translateX(0);
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    background: rgba(4,8,16,0.5); border:1px solid rgba(127,232,201,0.25);
+    border-radius:16px; padding:10px 9px; backdrop-filter: blur(4px);
+    transition: transform .35s ease, opacity .35s ease;
+  }
+  #remote.collapsed{ transform: translateY(-50%) translateX(140px); opacity:0; pointer-events:none; }
+  #remote .dpad{
+    display:grid; grid-template-columns: 34px 34px 34px; grid-template-rows: 34px 34px 34px;
+    gap:3px;
+  }
+  #remote .dbtn{
+    display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16);
+    border-radius:8px; color:var(--ink); font-size:14px; cursor:pointer;
+    user-select:none; -webkit-user-select:none;
+    touch-action:none;
+  }
+  #remote .dbtn:active, #remote .dbtn.held{ background: rgba(127,232,201,0.35); border-color:var(--hud); }
+  #remote .dbtn.empty{ background:transparent; border:none; }
+  #remote .zoomrow{ display:flex; gap:4px; }
+  #remote .zbtn{
+    width:34px; height:28px; display:flex; align-items:center; justify-content:center;
+    background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16);
+    border-radius:7px; color:var(--ink); font-size:15px; cursor:pointer; touch-action:none;
+  }
+  #remote .zbtn:active, #remote .zbtn.held{ background: rgba(127,232,201,0.35); border-color:var(--hud); }
+  #remote .toggles{ display:flex; flex-direction:column; gap:5px; width:100%; }
+  #remote .tbtn{
+    font-family: var(--font-mono);
+    font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+    background: rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.16);
+    border-radius:7px; color:var(--sub); padding:6px 4px; cursor:pointer; text-align:center;
+  }
+  #remote .tbtn.on{ background: rgba(127,232,201,0.25); color:#fff; border-color:var(--hud); }
+  #remote .label{ font-family: var(--font-mono); font-size:9px; color:var(--sub); letter-spacing:.1em; text-transform:uppercase; margin-top:2px; }
+
+  @media (max-width:640px){
+    #remote{ right:6px; padding:8px 7px; gap:6px; }
+    #remote .dpad{ grid-template-columns: 30px 30px 30px; grid-template-rows: 30px 30px 30px; }
+    #remote .zbtn{ width:30px; }
+    #hudReadout{ top:82px; left:8px; font-size:10px; padding:6px 9px; }
+  }
+
+  /* ---------- NOTES VIEW ---------- */
+  #notesView{
+    position:absolute; inset:0; z-index:15; overflow-y:auto;
+    padding: 150px 20px 60px;
+    background: radial-gradient(1200px 800px at 50% 0%, #10142b, #04050c 65%);
+  }
+  .notes-wrap{ max-width: 760px; margin: 0 auto; }
+  .notes-controls{ display:flex; justify-content:flex-end; gap:8px; margin-bottom:18px; }
+  .notes-controls button{
+    font-size:12px; font-weight:600; color:var(--sub);
+    background: rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.14);
+    border-radius:999px; padding:6px 14px; cursor:pointer;
+  }
+  .notes-controls button:hover{ color:var(--ink); background: rgba(255,255,255,0.1); }
+
+  details.section{
+    border-radius:18px; margin-bottom:14px;
+    background: rgba(255,255,255,0.035); border:1px solid rgba(255,255,255,0.1); overflow:hidden;
+  }
+  details.section > summary{
+    list-style:none; cursor:pointer; padding:18px 20px;
+    display:flex; align-items:center; gap:14px; font-size:17px; font-weight:800;
+    font-family: var(--font-display); letter-spacing:.02em; text-transform:uppercase;
+  }
+  .notes-controls button.on{ background: rgba(127,232,201,0.25); color:#fff; border-color:var(--hud); }
+  details.section > summary::-webkit-details-marker{ display:none; }
+  details.section > summary .ic{
+    width:38px; height:38px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center; font-size:19px; flex:none;
+  }
+  details.section > summary .meta{ flex:1; }
+  details.section > summary .meta .role-sub{ display:block; font-size:12.5px; font-weight:400; color:var(--sub); margin-top:2px; }
+  details.section > summary .chev{ color: var(--sub); transition: transform .25s ease; font-size:14px; }
+  details.section[open] > summary .chev{ transform: rotate(90deg); }
+  .section-intro{ padding: 0 22px 6px 76px; font-size:13.5px; color: var(--sub); line-height:1.6; }
+  .sub-list{ padding: 6px 16px 18px; }
+  details.sub{ border-top:1px solid rgba(255,255,255,0.06); }
+  details.sub > summary{
+    list-style:none; cursor:pointer; padding:11px 10px 11px 60px;
+    display:flex; align-items:center; gap:10px; font-size:14.5px; font-weight:600;
+  }
+  details.sub > summary::-webkit-details-marker{ display:none; }
+  details.sub > summary::before{ content:'●'; font-size:7px; position:relative; left:-2px; }
+  details.sub > summary .chev{ margin-left:auto; color:var(--sub); font-size:12px; transition: transform .25s ease; }
+  details.sub[open] > summary .chev{ transform: rotate(90deg); }
+  .sub-body{ padding: 0 20px 14px 60px; font-size:13.5px; color: var(--sub); line-height:1.55; }
+
+  ::-webkit-scrollbar{ width:8px; }
+  ::-webkit-scrollbar-thumb{ background: rgba(255,255,255,0.15); border-radius:6px; }
+
+  @media (max-width:600px){
+    .node-label.skill{ font-size:10.5px; }
+    #notesView{ padding-top:170px; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <h1>The New <span class="hi">AI Roles</span></h1>
+    <div class="byline">Created by <b>Sujit Kulkarni</b></div>
+    <p class="tagline">4 emerging roles and the core skills behind them — a fully manual 3D constellation</p>
+    <div class="view-toggle">
+      <button id="btnGalaxy" class="active">🌌 Galaxy View</button>
+      <button id="btnNotes">📝 Notes</button>
+    </div>
+  </header>
+
+  <div id="galaxyView">
+    <canvas id="c"></canvas>
+    <div id="scanlines"></div>
+    <div id="vignette"></div>
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div id="hudReadout">HDG <span id="hdgVal">000</span>°&nbsp;&nbsp;TILT <span id="tiltVal">00</span>°&nbsp;&nbsp;RNG <span id="rngVal">000</span></div>
+    <div id="labels"></div>
+
+    <div id="remoteHandle" title="Show / hide remote control">»</div>
+    <div id="remote">
+      <div class="dpad">
+        <div class="dbtn empty"></div>
+        <div class="dbtn" id="btnUp">▲</div>
+        <div class="dbtn empty"></div>
+        <div class="dbtn" id="btnLeft">◀</div>
+        <div class="dbtn" id="btnHome">⟲</div>
+        <div class="dbtn" id="btnRight">▶</div>
+        <div class="dbtn empty"></div>
+        <div class="dbtn" id="btnDown">▼</div>
+        <div class="dbtn empty"></div>
+      </div>
+      <div class="label">Orbit</div>
+      <div class="zoomrow">
+        <div class="zbtn" id="btnZoomIn">+</div>
+        <div class="zbtn" id="btnZoomOut">–</div>
+      </div>
+      <div class="label">Zoom</div>
+      <div class="toggles">
+        <div class="tbtn on" id="btnAutoRotate">Auto ⟳</div>
+        <div class="tbtn" id="btnTour">▶ Tour</div>
+      </div>
+    </div>
+
+    <div id="hud">
+      <div id="roleButtons">
+        <button class="pill active" data-role="overview"><span class="sw" style="background:#fff"></span>Overview</button>
+        <button class="pill" data-role="fde"><span class="sw" style="background:#f2b06a"></span>Forward Deployed Engineer</button>
+        <button class="pill" data-role="story"><span class="sw" style="background:#8fd9ff"></span>AI Storyteller</button>
+        <button class="pill" data-role="acc"><span class="sw" style="background:#8fd9ff"></span>AI Accelerator</button>
+        <button class="pill" data-role="chief"><span class="sw" style="background:#7fe8c9"></span>AI Chief</button>
+      </div>
+      <div id="hint">drag / arrow keys / remote dock to orbit 360° · scroll, pinch, or +/− to zoom · tap a role to fly in</div>
+    </div>
+  </div>
+
+  <div id="notesView" hidden>
+    <div class="notes-wrap">
+      <div class="notes-controls">
+        <button id="autoplayNotes">▶ Autoplay</button>
+        <button id="expandAll">Expand all</button>
+        <button id="collapseAll">Collapse all</button>
+      </div>
+      <div id="sections"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+/* ============================================================
+   ZERO EXTERNAL DEPENDENCIES.
+   No CDN, no fonts, no third-party scripts of any kind.
+   Everything — including the 3D engine — is inline, standard
+   browser JavaScript (Canvas 2D + math only), so nothing here
+   relies on any network fetch to render or run.
+   ============================================================ */
+
+const ROLES = [
+  {
+    key:'fde', title:'Forward Deployed Engineer', sub:'customer discovery · deployment · consulting',
+    color:'#f2b06a', icon:'🛠️',
+    intro:'Embeds directly with customers to design, build, and ship AI solutions on-site — the bridge between a product\'s raw capability and a customer\'s real environment.',
+    skills:[
+      ['Customer Discovery','Uncovering real customer workflows and pain points before proposing a solution.'],
+      ['Solution Design','Shaping a technical approach that fits the customer\'s actual constraints.'],
+      ['AI Product Knowledge','Deep fluency in the vendor\'s models, tools, and roadmap.'],
+      ['Python','Writing production-ready scripts and integrations quickly, on-site.'],
+      ['APIs','Wiring the product into a customer\'s existing systems and data.'],
+      ['Multiple Languages','Communicating and coding across regions, teams, and tech stacks.'],
+      ['Enterprise Integration','Connecting AI tools into legacy enterprise architecture safely.'],
+      ['Deployment Support','Getting a solution live, stable, and supported in production.'],
+      ['Technical Consulting','Advising customers on the right architecture and trade-offs.'],
+      ['Stakeholder Communication','Translating technical decisions for non-technical decision-makers.'],
+      ['Workflow Mapping','Documenting how work actually happens before automating it.'],
+      ['Travel Readiness','Being where the customer is, whenever the deployment needs it.']
+    ]
+  },
+  {
+    key:'story', title:'AI Storyteller', sub:'communications · media · community',
+    color:'#8fd9ff', icon:'🎙️',
+    intro:'Translates technical capability into narratives that customers, press, and the public actually understand — shaping how the outside world perceives the technology.',
+    skills:[
+      ['Communications Strategy','Planning what gets said, to whom, and when.'],
+      ['Technical Storytelling','Making complex AI capability understandable and compelling.'],
+      ['Media Relations','Building trust with journalists who cover the space.'],
+      ['Public Speaking','Representing the product confidently on stage and on camera.'],
+      ['Brand Messaging','Keeping the voice and positioning consistent everywhere.'],
+      ['Founder-Builder Mindset','Speaking with the credibility of someone who has actually shipped.'],
+      ['Developer Evangelism','Winning over the technical audience with real, honest demos.'],
+      ['Community Building','Growing a loyal audience around the product and its mission.'],
+      ['Startup Ecosystem','Understanding how founders, funders, and builders actually operate.'],
+      ['Reporter Network','Maintaining relationships that turn into fair, informed coverage.'],
+      ['Government Context','Framing the technology\'s role within policy and regulation.'],
+      ['Content Leadership','Setting the editorial bar for everything the company publishes.']
+    ]
+  },
+  {
+    key:'acc', title:'AI Accelerator', sub:'adoption · automation · enablement',
+    color:'#8fd9ff', icon:'⚙️',
+    intro:'Sits inside a team to redesign workflows, build automation hands-on, and make AI tools actually stick — turning pilots into everyday habits.',
+    skills:[
+      ['Business Automation','Finding processes worth automating and proving the ROI.'],
+      ['Change Management','Helping teams actually adopt new ways of working.'],
+      ['AI Tools Expertise','Knowing the current landscape of tools well enough to choose wisely.'],
+      ['Outcome Measurement','Proving impact with numbers, not just anecdotes.'],
+      ['Cross-Team Collaboration','Working across functions to remove adoption blockers.'],
+      ['Process Redesign','Rebuilding a workflow around what AI now makes possible.'],
+      ['Internal Consulting','Acting as an embedded advisor, not an outside vendor.'],
+      ['Prompt Design','Crafting reliable, repeatable instructions for AI systems.'],
+      ['Hands-on Engineering','Building the automation yourself, not just recommending it.'],
+      ['Team Enablement','Teaching people to use new tools with confidence.'],
+      ['Workflow Automation','Removing manual steps from repeatable business processes.'],
+      ['AI Adoption','Turning pilot projects into everyday, trusted habits.']
+    ]
+  },
+  {
+    key:'chief', title:'AI Chief', sub:'strategy · governance · risk',
+    color:'#7fe8c9', icon:'👔',
+    intro:'Owns AI strategy at the executive level — deciding where to invest, how to govern responsibly, and how the whole organization should change.',
+    skills:[
+      ['Capability Building','Growing the organization\'s AI skills and infrastructure deliberately.'],
+      ['AI Roadmapping','Sequencing AI investment against real business priorities.'],
+      ['Investment Prioritization','Deciding which AI bets are worth funding first.'],
+      ['Policy Direction','Setting the rules for how AI gets used responsibly.'],
+      ['Cross-Functional Alignment','Getting every department pulling toward the same AI goals.'],
+      ['Enterprise Transformation','Redesigning how the whole organization operates around AI.'],
+      ['Risk Oversight','Anticipating where AI use could go wrong before it does.'],
+      ['Operating Model Design','Deciding how AI-driven teams are structured and run.'],
+      ['Responsible AI','Ensuring systems are used fairly, safely, and transparently.'],
+      ['Governance','Building the checks that keep AI initiatives accountable.'],
+      ['Executive Leadership','Making the case for AI investment at the top table.'],
+      ['AI Strategy','Defining what AI should — and shouldn\'t — do for the business.']
+    ]
+  }
+];
+
+/* ---------------- NOTES VIEW ---------------- */
+(function buildNotes(){
+  const wrap = document.getElementById('sections');
+  ROLES.forEach((role, ri) => {
+    const sec = document.createElement('details');
+    sec.className = 'section';
+    if(ri === 0) sec.open = true;
+    const summary = document.createElement('summary');
+    summary.innerHTML = `
+      <div class="ic" style="background:${role.color}22;border:1px solid ${role.color}55;">${role.icon}</div>
+      <div class="meta">${role.title}<span class="role-sub">${role.sub} — ${role.skills.length} core skills</span></div>
+      <div class="chev">&#8250;</div>`;
+    sec.appendChild(summary);
+
+    const introP = document.createElement('div');
+    introP.className = 'section-intro';
+    introP.textContent = role.intro;
+    sec.appendChild(introP);
+
+    const list = document.createElement('div');
+    list.className = 'sub-list';
+    role.skills.forEach(([name, desc], i) => {
+      const sub = document.createElement('details');
+      sub.className = 'sub';
+      const ssum = document.createElement('summary');
+      ssum.innerHTML = `<span>${String(i+1).padStart(2,'0')}. ${name}</span><span class="chev">&#8250;</span>`;
+      sub.appendChild(ssum);
+      const body = document.createElement('div');
+      body.className = 'sub-body';
+      body.textContent = desc;
+      sub.appendChild(body);
+      list.appendChild(sub);
+    });
+    sec.appendChild(list);
+    wrap.appendChild(sec);
+  });
+  document.getElementById('expandAll').addEventListener('click', () => {
+    stopAutoplay();
+    document.querySelectorAll('#sections details').forEach(d => d.open = true);
+  });
+  document.getElementById('collapseAll').addEventListener('click', () => {
+    stopAutoplay();
+    document.querySelectorAll('#sections details').forEach(d => d.open = false);
+  });
+
+  /* ---- Autoplay: walks through every section, then every subsection,
+     popping each open in turn and scrolling it into view. ---- */
+  const autoplayBtn = document.getElementById('autoplayNotes');
+  let autoplayActive = false, autoplayTimer = null;
+
+  function stopAutoplay(){
+    autoplayActive = false;
+    clearTimeout(autoplayTimer);
+    autoplayBtn.textContent = '▶ Autoplay';
+    autoplayBtn.classList.remove('on');
+  }
+
+  function startAutoplay(){
+    autoplayActive = true;
+    autoplayBtn.textContent = '⏸ Stop';
+    autoplayBtn.classList.add('on');
+    document.querySelectorAll('#sections details').forEach(d => d.open = false);
+
+    const seq = [];
+    document.querySelectorAll('#sections > details.section').forEach(sec => {
+      seq.push({ type:'section', el:sec });
+      sec.querySelectorAll('details.sub').forEach(sub => seq.push({ type:'sub', el:sub, parent:sec }));
+    });
+
+    let idx = 0;
+    function step(){
+      if(!autoplayActive) return;
+      if(idx >= seq.length){ stopAutoplay(); return; }
+      const item = seq[idx++];
+      if(item.type === 'section'){
+        item.el.open = true;
+        item.el.scrollIntoView({ behavior:'smooth', block:'start' });
+        autoplayTimer = setTimeout(step, 750);
+      } else {
+        item.parent.querySelectorAll('details.sub').forEach(s => { if(s !== item.el) s.open = false; });
+        item.el.open = true;
+        item.el.scrollIntoView({ behavior:'smooth', block:'center' });
+        autoplayTimer = setTimeout(step, 1500);
+      }
+    }
+    step();
+  }
+
+  autoplayBtn.addEventListener('click', () => { autoplayActive ? stopAutoplay() : startAutoplay(); });
+})();
+
+/* ---------------- VIEW TOGGLE ---------------- */
+const btnGalaxy = document.getElementById('btnGalaxy');
+const btnNotes = document.getElementById('btnNotes');
+const galaxyView = document.getElementById('galaxyView');
+const notesView = document.getElementById('notesView');
+btnGalaxy.addEventListener('click', () => {
+  btnGalaxy.classList.add('active'); btnNotes.classList.remove('active');
+  galaxyView.hidden = false; notesView.hidden = true;
+});
+btnNotes.addEventListener('click', () => {
+  btnNotes.classList.add('active'); btnGalaxy.classList.remove('active');
+  notesView.hidden = false; galaxyView.hidden = true;
+});
+
+/* ============================================================
+   MINI 3D ENGINE — plain math + Canvas 2D. No libraries at all.
+   ============================================================ */
+(function initGalaxy(){
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const labelsLayer = document.getElementById('labels');
+  const hdgEl = document.getElementById('hdgVal');
+  const tiltEl = document.getElementById('tiltVal');
+  const rngEl = document.getElementById('rngVal');
+  let W, H, DPR;
+
+  function resize(){
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    W = window.innerWidth; H = window.innerHeight;
+    canvas.width = W*DPR; canvas.height = H*DPR;
+    canvas.style.width = W+'px'; canvas.style.height = H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  function hexToRgb(hex){
+    const v = parseInt(hex.slice(1),16);
+    return { r:(v>>16)&255, g:(v>>8)&255, b:v&255 };
+  }
+
+  /* ---------- build 3D layout ---------- */
+  const TRUNK_LEN = 300, SKILL_RADIUS = 120;
+  const dirs = [
+    norm({x:1,y:0.5,z:1}), norm({x:1,y:0.5,z:-1}),
+    norm({x:-1,y:0.5,z:-1}), norm({x:-1,y:0.5,z:1})
+  ];
+  function norm(v){ const l=Math.sqrt(v.x*v.x+v.y*v.y+v.z*v.z); return {x:v.x/l,y:v.y/l,z:v.z/l}; }
+  function cross(a,b){ return {x:a.y*b.z-a.z*b.y, y:a.z*b.x-a.x*b.z, z:a.x*b.y-a.y*b.x}; }
+  function addv(a,b,s){ return {x:a.x+b.x*s, y:a.y+b.y*s, z:a.z+b.z*s}; }
+
+  const roleData = [];
+  ROLES.forEach((role, i) => {
+    const dir = dirs[i];
+    const rolePos = { x:dir.x*TRUNK_LEN, y:dir.y*TRUNK_LEN, z:dir.z*TRUNK_LEN };
+    const up = Math.abs(dir.y) > 0.9 ? {x:1,y:0,z:0} : {x:0,y:1,z:0};
+    const u = norm(cross(dir, up));
+    const w = norm(cross(dir, u));
+    const n = role.skills.length;
+    const skillPos = role.skills.map((s, si) => {
+      const theta = (si/n) * Math.PI*2;
+      const jitter = 0.85 + (si % 3)*0.1;
+      let p = addv(rolePos, u, Math.cos(theta)*SKILL_RADIUS*jitter);
+      p = addv(p, w, Math.sin(theta)*SKILL_RADIUS*jitter);
+      p = addv(p, dir, 35 + (si%4)*9);
+      return p;
+    });
+    roleData.push({ role, dir, rolePos, skillPos });
+  });
+
+  /* ---------- starfield: 3 parallax depth layers ---------- */
+  function makeStars(count, rMin, rMax, sMin, sMax){
+    const arr = [];
+    for(let i=0;i<count;i++){
+      const r = rMin + Math.random()*(rMax-rMin);
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.acos(2*Math.random()-1);
+      arr.push({
+        x:r*Math.sin(phi)*Math.cos(theta),
+        y:r*Math.sin(phi)*Math.sin(theta)*0.6,
+        z:r*Math.cos(phi),
+        s: sMin+Math.random()*(sMax-sMin),
+        tw: Math.random()*Math.PI*2,
+        c: Math.random()<0.15 ? '191,212,255' : (Math.random()<0.3 ? '255,227,194' : '255,255,255')
+      });
+    }
+    return arr;
+  }
+  const starsFar  = makeStars(700, 1100, 2000, 0.4, 1.0);
+  const starsMid  = makeStars(500, 650, 1150, 0.6, 1.4);
+  const starsNear = makeStars(260, 350, 680, 1.0, 2.1);
+
+  /* grid "landing pad" ring on the plane beneath the hub */
+  const GRID_Y = -220;
+  const gridRadii = [70,150,230,310,390,470];
+  const gridSegs = 48;
+
+  /* ---------- camera state ---------- */
+  let yaw = 0.55, pitch = -0.18, D = 620;
+  const FOCAL = 480;
+  let autoRotate = true, dragging = false, lastX=0, lastY=0, pinchDist=0;
+  let camAnim = null;
+
+  function rotatePoint(x,y,z){
+    const cosY=Math.cos(yaw), sinY=Math.sin(yaw);
+    const x1 = x*cosY + z*sinY;
+    const z1 = -x*sinY + z*cosY;
+    const y1 = y;
+    const cosX=Math.cos(pitch), sinX=Math.sin(pitch);
+    const y2 = y1*cosX - z1*sinX;
+    const z2 = y1*sinX + z1*cosX;
+    return { x:x1, y:y2, z:z2 };
+  }
+  function project(p){
+    const depth = Math.max(45, p.z + D);
+    const scale = FOCAL / depth;
+    return { x: W/2 + p.x*scale, y: H/2 - p.y*scale, scale, depth };
+  }
+  function faceAngles(v){
+    const r = Math.sqrt(v.x*v.x + v.z*v.z) || 0.0001;
+    return { yaw: Math.atan2(v.x, -v.z), pitch: Math.atan2(-v.y, r) };
+  }
+  function clampPitch(p){ return Math.max(-1.4, Math.min(1.4, p)); }
+  function wrapYaw(y){ const twoPi=Math.PI*2; return ((y % twoPi)+twoPi)%twoPi; }
+
+  /* ---------- pointer / touch drag on canvas ---------- */
+  function onDown(x,y){ dragging=true; lastX=x; lastY=y; camAnim=null; autoRotate=false; stopTour(); }
+  function onMove(x,y){
+    if(!dragging) return;
+    const dx=x-lastX, dy=y-lastY; lastX=x; lastY=y;
+    yaw = wrapYaw(yaw + dx*0.0052);
+    pitch = clampPitch(pitch + dy*0.0052);
+  }
+  function onUp(){ dragging=false; }
+  function zoomBy(f){ D = Math.max(240, Math.min(1450, D*f)); }
+
+  canvas.addEventListener('mousedown', e=>onDown(e.clientX,e.clientY));
+  window.addEventListener('mousemove', e=>onMove(e.clientX,e.clientY));
+  window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('wheel', e=>{ e.preventDefault(); zoomBy(1+e.deltaY*0.0011); }, {passive:false});
+  canvas.addEventListener('touchstart', e=>{
+    if(e.touches.length===1) onDown(e.touches[0].clientX, e.touches[0].clientY);
+    else if(e.touches.length===2){
+      dragging=false;
+      const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+      pinchDist = Math.hypot(dx,dy);
+    }
+  }, {passive:true});
+  canvas.addEventListener('touchmove', e=>{
+    if(e.touches.length===1) onMove(e.touches[0].clientX, e.touches[0].clientY);
+    else if(e.touches.length===2){
+      const dx=e.touches[0].clientX-e.touches[1].clientX, dy=e.touches[0].clientY-e.touches[1].clientY;
+      const d = Math.hypot(dx,dy);
+      if(pinchDist>0) zoomBy(pinchDist/d);
+      pinchDist = d;
+    }
+    e.preventDefault();
+  }, {passive:false});
+  canvas.addEventListener('touchend', ()=>{ onUp(); pinchDist=0; });
+
+  /* ---------- REMOTE CONTROL DOCK + KEYBOARD (360° manual) ---------- */
+  const held = { left:false, right:false, up:false, down:false, zin:false, zout:false };
+  function bindHold(el, key){
+    const start = (e)=>{ e.preventDefault(); held[key]=true; camAnim=null; autoRotate=false; stopTour(); el.classList.add('held'); };
+    const stop  = ()=>{ held[key]=false; el.classList.remove('held'); };
+    el.addEventListener('mousedown', start);
+    el.addEventListener('touchstart', start, {passive:false});
+    ['mouseup','mouseleave','touchend','touchcancel'].forEach(ev=> el.addEventListener(ev, stop));
+  }
+  bindHold(document.getElementById('btnLeft'),'left');
+  bindHold(document.getElementById('btnRight'),'right');
+  bindHold(document.getElementById('btnUp'),'up');
+  bindHold(document.getElementById('btnDown'),'down');
+  bindHold(document.getElementById('btnZoomIn'),'zin');
+  bindHold(document.getElementById('btnZoomOut'),'zout');
+  window.addEventListener('mouseup', ()=>{ Object.keys(held).forEach(k=>held[k]=false);
+    document.querySelectorAll('#remote .held').forEach(e=>e.classList.remove('held')); });
+
+  document.getElementById('btnHome').addEventListener('click', ()=> { stopTour(); focusRole(null); });
+
+  /* remote control show/hide handle */
+  const remoteDock = document.getElementById('remote');
+  const remoteHandle = document.getElementById('remoteHandle');
+  let remoteCollapsed = false;
+  remoteHandle.addEventListener('click', ()=>{
+    remoteCollapsed = !remoteCollapsed;
+    remoteDock.classList.toggle('collapsed', remoteCollapsed);
+    remoteHandle.textContent = remoteCollapsed ? '«' : '»';
+    remoteHandle.title = remoteCollapsed ? 'Show remote control' : 'Hide remote control';
+  });
+
+  const autoBtn = document.getElementById('btnAutoRotate');
+  autoBtn.addEventListener('click', ()=>{
+    autoRotate = !autoRotate;
+    autoBtn.classList.toggle('on', autoRotate);
+  });
+
+  const KEYMAP = { ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down' };
+  window.addEventListener('keydown', e=>{
+    if(KEYMAP[e.key]){ held[KEYMAP[e.key]]=true; camAnim=null; autoRotate=false; stopTour(); e.preventDefault(); }
+    else if(e.key==='+' || e.key==='='){ held.zin=true; camAnim=null; }
+    else if(e.key==='-' || e.key==='_'){ held.zout=true; camAnim=null; }
+    else if(e.key===' '){ autoRotate=!autoRotate; autoBtn.classList.toggle('on',autoRotate); e.preventDefault(); }
+    else if(e.key==='0'){ stopTour(); focusRole(null); }
+  });
+  window.addEventListener('keyup', e=>{
+    if(KEYMAP[e.key]) held[KEYMAP[e.key]]=false;
+    if(e.key==='+'||e.key==='=') held.zin=false;
+    if(e.key==='-'||e.key==='_') held.zout=false;
+  });
+
+  /* ---------- labels ---------- */
+  const hubLabel = document.createElement('div');
+  hubLabel.className='node-label hub'; hubLabel.textContent='AI';
+  labelsLayer.appendChild(hubLabel);
+
+  roleData.forEach(rd => {
+    const el = document.createElement('div');
+    el.className = 'node-label role';
+    el.style.color = rd.role.color;
+    el.style.borderColor = rd.role.color;
+    el.innerHTML = `${rd.role.title}<span class="n">${rd.role.sub}</span>`;
+    el.addEventListener('click', ()=>focusRole(rd.role.key));
+    labelsLayer.appendChild(el);
+    rd.labelEl = el;
+
+    rd.skillLabels = rd.skillPos.map((p, i) => {
+      const el = document.createElement('div');
+      el.className = 'node-label skill';
+      el.style.color = rd.role.color;
+      el.style.opacity = '0';
+      el.textContent = rd.role.skills[i][0];
+      labelsLayer.appendChild(el);
+      return el;
+    });
+  });
+
+  /* ---------- focus / fly-to ---------- */
+  let focusedRole = null;
+  const pills = document.querySelectorAll('.pill');
+  pills.forEach(p => p.addEventListener('click', () => {
+    stopTour();
+    const r = p.dataset.role;
+    focusRole(r==='overview' ? null : r);
+  }));
+  function setActivePill(role){
+    pills.forEach(p => p.classList.toggle('active',
+      (role===null && p.dataset.role==='overview') || p.dataset.role===role));
+  }
+  function easeInOutCubic(t){ return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2; }
+
+  /* skill labels "pop up" one after another (autoplay reveal) whenever a role is focused */
+  let popTimers = [];
+  function clearPopTimers(){ popTimers.forEach(id=>clearTimeout(id)); popTimers = []; }
+  function playSkillPopIn(rd){
+    rd.skillLabels.forEach((el, i) => {
+      el.classList.remove('popped');
+      el.style.opacity = '0';
+      const id = setTimeout(() => {
+        el.style.opacity = '1';
+        el.classList.add('popped');
+      }, 350 + i*110);
+      popTimers.push(id);
+    });
+  }
+
+  function focusRole(key){
+    focusedRole = key;
+    setActivePill(key);
+    let y1,p1,d1;
+    if(key===null){ y1=0.55; p1=-0.18; d1=620; autoRotate=true; autoBtn.classList.add('on'); }
+    else{
+      const rd = roleData.find(r=>r.role.key===key);
+      const ang = faceAngles(rd.rolePos);
+      y1=ang.yaw; p1=ang.pitch; d1=430; autoRotate=false; autoBtn.classList.remove('on');
+    }
+    const y0=yaw, ySpan=((y1-y0+Math.PI)%(Math.PI*2)+Math.PI*2)%(Math.PI*2)-Math.PI;
+    camAnim = { t:0, dur:1300, y0, p0:pitch, d0:D, yS:ySpan, p1, d1 };
+
+    clearPopTimers();
+    roleData.forEach(rd => {
+      if(rd.role.key === key){
+        playSkillPopIn(rd);
+      } else {
+        rd.skillLabels.forEach(el => { el.style.opacity = '0'; el.classList.remove('popped'); });
+      }
+    });
+  }
+
+  /* ---------- Tour: automatically cycles overview → each role (with its
+     skills popping in) → next role → ... → back to overview, on a loop ---------- */
+  const tourBtn = document.getElementById('btnTour');
+  let tourActive = false, tourTimer = null, tourIdx = 0;
+  const TOUR_ORDER = [null, 'fde', 'story', 'acc', 'chief'];
+
+  function stopTour(){
+    if(!tourActive) return;
+    tourActive = false;
+    clearTimeout(tourTimer);
+    tourBtn.textContent = '▶ Tour';
+    tourBtn.classList.remove('on');
+  }
+  function startTour(){
+    tourActive = true; tourIdx = 0;
+    tourBtn.textContent = '⏸ Stop';
+    tourBtn.classList.add('on');
+    autoBtn.classList.remove('on'); autoRotate = false;
+    tourStep();
+  }
+  function tourStep(){
+    if(!tourActive) return;
+    const key = TOUR_ORDER[tourIdx % TOUR_ORDER.length];
+    focusRoleInternal(key);
+    setActivePill(key);
+    const dwell = key === null ? 2200 : 4700;
+    tourIdx++;
+    tourTimer = setTimeout(tourStep, dwell);
+  }
+  /* focusRole but without cancelling the tour (used internally by the tour itself) */
+  function focusRoleInternal(key){
+    const wasTour = tourActive;
+    focusRole(key);
+    tourActive = wasTour;
+  }
+  tourBtn.addEventListener('click', () => { tourActive ? stopTour() : startTour(); });
+
+  /* ---------- draw helpers ---------- */
+  function drawGlowDot(x,y,r,rgb,alpha){
+    const g = ctx.createRadialGradient(x,y,0,x,y,r);
+    g.addColorStop(0, `rgba(${rgb},${alpha})`);
+    g.addColorStop(0.5, `rgba(${rgb},${alpha*0.32})`);
+    g.addColorStop(1, `rgba(${rgb},0)`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+  }
+
+  let tPrev = performance.now();
+  function frame(now){
+    requestAnimationFrame(frame);
+    const dt = Math.min(50, now - tPrev); tPrev = now;
+
+    /* manual hold-driven rotation / zoom (dock + keyboard) */
+    const ROT = 0.0017;
+    if(held.left)  yaw = wrapYaw(yaw - ROT*dt);
+    if(held.right) yaw = wrapYaw(yaw + ROT*dt);
+    if(held.up)    pitch = clampPitch(pitch - ROT*dt);
+    if(held.down)  pitch = clampPitch(pitch + ROT*dt);
+    if(held.zin)   D = Math.max(240, D*(1-0.0019*dt));
+    if(held.zout)  D = Math.min(1450, D*(1+0.0019*dt));
+    const anyHeld = held.left||held.right||held.up||held.down;
+
+    if(camAnim){
+      camAnim.t += dt;
+      const p = Math.min(camAnim.t/camAnim.dur, 1);
+      const e = easeInOutCubic(p);
+      yaw   = wrapYaw(camAnim.y0 + camAnim.yS*e);
+      pitch = camAnim.p0 + (camAnim.p1-camAnim.p0)*e;
+      D     = camAnim.d0 + (camAnim.d1-camAnim.d0)*e;
+      if(p>=1) camAnim = null;
+    } else if(autoRotate && !dragging && !anyHeld){
+      yaw = wrapYaw(yaw + 0.00042*dt);
+    }
+
+    /* HUD readout */
+    hdgEl.textContent = String(Math.round((yaw*180/Math.PI)%360 + (yaw<0?360:0))).padStart(3,'0');
+    tiltEl.textContent = String(Math.round(pitch*180/Math.PI)).padStart(2,'0');
+    rngEl.textContent = String(Math.round(D)).padStart(3,'0');
+
+    /* ---- render ---- */
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0,0,W,H);
+
+    const bg = ctx.createRadialGradient(W/2,H*0.4,0,W/2,H*0.4,Math.max(W,H)*0.8);
+    bg.addColorStop(0,'#0d1226'); bg.addColorStop(0.55,'#060814'); bg.addColorStop(1,'#020308');
+    ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+
+    ctx.globalCompositeOperation = 'lighter';
+    [starsFar, starsMid, starsNear].forEach((layer, li) => {
+      layer.forEach(s => {
+        const rp = rotatePoint(s.x,s.y,s.z);
+        const pr = project(rp);
+        if(pr.depth<=0) return;
+        const tw = 0.5 + 0.5*Math.sin(now*0.0018 + s.tw);
+        ctx.fillStyle = `rgba(${s.c},${(0.22+0.5*tw).toFixed(2)})`;
+        ctx.beginPath(); ctx.arc(pr.x, pr.y, s.s*(0.7+pr.scale*0.5), 0, Math.PI*2); ctx.fill();
+      });
+    });
+
+    /* landing-pad grid rings beneath hub */
+    ctx.globalCompositeOperation = 'lighter';
+    gridRadii.forEach((rad, gi) => {
+      const alpha = 0.16 - gi*0.02;
+      if(alpha<=0) return;
+      ctx.strokeStyle = `rgba(120,200,255,${alpha})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      for(let i=0;i<=gridSegs;i++){
+        const th = (i/gridSegs)*Math.PI*2;
+        const p3 = rotatePoint(Math.cos(th)*rad, GRID_Y, Math.sin(th)*rad);
+        const pr = project(p3);
+        if(i===0) ctx.moveTo(pr.x,pr.y); else ctx.lineTo(pr.x,pr.y);
+      }
+      ctx.stroke();
+    });
+    for(let i=0;i<12;i++){
+      const th = (i/12)*Math.PI*2;
+      const a = rotatePoint(Math.cos(th)*70, GRID_Y, Math.sin(th)*70);
+      const b = rotatePoint(Math.cos(th)*470, GRID_Y, Math.sin(th)*470);
+      const pa = project(a), pb = project(b);
+      ctx.strokeStyle = 'rgba(120,200,255,0.06)';
+      ctx.beginPath(); ctx.moveTo(pa.x,pa.y); ctx.lineTo(pb.x,pb.y); ctx.stroke();
+    }
+
+    /* hub radar-ping rings */
+    for(let k=0;k<2;k++){
+      const phase = ((now/1800)+k*0.5) % 1;
+      const rad = phase*140;
+      const alpha = (1-phase)*0.35;
+      ctx.strokeStyle = `rgba(127,232,201,${alpha.toFixed(2)})`;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for(let i=0;i<=40;i++){
+        const th=(i/40)*Math.PI*2;
+        const p3 = rotatePoint(Math.cos(th)*rad, 0, Math.sin(th)*rad);
+        const pr = project(p3);
+        if(i===0) ctx.moveTo(pr.x,pr.y); else ctx.lineTo(pr.x,pr.y);
+      }
+      ctx.stroke();
+    }
+
+    /* hub core */
+    const hubR = rotatePoint(0,0,0);
+    const hubP = project(hubR);
+    const hubPulse = 1 + 0.08*Math.sin(now*0.0025);
+    drawGlowDot(hubP.x,hubP.y, 52*hubP.scale*hubPulse, '99,217,168', 0.55);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#eafff6';
+    ctx.beginPath(); ctx.arc(hubP.x,hubP.y, 6.5*hubP.scale, 0, Math.PI*2); ctx.fill();
+    ctx.strokeStyle = 'rgba(127,232,201,0.9)'; ctx.lineWidth=1.4;
+    ctx.beginPath(); ctx.arc(hubP.x,hubP.y, 10*hubP.scale, 0, Math.PI*2); ctx.stroke();
+    hubLabel.style.left = hubP.x+'px'; hubLabel.style.top = (hubP.y-28)+'px';
+
+    /* roles + skills */
+    roleData.forEach((rd, ri) => {
+      const rgb = hexToRgb(rd.role.color);
+      const rgbStr = `${rgb.r},${rgb.g},${rgb.b}`;
+
+      const rp3 = rotatePoint(rd.rolePos.x, rd.rolePos.y, rd.rolePos.z);
+      const rpP = project(rp3);
+
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = `rgba(${rgbStr},0.55)`;
+      ctx.lineWidth = 1.7;
+      ctx.beginPath(); ctx.moveTo(hubP.x,hubP.y); ctx.lineTo(rpP.x,rpP.y); ctx.stroke();
+
+      rd.skillPos.forEach((sp,i) => {
+        const s3 = rotatePoint(sp.x, sp.y, sp.z);
+        const sP = project(s3);
+
+        ctx.strokeStyle = `rgba(${rgbStr},0.28)`;
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(rpP.x,rpP.y); ctx.lineTo(sP.x,sP.y); ctx.stroke();
+
+        const pulse = 1 + 0.15*Math.sin(now*0.003 + ri*2 + i*0.6);
+        const r = Math.max(1.6, 3.2*sP.scale*pulse);
+        drawGlowDot(sP.x, sP.y, r*5.5, rgbStr, 0.22);
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = `rgba(${rgbStr},0.95)`;
+        ctx.beginPath(); ctx.arc(sP.x, sP.y, r, 0, Math.PI*2); ctx.fill();
+        ctx.globalCompositeOperation = 'lighter';
+
+        const lbl = rd.skillLabels[i];
+        lbl.style.left = sP.x+'px';
+        lbl.style.top = (sP.y-14)+'px';
+      });
+
+      const rolePulse = 1 + 0.06*Math.sin(now*0.002 + ri);
+      drawGlowDot(rpP.x,rpP.y, 34*rpP.scale*rolePulse, rgbStr, 0.5);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#0a0e1c';
+      ctx.strokeStyle = rd.role.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(rpP.x,rpP.y, 8.5*rpP.scale, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+      rd.labelEl.style.left = rpP.x+'px';
+      rd.labelEl.style.top = (rpP.y-40)+'px';
+    });
+
+    ctx.globalCompositeOperation = 'source-over';
+  }
+  requestAnimationFrame(frame);
+
+  focusRole(null);
+})();
+</script>
+
+</body>
+</html>
