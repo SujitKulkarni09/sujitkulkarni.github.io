@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Solar System — 3D Futuristic Visualization</title>
+<style>
+  :root{
+    --bg:#050508;
+    --panel:#0E0E12CC;
+    --line:#2A2A32;
+    --white:#F2F2F0;
+    --gray:#9797A0;
+    --orange:#F5A25D;
+    --cyan:#5FE3E0;
+    --mono:'IBM Plex Mono','Courier New',monospace;
+    --disp:'Archivo Black','Arial Black',sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; height:100%; overflow:hidden;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(95,227,224,0.05), transparent 45%),
+      radial-gradient(ellipse at 75% 75%, rgba(245,162,93,0.04), transparent 45%),
+      var(--bg);
+    font-family:var(--mono);
+    color:var(--white);
+  }
+  #canvas-holder{ position:fixed; inset:0; }
+  canvas{ display:block; }
+
+  /* ---- HUD ---- */
+  .hud{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+  }
+  .top-hud{
+    position:absolute;
+    top:28px; left:32px;
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.24em;
+    color:var(--orange);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--disp);
+    font-size:clamp(22px,4vw,40px);
+    text-transform:uppercase;
+    line-height:1.05;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  h1 .hi{ color:var(--orange); }
+  .credit{
+    margin-top:10px;
+    font-size:14px;
+    letter-spacing:.05em;
+    color:#eafffe;
+    text-shadow:
+      0 0 4px #fff, 0 0 10px var(--cyan), 0 0 20px var(--cyan),
+      0 0 38px rgba(95,227,224,.85), 0 0 60px rgba(95,227,224,.5);
+  }
+
+  .hint{
+    position:absolute;
+    bottom:26px; left:32px;
+    font-size:11.5px;
+    color:var(--gray);
+    letter-spacing:.04em;
+    line-height:1.7;
+    pointer-events:none;
+  }
+  .hint span{ color:var(--cyan); }
+
+  .legend{
+    position:absolute;
+    bottom:26px; right:32px;
+    text-align:right;
+    font-size:11px;
+    color:var(--gray);
+    letter-spacing:.03em;
+    pointer-events:none;
+  }
+  .legend .row{ margin-bottom:4px; }
+  .legend .sw{
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    margin-left:6px; vertical-align:middle;
+  }
+
+  /* ---- info panel ---- */
+  .info-panel{
+    position:absolute;
+    top:28px; right:32px;
+    width:280px;
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:20px 22px;
+    backdrop-filter: blur(6px);
+    transform: translateX(120%);
+    opacity:0;
+    transition: transform .35s ease, opacity .35s ease;
+    pointer-events:auto;
+  }
+  .info-panel.open{ transform: translateX(0); opacity:1; }
+  .info-panel .close{
+    position:absolute; top:12px; right:14px;
+    background:none; border:none; color:var(--gray);
+    font-family:var(--mono); font-size:13px; cursor:pointer;
+  }
+  .info-panel .close:hover{ color:var(--orange); }
+  .info-panel .tag{
+    font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--cyan); margin-bottom:8px;
+  }
+  .info-panel h3{
+    font-family:var(--disp);
+    font-size:24px;
+    text-transform:uppercase;
+    margin:0 0 10px;
+    color:var(--white);
+  }
+  .info-panel p{
+    font-size:13px;
+    line-height:1.6;
+    color:#D3D3D0;
+    margin:0 0 12px;
+  }
+  .info-panel .stat{
+    display:flex; justify-content:space-between;
+    font-size:11.5px; color:var(--gray);
+    border-top:1px solid var(--line);
+    padding-top:10px; margin-top:8px;
+  }
+  .info-panel .stat b{ color:var(--orange); font-weight:normal; }
+
+  .loader{
+    position:fixed; inset:0;
+    background:#050508;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+    z-index:20;
+    transition: opacity .5s ease;
+  }
+  .loader .spin{
+    width:34px; height:34px;
+    border:2px solid #2A2A32;
+    border-top-color: var(--orange);
+    border-radius:50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom:16px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .loader .txt{ font-size:12px; letter-spacing:.14em; color:var(--gray); text-transform:uppercase; }
+
+  /* ---- notes toggle button ---- */
+  .notes-toggle{
+    position:absolute;
+    top:28px; right:32px;
+    pointer-events:auto;
+    font-family:var(--mono);
+    font-size:12.5px;
+    letter-spacing:.04em;
+    color:var(--white);
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    padding:10px 16px;
+    border-radius:8px;
+    cursor:pointer;
+    backdrop-filter: blur(6px);
+  }
+  .notes-toggle:hover{ border-color:var(--orange); color:var(--orange); }
+
+  /* ---- AI Agents notes overlay ---- */
+  .notes-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(5,5,8,0.85);
+    backdrop-filter: blur(4px);
+    z-index:15;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity .3s ease;
+    padding: 24px;
+  }
+  .notes-overlay.open{ opacity:1; pointer-events:auto; }
+
+  .notes-card{
+    width:100%;
+    max-width:640px;
+    max-height:84vh;
+    overflow-y:auto;
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    border-radius:16px;
+    padding: 34px 38px 30px;
+    transform: translateY(16px);
+    transition: transform .3s ease;
+  }
+  .notes-overlay.open .notes-card{ transform: translateY(0); }
+
+  .notes-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:6px;
+  }
+  .notes-eyebrow{
+    font-size:11px;
+    letter-spacing:.2em;
+    color:var(--orange);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  .notes-head h2{
+    font-family:var(--disp);
+    font-size:clamp(24px,4vw,34px);
+    text-transform:uppercase;
+    line-height:1.1;
+    margin:0;
+  }
+  .notes-head h2 .hi{ color:var(--orange); }
+  .notes-close{
+    background:none;
+    border:1.5px solid var(--line);
+    color:var(--gray);
+    font-family:var(--mono);
+    font-size:11px;
+    padding:6px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    flex:none;
+    margin-left:14px;
+  }
+  .notes-close:hover{ color:var(--orange); border-color:var(--orange); }
+
+  .notes-sub{
+    font-size:14px;
+    color:#eafffe;
+    text-shadow: 0 0 4px #fff, 0 0 10px var(--cyan), 0 0 20px var(--cyan), 0 0 38px rgba(95,227,224,.7);
+    margin: 6px 0 24px;
+  }
+
+  .notes-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .notes-beat{
+    background:#16161B;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px 16px;
+  }
+  .notes-beat .n{
+    font-family:var(--mono);
+    font-size:10px;
+    color:var(--cyan);
+    letter-spacing:.1em;
+    margin-bottom:6px;
+  }
+  .notes-beat h4{
+    font-family:var(--disp);
+    font-size:16px;
+    text-transform:uppercase;
+    margin:0 0 4px;
+    color:var(--white);
+  }
+  .notes-beat p{
+    font-size:12px;
+    color:var(--gray);
+    line-height:1.5;
+    margin:0;
+  }
+
+  .notes-section h4{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--cyan);
+    margin: 18px 0 8px;
+  }
+  .notes-section h4:first-child{ margin-top:0; }
+  .notes-section ul{ margin:0; padding-left:18px; }
+  .notes-section li{
+    font-size:13px;
+    line-height:1.65;
+    color:#D3D3D0;
+    margin-bottom:5px;
+  }
+  .notes-section li strong{ color:var(--white); }
+
+  .notes-payoff{
+    margin-top:22px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+    text-align:center;
+  }
+  .notes-payoff .line{
+    font-family:var(--disp);
+    font-size:20px;
+    text-transform:uppercase;
+    line-height:1.2;
+  }
+  .notes-payoff .line .hi{ color:var(--orange); }
+  .notes-payoff .cta{
+    margin-top:8px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--gray);
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-holder"></div>
+
+<div class="loader" id="loader">
+  <div class="spin"></div>
+  <div class="txt">Initializing orbital simulation…</div>
+</div>
+
+<div class="hud">
+  <div class="top-hud">
+    <div class="eyebrow">3D Visualization · Live Orbits</div>
+    <h1>Solar <span class="hi">System</span></h1>
+    <div class="credit">Created by Sujit Kulkarni</div>
+  </div>
+
+  <div class="hint">
+    <span>drag</span> to rotate &nbsp;·&nbsp; <span>scroll</span> to zoom &nbsp;·&nbsp; <span>click</span> a planet for details
+  </div>
+
+  <div class="legend">
+    <div class="row">Mercury <span class="sw" style="background:#B5B5B0"></span></div>
+    <div class="row">Venus <span class="sw" style="background:#E8C79E"></span></div>
+    <div class="row">Earth <span class="sw" style="background:#3E7BD9"></span></div>
+    <div class="row">Mars <span class="sw" style="background:#C1440E"></span></div>
+    <div class="row">Jupiter <span class="sw" style="background:#D9A066"></span></div>
+    <div class="row">Saturn <span class="sw" style="background:#E3C28C"></span></div>
+    <div class="row">Uranus <span class="sw" style="background:#9FE3E0"></span></div>
+    <div class="row">Neptune <span class="sw" style="background:#4169E1"></span></div>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <button class="close" id="infoClose">CLOSE ✕</button>
+    <div class="tag" id="infoTag">celestial body</div>
+    <h3 id="infoName">—</h3>
+    <p id="infoFact">—</p>
+    <div class="stat"><span>Orbit distance</span><b id="infoDist">—</b></div>
+    <div class="stat"><span>Relative size</span><b id="infoSize">—</b></div>
+  </div>
+
+  <button class="notes-toggle" id="notesToggle">📋 AI Agents Notes</button>
+</div>
+
+<div class="notes-overlay" id="notesOverlay">
+  <div class="notes-card">
+    <div class="notes-head">
+      <div>
+        <div class="notes-eyebrow">AI Explained · Quick Take</div>
+        <h2>AI Agents Are The <span class="hi">Next Big Shift</span></h2>
+      </div>
+      <button class="notes-close" id="notesClose">CLOSE ✕</button>
+    </div>
+    <div class="notes-sub">Created by Sujit Kulkarni</div>
+
+    <div class="notes-grid">
+      <div class="notes-beat">
+        <div class="n">01 · PLAN</div>
+        <h4>It can plan.</h4>
+        <p>Breaks a goal into ordered steps on its own.</p>
+      </div>
+      <div class="notes-beat">
+        <div class="n">02 · ACT</div>
+        <h4>It can act.</h4>
+        <p>Calls real tools & takes real actions, not just replies.</p>
+      </div>
+      <div class="notes-beat">
+        <div class="n">03 · AUTOMATE</div>
+        <h4>It can automate.</h4>
+        <p>Repeats the workflow without a fresh prompt each time.</p>
+      </div>
+      <div class="notes-beat">
+        <div class="n">04 · SAVE TIME</div>
+        <h4>It can save time.</h4>
+        <p>Hours of manual work compressed into minutes.</p>
+      </div>
+    </div>
+
+    <div class="notes-section">
+      <h4>Format</h4>
+      <ul>
+        <li>Vertical 9:16, 10–15 sec — built for Reels/Shorts/TikTok</li>
+        <li>Fast pacing — visual changes every 1–2s, no dead air</li>
+      </ul>
+
+      <h4>Visual Structure</h4>
+      <ul>
+        <li>Bold sans-serif text overlays carry the message, not narration</li>
+        <li>Dark, high-contrast background so text pops</li>
+        <li>One idea per screen — quick "reveal" beats, not paragraphs</li>
+        <li>Safe margins so text isn't cropped by platform UI</li>
+      </ul>
+
+      <h4>Pacing Logic</h4>
+      <ul>
+        <li>Hook in first 1–2s — must stop the scroll</li>
+        <li>3–5 rapid beats build the idea</li>
+        <li>Payoff/CTA at the end — follow, save, comment</li>
+      </ul>
+
+      <h4>How To Recreate</h4>
+      <ul>
+        <li><strong>Script first:</strong> one line per beat, 5–8 words max</li>
+        <li><strong>Edit vertical-first:</strong> CapCut (auto-captions) or Premiere/Resolve, 1080×1920</li>
+        <li><strong>Text treatment:</strong> heavy sans font, high contrast, 0.2–0.3s pop-in</li>
+        <li><strong>Cut aggressively:</strong> zero dead time between beats</li>
+        <li><strong>Export:</strong> 1080×1920 · 30fps · H.264 · under 60 sec</li>
+      </ul>
+    </div>
+
+    <div class="notes-payoff">
+      <div class="line">AI agents are the <span class="hi">next big shift.</span></div>
+      <div class="cta">most people are still using AI like a search bar.</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  const holder = document.getElementById('canvas-holder');
+  const loader = document.getElementById('loader');
+
+  // ---------- SCENE / CAMERA / RENDERER ----------
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 4000);
+  camera.position.set(0, 95, 230);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  holder.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.35;
+  controls.minDistance = 40;
+  controls.maxDistance = 700;
+  controls.enablePan = false;
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---------- TEXTURE HELPERS ----------
+  function glowTexture(inner, outer){
+    const c = document.createElement('canvas'); c.width=256; c.height=256;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(128,128,0,128,128,128);
+    g.addColorStop(0, inner);
+    g.addColorStop(1, outer);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,256,256);
+    return new THREE.CanvasTexture(c);
+  }
+
+  function labelTexture(text, color){
+    const c = document.createElement('canvas'); c.width=256; c.height=64;
+    const ctx = c.getContext('2d');
+    ctx.font = '600 30px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = color; ctx.shadowBlur = 14;
+    ctx.fillStyle = color;
+    ctx.fillText(text.toUpperCase(), 128, 32);
+    ctx.fillText(text.toUpperCase(), 128, 32);
+    return new THREE.CanvasTexture(c);
+  }
+
+  function ringTexture(){
+    const c = document.createElement('canvas'); c.width=256; c.height=8;
+    const ctx = c.getContext('2d');
+    for(let x=0;x<256;x++){
+      const t = x/256;
+      const band = Math.sin(t*40) * 0.5 + 0.5;
+      const alpha = 0.35 + band*0.5 * (1 - Math.abs(t-0.5)*1.4);
+      ctx.fillStyle = `rgba(226,196,150,${Math.max(0,alpha)})`;
+      ctx.fillRect(x,0,1,8);
+    }
+    return new THREE.CanvasTexture(c);
+  }
+
+  function fixRingUVs(geometry, innerR, outerR){
+    const pos = geometry.attributes.position;
+    const uv = geometry.attributes.uv;
+    const v3 = new THREE.Vector3();
+    for(let i=0;i<pos.count;i++){
+      v3.fromBufferAttribute(pos, i);
+      const r = v3.length();
+      uv.setXY(i, (r-innerR)/(outerR-innerR), 1);
+    }
+  }
+
+  // ---------- STARFIELD ----------
+  function buildStarfield(count, radiusMin, radiusMax){
+    const positions = new Float32Array(count*3);
+    const colors = new Float32Array(count*3);
+    const palette = [
+      [1,1,1], [0.75,0.87,1], [1,0.85,0.7], [0.68,0.93,0.92]
+    ];
+    for(let i=0;i<count;i++){
+      const r = radiusMin + Math.random()*(radiusMax-radiusMin);
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.acos((Math.random()*2)-1);
+      positions[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      positions[i*3+1] = r*Math.cos(phi);
+      positions[i*3+2] = r*Math.sin(phi)*Math.sin(theta);
+      const p = palette[Math.floor(Math.random()*palette.length)];
+      const b = 0.6 + Math.random()*0.4;
+      colors[i*3]=p[0]*b; colors[i*3+1]=p[1]*b; colors[i*3+2]=p[2]*b;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat = new THREE.PointsMaterial({
+      size:1.6, vertexColors:true, transparent:true, opacity:0.9,
+      sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    return new THREE.Points(geo, mat);
+  }
+  scene.add(buildStarfield(9000, 500, 1600));
+  scene.add(buildStarfield(2000, 300, 500));
+
+  // faint nebula sprites for depth/color
+  const nebulaColors = ['rgba(95,227,224,0.10)','rgba(245,162,93,0.09)','rgba(160,100,220,0.08)'];
+  for(let i=0;i<6;i++){
+    const tex = glowTexture(nebulaColors[i%nebulaColors.length], 'rgba(0,0,0,0)');
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false });
+    const spr = new THREE.Sprite(mat);
+    const s = 260+Math.random()*260;
+    spr.scale.set(s,s,1);
+    spr.position.set((Math.random()-0.5)*1400,(Math.random()-0.5)*700,(Math.random()-0.5)*1400);
+    scene.add(spr);
+  }
+
+  // ---------- LIGHTING ----------
+  scene.add(new THREE.AmbientLight(0x33333d, 1.1));
+  const sunLight = new THREE.PointLight(0xffe3b8, 3.2, 2000, 1.4);
+  scene.add(sunLight);
+
+  // ---------- SUN ----------
+  const sunGroup = new THREE.Group();
+  const sunMat = new THREE.MeshBasicMaterial({ color:0xffb454 });
+  const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(10, 48, 48), sunMat);
+  sunGroup.add(sunMesh);
+
+  const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTexture('rgba(255,200,120,0.9)','rgba(255,120,60,0)'),
+    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+  }));
+  sunGlow.scale.set(60,60,1);
+  sunGroup.add(sunGlow);
+  scene.add(sunGroup);
+  sunMesh.userData = { name:'The Sun', tag:'star · center of the system',
+    fact:'99.8% of the solar system\'s mass. Nuclear fusion converts hydrogen into helium, powering everything that orbits it.',
+    dist:'0 AU', size:'109× Earth' };
+
+  // ---------- PLANET DATA ----------
+  const planetData = [
+    { name:'Mercury', color:0xB5B5B0, size:1.6, dist:34,  speed:1.9,  rot:0.6,  tag:'smallest · closest to the sun',
+      fact:'No real atmosphere — surface temperatures swing from scorching to freezing within hours.', sizeLabel:'0.38× Earth' },
+    { name:'Venus', color:0xE8C79E, size:2.4, dist:46,  speed:1.5,  rot:0.2,  tag:'hottest planet',
+      fact:'A thick CO₂ atmosphere traps heat, making it hotter than Mercury despite being farther from the Sun.', sizeLabel:'0.95× Earth' },
+    { name:'Earth', color:0x3E7BD9, size:2.6, dist:60,  speed:1.2,  rot:1.0,  tag:'home',
+      fact:'The only known planet with life — 71% of its surface is water, and it has one large moon.', sizeLabel:'1× Earth', moon:true },
+    { name:'Mars', color:0xC1440E, size:2.0, dist:76,  speed:0.95, rot:0.95, tag:'the red planet',
+      fact:'Home to Olympus Mons, the largest volcano in the solar system — nearly 3x the height of Everest.', sizeLabel:'0.53× Earth' },
+    { name:'Jupiter', color:0xD9A066, size:7.5, dist:128, speed:0.5, rot:2.2,  tag:'largest planet',
+      fact:'A gas giant with a storm — the Great Red Spot — larger than Earth and raging for centuries.', sizeLabel:'11.2× Earth' },
+    { name:'Saturn', color:0xE3C28C, size:6.4, dist:165, speed:0.36, rot:2.0, tag:'the ringed giant', ring:true,
+      fact:'Its dramatic rings are made of billions of ice and rock fragments, some as small as dust, some as large as mountains.', sizeLabel:'9.4× Earth' },
+    { name:'Uranus', color:0x9FE3E0, size:4.2, dist:195, speed:0.24, rot:1.4, tag:'the tilted ice giant',
+      fact:'Rotates almost perpendicular to its orbit — it essentially spins on its side.', sizeLabel:'4× Earth' },
+    { name:'Neptune', color:0x4169E1, size:4.0, dist:220, speed:0.18, rot:1.4, tag:'farthest planet',
+      fact:'Home to the fastest winds in the solar system, reaching over 2,000 km/h.', sizeLabel:'3.9× Earth' }
+  ];
+
+  const clickable = [sunMesh];
+  const orbitGroups = [];
+
+  function buildOrbitLine(radius){
+    const pts = [];
+    const segs = 128;
+    for(let i=0;i<=segs;i++){
+      const a = (i/segs)*Math.PI*2;
+      pts.push(new THREE.Vector3(Math.cos(a)*radius, 0, Math.sin(a)*radius));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color:0x3a4650, transparent:true, opacity:0.45 });
+    return new THREE.LineLoop(geo, mat);
+  }
+
+  planetData.forEach(p => {
+    scene.add(buildOrbitLine(p.dist));
+
+    const orbitGroup = new THREE.Group();
+    orbitGroup.rotation.y = Math.random()*Math.PI*2;
+    scene.add(orbitGroup);
+
+    const pivot = new THREE.Group();
+    pivot.position.set(p.dist, 0, 0);
+    orbitGroup.add(pivot);
+
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(p.size, 40, 40),
+      new THREE.MeshStandardMaterial({ color:p.color, roughness:0.75, metalness:0.15 })
+    );
+    mesh.userData = { name:p.name, tag:p.tag, fact:p.fact, dist:p.dist.toFixed(0)+' units', size:p.sizeLabel };
+    pivot.add(mesh);
+    clickable.push(mesh);
+
+    // subtle atmosphere glow
+    const atmo = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture('rgba(255,255,255,0.35)','rgba(255,255,255,0)'),
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    }));
+    atmo.scale.set(p.size*4.4, p.size*4.4, 1);
+    pivot.add(atmo);
+
+    // label sprite
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: labelTexture(p.name, '#5FE3E0'), transparent:true, depthWrite:false
+    }));
+    label.scale.set(9, 2.3, 1);
+    label.position.set(0, p.size+3.2, 0);
+    pivot.add(label);
+
+    // ring (Saturn)
+    if(p.ring){
+      const inner = p.size*1.4, outer = p.size*2.6;
+      const ringGeo = new THREE.RingGeometry(inner, outer, 64);
+      fixRingUVs(ringGeo, inner, outer);
+      const ringMat = new THREE.MeshBasicMaterial({
+        map: ringTexture(), side:THREE.DoubleSide, transparent:true, opacity:0.9
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI/2.25;
+      pivot.add(ringMesh);
+    }
+
+    // moon (Earth)
+    let moonPivot = null;
+    if(p.moon){
+      moonPivot = new THREE.Group();
+      pivot.add(moonPivot);
+      const moon = new THREE.Mesh(
+        new THREE.SphereGeometry(0.6, 20, 20),
+        new THREE.MeshStandardMaterial({ color:0xB8B8B8, roughness:0.9 })
+      );
+      moon.position.set(p.size+2.4, 0, 0);
+      moonPivot.add(moon);
+    }
+
+    orbitGroups.push({ group:orbitGroup, speed:p.speed*0.09, mesh, rot:p.rot*0.01, moonPivot });
+  });
+
+  // ---------- ASTEROID BELT ----------
+  const beltCount = 500;
+  const beltGeo = new THREE.IcosahedronGeometry(0.35, 0);
+  const beltMat = new THREE.MeshStandardMaterial({ color:0x8a8a86, roughness:0.9 });
+  const beltMesh = new THREE.InstancedMesh(beltGeo, beltMat, beltCount);
+  const dummy = new THREE.Object3D();
+  for(let i=0;i<beltCount;i++){
+    const r = 98 + Math.random()*14;
+    const a = Math.random()*Math.PI*2;
+    dummy.position.set(Math.cos(a)*r, (Math.random()-0.5)*3, Math.sin(a)*r);
+    dummy.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
+    const s = 0.5+Math.random()*1.4;
+    dummy.scale.set(s,s,s);
+    dummy.updateMatrix();
+    beltMesh.setMatrixAt(i, dummy.matrix);
+  }
+  scene.add(beltMesh);
+
+  // ---------- RAYCAST / INFO PANEL ----------
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const infoPanel = document.getElementById('infoPanel');
+  const infoName = document.getElementById('infoName');
+  const infoTag = document.getElementById('infoTag');
+  const infoFact = document.getElementById('infoFact');
+  const infoDist = document.getElementById('infoDist');
+  const infoSize = document.getElementById('infoSize');
+
+  function showInfo(d){
+    infoName.textContent = d.name;
+    infoTag.textContent = d.tag;
+    infoFact.textContent = d.fact;
+    infoDist.textContent = d.dist;
+    infoSize.textContent = d.size;
+    infoPanel.classList.add('open');
+  }
+  document.getElementById('infoClose').addEventListener('click', () => infoPanel.classList.remove('open'));
+
+  renderer.domElement.addEventListener('click', (e) => {
+    mouse.x = (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickable, false);
+    if(hits.length){
+      showInfo(hits[0].object.userData);
+    }
+  });
+
+  // ---------- NOTES OVERLAY (AI Agents) ----------
+  const notesOverlay = document.getElementById('notesOverlay');
+  document.getElementById('notesToggle').addEventListener('click', () => {
+    notesOverlay.classList.add('open');
+    controls.autoRotate = false;
+  });
+  document.getElementById('notesClose').addEventListener('click', () => {
+    notesOverlay.classList.remove('open');
+    controls.autoRotate = true;
+  });
+
+  // ---------- ANIMATE ----------
+  const clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    const t = clock.getElapsedTime();
+
+    sunMesh.rotation.y += dt*0.05;
+    sunGroup.scale.setScalar(1 + Math.sin(t*0.8)*0.015);
+
+    orbitGroups.forEach(o => {
+      o.group.rotation.y += o.speed*dt;
+      o.mesh.rotation.y += o.rot;
+      if(o.moonPivot) o.moonPivot.rotation.y += dt*1.4;
+    });
+
+    beltMesh.rotation.y += dt*0.02;
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+  setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 600);
+})();
+</script>
+</body>
+</html>
