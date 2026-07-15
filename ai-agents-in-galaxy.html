@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agents — 3D Systems Visualization</title>
+<style>
+  :root{
+    --bg:#050508;
+    --panel:#0E0E12CC;
+    --line:#2A2A32;
+    --white:#F2F2F0;
+    --gray:#9797A0;
+    --orange:#F5A25D;
+    --cyan:#5FE3E0;
+    --mono:'IBM Plex Mono','Courier New',monospace;
+    --disp:'Archivo Black','Arial Black',sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; height:100%; overflow:hidden;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(95,227,224,0.05), transparent 45%),
+      radial-gradient(ellipse at 75% 75%, rgba(245,162,93,0.04), transparent 45%),
+      var(--bg);
+    font-family:var(--mono);
+    color:var(--white);
+  }
+  #canvas-holder{ position:fixed; inset:0; }
+  canvas{ display:block; }
+
+  /* ---- HUD ---- */
+  .hud{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:5;
+  }
+  .top-hud{
+    position:absolute;
+    top:28px; left:32px;
+    pointer-events:none;
+  }
+  .eyebrow{
+    font-size:12px;
+    letter-spacing:.24em;
+    color:var(--orange);
+    text-transform:uppercase;
+    margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--disp);
+    font-size:clamp(22px,4vw,40px);
+    text-transform:uppercase;
+    line-height:1.05;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  h1 .hi{ color:var(--orange); }
+  .credit{
+    margin-top:10px;
+    font-size:14px;
+    letter-spacing:.05em;
+    color:#eafffe;
+    text-shadow:
+      0 0 4px #fff, 0 0 10px var(--cyan), 0 0 20px var(--cyan),
+      0 0 38px rgba(95,227,224,.85), 0 0 60px rgba(95,227,224,.5);
+  }
+
+  .hint{
+    position:absolute;
+    bottom:26px; left:32px;
+    font-size:11.5px;
+    color:var(--gray);
+    letter-spacing:.04em;
+    line-height:1.7;
+    pointer-events:none;
+  }
+  .hint span{ color:var(--cyan); }
+
+  .legend{
+    position:absolute;
+    bottom:26px; right:32px;
+    text-align:right;
+    font-size:11px;
+    color:var(--gray);
+    letter-spacing:.03em;
+    pointer-events:none;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-end;
+  }
+  .legend-btn{
+    pointer-events:auto;
+    margin-bottom:4px;
+    background:none;
+    border:none;
+    color:var(--gray);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.03em;
+    text-align:right;
+    display:block;
+    cursor:pointer;
+    padding:2px 0;
+  }
+  .legend-btn:hover{ color:var(--white); }
+  .legend-btn:hover .sw{ box-shadow:0 0 8px currentColor; }
+  .legend .sw{
+    display:inline-block; width:8px; height:8px; border-radius:50%;
+    margin-left:6px; vertical-align:middle;
+  }
+
+  /* ---- info panel ---- */
+  .info-panel{
+    position:absolute;
+    top:28px; right:32px;
+    width:320px;
+    max-height:82vh;
+    overflow-y:auto;
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:20px 22px;
+    backdrop-filter: blur(6px);
+    transform: translateX(120%);
+    opacity:0;
+    transition: transform .35s ease, opacity .35s ease;
+    pointer-events:auto;
+  }
+  .info-panel.open{ transform: translateX(0); opacity:1; }
+  .info-panel .close{
+    position:absolute; top:12px; right:14px;
+    background:none; border:none; color:var(--gray);
+    font-family:var(--mono); font-size:13px; cursor:pointer;
+  }
+  .info-panel .close:hover{ color:var(--orange); }
+  .info-panel .tag{
+    font-size:10px; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--cyan); margin-bottom:8px;
+  }
+  .info-panel h3{
+    font-family:var(--disp);
+    font-size:24px;
+    text-transform:uppercase;
+    margin:0 0 10px;
+    color:var(--white);
+  }
+  .info-panel p{
+    font-size:13px;
+    line-height:1.6;
+    color:#D3D3D0;
+    margin:0 0 12px;
+  }
+  .info-panel .stat{
+    display:flex; justify-content:space-between;
+    font-size:11.5px; color:var(--gray);
+    border-top:1px solid var(--line);
+    padding-top:10px; margin-top:8px;
+  }
+  .info-panel .stat b{ color:var(--orange); font-weight:normal; }
+  .info-panel .example{
+    margin-top:12px;
+    padding-top:10px;
+    border-top:1px solid var(--line);
+    font-size:11px;
+    color:var(--gray);
+  }
+  .info-panel .example .lbl{
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--cyan); margin-bottom:5px;
+  }
+  .info-panel .example p{
+    font-size:12.5px; line-height:1.55; color:#D3D3D0; margin:0;
+  }
+
+  /* ---- manual joystick ---- */
+  .joystick{
+    position:absolute;
+    left:50%;
+    bottom:26px;
+    transform:translateX(-50%);
+    pointer-events:auto;
+    display:grid;
+    grid-template-columns:36px 36px 36px;
+    grid-template-rows:36px 36px 36px;
+    gap:6px;
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    border-radius:12px;
+    padding:10px;
+    backdrop-filter: blur(6px);
+  }
+  .jbtn{
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--white);
+    background:#16161B;
+    border:1px solid var(--line);
+    border-radius:7px;
+    cursor:pointer;
+    user-select:none;
+    -webkit-user-select:none;
+    touch-action:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .jbtn:hover, .jbtn:active{ border-color:var(--cyan); color:var(--cyan); }
+  .jbtn-zout{ grid-column:1; grid-row:1; }
+  .jbtn-up{ grid-column:2; grid-row:1; }
+  .jbtn-zin{ grid-column:3; grid-row:1; }
+  .jbtn-left{ grid-column:1; grid-row:2; }
+  .jbtn-center{ grid-column:2; grid-row:2; color:var(--orange); }
+  .jbtn-right{ grid-column:3; grid-row:2; }
+  .jbtn-down{ grid-column:2; grid-row:3; }
+
+  .loader{
+    position:fixed; inset:0;
+    background:#050508;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+    z-index:20;
+    transition: opacity .5s ease;
+  }
+  .loader .spin{
+    width:34px; height:34px;
+    border:2px solid #2A2A32;
+    border-top-color: var(--orange);
+    border-radius:50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom:16px;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .loader .txt{ font-size:12px; letter-spacing:.14em; color:var(--gray); text-transform:uppercase; }
+
+</style>
+</head>
+<body>
+
+<div id="canvas-holder"></div>
+
+<div class="loader" id="loader">
+  <div class="spin"></div>
+  <div class="txt">Initializing agent system…</div>
+</div>
+
+<div class="hud">
+  <div class="top-hud">
+    <div class="eyebrow">3D Visualization · Core Capabilities</div>
+    <h1>AI <span class="hi">Agents</span></h1>
+    <div class="credit">Created by Sujit Kulkarni</div>
+  </div>
+
+  <div class="hint">
+    <span>drag</span> to rotate &nbsp;·&nbsp; <span>scroll</span> to zoom &nbsp;·&nbsp; <span>tap a name below</span> or a capability in 3D for notes
+  </div>
+
+  <div class="legend">
+    <button class="row legend-btn" data-name="The Agent">The Agent (core) <span class="sw" style="background:#FFB454"></span></button>
+    <button class="row legend-btn" data-name="Perception">Perception <span class="sw" style="background:#B5B5B0"></span></button>
+    <button class="row legend-btn" data-name="Reasoning">Reasoning <span class="sw" style="background:#E8C79E"></span></button>
+    <button class="row legend-btn" data-name="Planning">Planning <span class="sw" style="background:#3E7BD9"></span></button>
+    <button class="row legend-btn" data-name="Action">Action <span class="sw" style="background:#C1440E"></span></button>
+    <button class="row legend-btn" data-name="Tool Use">Tool Use <span class="sw" style="background:#D9A066"></span></button>
+    <button class="row legend-btn" data-name="Memory">Memory <span class="sw" style="background:#E3C28C"></span></button>
+    <button class="row legend-btn" data-name="Autonomy">Autonomy <span class="sw" style="background:#9FE3E0"></span></button>
+    <button class="row legend-btn" data-name="Automation">Automation <span class="sw" style="background:#4169E1"></span></button>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <button class="close" id="infoClose">CLOSE ✕</button>
+    <div class="tag" id="infoTag">agent capability</div>
+    <h3 id="infoName">—</h3>
+    <p id="infoFact">—</p>
+    <div class="stat"><span>Distance from core</span><b id="infoDist">—</b></div>
+    <div class="stat"><span>Relative impact</span><b id="infoSize">—</b></div>
+    <div class="example">
+      <div class="lbl">In practice</div>
+      <p id="infoExample">—</p>
+    </div>
+  </div>
+
+  <div class="joystick" id="joystick">
+    <button class="jbtn jbtn-up" data-act="up" aria-label="orbit up">▲</button>
+    <button class="jbtn jbtn-left" data-act="left" aria-label="orbit left">◀</button>
+    <button class="jbtn jbtn-center" data-act="reset" aria-label="reset view">⟳</button>
+    <button class="jbtn jbtn-right" data-act="right" aria-label="orbit right">▶</button>
+    <button class="jbtn jbtn-down" data-act="down" aria-label="orbit down">▼</button>
+    <button class="jbtn jbtn-zin" data-act="in" aria-label="zoom in">+</button>
+    <button class="jbtn jbtn-zout" data-act="out" aria-label="zoom out">−</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  const holder = document.getElementById('canvas-holder');
+  const loader = document.getElementById('loader');
+
+  // ---------- SCENE / CAMERA / RENDERER ----------
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 4000);
+  camera.position.set(0, 95, 230);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  holder.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.35;
+  controls.minDistance = 40;
+  controls.maxDistance = 700;
+  controls.enablePan = false;
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---------- TEXTURE HELPERS ----------
+  function glowTexture(inner, outer){
+    const c = document.createElement('canvas'); c.width=256; c.height=256;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(128,128,0,128,128,128);
+    g.addColorStop(0, inner);
+    g.addColorStop(1, outer);
+    ctx.fillStyle = g;
+    ctx.fillRect(0,0,256,256);
+    return new THREE.CanvasTexture(c);
+  }
+
+  function labelTexture(text, color){
+    const c = document.createElement('canvas'); c.width=256; c.height=64;
+    const ctx = c.getContext('2d');
+    ctx.font = '600 30px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.shadowColor = color; ctx.shadowBlur = 14;
+    ctx.fillStyle = color;
+    ctx.fillText(text.toUpperCase(), 128, 32);
+    ctx.fillText(text.toUpperCase(), 128, 32);
+    return new THREE.CanvasTexture(c);
+  }
+
+  function ringTexture(){
+    const c = document.createElement('canvas'); c.width=256; c.height=8;
+    const ctx = c.getContext('2d');
+    for(let x=0;x<256;x++){
+      const t = x/256;
+      const band = Math.sin(t*40) * 0.5 + 0.5;
+      const alpha = 0.35 + band*0.5 * (1 - Math.abs(t-0.5)*1.4);
+      ctx.fillStyle = `rgba(226,196,150,${Math.max(0,alpha)})`;
+      ctx.fillRect(x,0,1,8);
+    }
+    return new THREE.CanvasTexture(c);
+  }
+
+  // dashed circular marker that says "this is clickable" — billboards to camera as a Sprite
+  function clickMarkerTexture(color){
+    const c = document.createElement('canvas'); c.width=256; c.height=256;
+    const ctx = c.getContext('2d');
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 5;
+    ctx.setLineDash([14, 12]);
+    ctx.beginPath();
+    ctx.arc(128, 128, 104, 0, Math.PI*2);
+    ctx.stroke();
+    // small corner ticks, crosshair-style
+    ctx.setLineDash([]);
+    ctx.lineWidth = 4;
+    const tick = 16;
+    [[128,8],[128,248],[8,128],[248,128]].forEach(([x,y])=>{
+      ctx.beginPath();
+      if(y < 128){ ctx.moveTo(x,y); ctx.lineTo(x,y+tick); }
+      else if(y > 128){ ctx.moveTo(x,y); ctx.lineTo(x,y-tick); }
+      else if(x < 128){ ctx.moveTo(x,y); ctx.lineTo(x+tick,y); }
+      else { ctx.moveTo(x,y); ctx.lineTo(x-tick,y); }
+      ctx.stroke();
+    });
+    return new THREE.CanvasTexture(c);
+  }
+
+  function fixRingUVs(geometry, innerR, outerR){
+    const pos = geometry.attributes.position;
+    const uv = geometry.attributes.uv;
+    const v3 = new THREE.Vector3();
+    for(let i=0;i<pos.count;i++){
+      v3.fromBufferAttribute(pos, i);
+      const r = v3.length();
+      uv.setXY(i, (r-innerR)/(outerR-innerR), 1);
+    }
+  }
+
+  // ---------- STARFIELD ----------
+  function buildStarfield(count, radiusMin, radiusMax){
+    const positions = new Float32Array(count*3);
+    const colors = new Float32Array(count*3);
+    const palette = [
+      [1,1,1], [0.75,0.87,1], [1,0.85,0.7], [0.68,0.93,0.92]
+    ];
+    for(let i=0;i<count;i++){
+      const r = radiusMin + Math.random()*(radiusMax-radiusMin);
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.acos((Math.random()*2)-1);
+      positions[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      positions[i*3+1] = r*Math.cos(phi);
+      positions[i*3+2] = r*Math.sin(phi)*Math.sin(theta);
+      const p = palette[Math.floor(Math.random()*palette.length)];
+      const b = 0.6 + Math.random()*0.4;
+      colors[i*3]=p[0]*b; colors[i*3+1]=p[1]*b; colors[i*3+2]=p[2]*b;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat = new THREE.PointsMaterial({
+      size:1.6, vertexColors:true, transparent:true, opacity:0.9,
+      sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    return new THREE.Points(geo, mat);
+  }
+  scene.add(buildStarfield(9000, 500, 1600));
+  scene.add(buildStarfield(2000, 300, 500));
+
+  // faint nebula sprites for depth/color
+  const nebulaColors = ['rgba(95,227,224,0.10)','rgba(245,162,93,0.09)','rgba(160,100,220,0.08)'];
+  for(let i=0;i<6;i++){
+    const tex = glowTexture(nebulaColors[i%nebulaColors.length], 'rgba(0,0,0,0)');
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false });
+    const spr = new THREE.Sprite(mat);
+    const s = 260+Math.random()*260;
+    spr.scale.set(s,s,1);
+    spr.position.set((Math.random()-0.5)*1400,(Math.random()-0.5)*700,(Math.random()-0.5)*1400);
+    scene.add(spr);
+  }
+
+  // ---------- LIGHTING ----------
+  scene.add(new THREE.AmbientLight(0x33333d, 1.1));
+  const sunLight = new THREE.PointLight(0xffe3b8, 3.2, 2000, 1.4);
+  scene.add(sunLight);
+
+  // ---------- SUN ----------
+  const clickMarkers = []; // sprites that visually mark clickable targets, pulsed in animate()
+  const sunGroup = new THREE.Group();
+  const sunMat = new THREE.MeshBasicMaterial({ color:0xffb454 });
+  const sunMesh = new THREE.Mesh(new THREE.SphereGeometry(10, 48, 48), sunMat);
+  sunGroup.add(sunMesh);
+
+  const sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTexture('rgba(255,200,120,0.9)','rgba(255,120,60,0)'),
+    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+  }));
+  sunGlow.scale.set(60,60,1);
+  sunGroup.add(sunGlow);
+  scene.add(sunGroup);
+
+  const sunHitSphere = new THREE.Mesh(
+    new THREE.SphereGeometry(20, 16, 16),
+    new THREE.MeshBasicMaterial({ visible:false })
+  );
+  sunGroup.add(sunHitSphere);
+
+  const sunMarker = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: clickMarkerTexture('#5FE3E0'), transparent:true, depthWrite:false, opacity:0.8
+  }));
+  sunMarker.scale.set(32, 32, 1);
+  sunGroup.add(sunMarker);
+  clickMarkers.push({ sprite:sunMarker, base:32 });
+
+  sunMesh.userData = { name:'The Agent', tag:'core · orchestrates everything',
+    fact:'The LLM-powered reasoning engine at the center. It interprets goals, decides what to do next, and coordinates every capability orbiting it — nothing else here runs on its own.',
+    dist:'0 · the core', size:'orchestrator',
+    example:'A coding agent reading "fix the failing test" — it is the part deciding which file to open first.' };
+  sunHitSphere.userData = sunMesh.userData;
+
+  // ---------- PLANET DATA ----------
+  const planetData = [
+    { name:'Perception', color:0xB5B5B0, size:1.6, dist:34,  speed:1.9,  rot:0.6,  tag:'the first pass · reads the input',
+      fact:'Parses the raw prompt, files, or sensor data the moment it arrives — the fastest, lightest step in the whole loop.', sizeLabel:'entry point',
+      example:'A support agent reading an incoming ticket and pulling out the customer\'s order number before anything else happens.' },
+    { name:'Reasoning', color:0xE8C79E, size:2.4, dist:46,  speed:1.5,  rot:0.2,  tag:'the thinking layer',
+      fact:'Chains thoughts, weighs options, and decides what actually needs to happen — the step most people mistake for "the whole model."', sizeLabel:'chain-of-thought',
+      example:'Working out that "refund this order" requires checking the return policy before it requires touching the payment system.' },
+    { name:'Planning', color:0x3E7BD9, size:2.6, dist:60,  speed:1.2,  rot:1.0,  tag:'home base · breaks goals into steps',
+      fact:'Splits one big goal into an ordered sequence of smaller ones on its own — no human has to write the checklist.', sizeLabel:'core skill', moon:true,
+      example:'"Book me a trip to Goa" becomes: check dates → search flights → search hotels → compare budget → confirm with user.' },
+    { name:'Action', color:0xC1440E, size:2.0, dist:76,  speed:0.95, rot:0.95, tag:'where thought becomes output',
+      fact:'Executes the chosen step for real — sending the request, writing the file, clicking the button — not just describing it.', sizeLabel:'real-world step',
+      example:'Actually calling the payment API to issue the refund, instead of just replying "I will process your refund."' },
+    { name:'Tool Use', color:0xD9A066, size:7.5, dist:128, speed:0.5, rot:2.2,  tag:'biggest capability jump',
+      fact:'Calls real APIs, search, code execution, and other software — the single upgrade that turns a chatbot into an agent.', sizeLabel:'biggest leap',
+      example:'Running a Python snippet to recompute a spreadsheet total instead of guessing the number from memory.' },
+    { name:'Memory', color:0xE3C28C, size:6.4, dist:165, speed:0.36, rot:2.0, tag:'context that persists', ring:true,
+      fact:'Rings of accumulated context — past turns, retrieved documents, prior results — that wrap around every decision the agent makes.', sizeLabel:'accumulated context',
+      example:'Remembering three messages later that the user already said they prefer window seats, without being told again.' },
+    { name:'Autonomy', color:0x9FE3E0, size:4.2, dist:195, speed:0.24, rot:1.4, tag:'off the usual axis',
+      fact:'Keeps going without a fresh prompt for every step — operating on its own tilt, outside the normal request-reply cycle.', sizeLabel:'self-directed',
+      example:'Monitoring an inbox overnight and drafting replies on its own, instead of waiting for someone to ask each time.' },
+    { name:'Automation', color:0x4169E1, size:4.0, dist:220, speed:0.18, rot:1.4, tag:'the outer orbit · full workflows',
+      fact:'The whole loop running end-to-end on a schedule or trigger — hours of manual work compressed into minutes, repeatedly.', sizeLabel:'full workflow',
+      example:'A weekly report that used to take an analyst half a day now assembles itself every Monday at 6am.' }
+  ];
+
+  const clickable = [sunHitSphere];
+  const orbitGroups = [];
+
+  function buildOrbitLine(radius){
+    const pts = [];
+    const segs = 128;
+    for(let i=0;i<=segs;i++){
+      const a = (i/segs)*Math.PI*2;
+      pts.push(new THREE.Vector3(Math.cos(a)*radius, 0, Math.sin(a)*radius));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color:0x3a4650, transparent:true, opacity:0.45 });
+    return new THREE.LineLoop(geo, mat);
+  }
+
+  planetData.forEach(p => {
+    scene.add(buildOrbitLine(p.dist));
+
+    const orbitGroup = new THREE.Group();
+    orbitGroup.rotation.y = Math.random()*Math.PI*2;
+    scene.add(orbitGroup);
+
+    const pivot = new THREE.Group();
+    pivot.position.set(p.dist, 0, 0);
+    orbitGroup.add(pivot);
+
+    const mesh = new THREE.Mesh(
+      new THREE.SphereGeometry(p.size, 40, 40),
+      new THREE.MeshStandardMaterial({ color:p.color, roughness:0.75, metalness:0.15 })
+    );
+    mesh.userData = { name:p.name, tag:p.tag, fact:p.fact, dist:p.dist.toFixed(0)+' units', size:p.sizeLabel, example:p.example };
+    pivot.add(mesh);
+
+    // invisible, larger hit-sphere so fast-orbiting/small bodies are easy to click
+    const hitRadius = Math.max(p.size*2.6, 6);
+    const hitSphere = new THREE.Mesh(
+      new THREE.SphereGeometry(hitRadius, 12, 12),
+      new THREE.MeshBasicMaterial({ visible:false })
+    );
+    hitSphere.userData = mesh.userData;
+    pivot.add(hitSphere);
+    clickable.push(hitSphere);
+
+    // visible dashed ring marking this as a click target
+    const marker = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: clickMarkerTexture('#5FE3E0'), transparent:true, depthWrite:false, opacity:0.7
+    }));
+    const markerBase = hitRadius*2.3;
+    marker.scale.set(markerBase, markerBase, 1);
+    pivot.add(marker);
+    clickMarkers.push({ sprite:marker, base:markerBase });
+
+    // subtle atmosphere glow
+    const atmo = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture('rgba(255,255,255,0.35)','rgba(255,255,255,0)'),
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    }));
+    atmo.scale.set(p.size*4.4, p.size*4.4, 1);
+    pivot.add(atmo);
+
+    // label sprite
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: labelTexture(p.name, '#5FE3E0'), transparent:true, depthWrite:false
+    }));
+    label.scale.set(9, 2.3, 1);
+    label.position.set(0, p.size+3.2, 0);
+    pivot.add(label);
+
+    // ring (Saturn)
+    if(p.ring){
+      const inner = p.size*1.4, outer = p.size*2.6;
+      const ringGeo = new THREE.RingGeometry(inner, outer, 64);
+      fixRingUVs(ringGeo, inner, outer);
+      const ringMat = new THREE.MeshBasicMaterial({
+        map: ringTexture(), side:THREE.DoubleSide, transparent:true, opacity:0.9
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI/2.25;
+      pivot.add(ringMesh);
+    }
+
+    // moon (Earth)
+    let moonPivot = null;
+    if(p.moon){
+      moonPivot = new THREE.Group();
+      pivot.add(moonPivot);
+      const moon = new THREE.Mesh(
+        new THREE.SphereGeometry(0.6, 20, 20),
+        new THREE.MeshStandardMaterial({ color:0xB8B8B8, roughness:0.9 })
+      );
+      moon.position.set(p.size+2.4, 0, 0);
+      moonPivot.add(moon);
+    }
+
+    orbitGroups.push({ group:orbitGroup, speed:p.speed*0.09, mesh, rot:p.rot*0.01, moonPivot });
+  });
+
+  // ---------- ASTEROID BELT ----------
+  const beltCount = 500;
+  const beltGeo = new THREE.IcosahedronGeometry(0.35, 0);
+  const beltMat = new THREE.MeshStandardMaterial({ color:0x8a8a86, roughness:0.9 });
+  const beltMesh = new THREE.InstancedMesh(beltGeo, beltMat, beltCount);
+  const dummy = new THREE.Object3D();
+  for(let i=0;i<beltCount;i++){
+    const r = 98 + Math.random()*14;
+    const a = Math.random()*Math.PI*2;
+    dummy.position.set(Math.cos(a)*r, (Math.random()-0.5)*3, Math.sin(a)*r);
+    dummy.rotation.set(Math.random()*6,Math.random()*6,Math.random()*6);
+    const s = 0.5+Math.random()*1.4;
+    dummy.scale.set(s,s,s);
+    dummy.updateMatrix();
+    beltMesh.setMatrixAt(i, dummy.matrix);
+  }
+  scene.add(beltMesh);
+
+  // ---------- RAYCAST / INFO PANEL ----------
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const infoPanel = document.getElementById('infoPanel');
+  const infoName = document.getElementById('infoName');
+  const infoTag = document.getElementById('infoTag');
+  const infoFact = document.getElementById('infoFact');
+  const infoDist = document.getElementById('infoDist');
+  const infoSize = document.getElementById('infoSize');
+  const infoExample = document.getElementById('infoExample');
+
+  function showInfo(d){
+    infoName.textContent = d.name;
+    infoTag.textContent = d.tag;
+    infoFact.textContent = d.fact;
+    infoDist.textContent = d.dist;
+    infoSize.textContent = d.size;
+    infoExample.textContent = d.example;
+    infoPanel.classList.add('open');
+  }
+  document.getElementById('infoClose').addEventListener('click', () => infoPanel.classList.remove('open'));
+
+  renderer.domElement.addEventListener('click', (e) => {
+    mouse.x = (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickable, false);
+    if(hits.length){
+      showInfo(hits[0].object.userData);
+    }
+  });
+
+  renderer.domElement.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickable, false);
+    renderer.domElement.style.cursor = hits.length ? 'pointer' : 'grab';
+  });
+
+  // ---------- LEGEND BUTTONS (guaranteed-to-work notes access, no raycasting needed) ----------
+  const infoByName = {};
+  clickable.forEach(o => { infoByName[o.userData.name] = o.userData; });
+  document.querySelectorAll('.legend-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const d = infoByName[btn.dataset.name];
+      if(d){
+        showInfo(d);
+        controls.autoRotate = false;
+      }
+    });
+  });
+
+  // ---------- MANUAL JOYSTICK (orbit/zoom without needing to drag) ----------
+  const initialCameraPos = camera.position.clone();
+  function nudgeCamera(dTheta, dPhi, dRadius){
+    const offset = camera.position.clone().sub(controls.target);
+    const sph = new THREE.Spherical().setFromVector3(offset);
+    sph.theta += dTheta;
+    sph.phi = Math.max(0.15, Math.min(Math.PI-0.15, sph.phi + dPhi));
+    sph.radius = Math.max(controls.minDistance, Math.min(controls.maxDistance, sph.radius + dRadius));
+    offset.setFromSpherical(sph);
+    camera.position.copy(controls.target).add(offset);
+    camera.lookAt(controls.target);
+  }
+  let joystickTimer = null;
+  function joystickStep(action){
+    if(action === 'left') nudgeCamera(-0.045, 0, 0);
+    else if(action === 'right') nudgeCamera(0.045, 0, 0);
+    else if(action === 'up') nudgeCamera(0, -0.035, 0);
+    else if(action === 'down') nudgeCamera(0, 0.035, 0);
+    else if(action === 'in') nudgeCamera(0, 0, -10);
+    else if(action === 'out') nudgeCamera(0, 0, 10);
+    else if(action === 'reset'){
+      camera.position.copy(initialCameraPos);
+      camera.lookAt(controls.target);
+      controls.autoRotate = true;
+    }
+  }
+  function startJoystick(action){
+    controls.autoRotate = false;
+    stopJoystick();
+    joystickStep(action);
+    if(action !== 'reset') joystickTimer = setInterval(() => joystickStep(action), 40);
+  }
+  function stopJoystick(){
+    if(joystickTimer){ clearInterval(joystickTimer); joystickTimer = null; }
+  }
+  document.querySelectorAll('.jbtn').forEach(btn => {
+    const act = btn.dataset.act;
+    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); startJoystick(act); });
+  });
+  window.addEventListener('pointerup', stopJoystick);
+  window.addEventListener('pointercancel', stopJoystick);
+
+  // ---------- ANIMATE ----------
+  const clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    const t = clock.getElapsedTime();
+
+    sunMesh.rotation.y += dt*0.05;
+    sunGroup.scale.setScalar(1 + Math.sin(t*0.8)*0.015);
+
+    orbitGroups.forEach(o => {
+      o.group.rotation.y += o.speed*dt;
+      o.mesh.rotation.y += o.rot;
+      if(o.moonPivot) o.moonPivot.rotation.y += dt*1.4;
+    });
+
+    beltMesh.rotation.y += dt*0.02;
+
+    clickMarkers.forEach((m, i) => {
+      const pulse = 1 + Math.sin(t*1.6 + i*0.7)*0.08;
+      m.sprite.scale.set(m.base*pulse, m.base*pulse, 1);
+      m.sprite.material.opacity = 0.55 + Math.sin(t*1.6 + i*0.7)*0.2;
+      m.sprite.material.rotation += dt*0.15;
+    });
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+
+  animate();
+  setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 600);
+})();
+</script>
+</body>
+</html>
