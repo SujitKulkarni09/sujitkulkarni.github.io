@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agentic AI Workflow — Investment Banking</title>
+<style>
+  :root{
+    --bg:#050508;
+    --panel:#0E0E12CC;
+    --line:#2A2A32;
+    --white:#F2F2F0;
+    --gray:#9797A0;
+    --orange:#F5A25D;
+    --cyan:#5FE3E0;
+    --mono:'IBM Plex Mono','Courier New',monospace;
+    --disp:'Archivo Black','Arial Black',sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{
+    margin:0; height:100%; overflow:hidden;
+    background:
+      radial-gradient(ellipse at 30% 20%, rgba(95,227,224,0.05), transparent 45%),
+      radial-gradient(ellipse at 75% 75%, rgba(245,162,93,0.04), transparent 45%),
+      var(--bg);
+    font-family:var(--mono);
+    color:var(--white);
+  }
+  #canvas-holder{ position:fixed; inset:0; }
+  canvas{ display:block; }
+
+  .hud{ position:fixed; inset:0; pointer-events:none; z-index:5; }
+  .top-hud{ position:absolute; top:28px; left:32px; pointer-events:none; max-width:520px; }
+  .eyebrow{ font-size:12px; letter-spacing:.24em; color:var(--orange); text-transform:uppercase; margin-bottom:10px; }
+  h1{ font-family:var(--disp); font-size:clamp(20px,3.6vw,36px); text-transform:uppercase; line-height:1.08; margin:0; letter-spacing:-0.01em; }
+  h1 .hi{ color:var(--orange); }
+  .credit{
+    margin-top:10px; font-size:14px; letter-spacing:.05em; color:#eafffe;
+    text-shadow: 0 0 4px #fff, 0 0 10px var(--cyan), 0 0 20px var(--cyan), 0 0 38px rgba(95,227,224,.85), 0 0 60px rgba(95,227,224,.5);
+  }
+
+  .hint{ position:absolute; bottom:26px; left:32px; font-size:11.5px; color:var(--gray); letter-spacing:.04em; line-height:1.7; pointer-events:none; }
+  .hint span{ color:var(--cyan); }
+
+  .legend{ position:absolute; bottom:26px; right:32px; text-align:right; font-size:11px; color:var(--gray); letter-spacing:.03em; pointer-events:none; }
+  .legend .row{ margin-bottom:4px; }
+  .legend .sw{ display:inline-block; width:8px; height:8px; border-radius:50%; margin-left:6px; vertical-align:middle; }
+
+  /* live status ticker */
+  .status-bar{
+    position:absolute;
+    top:28px; left:50%;
+    transform:translateX(-50%);
+    background:var(--panel);
+    border:1.5px solid var(--line);
+    border-radius:30px;
+    padding:9px 20px;
+    font-size:11.5px;
+    letter-spacing:.05em;
+    color:var(--gray);
+    backdrop-filter: blur(6px);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .status-bar .dot{
+    width:7px; height:7px; border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 8px var(--cyan);
+    animation: blink 1.2s infinite;
+  }
+  @keyframes blink{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+  .status-bar b{ color:var(--white); font-weight:normal; }
+
+  .info-panel{
+    position:absolute; top:28px; right:32px; width:280px;
+    background:var(--panel); border:1.5px solid var(--line); border-radius:12px;
+    padding:20px 22px; backdrop-filter: blur(6px);
+    transform: translateX(120%); opacity:0;
+    transition: transform .35s ease, opacity .35s ease; pointer-events:auto;
+  }
+  .info-panel.open{ transform: translateX(0); opacity:1; }
+  .info-panel .close{ position:absolute; top:12px; right:14px; background:none; border:none; color:var(--gray); font-family:var(--mono); font-size:13px; cursor:pointer; }
+  .info-panel .close:hover{ color:var(--orange); }
+  .info-panel .tag{ font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); margin-bottom:8px; }
+  .info-panel h3{ font-family:var(--disp); font-size:22px; text-transform:uppercase; margin:0 0 10px; color:var(--white); }
+  .info-panel p{ font-size:13px; line-height:1.6; color:#D3D3D0; margin:0 0 12px; }
+  .info-panel .stat{ display:flex; justify-content:space-between; font-size:11.5px; color:var(--gray); border-top:1px solid var(--line); padding-top:10px; margin-top:8px; }
+  .info-panel .stat b{ color:var(--orange); font-weight:normal; }
+
+  .loader{
+    position:fixed; inset:0; background:#050508; display:flex; align-items:center; justify-content:center;
+    flex-direction:column; z-index:20; transition: opacity .5s ease;
+  }
+  .loader .spin{ width:34px; height:34px; border:2px solid #2A2A32; border-top-color: var(--orange); border-radius:50%; animation: spin 0.9s linear infinite; margin-bottom:16px; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .loader .txt{ font-size:12px; letter-spacing:.14em; color:var(--gray); text-transform:uppercase; }
+</style>
+</head>
+<body>
+
+<div id="canvas-holder"></div>
+
+<div class="loader" id="loader">
+  <div class="spin"></div>
+  <div class="txt">Initializing agentic workflow…</div>
+</div>
+
+<div class="hud">
+  <div class="top-hud">
+    <div class="eyebrow">Agentic AI · Live Workflow</div>
+    <h1>Investment Banking <span class="hi">Agent Network</span></h1>
+    <div class="credit">Created by Sujit Kulkarni</div>
+  </div>
+
+  <div class="status-bar">
+    <span class="dot"></span> live stage: <b id="statusText">Analyst Request</b>
+  </div>
+
+  <div class="hint">
+    <span>drag</span> to rotate &nbsp;·&nbsp; <span>scroll</span> to zoom &nbsp;·&nbsp; <span>click</span> a node for details
+  </div>
+
+  <div class="legend">
+    <div class="row">Entry / Output <span class="sw" style="background:#F5A25D"></span></div>
+    <div class="row">Data / Research <span class="sw" style="background:#5FE3E0"></span></div>
+    <div class="row">Orchestrator <span class="sw" style="background:#EDEDE8"></span></div>
+    <div class="row">Compliance <span class="sw" style="background:#4169E1"></span></div>
+    <div class="row">Research Agent <span class="sw" style="background:#7FD98A"></span></div>
+    <div class="row">Documents <span class="sw" style="background:#D9A066"></span></div>
+    <div class="row">Human Review <span class="sw" style="background:#E0616B"></span></div>
+  </div>
+
+  <div class="info-panel" id="infoPanel">
+    <button class="close" id="infoClose">CLOSE ✕</button>
+    <div class="tag" id="infoTag">agent stage</div>
+    <h3 id="infoName">—</h3>
+    <p id="infoFact">—</p>
+    <div class="stat"><span>Role</span><b id="infoDist">—</b></div>
+    <div class="stat"><span>Stage</span><b id="infoSize">—</b></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+  const holder = document.getElementById('canvas-holder');
+  const loader = document.getElementById('loader');
+
+  // ---------- SCENE / CAMERA / RENDERER ----------
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(48, window.innerWidth/window.innerHeight, 0.1, 4000);
+  camera.position.set(20, 130, 300);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+  holder.appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.06;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.25;
+  controls.minDistance = 60;
+  controls.maxDistance = 700;
+  controls.enablePan = false;
+  controls.target.set(14, 6, 0);
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ---------- TEXTURE HELPERS ----------
+  function glowTexture(inner, outer){
+    const c = document.createElement('canvas'); c.width=256; c.height=256;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(128,128,0,128,128,128);
+    g.addColorStop(0, inner); g.addColorStop(1, outer);
+    ctx.fillStyle = g; ctx.fillRect(0,0,256,256);
+    return new THREE.CanvasTexture(c);
+  }
+  function labelTexture(text, color){
+    const c = document.createElement('canvas'); c.width=320; c.height=64;
+    const ctx = c.getContext('2d');
+    ctx.font = '600 26px "IBM Plex Mono", monospace';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = color; ctx.shadowBlur = 14;
+    ctx.fillStyle = color;
+    ctx.fillText(text.toUpperCase(), 160, 32);
+    ctx.fillText(text.toUpperCase(), 160, 32);
+    return new THREE.CanvasTexture(c);
+  }
+  function flowTexture(color){
+    const c = document.createElement('canvas'); c.width=128; c.height=16;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0,0,128,16);
+    ctx.fillStyle = color;
+    for(let i=0;i<4;i++){
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(i*32, 8);
+      ctx.lineTo(i*32+18, 2);
+      ctx.lineTo(i*32+18, 14);
+      ctx.closePath();
+      ctx.fill();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.wrapS = THREE.RepeatWrapping; tex.wrapT = THREE.RepeatWrapping;
+    return tex;
+  }
+
+  // ---------- STARFIELD ----------
+  function buildStarfield(count, radiusMin, radiusMax){
+    const positions = new Float32Array(count*3);
+    const colors = new Float32Array(count*3);
+    const palette = [[1,1,1],[0.75,0.87,1],[1,0.85,0.7],[0.68,0.93,0.92]];
+    for(let i=0;i<count;i++){
+      const r = radiusMin + Math.random()*(radiusMax-radiusMin);
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.acos((Math.random()*2)-1);
+      positions[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      positions[i*3+1] = r*Math.cos(phi);
+      positions[i*3+2] = r*Math.sin(phi)*Math.sin(theta);
+      const p = palette[Math.floor(Math.random()*palette.length)];
+      const b = 0.6 + Math.random()*0.4;
+      colors[i*3]=p[0]*b; colors[i*3+1]=p[1]*b; colors[i*3+2]=p[2]*b;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat = new THREE.PointsMaterial({ size:1.6, vertexColors:true, transparent:true, opacity:0.9,
+      sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false });
+    return new THREE.Points(geo, mat);
+  }
+  scene.add(buildStarfield(9000, 500, 1600));
+  scene.add(buildStarfield(2000, 300, 500));
+
+  const nebulaColors = ['rgba(95,227,224,0.10)','rgba(245,162,93,0.09)','rgba(160,100,220,0.08)'];
+  for(let i=0;i<6;i++){
+    const tex = glowTexture(nebulaColors[i%nebulaColors.length], 'rgba(0,0,0,0)');
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, blending:THREE.AdditiveBlending, depthWrite:false });
+    const spr = new THREE.Sprite(mat);
+    const s = 260+Math.random()*260;
+    spr.scale.set(s,s,1);
+    spr.position.set((Math.random()-0.5)*1400,(Math.random()-0.5)*700,(Math.random()-0.5)*1400);
+    scene.add(spr);
+  }
+
+  scene.add(new THREE.AmbientLight(0x33333d, 1.3));
+  const keyLight = new THREE.PointLight(0xffe3b8, 2.4, 2000, 1.4);
+  keyLight.position.set(0, 150, 100);
+  scene.add(keyLight);
+
+  // ---------- NODE DATA ----------
+  const nodeData = [
+    { id:'n1', name:'Analyst Request', color:0xF5A25D, size:3.2, pos:[-100,12,0],
+      tag:'entry point', role:'Human input', fact:'A banker submits a request — e.g. "build a comps analysis for Company X".' },
+    { id:'n2', name:'Data Ingestion', color:0x5FE3E0, size:3.6, pos:[-68,-10,0],
+      tag:'gathers raw data', role:'Data agent', fact:'Pulls market data, SEC filings, earnings calls, and news feeds in real time.' },
+    { id:'n3', name:'Orchestrator', color:0xEDEDE8, size:3.8, pos:[-34,12,0],
+      tag:'plans & routes tasks', role:'Orchestration agent', fact:'Breaks the request into sub-tasks and routes each to the right specialist agent.' },
+    { id:'n4a', name:'Research Agent', color:0x7FD98A, size:3.2, pos:[-2,26,-20],
+      tag:'comps & industry analysis', role:'Research agent', fact:'Builds comparable company analysis and industry positioning in parallel with compliance.' },
+    { id:'n4b', name:'Risk & Compliance', color:0x4169E1, size:3.2, pos:[-2,26,20],
+      tag:'regulatory & KYC checks', role:'Compliance agent', fact:'Runs regulatory, KYC, and risk checks in parallel with research — nothing proceeds unchecked.' },
+    { id:'n5', name:'Financial Modeling', color:0xF5A25D, size:4.4, pos:[30,-10,0],
+      tag:'valuation & projections', role:'Modeling agent', fact:'Builds DCF models, valuation multiples, and forward projections from the gathered data.' },
+    { id:'n6', name:'Document Generation', color:0xD9A066, size:3.8, pos:[64,12,0],
+      tag:'drafts the deliverable', role:'Drafting agent', fact:'Auto-drafts the pitch book or IC memo directly from the model outputs and research.' },
+    { id:'n7', name:'Human Review', color:0xE0616B, size:3.6, pos:[96,-10,0],
+      tag:'human-in-the-loop', role:'Senior banker', fact:'A senior banker reviews, edits, and signs off before anything goes external.' },
+    { id:'n8', name:'Final Deliverable', color:0x9FE3E0, size:4.2, pos:[130,12,0],
+      tag:'client-ready output', role:'Output', fact:'The polished, client-ready deliverable — hours of manual work compressed into minutes.' }
+  ];
+
+  const nodeMap = {};
+  const clickable = [];
+
+  nodeData.forEach(d => {
+    const group = new THREE.Group();
+    group.position.set(...d.pos);
+    scene.add(group);
+
+    const mesh = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(d.size, 2),
+      new THREE.MeshStandardMaterial({ color:d.color, roughness:0.4, metalness:0.35, flatShading:true })
+    );
+    mesh.userData = { name:d.name, tag:d.tag, fact:d.fact, dist:d.role, size:d.tag };
+    group.add(mesh);
+    clickable.push(mesh);
+
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture('rgba(255,255,255,0.55)','rgba(255,255,255,0)'),
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    }));
+    glow.scale.set(d.size*4.6, d.size*4.6, 1);
+    group.add(glow);
+
+    const label = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: labelTexture(d.name, '#5FE3E0'), transparent:true, depthWrite:false
+    }));
+    label.scale.set(15, 3, 1);
+    label.position.set(0, d.size+4.4, 0);
+    group.add(label);
+
+    nodeMap[d.id] = { group, mesh, glow, baseScale: mesh.scale.x, pulseUntil:0, size:d.size };
+  });
+
+  // ---------- EDGES (curved glowing tubes with flow animation) ----------
+  const edgeDefs = [
+    ['n1','n2'], ['n2','n3'],
+    ['n3','n4a'], ['n3','n4b'],
+    ['n4a','n5'], ['n4b','n5'],
+    ['n5','n6'], ['n6','n7'], ['n7','n8']
+  ];
+  const edgeMap = {};
+
+  edgeDefs.forEach(([a,b]) => {
+    const pa = new THREE.Vector3(...nodeData.find(n=>n.id===a).pos);
+    const pb = new THREE.Vector3(...nodeData.find(n=>n.id===b).pos);
+    const mid = pa.clone().lerp(pb, 0.5);
+    mid.y += 10 + Math.random()*4;
+    const curve = new THREE.QuadraticBezierCurve3(pa, mid, pb);
+    const len = pa.distanceTo(pb);
+    const tubeGeo = new THREE.TubeGeometry(curve, 40, 0.55, 8, false);
+    const tex = flowTexture('#5FE3E0');
+    tex.repeat.set(Math.max(2, Math.round(len/14)), 1);
+    const mat = new THREE.MeshBasicMaterial({
+      map:tex, transparent:true, opacity:0.85, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    const tube = new THREE.Mesh(tubeGeo, mat);
+    scene.add(tube);
+    edgeMap[a+'-'+b] = { tube, mat, curve, len };
+  });
+
+  // ---------- PULSE (traveling "request" markers) ----------
+  const pulseGeo = new THREE.SphereGeometry(1.3, 16, 16);
+  function makePulse(){
+    const mesh = new THREE.Mesh(pulseGeo, new THREE.MeshBasicMaterial({ color:0xffffff }));
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture('rgba(255,255,255,0.95)','rgba(95,227,224,0)'),
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    }));
+    glow.scale.set(9,9,1);
+    mesh.add(glow);
+    scene.add(mesh);
+    return mesh;
+  }
+
+  const stages = [
+    { edges:['n1-n2'], label:'Data Ingestion' },
+    { edges:['n2-n3'], label:'Orchestrator' },
+    { edges:['n3-n4a','n3-n4b'], label:'Research + Compliance (parallel)' },
+    { edges:['n4a-n5','n4b-n5'], label:'Financial Modeling' },
+    { edges:['n5-n6'], label:'Document Generation' },
+    { edges:['n6-n7'], label:'Human Review' },
+    { edges:['n7-n8'], label:'Final Deliverable' }
+  ];
+  const statusText = document.getElementById('statusText');
+  let stageIdx = 0;
+  let activePulses = [];
+  let stagePause = 0;
+  const PULSE_SPEED = 0.55; // units of t per second
+
+  function startStage(i){
+    const st = stages[i];
+    activePulses = st.edges.map(key => ({ key, t:0 }));
+    statusText.textContent = st.label;
+    // pulse the origin node of this stage
+    st.edges.forEach(key => {
+      const fromId = key.split('-')[0];
+      if(nodeMap[fromId]) nodeMap[fromId].pulseUntil = performance.now()+600;
+    });
+  }
+  startStage(0);
+
+  function triggerArrival(nodeId){
+    if(nodeMap[nodeId]) nodeMap[nodeId].pulseUntil = performance.now()+600;
+  }
+
+  // ---------- RAYCAST / INFO PANEL ----------
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const infoPanel = document.getElementById('infoPanel');
+  const infoName = document.getElementById('infoName');
+  const infoTag = document.getElementById('infoTag');
+  const infoFact = document.getElementById('infoFact');
+  const infoDist = document.getElementById('infoDist');
+  const infoSize = document.getElementById('infoSize');
+
+  function showInfo(d){
+    infoName.textContent = d.name;
+    infoTag.textContent = 'agent stage';
+    infoFact.textContent = d.fact;
+    infoDist.textContent = d.dist;
+    infoSize.textContent = d.size;
+    infoPanel.classList.add('open');
+  }
+  document.getElementById('infoClose').addEventListener('click', () => infoPanel.classList.remove('open'));
+
+  renderer.domElement.addEventListener('click', (e) => {
+    mouse.x = (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickable, false);
+    if(hits.length) showInfo(hits[0].object.userData);
+  });
+
+  // ---------- ANIMATE ----------
+  const clock = new THREE.Clock();
+  const pulseObjs = [];
+
+  function animate(){
+    requestAnimationFrame(animate);
+    const dt = Math.min(clock.getDelta(), 0.05);
+    const now = performance.now();
+
+    // flow texture scroll on every edge (constant ambient "live" motion)
+    Object.values(edgeMap).forEach(e => {
+      e.mat.map.offset.x -= dt*0.6;
+    });
+
+    // node idle bob + pulse-triggered scale bump
+    Object.values(nodeMap).forEach(n => {
+      const active = now < n.pulseUntil;
+      const targetScale = active ? 1.35 : 1.0;
+      const cur = n.mesh.scale.x;
+      const next = cur + (targetScale-cur)*0.15;
+      n.mesh.scale.set(next,next,next);
+      n.glow.material.opacity = active ? 1 : 0.55;
+      n.group.rotation.y += dt*0.15;
+    });
+
+    // advance stage pulses
+    if(stagePause > 0){
+      stagePause -= dt;
+    } else {
+      let allDone = true;
+      activePulses.forEach(p => {
+        p.t += dt*PULSE_SPEED;
+        if(p.t < 1) allDone = false;
+      });
+      if(allDone){
+        // arrival: trigger the "to" node(s) of this stage
+        const st = stages[stageIdx];
+        st.edges.forEach(key => triggerArrival(key.split('-')[1]));
+        stageIdx = (stageIdx+1) % stages.length;
+        stagePause = 0.35;
+        startStage(stageIdx);
+      }
+    }
+
+    // sync pulse mesh objects to activePulses
+    while(pulseObjs.length < activePulses.length) pulseObjs.push(makePulse());
+    while(pulseObjs.length > activePulses.length){
+      const p = pulseObjs.pop();
+      scene.remove(p);
+    }
+    activePulses.forEach((p, i) => {
+      const edge = edgeMap[p.key];
+      if(!edge) return;
+      const pos = edge.curve.getPoint(Math.min(p.t,1));
+      pulseObjs[i].position.copy(pos);
+    });
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  setTimeout(() => { loader.style.opacity='0'; setTimeout(()=>loader.remove(),500); }, 600);
+})();
+</script>
+</body>
+</html>
