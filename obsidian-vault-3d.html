@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude + Obsidian — Interactive Knowledge Vault</title>
+<style>
+  :root{
+    --bg:#06040d;
+    --cyan:#00e5ff;
+    --blue:#3d7bff;
+    --purple:#a35cff;
+    --magenta:#ff3ec4;
+    --teal:#2dffc0;
+    --ink:#eae7ff;
+    --dim:#8d89ab;
+    --panel: rgba(16,12,28,0.62);
+    --panel-solid:#120e20;
+    --line: rgba(163,92,255,0.28);
+    --mono:'IBM Plex Mono','Courier New',monospace;
+    --disp:'Orbitron','Arial Black',sans-serif;
+    --ui:'Rajdhani','Segoe UI',sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ width:100%; height:100%; overflow:hidden; background:var(--bg); font-family:var(--ui); color:var(--ink); }
+  #canvas-holder{ position:fixed; inset:0; }
+  canvas{ display:block; }
+
+  ::-webkit-scrollbar{ width:6px; }
+  ::-webkit-scrollbar-thumb{ background:var(--purple); border-radius:3px; }
+
+  .vignette{
+    position:fixed; inset:0; pointer-events:none; z-index:2;
+    background: radial-gradient(ellipse at center, transparent 38%, rgba(2,1,6,0.65) 100%);
+  }
+  .scanlines{
+    position:fixed; inset:0; pointer-events:none; z-index:2; opacity:.05;
+    background: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 3px);
+  }
+
+  .hud{ position:fixed; inset:0; z-index:6; pointer-events:none; }
+
+  /* ---------- top-left title block ---------- */
+  .top-hud{ position:absolute; top:26px; left:30px; max-width:480px; pointer-events:none; }
+  .eyebrow{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--cyan); text-shadow:0 0 8px rgba(0,229,255,.8); margin-bottom:10px;
+  }
+  h1{
+    font-family:var(--disp); font-size:clamp(18px,2.6vw,28px); text-transform:uppercase;
+    line-height:1.25; letter-spacing:.03em; color:var(--ink);
+    text-shadow:0 0 6px rgba(163,92,255,.9), 0 0 22px rgba(163,92,255,.45);
+  }
+  h1 .hi{ color:var(--magenta); text-shadow:0 0 8px rgba(255,62,196,.9), 0 0 24px rgba(255,62,196,.5); }
+  .credit{ margin-top:14px; font-family:var(--mono); font-size:11px; color:var(--dim); letter-spacing:.04em; }
+  .credit b{ color:var(--teal); font-weight:600; }
+
+  /* ---------- legend, top-right ---------- */
+  .legend{
+    position:absolute; top:26px; right:326px; width:186px;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px; backdrop-filter: blur(10px); pointer-events:auto;
+  }
+  .legend h4{
+    font-family:var(--mono); font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+    color:var(--dim); margin-bottom:10px;
+  }
+  .legend-btn{
+    display:flex; align-items:center; gap:8px; width:100%;
+    background:none; border:none; color:#d6d3ee; font-family:var(--ui); font-size:13px;
+    text-align:left; cursor:pointer; padding:5px 2px; border-radius:6px;
+  }
+  .legend-btn:hover{ background:rgba(255,255,255,0.05); color:var(--ink); }
+  .legend .dot{
+    width:9px; height:9px; border-radius:50%; flex:none;
+    box-shadow:0 0 8px currentColor;
+  }
+
+  /* ---------- bottom-center hint + joystick ---------- */
+  .hint{
+    position:absolute; bottom:158px; left:50%; transform:translateX(-50%);
+    font-family:var(--mono); font-size:11px; color:var(--dim); letter-spacing:.03em;
+    white-space:nowrap; text-align:center;
+  }
+  .hint span{ color:var(--cyan); }
+
+  .joystick{
+    position:absolute; left:50%; bottom:24px; transform:translateX(-50%);
+    pointer-events:auto; display:grid;
+    grid-template-columns:34px 34px 34px; grid-template-rows:34px 34px 34px; gap:6px;
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:10px; backdrop-filter: blur(10px);
+  }
+  .jbtn{
+    font-family:var(--mono); font-size:13px; color:var(--ink);
+    background:rgba(255,255,255,0.04); border:1px solid var(--line); border-radius:7px;
+    cursor:pointer; user-select:none; -webkit-user-select:none; touch-action:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .jbtn:hover, .jbtn:active{ border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 10px rgba(0,229,255,.35); }
+  .jbtn-zout{ grid-column:1; grid-row:1; }
+  .jbtn-up{ grid-column:2; grid-row:1; }
+  .jbtn-zin{ grid-column:3; grid-row:1; }
+  .jbtn-left{ grid-column:1; grid-row:2; }
+  .jbtn-center{ grid-column:2; grid-row:2; color:var(--magenta); }
+  .jbtn-right{ grid-column:3; grid-row:2; }
+  .jbtn-down{ grid-column:2; grid-row:3; }
+
+  /* ---------- connected-ideas toggle ---------- */
+  .mode-toggle{
+    position:absolute; top:26px; left:50%; transform:translateX(-50%);
+    pointer-events:auto; display:flex; align-items:center; gap:8px;
+    background:var(--panel); border:1px solid var(--line); border-radius:999px;
+    padding:8px 16px; backdrop-filter: blur(10px); cursor:pointer;
+    font-family:var(--mono); font-size:11px; letter-spacing:.05em; color:var(--dim);
+  }
+  .mode-toggle .led{
+    width:8px; height:8px; border-radius:50%; background:#3a3550; transition:.25s;
+  }
+  .mode-toggle.active{ color:var(--ink); border-color:var(--magenta); }
+  .mode-toggle.active .led{ background:var(--magenta); box-shadow:0 0 10px var(--magenta); }
+
+  /* ---------- notes drawer (guaranteed click path) ---------- */
+  /* ---------- notes sidebar (always visible — guaranteed click path) ---------- */
+  .notes-sidebar{
+    position:fixed; top:0; right:0; height:100%; width:300px;
+    background:var(--panel-solid); border-left:1px solid var(--line);
+    pointer-events:auto; z-index:7;
+    overflow-y:auto; padding:26px 20px 40px;
+    transform:translateX(0); transition:transform .3s ease;
+  }
+  .notes-sidebar.collapsed{ transform:translateX(100%); }
+  .sidebar-tab{
+    position:fixed; top:50%; right:300px; transform:translateY(-50%);
+    z-index:8; pointer-events:auto;
+    background:var(--panel-solid); border:1px solid var(--line); border-right:none;
+    border-radius:10px 0 0 10px; padding:14px 8px;
+    font-family:var(--mono); font-size:11px; letter-spacing:.04em; color:var(--ink);
+    cursor:pointer; writing-mode:vertical-rl; text-orientation:mixed;
+    transition:right .3s ease;
+  }
+  .sidebar-tab:hover{ color:var(--cyan); border-color:var(--cyan); }
+  .notes-sidebar.collapsed ~ .sidebar-tab{ right:0; }
+  .notes-sidebar h3{
+    font-family:var(--disp); font-size:16px; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--ink); margin-bottom:4px;
+  }
+  .notes-sidebar .sub{ font-size:11.5px; color:var(--dim); margin-bottom:20px; }
+
+  .cat-block{ margin-bottom:22px; }
+  .cat-head{
+    display:flex; align-items:center; gap:8px; font-family:var(--mono); font-size:11px;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin-bottom:8px;
+  }
+  .cat-head .dot{ width:8px; height:8px; border-radius:50%; box-shadow:0 0 8px currentColor; }
+
+  .note-card{
+    display:block; width:100%; text-align:left; background:rgba(255,255,255,0.03);
+    border:1px solid var(--line); border-radius:10px; padding:10px 12px; margin-bottom:8px;
+    cursor:pointer; transition:.15s;
+  }
+  .note-card:hover{ background:rgba(255,255,255,0.07); border-color:var(--cyan); transform:translateX(-2px); }
+  .note-card .t{ font-size:13.5px; color:var(--ink); margin-bottom:3px; }
+  .note-card .tg{ font-family:var(--mono); font-size:10px; color:var(--dim); }
+
+  /* ---------- note modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; z-index:9; background:rgba(3,2,8,0.7); backdrop-filter: blur(3px);
+    display:flex; align-items:center; justify-content:center; padding:24px;
+    opacity:0; pointer-events:none; transition:opacity .28s ease;
+  }
+  .modal-overlay.open{ opacity:1; pointer-events:auto; }
+  .modal-card{
+    width:100%; max-width:520px; max-height:82vh; overflow-y:auto;
+    background:var(--panel-solid); border:1px solid var(--line); border-radius:16px;
+    padding:30px 32px; transform:translateY(14px); transition:transform .28s ease;
+    box-shadow:0 0 60px rgba(163,92,255,.18);
+  }
+  .modal-overlay.open .modal-card{ transform:translateY(0); }
+  .modal-top{ display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; }
+  .modal-tag{ font-family:var(--mono); font-size:10.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--cyan); margin-bottom:8px; }
+  .modal-card h2{ font-family:var(--disp); font-size:clamp(19px,3vw,25px); text-transform:uppercase; letter-spacing:.02em; color:var(--ink); line-height:1.25; }
+  .modal-close{
+    background:none; border:1px solid var(--line); color:var(--dim); font-family:var(--mono);
+    font-size:10.5px; padding:6px 10px; border-radius:6px; cursor:pointer; flex:none; margin-left:14px;
+  }
+  .modal-close:hover{ color:var(--magenta); border-color:var(--magenta); }
+  .modal-summary{ font-size:13.5px; color:#d3d0ec; line-height:1.65; margin:14px 0 18px; }
+
+  .chip-row{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom:16px; }
+  .chip{
+    font-family:var(--mono); font-size:10.5px; padding:4px 10px; border-radius:999px;
+    border:1px solid var(--line); color:var(--dim);
+  }
+  .chip.link{ cursor:pointer; color:var(--teal); border-color:rgba(45,255,192,.35); }
+  .chip.link:hover{ background:rgba(45,255,192,.1); }
+
+  .modal-section h4{
+    font-family:var(--mono); font-size:10.5px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--dim); margin:16px 0 8px;
+  }
+  .modal-section:first-of-type h4{ margin-top:0; }
+  .action-item{
+    display:flex; align-items:flex-start; gap:8px; font-size:13px; color:#d3d0ec; line-height:1.5; margin-bottom:6px;
+  }
+  .action-item .box{
+    width:13px; height:13px; border:1.5px solid var(--purple); border-radius:3px; flex:none; margin-top:2px;
+  }
+
+  .modal-actions{ display:flex; gap:10px; margin-top:20px; padding-top:16px; border-top:1px solid var(--line); }
+  .modal-btn{
+    font-family:var(--mono); font-size:11.5px; letter-spacing:.04em; padding:9px 16px; border-radius:8px;
+    border:1px solid var(--line); background:rgba(255,255,255,0.03); color:var(--ink); cursor:pointer;
+  }
+  .modal-btn:hover{ border-color:var(--cyan); color:var(--cyan); }
+  .modal-btn.primary{ border-color:var(--magenta); color:var(--magenta); }
+  .modal-btn.primary:hover{ background:rgba(255,62,196,.12); }
+
+  /* ---------- hover tooltip ---------- */
+  .tooltip{
+    position:fixed; z-index:8; pointer-events:none; transform:translate(-50%,-140%);
+    font-family:var(--mono); font-size:11px; color:var(--ink);
+    background:rgba(16,12,28,0.9); border:1px solid var(--line); border-radius:7px;
+    padding:5px 10px; opacity:0; transition:opacity .12s ease; white-space:nowrap;
+  }
+  .tooltip.show{ opacity:1; }
+
+  /* ---------- loader ---------- */
+  .loader{
+    position:fixed; inset:0; background:var(--bg); display:flex; flex-direction:column;
+    align-items:center; justify-content:center; z-index:20; transition:opacity .5s ease;
+  }
+  .loader .ring{
+    width:52px; height:52px; border-radius:50%; border:3px solid rgba(163,92,255,.2);
+    border-top-color:var(--magenta); animation:spin 0.9s linear infinite; margin-bottom:16px;
+  }
+  .loader .txt{ font-family:var(--mono); font-size:12px; color:var(--dim); letter-spacing:.05em; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .loader.hide{ opacity:0; pointer-events:none; }
+
+  .error-banner{
+    display:none; position:fixed; top:16px; left:50%; transform:translateX(-50%);
+    z-index:25; background:#2a0f14; border:1px solid #ff5f7a; color:#ffd8de;
+    font-family:var(--mono); font-size:11.5px; padding:10px 18px; border-radius:8px;
+    max-width:90vw;
+  }
+
+  @media (max-width: 860px){
+    .top-hud{ max-width:78vw; }
+    .legend{ display:none; }
+    .hint{ display:none; }
+    .notes-sidebar{ width:78vw; }
+    .mode-toggle span.lbl{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="canvas-holder"></div>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+
+<div class="loader" id="loader">
+  <div class="ring"></div>
+  <div class="txt">Opening the vault…</div>
+</div>
+<div class="error-banner" id="errorBanner"></div>
+
+<div class="hud">
+  <div class="top-hud">
+    <div class="eyebrow">3D Knowledge Graph · Live</div>
+    <h1>Claude + Obsidian <span class="hi">Interactive Knowledge Vault</span></h1>
+    <div class="credit">Created by <b>Sujit Kulkarni</b></div>
+  </div>
+
+  <div class="mode-toggle" id="modeToggle">
+    <div class="led"></div><span class="lbl">Connected Ideas Mode</span>
+  </div>
+
+  <div class="legend">
+    <h4>Node Key</h4>
+    <button class="legend-btn" data-name="vault"><span class="dot" style="background:#c9baff;color:#c9baff"></span>The Vault</button>
+    <button class="legend-btn" data-name="daily"><span class="dot" style="background:#00e5ff;color:#00e5ff"></span>Daily Notes</button>
+    <button class="legend-btn" data-name="meeting"><span class="dot" style="background:#3d7bff;color:#3d7bff"></span>Meeting Notes</button>
+    <button class="legend-btn" data-name="research"><span class="dot" style="background:#a35cff;color:#a35cff"></span>Research Notes</button>
+    <button class="legend-btn" data-name="project"><span class="dot" style="background:#ff3ec4;color:#ff3ec4"></span>Project Notes</button>
+    <button class="legend-btn" data-name="output"><span class="dot" style="background:#2dffc0;color:#2dffc0"></span>Output Notes</button>
+  </div>
+
+  <div class="hint"><span>drag</span> to orbit &nbsp;·&nbsp; <span>scroll</span> to zoom &nbsp;·&nbsp; <span>click</span> any node for notes</div>
+
+  <div class="joystick" id="joystick">
+    <button class="jbtn jbtn-zout" data-act="out" aria-label="zoom out">−</button>
+    <button class="jbtn jbtn-up" data-act="up" aria-label="orbit up">▲</button>
+    <button class="jbtn jbtn-zin" data-act="in" aria-label="zoom in">+</button>
+    <button class="jbtn jbtn-left" data-act="left" aria-label="orbit left">◀</button>
+    <button class="jbtn jbtn-center" data-act="reset" aria-label="reset view">⟳</button>
+    <button class="jbtn jbtn-right" data-act="right" aria-label="orbit right">▶</button>
+    <button class="jbtn jbtn-down" data-act="down" aria-label="orbit down">▼</button>
+  </div>
+</div>
+
+<div class="notes-sidebar" id="notesSidebar">
+  <h3>All Notes</h3>
+  <div class="sub">Click any note to open it.</div>
+  <div id="notesList"></div>
+</div>
+<button class="sidebar-tab" id="sidebarTab">☰ NOTES</button>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card">
+    <div class="modal-top">
+      <div>
+        <div class="modal-tag" id="modalTag">category</div>
+        <h2 id="modalTitle">—</h2>
+      </div>
+      <button class="modal-close" id="modalClose">CLOSE ✕</button>
+    </div>
+    <div class="chip-row" id="modalTags"></div>
+    <p class="modal-summary" id="modalSummary">—</p>
+    <div class="modal-section" id="modalRelatedSection">
+      <h4>Related Notes</h4>
+      <div class="chip-row" id="modalRelated"></div>
+    </div>
+    <div class="modal-section" id="modalActionsSection">
+      <h4>Action Items</h4>
+      <div id="modalActions"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn primary" id="focusBtn">◎ Focus This Node</button>
+      <button class="modal-btn" id="modalCloseBtn2">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(function(){
+
+  // Hide the loading screen unconditionally after a short delay, and on any
+  // uncaught error — this must not depend on the rest of the script succeeding,
+  // or a single error anywhere below would leave an opaque overlay blocking
+  // every click forever.
+  const loaderEl = document.getElementById('loader');
+  function hideLoader(){ if(loaderEl) loaderEl.classList.add('hide'); }
+  window.addEventListener('load', hideLoader);
+  setTimeout(hideLoader, 1800);
+  window.addEventListener('error', (e) => {
+    hideLoader();
+    console.error('Vault error:', e.error || e.message);
+    const banner = document.getElementById('errorBanner');
+    if(banner){ banner.textContent = '⚠ Something failed to load fully — check the browser console for details.'; banner.style.display = 'block'; }
+  });
+
+  // ================= DATA =================
+  const CATEGORIES = {
+    vault:   { label:'The Vault',     hex:'#c9baff', pos:[0,0,0] },
+    daily:   { label:'Daily Notes',   hex:'#00e5ff', pos:[100, 30, -20] },
+    meeting: { label:'Meeting Notes', hex:'#3d7bff', pos:[-40, 60, 90]  },
+    research:{ label:'Research Notes',hex:'#a35cff', pos:[-95,-15,-45]  },
+    project: { label:'Project Notes', hex:'#ff3ec4', pos:[20,-70, 85]   },
+    output:  { label:'Output Notes',  hex:'#2dffc0', pos:[60, 10,-95]   }
+  };
+
+  const NOTES = [
+    { id:'todays-log', cat:'daily', title:"Today's Log", tags:['daily','journal'],
+      summary:'A running timestamped log of the day — what got worked on, what got decided, and what got parked for later.',
+      related:['habit-tracker'], actions:['Log the 3pm client sync','Note the blocker on the export pipeline'], pos:[140,42,-28] },
+    { id:'habit-tracker', cat:'daily', title:'Habit Tracker', tags:['daily','habits'],
+      summary:'A lightweight streak tracker for the handful of daily habits worth protecting, reviewed every Sunday.',
+      related:['todays-log'], actions:['Mark today\'s deep-work block','Review the week\'s streak on Sunday'], pos:[125,60,5] },
+    { id:'standup', cat:'meeting', title:'Standup Notes', tags:['meeting','team'],
+      summary:'Rolling notes from the daily team standup — blockers, hand-offs, and anything that needs a follow-up thread.',
+      related:['client-call'], actions:['Follow up on the blocked ticket','Share the standup summary in the team channel'], pos:[-55,85,125] },
+    { id:'client-call', cat:'meeting', title:'Client Call — Q3 Roadmap', tags:['meeting','client'],
+      summary:'Notes from the Q3 roadmap review — scope agreed, open questions, and what the client is expecting to see next.',
+      related:['standup','second-brain'], actions:['Send the recap email','Confirm the revised timeline'], pos:[-20,40,130] },
+    { id:'ai-deepdive', cat:'research', title:'AI Agents Deep Dive', tags:['research','ai-agents'],
+      summary:'Working notes on how agentic systems plan, use tools, and act — the reading pile behind the second-brain project.',
+      related:['vector-db','second-brain'], actions:['Summarize the planning-loop section','Link findings into the project note'], pos:[-135,-20,-65] },
+    { id:'vector-db', cat:'research', title:'Vector DB Comparison', tags:['research','embeddings'],
+      summary:'Side-by-side notes comparing embedding stores for retrieval — indexing speed, recall quality, and hosting cost.',
+      related:['ai-deepdive'], actions:['Benchmark recall on the sample corpus'], pos:[-110,-50,-20] },
+    { id:'second-brain', cat:'project', title:'Second Brain Build', tags:['project','obsidian'],
+      summary:'The build log for this very vault — structure, linking conventions, and what still needs automating.',
+      related:['ai-deepdive','client-call','blog-draft'], actions:['Finish the daily-note template','Wire up the backlink graph view'], pos:[30,-100,120] },
+    { id:'portfolio', cat:'project', title:'Portfolio Site Revamp', tags:['project','web'],
+      summary:'Planning notes for the portfolio refresh — new case studies, and the story each project should tell.',
+      related:['video-script'], actions:['Draft the new case-study outline'], pos:[55,-55,60] },
+    { id:'blog-draft', cat:'output', title:'Blog Draft — Building a Second Brain', tags:['output','writing'],
+      summary:'A draft walking through why and how this vault was built, pulled together from the project notes.',
+      related:['second-brain'], actions:['Write the intro hook','Add screenshots of the graph view'], pos:[85,15,-135] },
+    { id:'video-script', cat:'output', title:'Video Script — Claude Demo', tags:['output','video'],
+      summary:'Script draft for a short demo walking through the vault and how Claude helps keep it organized.',
+      related:['portfolio'], actions:['Time the script to 90 seconds','Record a rough voiceover pass'], pos:[40,40,-110] }
+  ];
+
+  const VAULT_INFO = {
+    id:'vault', cat:'vault', title:'The Vault', tags:['core','obsidian'],
+    summary:'Every note eventually feeds back into this core — the single obsidian store that daily logs, meetings, research, projects, and output all connect through.',
+    related:['daily','meeting','research','project','output'],
+    actions:[]
+  };
+
+  const byId = {};
+  NOTES.forEach(n => byId[n.id] = n);
+  Object.keys(CATEGORIES).forEach(k => { if(k!=='vault') byId[k] = Object.assign({ id:k, title:CATEGORIES[k].label, cat:k, tags:['category'], summary:'A category hub gathering every note tagged '+CATEGORIES[k].label.toLowerCase()+'.', related:NOTES.filter(n=>n.cat===k).map(n=>n.id), actions:[] }, {}); });
+  byId['vault'] = VAULT_INFO;
+
+  const CROSS_LINKS = [
+    ['client-call','second-brain'],
+    ['ai-deepdive','second-brain'],
+    ['second-brain','blog-draft'],
+    ['portfolio','video-script']
+  ];
+
+  // ================= THREE SETUP =================
+  const scene = new THREE.Scene();
+  scene.fog = new THREE.FogExp2(0x06040d, 0.0016);
+
+  const camera = new THREE.PerspectiveCamera(52, window.innerWidth/window.innerHeight, 0.1, 3000);
+  camera.position.set(0, 90, 320);
+
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  document.getElementById('canvas-holder').appendChild(renderer.domElement);
+
+  const controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.07;
+  controls.minDistance = 60;
+  controls.maxDistance = 620;
+  controls.autoRotate = true;
+  controls.autoRotateSpeed = 0.35;
+
+  scene.add(new THREE.AmbientLight(0x6a5aa8, 0.55));
+  const coreLight = new THREE.PointLight(0xb98cff, 2.4, 900, 2);
+  coreLight.position.set(0,0,0);
+  scene.add(coreLight);
+  const rimLight = new THREE.DirectionalLight(0x00e5ff, 0.4);
+  rimLight.position.set(-200, 150, 200);
+  scene.add(rimLight);
+
+  // ---------- texture helpers ----------
+  function glowTexture(inner, outer){
+    const c = document.createElement('canvas'); c.width=128; c.height=128;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(64,64,0,64,64,64);
+    g.addColorStop(0, inner); g.addColorStop(1, outer);
+    ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
+    return new THREE.CanvasTexture(c);
+  }
+  function clickMarkerTexture(color){
+    const c = document.createElement('canvas'); c.width=256; c.height=256;
+    const ctx = c.getContext('2d');
+    ctx.strokeStyle = color; ctx.lineWidth = 5;
+    ctx.setLineDash([14,12]);
+    ctx.beginPath(); ctx.arc(128,128,104,0,Math.PI*2); ctx.stroke();
+    ctx.setLineDash([]); ctx.lineWidth = 4;
+    const tick = 16;
+    [[128,8],[128,248],[8,128],[248,128]].forEach(([x,y])=>{
+      ctx.beginPath();
+      if(y<128){ ctx.moveTo(x,y); ctx.lineTo(x,y+tick); }
+      else if(y>128){ ctx.moveTo(x,y); ctx.lineTo(x,y-tick); }
+      else if(x<128){ ctx.moveTo(x,y); ctx.lineTo(x+tick,y); }
+      else { ctx.moveTo(x,y); ctx.lineTo(x-tick,y); }
+      ctx.stroke();
+    });
+    return new THREE.CanvasTexture(c);
+  }
+
+  // ---------- starfield ----------
+  function buildStarfield(count, rMin, rMax, palette){
+    const positions = new Float32Array(count*3);
+    const colors = new Float32Array(count*3);
+    for(let i=0;i<count;i++){
+      const r = rMin + Math.random()*(rMax-rMin);
+      const theta = Math.random()*Math.PI*2;
+      const phi = Math.acos((Math.random()*2)-1);
+      positions[i*3]   = r*Math.sin(phi)*Math.cos(theta);
+      positions[i*3+1] = r*Math.cos(phi);
+      positions[i*3+2] = r*Math.sin(phi)*Math.sin(theta);
+      const p = palette[Math.floor(Math.random()*palette.length)];
+      const b = 0.6 + Math.random()*0.4;
+      colors[i*3]=p[0]*b; colors[i*3+1]=p[1]*b; colors[i*3+2]=p[2]*b;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(colors,3));
+    const mat = new THREE.PointsMaterial({
+      size:1.7, vertexColors:true, transparent:true, opacity:0.9,
+      sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    return new THREE.Points(geo, mat);
+  }
+  const neonPalette = [[0,0.9,1],[0.64,0.36,1],[1,0.24,0.77],[0.18,1,0.75],[0.24,0.48,1]];
+  scene.add(buildStarfield(3200, 400, 1300, neonPalette));
+  scene.add(buildStarfield(1400, 220, 420, neonPalette));
+
+  // faint distant nebula blobs for cinematic depth
+  [[ -500,120,-300,'rgba(163,92,255,0.35)'],[420,-80,260,'rgba(0,229,255,0.28)'],[ -280,-200,-450,'rgba(255,62,196,0.22)']].forEach(([x,y,z,color])=>{
+    const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture(color, 'rgba(0,0,0,0)'), transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+    }));
+    spr.position.set(x,y,z); spr.scale.set(520,520,1);
+    scene.add(spr);
+  });
+
+  // neon digital grid floor
+  const grid = new THREE.GridHelper(900, 36, 0xa35cff, 0x241a3d);
+  grid.position.y = -180;
+  grid.material.transparent = true;
+  grid.material.opacity = 0.35;
+  scene.add(grid);
+
+  // ================= VAULT CORE =================
+  const vaultGroup = new THREE.Group();
+  const vaultCore = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(16, 1),
+    new THREE.MeshStandardMaterial({ color:0x0b0714, emissive:0x3a1f66, emissiveIntensity:0.6, roughness:0.35, metalness:0.6, flatShading:true })
+  );
+  vaultGroup.add(vaultCore);
+  const vaultWire = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(17.4, 1),
+    new THREE.MeshBasicMaterial({ color:0x00e5ff, wireframe:true, transparent:true, opacity:0.5 })
+  );
+  vaultGroup.add(vaultWire);
+  const vaultGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: glowTexture('rgba(180,140,255,0.9)','rgba(120,60,255,0)'),
+    transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+  }));
+  vaultGlow.scale.set(95,95,1);
+  vaultGroup.add(vaultGlow);
+  scene.add(vaultGroup);
+
+  const vaultHitSphere = new THREE.Mesh(new THREE.SphereGeometry(30,16,16), new THREE.MeshBasicMaterial({ visible:false }));
+  vaultGroup.add(vaultHitSphere);
+  const vaultMarker = new THREE.Sprite(new THREE.SpriteMaterial({ map:clickMarkerTexture('#c9baff'), transparent:true, depthWrite:false, opacity:0.75 }));
+  vaultMarker.scale.set(52,52,1);
+  vaultGroup.add(vaultMarker);
+
+  // ================= NODE BUILDER =================
+  const clickable = [];
+  const clickMarkers = [];
+  const nodeMeshes = {};      // id -> { mesh, marker, glow }
+  const edgeLines = [];       // { line, a, b, baseOpacity, dashed }
+  const flowStreams = [];     // { curve pts a,b, dots:[{sprite,t,speed}] }
+
+  nodeMeshes['vault'] = { mesh:vaultCore, marker:vaultMarker, group:vaultGroup, baseEmissive:0.6 };
+  vaultHitSphere.userData = { id:'vault' };
+  clickable.push(vaultHitSphere);
+  clickMarkers.push({ sprite:vaultMarker, base:52 });
+
+  function makeNode(id, worldPos, size, colorHex, isHub){
+    const group = new THREE.Group();
+    group.position.set(worldPos[0], worldPos[1], worldPos[2]);
+    scene.add(group);
+
+    const mesh = new THREE.Mesh(
+      new THREE.IcosahedronGeometry(size, 0),
+      new THREE.MeshStandardMaterial({ color:colorHex, emissive:colorHex, emissiveIntensity:0.55, roughness:0.4, metalness:0.3, flatShading:true })
+    );
+    group.add(mesh);
+
+    const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTexture('rgba(255,255,255,0.55)', 'rgba(0,0,0,0)'),
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, color: colorHex
+    }));
+    glow.scale.set(size*7, size*7, 1);
+    group.add(glow);
+
+    const hitRadius = Math.max(size*3.2, 9);
+    const hitSphere = new THREE.Mesh(new THREE.SphereGeometry(hitRadius, 12, 12), new THREE.MeshBasicMaterial({ visible:false }));
+    hitSphere.userData = { id };
+    group.add(hitSphere);
+    clickable.push(hitSphere);
+
+    const marker = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: clickMarkerTexture('#'+colorHex.toString(16).padStart(6,'0')), transparent:true, depthWrite:false, opacity:0.7
+    }));
+    const markerBase = hitRadius*2.3;
+    marker.scale.set(markerBase, markerBase, 1);
+    group.add(marker);
+    clickMarkers.push({ sprite:marker, base:markerBase });
+
+    nodeMeshes[id] = { mesh, marker, glow, group, baseEmissive:0.55 };
+    return group;
+  }
+
+  const hubColorNum = { daily:0x00e5ff, meeting:0x3d7bff, research:0xa35cff, project:0xff3ec4, output:0x2dffc0 };
+  Object.keys(CATEGORIES).forEach(catId => {
+    if(catId==='vault') return;
+    makeNode(catId, CATEGORIES[catId].pos, 9, hubColorNum[catId], true);
+  });
+  NOTES.forEach(n => {
+    makeNode(n.id, n.pos, 4.8, hubColorNum[n.cat], false);
+  });
+
+  // ================= EDGES + MEMORY FLOW =================
+  function lineBetween(aPos, bPos, colorHex, opacity, dashed){
+    const pts = [new THREE.Vector3(...aPos), new THREE.Vector3(...bPos)];
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = dashed
+      ? new THREE.LineDashedMaterial({ color:colorHex, transparent:true, opacity, dashSize:4, gapSize:3 })
+      : new THREE.LineBasicMaterial({ color:colorHex, transparent:true, opacity });
+    const line = new THREE.Line(geo, mat);
+    if(dashed) line.computeLineDistances();
+    scene.add(line);
+    return line;
+  }
+
+  // vault -> hub (thick memory-flow lines)
+  Object.keys(CATEGORIES).forEach(catId => {
+    if(catId==='vault') return;
+    const hubPos = CATEGORIES[catId].pos;
+    const line = lineBetween([0,0,0], hubPos, hubColorNum[catId], 0.55, false);
+    edgeLines.push({ line, a:'vault', b:catId, baseOpacity:0.55 });
+
+    const dots = [];
+    for(let i=0;i<2;i++){
+      const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: glowTexture('rgba(255,255,255,0.95)','rgba(255,255,255,0)'),
+        transparent:true, blending:THREE.AdditiveBlending, depthWrite:false, color:hubColorNum[catId]
+      }));
+      spr.scale.set(6,6,1);
+      scene.add(spr);
+      dots.push({ sprite:spr, t:i*0.5, speed:0.09 });
+    }
+    flowStreams.push({ from:new THREE.Vector3(...hubPos), to:new THREE.Vector3(0,0,0), dots });
+  });
+
+  // hub -> leaf (thin backlink lines)
+  NOTES.forEach(n => {
+    const hubPos = CATEGORIES[n.cat].pos;
+    const line = lineBetween(hubPos, n.pos, hubColorNum[n.cat], 0.3, false);
+    edgeLines.push({ line, a:n.cat, b:n.id, baseOpacity:0.3 });
+  });
+
+  // cross-category backlinks (dashed)
+  CROSS_LINKS.forEach(([a,b]) => {
+    const line = lineBetween(byId[a].pos, byId[b].pos, 0xffffff, 0.32, true);
+    edgeLines.push({ line, a, b, baseOpacity:0.32, dashed:true });
+  });
+
+  // ================= RAYCAST / SELECTION =================
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  const modalTag = document.getElementById('modalTag');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalTags = document.getElementById('modalTags');
+  const modalSummary = document.getElementById('modalSummary');
+  const modalRelated = document.getElementById('modalRelated');
+  const modalRelatedSection = document.getElementById('modalRelatedSection');
+  const modalActions = document.getElementById('modalActions');
+  const modalActionsSection = document.getElementById('modalActionsSection');
+
+  let selectedId = null;
+  let connectedIdeasMode = false;
+
+  function categoryLabel(catId){ return CATEGORIES[catId] ? CATEGORIES[catId].label : catId; }
+
+  function selectNode(id){
+    const d = byId[id];
+    if(!d) return;
+    selectedId = id;
+
+    modalTag.textContent = d.id==='vault' ? 'core' : categoryLabel(d.cat);
+    modalTitle.textContent = d.title;
+    modalSummary.textContent = d.summary;
+
+    modalTags.innerHTML = '';
+    (d.tags||[]).forEach(t => {
+      const el = document.createElement('span');
+      el.className = 'chip'; el.textContent = '#'+t;
+      modalTags.appendChild(el);
+    });
+
+    modalRelated.innerHTML = '';
+    if(d.related && d.related.length){
+      modalRelatedSection.style.display = 'block';
+      d.related.forEach(rid => {
+        const rd = byId[rid];
+        if(!rd) return;
+        const el = document.createElement('span');
+        el.className = 'chip link'; el.textContent = rd.title;
+        el.addEventListener('click', () => selectNode(rid));
+        modalRelated.appendChild(el);
+      });
+    } else {
+      modalRelatedSection.style.display = 'none';
+    }
+
+    modalActions.innerHTML = '';
+    if(d.actions && d.actions.length){
+      modalActionsSection.style.display = 'block';
+      d.actions.forEach(a => {
+        const row = document.createElement('div'); row.className = 'action-item';
+        row.innerHTML = '<span class="box"></span><span>'+a+'</span>';
+        modalActions.appendChild(row);
+      });
+    } else {
+      modalActionsSection.style.display = 'none';
+    }
+
+    modalOverlay.classList.add('open');
+    controls.autoRotate = false;
+    pulseNode(id);
+    if(connectedIdeasMode) highlightConnections(id); else resetHighlights();
+  }
+
+  function closeModal(){ modalOverlay.classList.remove('open'); }
+  document.getElementById('modalClose').addEventListener('click', closeModal);
+  document.getElementById('modalCloseBtn2').addEventListener('click', closeModal);
+
+  // ---- connected-ideas highlighting ----
+  function connectedSetFor(id){
+    const set = new Set([id]);
+    const d = byId[id];
+    if(d && d.related) d.related.forEach(r => set.add(r));
+    if(d && d.cat && CATEGORIES[d.cat]) set.add(d.cat);
+    if(CATEGORIES[id]){ NOTES.filter(n=>n.cat===id).forEach(n=>set.add(n.id)); set.add('vault'); }
+    if(id==='vault') Object.keys(CATEGORIES).forEach(k=>{ if(k!=='vault') set.add(k); });
+    return set;
+  }
+  function highlightConnections(id){
+    const set = connectedSetFor(id);
+    Object.keys(nodeMeshes).forEach(nid => {
+      const n = nodeMeshes[nid];
+      const on = set.has(nid);
+      n.mesh.material.emissiveIntensity = on ? 1.1 : 0.12;
+      n.marker.material.opacity = on ? 0.95 : 0.15;
+      if(n.glow) n.glow.material.opacity = on ? 1 : 0.2;
+    });
+    edgeLines.forEach(e => {
+      const on = set.has(e.a) && set.has(e.b);
+      e.line.material.opacity = on ? Math.min(e.baseOpacity*2.2, 0.9) : e.baseOpacity*0.12;
+    });
+  }
+  function resetHighlights(){
+    Object.keys(nodeMeshes).forEach(nid => {
+      const n = nodeMeshes[nid];
+      n.mesh.material.emissiveIntensity = n.baseEmissive;
+      n.marker.material.opacity = 0.7;
+      if(n.glow) n.glow.material.opacity = 1;
+    });
+    edgeLines.forEach(e => { e.line.material.opacity = e.baseOpacity; });
+  }
+
+  const modeToggle = document.getElementById('modeToggle');
+  modeToggle.addEventListener('click', () => {
+    connectedIdeasMode = !connectedIdeasMode;
+    modeToggle.classList.toggle('active', connectedIdeasMode);
+    if(connectedIdeasMode && selectedId) highlightConnections(selectedId);
+    else resetHighlights();
+  });
+
+  // ---- click feedback pulse (soundless) ----
+  const activePulses = [];
+  function pulseNode(id){
+    const n = nodeMeshes[id];
+    if(!n) return;
+    activePulses.push({ marker:n.marker, start:performance.now() });
+  }
+
+  // ---- click / hover raycasting ----
+  renderer.domElement.addEventListener('click', (e) => {
+    mouse.x = (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickable, false);
+    if(hits.length) selectNode(hits[0].object.userData.id);
+  });
+
+  const tooltip = document.getElementById('tooltip');
+  renderer.domElement.addEventListener('mousemove', (e) => {
+    mouse.x = (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(clickable, false);
+    if(hits.length){
+      renderer.domElement.style.cursor = 'pointer';
+      const d = byId[hits[0].object.userData.id];
+      tooltip.textContent = d ? d.title : '';
+      tooltip.style.left = e.clientX+'px';
+      tooltip.style.top = e.clientY+'px';
+      tooltip.classList.add('show');
+    } else {
+      renderer.domElement.style.cursor = 'grab';
+      tooltip.classList.remove('show');
+    }
+  });
+
+  // ================= LEGEND + NOTES DRAWER (guaranteed click path) =================
+  document.querySelectorAll('.legend-btn').forEach(btn => {
+    btn.addEventListener('click', () => selectNode(btn.dataset.name));
+  });
+
+  const notesList = document.getElementById('notesList');
+  Object.keys(CATEGORIES).forEach(catId => {
+    if(catId==='vault') return;
+    const block = document.createElement('div'); block.className = 'cat-block';
+    const head = document.createElement('div'); head.className = 'cat-head';
+    head.innerHTML = '<span class="dot" style="background:'+CATEGORIES[catId].hex+';color:'+CATEGORIES[catId].hex+'"></span>'+CATEGORIES[catId].label;
+    block.appendChild(head);
+    NOTES.filter(n => n.cat===catId).forEach(n => {
+      const card = document.createElement('button'); card.className = 'note-card';
+      card.innerHTML = '<div class="t">'+n.title+'</div><div class="tg">#'+n.tags.join(' #')+'</div>';
+      card.addEventListener('click', () => selectNode(n.id));
+      block.appendChild(card);
+    });
+    notesList.appendChild(block);
+  });
+
+  // notes sidebar is visible by default — collapsible via the side tab so it doesn't have to block the 3D view
+  const notesSidebar = document.getElementById('notesSidebar');
+  const sidebarTab = document.getElementById('sidebarTab');
+  sidebarTab.addEventListener('click', () => {
+    const collapsed = notesSidebar.classList.toggle('collapsed');
+    sidebarTab.textContent = collapsed ? '☰ NOTES' : '✕ CLOSE';
+  });
+
+  // ================= FOCUS NOTE (camera tween) =================
+  let tween = null;
+  document.getElementById('focusBtn').addEventListener('click', () => {
+    if(!selectedId) return;
+    const n = nodeMeshes[selectedId];
+    if(!n) return;
+    const targetPos = new THREE.Vector3();
+    n.group.getWorldPosition(targetPos);
+    const dir = camera.position.clone().sub(controls.target).normalize();
+    const newCamPos = targetPos.clone().add(dir.multiplyScalar(55));
+    tween = {
+      fromCam:camera.position.clone(), toCam:newCamPos,
+      fromTarget:controls.target.clone(), toTarget:targetPos.clone(),
+      start:performance.now(), dur:700
+    };
+    controls.autoRotate = false;
+    closeModal();
+  });
+
+  // ================= JOYSTICK =================
+  const initialCameraPos = camera.position.clone();
+  function nudgeCamera(dTheta, dPhi, dRadius){
+    const offset = camera.position.clone().sub(controls.target);
+    const sph = new THREE.Spherical().setFromVector3(offset);
+    sph.theta += dTheta;
+    sph.phi = Math.max(0.15, Math.min(Math.PI-0.15, sph.phi + dPhi));
+    sph.radius = Math.max(controls.minDistance, Math.min(controls.maxDistance, sph.radius + dRadius));
+    offset.setFromSpherical(sph);
+    camera.position.copy(controls.target).add(offset);
+    camera.lookAt(controls.target);
+  }
+  let joystickTimer = null;
+  function joystickStep(action){
+    if(action==='left') nudgeCamera(-0.045,0,0);
+    else if(action==='right') nudgeCamera(0.045,0,0);
+    else if(action==='up') nudgeCamera(0,-0.035,0);
+    else if(action==='down') nudgeCamera(0,0.035,0);
+    else if(action==='in') nudgeCamera(0,0,-10);
+    else if(action==='out') nudgeCamera(0,0,10);
+    else if(action==='reset'){
+      controls.target.set(0,0,0);
+      camera.position.copy(initialCameraPos);
+      camera.lookAt(controls.target);
+      controls.autoRotate = true;
+    }
+  }
+  function startJoystick(action){
+    controls.autoRotate = false;
+    stopJoystick();
+    joystickStep(action);
+    if(action!=='reset') joystickTimer = setInterval(()=>joystickStep(action), 40);
+  }
+  function stopJoystick(){ if(joystickTimer){ clearInterval(joystickTimer); joystickTimer=null; } }
+  document.querySelectorAll('.jbtn').forEach(btn => {
+    const act = btn.dataset.act;
+    btn.addEventListener('pointerdown', (e)=>{ e.preventDefault(); startJoystick(act); });
+  });
+  window.addEventListener('pointerup', stopJoystick);
+  window.addEventListener('pointercancel', stopJoystick);
+
+  // ================= RESIZE =================
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth/window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  // ================= ANIMATE =================
+  const clock = new THREE.Clock();
+  function animate(){
+    requestAnimationFrame(animate);
+    const dt = clock.getDelta();
+    const t = clock.getElapsedTime();
+
+    vaultCore.rotation.y += dt*0.15;
+    vaultWire.rotation.y -= dt*0.09;
+    vaultGroup.scale.setScalar(1 + Math.sin(t*0.9)*0.02);
+    coreLight.intensity = 2.2 + Math.sin(t*1.3)*0.35;
+
+    Object.keys(nodeMeshes).forEach(nid => {
+      if(nid==='vault') return;
+      nodeMeshes[nid].mesh.rotation.y += dt*0.25;
+      nodeMeshes[nid].mesh.rotation.x += dt*0.12;
+    });
+
+    clickMarkers.forEach((m,i) => {
+      const pulse = 1 + Math.sin(t*1.6 + i*0.7)*0.08;
+      m.sprite.scale.set(m.base*pulse, m.base*pulse, 1);
+      m.sprite.material.rotation += dt*0.15;
+    });
+
+    // memory flow dots
+    flowStreams.forEach(s => {
+      s.dots.forEach(d => {
+        d.t += dt*d.speed;
+        if(d.t>1) d.t -= 1;
+        d.sprite.position.lerpVectors(s.from, s.to, d.t);
+      });
+    });
+
+    // click feedback pulses
+    for(let i=activePulses.length-1;i>=0;i--){
+      const p = activePulses[i];
+      const el = (performance.now()-p.start)/380;
+      if(el>=1){ activePulses.splice(i,1); continue; }
+      const bump = 1 + Math.sin(el*Math.PI)*0.6;
+      p.marker.scale.set(p.marker.scale.x, p.marker.scale.x, 1); // keep square
+      p.marker.material.opacity = 0.7 + Math.sin(el*Math.PI)*0.3;
+    }
+
+    // camera focus tween
+    if(tween){
+      const el = Math.min((performance.now()-tween.start)/tween.dur, 1);
+      const ease = el<0.5 ? 2*el*el : -1+(4-2*el)*el;
+      camera.position.lerpVectors(tween.fromCam, tween.toCam, ease);
+      controls.target.lerpVectors(tween.fromTarget, tween.toTarget, ease);
+      if(el>=1) tween = null;
+    }
+
+    controls.update();
+    renderer.render(scene, camera);
+  }
+  animate();
+
+})();
+</script>
+</body>
+</html>
