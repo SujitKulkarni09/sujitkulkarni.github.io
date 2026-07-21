@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Dashboard Playbook — An Interactive Field Guide for AI Copilot Tools</title>
+<meta name="description" content="An independent, interactive field guide to building dashboards, kanban boards and status reports with AI copilot tools — base to expert level, matched to audience and cadence. Sourced strictly from publicly available material, for educational purposes only. Compiled by Sujit Kulkarni.">
+<meta name="author" content="Sujit Kulkarni">
+<style>
+  :root{
+    --paper:#F2F1EC;
+    --paper-card:#FFFDF9;
+    --ink:#1B1D1A;
+    --ink-soft:#5C6058;
+    --hair:#DCDACF;
+    --base:#5B6B84;
+    --med:#B9764F;
+    --expert:#7A5FA6;
+    --slt:#2F6E4F;
+    --cadence:#3A6EA5;
+    --tmpl:#A6483F;
+    --trouble:#B23A2E;
+    --story:#2C7A6B;
+    --accent:#1B1B1B;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif; line-height:1.55;}
+  .serif{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;}
+  a{color:inherit;}
+  .wrap{max-width:960px; margin:0 auto; padding:0 22px;}
+  .eyebrow{text-transform:uppercase; letter-spacing:.14em; font-size:.72rem; font-weight:700; color:var(--ink-soft);}
+
+  /* top disclaimer bar */
+  .disclaimer-bar{background:#1B1B1B; color:#EFE7D8; font-size:.72rem; padding:8px 0;}
+  .disclaimer-bar .wrap{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; justify-content:center; text-align:center;}
+  .disclaimer-bar b{color:#F3C98B;}
+  .disclaimer-bar .sep{opacity:.4;}
+
+  /* topbar */
+  .topbar{position:sticky; top:0; z-index:50; background:rgba(242,241,236,.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--hair);}
+  .topbar .wrap{display:flex; align-items:center; gap:14px;}
+  .topbar-row1{padding-top:9px; padding-bottom:5px;}
+  .topbar-row2{padding-top:0; padding-bottom:8px;}
+  .topbar .brand{font-weight:800; font-size:.92rem; white-space:nowrap; flex-shrink:0;}
+  .topnav{display:flex; gap:2px; flex-wrap:nowrap; width:100%; overflow-x:auto; scrollbar-width:none;}
+  .topnav::-webkit-scrollbar{display:none;}
+  .topnav a{font-size:.74rem; padding:7px 9px; border-radius:7px; white-space:nowrap; text-decoration:none; color:var(--ink-soft); border:1px solid transparent; flex-shrink:0;}
+  .topnav a:hover, .topnav a.active{border-color:var(--hair); color:var(--ink); background:var(--paper-card); font-weight:800;}
+  .progress-track{position:absolute; left:0; right:0; bottom:-5px; height:5px; background:rgba(0,0,0,.08);}
+  .progress-fill{height:100%; width:0%; background:var(--med); border-radius:0 3px 3px 0; box-shadow:0 0 10px 1px var(--med); transition:width .1s linear, background-color .35s ease, box-shadow .35s ease;}
+  .progress-pct{flex-shrink:0; font-family:monospace; font-weight:800; font-size:.74rem; font-variant-numeric:tabular-nums; padding:5px 11px; border-radius:999px; background:var(--paper-card); border:2px solid var(--med); color:var(--med); transition:color .35s ease, border-color .35s ease; white-space:nowrap;}
+
+  /* dot rail minimap */
+  .dot-rail{position:fixed; right:14px; top:50%; transform:translateY(-50%); z-index:40; display:flex; flex-direction:column; gap:9px;}
+  .dot-rail .dot{width:9px; height:9px; border-radius:50%; background:var(--hair); border:none; cursor:pointer; padding:0; position:relative; transition:transform .15s;}
+  .dot-rail .dot:hover{transform:scale(1.4);}
+  .dot-rail .dot.active{background:var(--dot-color,var(--ink)); transform:scale(1.5);}
+  .dot-rail .dot-label{position:absolute; right:16px; top:50%; transform:translateY(-50%); background:var(--ink); color:#fff; font-size:.68rem; padding:3px 8px; border-radius:6px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s;}
+  .dot-rail .dot:hover .dot-label, .dot-rail .dot:focus-visible .dot-label{opacity:1;}
+  @media(max-width:900px){.dot-rail{display:none;}}
+
+  /* hero */
+  header.hero{padding:60px 0 36px; border-bottom:1px solid var(--hair); position:relative; overflow:hidden;
+    background: radial-gradient(ellipse 700px 340px at 82% -8%, rgba(255,255,255,.65), transparent 65%), linear-gradient(180deg, rgba(255,255,255,.35), transparent 40%);}
+  header.hero::before{content:"ISSUE №1 — DASHBOARD & REPORTING FIELD GUIDE"; position:absolute; top:22px; right:22px; font-size:.62rem; letter-spacing:.16em; font-weight:800; color:var(--ink-soft); opacity:.55; text-transform:uppercase;}
+  .kicker{font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); font-weight:700;}
+  h1.title{font-size:2.5rem; margin:.35em 0 .1em; line-height:1.08; color:var(--ink); filter:drop-shadow(0 1px 0 rgba(255,255,255,.5));}
+  @supports((background-clip:text) or (-webkit-background-clip:text)){
+    h1.title{background:linear-gradient(180deg,#3d372f 0%,#171512 45%,#3d372f 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  }
+  .subtitle{font-size:1.12rem; color:var(--ink-soft); max-width:640px; margin-bottom:6px;}
+
+  .hero-author{display:flex; align-items:center; gap:16px; margin-top:22px; padding:14px 20px 14px 14px; background:var(--paper-card); border:1px solid var(--hair); border-radius:18px; max-width:580px; box-shadow:0 16px 32px -22px rgba(30,20,10,.45);}
+  .hero-author-avatar{width:78px; height:78px; border-radius:50%; flex-shrink:0; border:3px solid #fff; position:relative; isolation:isolate; overflow:hidden; box-shadow:0 0 0 1px var(--hair),0 12px 24px -10px rgba(30,20,10,.55),0 1px 0 rgba(255,255,255,.7);}
+  .hero-author-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .hero-author-avatar::after{content:""; position:absolute; z-index:2; pointer-events:none; top:-30%; left:-40%; width:70%; height:160%; background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.85) 45%,rgba(255,255,255,0) 65%); transform:rotate(18deg);}
+  .hero-author-info{min-width:0;}
+  .hero-author-name{font-family:Georgia,serif; font-weight:800; font-size:1.18rem; line-height:1.15;}
+  .hero-author-desc{font-size:.85rem; color:var(--ink-soft); line-height:1.45; margin-top:3px; max-width:400px;}
+  .hero-author-creds{font-size:.72rem; color:var(--ink-soft); margin-top:7px; font-weight:700;}
+
+  .stats-strip{display:flex; gap:10px; flex-wrap:wrap; margin:20px 0 4px;}
+  .stat-pill{background:var(--paper-card); border:1px solid var(--hair); border-radius:11px; padding:9px 14px; display:flex; flex-direction:column; min-width:84px;}
+  .stat-pill .n{font-size:1.25rem; font-weight:800; font-family:Georgia,serif; line-height:1;}
+  .stat-pill .l{font-size:.66rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin-top:3px;}
+
+  /* ask box */
+  .ask-box{margin-top:26px; background:var(--paper-card); border:1px solid var(--hair); border-left:3px solid #3a332c; border-radius:12px; padding:20px 22px; max-width:640px; box-shadow:0 10px 24px -18px rgba(30,20,10,.35);}
+  .ask-header{display:flex; align-items:flex-start; gap:13px; margin-bottom:16px;}
+  .ask-avatar{width:34px; height:34px; border-radius:50%; overflow:hidden; flex-shrink:0; border:2px solid var(--paper-card); box-shadow:0 0 0 1px var(--hair);}
+  .ask-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .ask-header-text{flex:1; min-width:0; padding-top:2px;}
+  .ask-header-text .lbl{font-weight:800; font-size:1.05rem;}
+  .ask-header-text .sub{color:var(--ink-soft); font-size:.85rem; line-height:1.5; margin-top:4px;}
+  .ask-row{display:flex; gap:8px;}
+  .ask-input-wrap{position:relative; flex:1; min-width:0;}
+  .ask-row input{width:100%; padding:11px 70px 11px 14px; border-radius:9px; border:1px solid var(--hair); font-size:.92rem; font-family:inherit; background:#fff;}
+  .ask-row input:focus{border-color:#3a332c; box-shadow:0 0 0 3px rgba(58,51,44,.1); outline:none;}
+  .ask-row .kbd-hint{position:absolute; right:10px; top:50%; transform:translateY(-50%); font-size:.66rem; color:var(--ink-soft); border:1px solid var(--hair); border-radius:5px; padding:2px 6px; background:var(--paper); pointer-events:none; font-family:monospace;}
+  .ask-row button{padding:11px 18px; border-radius:9px; border:none; background:linear-gradient(180deg,#4a4038,var(--accent) 55%,#0f0d0b); color:#fff; font-weight:700; cursor:pointer; font-size:.88rem; position:relative; overflow:hidden;
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 -3px 0 rgba(0,0,0,.4) inset, 0 10px 20px -8px rgba(0,0,0,.55);}
+  .ask-row button:active{transform:translateY(1px);}
+  .ask-suggest{margin-top:12px; font-size:.78rem; color:var(--ink-soft); display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+  .ask-suggest .try-lbl{font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; margin-right:2px;}
+  .chip-btn{border:1px solid var(--hair); background:#fff; border-radius:999px; padding:5px 12px; font-size:.78rem; cursor:pointer; color:var(--ink-soft);}
+  .chip-btn:hover{border-color:#3a332c; color:var(--ink);}
+  #askResult{margin-top:14px; font-size:.9rem; display:none; border-left:3px solid #3a332c; background:var(--paper); border-radius:0 8px 8px 0; padding:11px 14px;}
+  .runs-locally{margin-top:12px; font-size:.72rem; color:var(--ink-soft); display:flex; align-items:center; gap:5px;}
+  .runs-locally::before{content:"●"; color:#2F5C3D; font-size:.6rem;}
+
+  /* prompt builder */
+  .builder-box{
+    margin-top:18px; background:var(--paper-card); border:1px solid var(--hair);
+    border-left:3px solid var(--cadence); border-radius:12px; padding:18px 20px; max-width:640px;
+    box-shadow:0 10px 24px -18px rgba(30,20,10,.35);
+  }
+  .builder-header .lbl{font-weight:800; font-size:1rem;}
+  .builder-header .sub{color:var(--ink-soft); font-size:.82rem; margin-top:3px; margin-bottom:12px;}
+  .builder-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px 12px; margin-top:4px;}
+  @media(max-width:520px){.builder-grid{grid-template-columns:1fr;}}
+  .builder-field{display:flex; flex-direction:column; gap:4px; font-size:.72rem; font-weight:700; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;}
+  .builder-field select{
+    padding:9px 10px; border-radius:8px; border:1px solid var(--hair); font-size:.86rem; font-family:inherit;
+    font-weight:400; text-transform:none; letter-spacing:normal; color:var(--ink); background:#fff;
+  }
+  .builder-field select:focus{border-color:var(--cadence); outline:none;}
+  .builder-check-row{display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin-top:14px;}
+  .builder-check-lbl{font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:800; margin-right:2px;}
+  .bp-chip{display:flex; align-items:center; gap:5px; border:1px solid var(--hair); background:#fff; border-radius:999px; padding:5px 11px 5px 9px; font-size:.78rem; cursor:pointer; color:var(--ink-soft);}
+  .bp-chip input{margin:0; accent-color:var(--cadence);}
+  .bp-chip:has(input:checked){border-color:var(--cadence); color:var(--ink); font-weight:700;}
+  .builder-btn{
+    margin-top:14px; padding:10px 18px; border-radius:9px; border:none; cursor:pointer; font-weight:700; font-size:.86rem; color:#fff;
+    background:linear-gradient(180deg,#4a4038,var(--accent) 55%,#0f0d0b);
+    box-shadow:0 1px 0 rgba(255,255,255,.35) inset, 0 -3px 0 rgba(0,0,0,.4) inset, 0 10px 20px -8px rgba(0,0,0,.55);
+  }
+  .builder-btn:active{transform:translateY(1px);}
+  .builder-result-wrap{display:none; margin-top:14px;}
+  .builder-output{
+    width:100%; padding:11px 12px; border-radius:9px; border:1px solid var(--hair); background:var(--paper);
+    font-family:inherit; font-size:.85rem; color:var(--ink); resize:vertical;
+  }
+  .builder-copy-btn{margin-top:8px; padding:8px 14px; border-radius:8px; border:1px solid var(--hair); background:#fff; font-size:.8rem; font-weight:700; cursor:pointer; color:var(--ink-soft);}
+  .builder-copy-btn:hover{border-color:var(--cadence); color:var(--ink);}
+  .builder-copy-btn.copied{border-color:#2F5C3D; color:#2F5C3D;}
+
+  /* glossary: sub-heads + prompt list */
+  .glossary-sub-head{font-size:.78rem; font-weight:800; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); margin:6px 0 14px; padding-bottom:8px; border-bottom:1px dashed var(--hair);}
+  .prompt-glossary-list{display:flex; flex-direction:column; gap:10px;}
+  .prompt-glossary-item{background:var(--paper-card); border:1px solid var(--hair); border-left:3px solid var(--c,#333); border-radius:10px; padding:12px 14px;}
+  .prompt-glossary-item .pg-src{font-size:.68rem; font-weight:800; text-transform:uppercase; letter-spacing:.05em; color:var(--c,#333); margin-bottom:5px;}
+  .prompt-glossary-item .pg-text{font-size:.86rem; line-height:1.5; margin:0;}
+  .prompt-glossary-item .pg-copy{margin-top:8px; font-size:.7rem; padding:4px 10px; border-radius:6px; border:1px solid var(--hair); background:#fff; cursor:pointer; color:var(--ink-soft);}
+  .prompt-glossary-item .pg-copy:hover{border-color:var(--c,#333); color:var(--ink);}
+  .prompt-glossary-item .pg-copy.copied{border-color:#2F5C3D; color:#2F5C3D;}
+
+  /* palette cards + live preview */
+  .palette-card{background:var(--paper-card); border:1px solid var(--hair); border-radius:12px; padding:14px 16px;}
+  .swatch-row{display:flex; gap:6px; margin-bottom:10px;}
+  .swatch{width:26px; height:26px; border-radius:6px; border:1px solid rgba(0,0,0,.08); display:inline-block;}
+  .palette-card h4{margin:0 0 4px; font-size:.92rem;}
+  .hex-list{font-size:.72rem; color:var(--ink-soft); font-family:monospace; margin:0 0 10px;}
+  .preview-btn{padding:7px 14px; border-radius:8px; border:1px solid var(--hair); background:#fff; font-size:.78rem; font-weight:700; cursor:pointer; color:var(--ink-soft);}
+  .preview-btn:hover{border-color:var(--story); color:var(--ink);}
+  .live-preview{margin-top:20px; padding:20px; border-radius:14px; border:1px solid var(--hair); background:#F4F6F9; transition:background .3s ease;}
+  .lp-kpi{display:flex; flex-direction:column; gap:2px; margin-bottom:12px;}
+  .lp-n{font-size:1.6rem; font-weight:800; font-family:Georgia,serif; color:#2C5C8A; transition:color .3s ease;}
+  .lp-l{font-size:.78rem; color:#5C6058;}
+  .lp-bar{height:8px; border-radius:99px; background:rgba(0,0,0,.08); overflow:hidden; margin-bottom:10px;}
+  .lp-bar-fill{height:100%; width:72%; background:#2C5C8A; border-radius:99px; transition:background .3s ease;}
+  .lp-note{font-size:.76rem; color:#5C6058;}
+
+  /* before / after */
+  .ba-panel{background:var(--paper-card); border:1px solid var(--hair); border-radius:12px; padding:16px;}
+  .ba-label{font-weight:800; font-size:.82rem; margin-bottom:10px; color:#B23A2E;}
+  .ba-row{display:flex; flex-wrap:wrap; gap:4px; margin-bottom:8px;}
+  .ba-chip{font-size:.62rem; font-weight:700; padding:3px 7px; border-radius:5px; color:#3a332c;}
+  .ba-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:5px;}
+  .ba-box{height:36px; border-radius:5px; background:repeating-linear-gradient(45deg,#e9e5da,#e9e5da 4px,#ddd7c8 4px,#ddd7c8 8px);}
+  .ba-note{font-size:.76rem; color:var(--ink-soft); margin:10px 0 0;}
+  .ba-hero-num{font-size:1.5rem; font-weight:800; font-family:Georgia,serif; display:flex; align-items:center; gap:8px;}
+  .ba-sub{font-size:.78rem; color:var(--ink-soft); margin-bottom:14px;}
+  .ba-grid-clean{grid-template-columns:2fr 1fr;}
+  .ba-grid-clean .ba-box{background:#EDF1F5; height:70px;}
+  .ba-grid-clean .ba-box.tall{height:70px;}
+
+  /* checklist */
+  .check-list{list-style:none; padding:0; margin:16px 0;}
+  .check-list li{display:flex; align-items:center; gap:10px; padding:10px 12px; border:1px solid var(--hair); border-radius:8px; margin-bottom:6px; font-size:.88rem; cursor:pointer; background:var(--paper-card); transition:background .15s;}
+  .check-list li:hover{background:#fff;}
+  .check-list li .cb{width:18px; height:18px; border-radius:5px; border:2px solid var(--hair); flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:all .15s;}
+  .check-list li.done .cb{background:#2F5C3D; border-color:#2F5C3D;}
+  .check-list li.done .cb::after{content:"✓"; color:#fff; font-size:.7rem; font-weight:800;}
+  .check-list li.done{background:#EEF5EF; text-decoration:line-through; color:var(--ink-soft);}
+
+  /* download button */
+  .download-btn{margin-bottom:14px; padding:8px 15px; border-radius:8px; border:1px solid var(--hair); background:#fff; font-size:.8rem; font-weight:700; cursor:pointer; color:var(--ink-soft);}
+  .download-btn:hover{border-color:var(--ink); color:var(--ink);}
+
+  /* sections + glossy cards */
+  .section{padding:52px 0; border-bottom:1px solid var(--hair);}
+  .section h2{font-size:1.65rem; margin:0 0 6px;}
+  .section .tag{font-size:.82rem; color:var(--ink-soft); margin-bottom:24px; max-width:680px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid3{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .box{background:var(--paper-card); border:1px solid var(--hair); border-radius:14px; padding:16px 18px; border-top:3px solid var(--c,#333); position:relative; overflow:hidden; isolation:isolate;
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 20px 30px -20px rgba(30,20,10,.5), 0 2px 7px rgba(30,20,10,.12);}
+  .box::before{content:""; position:absolute; z-index:1; pointer-events:none; top:-70%; left:-30%; width:55%; height:260%; background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.85) 45%,rgba(255,255,255,0) 62%); transform:rotate(14deg);}
+  .box h4{margin:0 0 8px; font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); position:relative; z-index:2;}
+  .box p{margin:0; font-size:.92rem; position:relative; z-index:2;}
+  .caveat{background:#FBF3E7; border:1px solid #E8D3B0; border-radius:10px; padding:12px 16px; font-size:.86rem; margin:16px 0;}
+  .avoid{background:#FBEBEA; border:1px solid #ECC5C1; border-radius:10px; padding:12px 16px; font-size:.86rem; margin:16px 0;}
+
+  /* hub + spokes */
+  .hub-wrap{position:relative; padding:30px 0 10px;}
+  svg.lines{position:absolute; inset:0; width:100%; height:100%; pointer-events:none;}
+  svg.lines path{fill:none; stroke:var(--hair); stroke-width:2;}
+  .hub-center{display:flex; flex-direction:column; align-items:center; gap:8px; margin:0 auto 40px; width:190px; background:linear-gradient(180deg,#fffdf9,var(--paper-card)); border:2px solid var(--ink); border-radius:16px; padding:18px; position:relative; z-index:2; text-align:center;}
+  .hub-center .name{font-weight:800; font-family:monospace; font-size:.92rem;}
+  .hub-center .sub{font-size:.66rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);}
+  .spokes{display:grid; grid-template-columns:repeat(6,1fr); gap:10px; position:relative; z-index:2;}
+  @media(max-width:820px){.spokes{grid-template-columns:repeat(3,1fr);}}
+  @media(max-width:480px){.spokes{grid-template-columns:repeat(2,1fr);}}
+  .node{background:var(--paper-card); border:1px solid var(--hair); border-radius:12px; padding:14px 6px; text-align:center; cursor:pointer; transition:transform .15s,border-color .15s; text-decoration:none; color:var(--ink); display:block;}
+  .node:hover{transform:translateY(-4px); border-color:var(--ink);}
+  .node .icon{width:34px; height:34px; margin:0 auto 8px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:.9rem;}
+  .node .lbl{font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.03em;}
+
+  /* skill-card style item grid (used per category) */
+  .skills-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin:18px 0 4px;}
+  @media(max-width:700px){.skills-grid{grid-template-columns:1fr;}}
+  .skill-card{position:relative; overflow:hidden; isolation:isolate; background:linear-gradient(180deg,#fffefb,color-mix(in srgb,var(--crew,#333) 6%,var(--paper-card))); border-radius:14px; padding:16px 18px; border-top:3px solid var(--crew,#333);
+    box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 18px 28px -18px rgba(30,20,10,.5), 0 2px 7px rgba(30,20,10,.12);}
+  .skill-card::before{content:""; position:absolute; z-index:1; pointer-events:none; top:-70%; left:-30%; width:55%; height:260%; background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.85) 45%,rgba(255,255,255,0) 62%); transform:rotate(14deg);}
+  .skill-name{position:relative; z-index:2; font-weight:800; font-size:1rem; color:var(--crew,#333);}
+  .skill-desc{position:relative; z-index:2; font-size:.86rem; margin:8px 0 10px;}
+  .src-tag{position:relative; z-index:2; display:inline-block; font-size:.64rem; padding:3px 8px; border-radius:999px; font-weight:800; white-space:nowrap;}
+  .src-base{background:#E4E9EF; color:var(--base);}
+  .src-med{background:#F3E1D2; color:var(--med);}
+  .src-expert{background:#EBE3F3; color:var(--expert);}
+
+  .crew-head{display:flex; align-items:center; gap:16px; margin-bottom:6px;}
+  .crew-head .icon-wrap{width:52px; height:52px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; font-size:1.2rem; background:var(--crew);}
+  .crew-badge{font-size:.72rem; color:var(--crew); font-weight:800; text-transform:uppercase; letter-spacing:.1em;}
+
+  /* tabs */
+  .tabs{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:0;}
+  .tab-btn{border:1px solid var(--hair); background:var(--paper-card); border-radius:9px 9px 0 0; padding:9px 14px; font-size:.82rem; cursor:pointer; font-weight:700; color:var(--ink-soft);}
+  .tab-btn.active{background:#fff; color:var(--ink); border-bottom:2px solid #fff; position:relative; top:1px; box-shadow:0 1px 0 rgba(255,255,255,.9) inset, 0 -6px 14px -10px rgba(0,0,0,.15) inset;}
+  .tab-panel{display:none; background:#fff; border:1px solid var(--hair); border-radius:0 10px 10px 10px; padding:18px;}
+  .tab-panel.active{display:block;}
+  .step-list{counter-reset:step; list-style:none; padding:0; margin:10px 0;}
+  .step-list li{counter-increment:step; position:relative; padding-left:34px; margin-bottom:10px; font-size:.9rem;}
+  .step-list li::before{content:counter(step); position:absolute; left:0; top:0; width:24px; height:24px; border-radius:50%; background:var(--ink); color:#fff; font-size:.72rem; display:flex; align-items:center; justify-content:center; font-weight:700;}
+  pre{background:#1B1B1B; color:#F1E9DA; padding:14px 16px; border-radius:10px; overflow-x:auto; font-size:.82rem; line-height:1.6; margin:10px 0; position:relative;}
+  code{font-family:"SFMono-Regular",Consolas,monospace;}
+  .copy-btn{position:absolute; top:8px; right:8px; font-size:.68rem; background:#28303B; color:#EAEFF5; border:1px solid #3a4552; border-radius:6px; padding:4px 9px; cursor:pointer;}
+  .copy-btn:hover{background:#3a4552;}
+
+  /* templates */
+  .tmpl-card{background:var(--paper-card); border:1px solid var(--hair); border-radius:12px; padding:18px 20px; margin-bottom:16px; border-left:4px solid var(--tmpl);}
+  .tmpl-card h4{margin:0 0 4px; font-size:1.02rem;}
+  .tmpl-card .pairs{font-size:.76rem; color:var(--tmpl); font-weight:700; text-transform:uppercase; letter-spacing:.04em; margin-bottom:10px;}
+  .mock{border:1px dashed var(--hair); border-radius:10px; padding:12px; background:#FAFBFC; font-size:.78rem; margin-top:10px;}
+  .mock-row{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;}
+  .mock-box{flex:1; min-width:80px; background:#fff; border:1px solid var(--hair); border-radius:7px; padding:8px 10px; text-align:center; font-weight:700; color:var(--ink-soft); font-size:.72rem;}
+  .rag{display:inline-block; width:9px; height:9px; border-radius:50%; margin-right:5px;}
+  .rag.g{background:#2F9E5C;} .rag.a{background:#D9922B;} .rag.r{background:#D9453F;}
+
+  /* finder */
+  .finder-box{background:var(--paper-card); border:1px solid var(--hair); border-radius:16px; padding:20px 22px; max-width:100%; box-shadow:0 14px 30px -22px rgba(30,20,10,.4);}
+  #finderInput{width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--hair); font-size:.98rem; font-family:inherit; background:#fff; margin-bottom:14px;}
+  #finderInput:focus{border-color:#3a332c; box-shadow:0 0 0 3px rgba(58,51,44,.1); outline:none;}
+  .finder-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;}
+  .finder-lbl{font-size:.7rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft); font-weight:800; margin-right:2px;}
+  .finder-chip{border:1px solid var(--hair); background:#fff; border-radius:999px; padding:6px 13px; font-size:.8rem; cursor:pointer; color:var(--ink-soft); font-family:inherit;}
+  .finder-chip.active{background:#3a332c; border-color:#3a332c; color:#fff; font-weight:700;}
+  .finder-status{font-size:.82rem; color:var(--ink-soft); margin-top:8px; padding-top:12px; border-top:1px dashed var(--hair);}
+  .finder-status b{color:var(--ink);}
+  .ref-table-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch;}
+  table.ref{width:100%; min-width:520px; table-layout:fixed; border-collapse:collapse; font-size:.84rem; margin-top:8px;}
+  table.ref th{text-align:left; font-size:.66rem; text-transform:uppercase; letter-spacing:.05em; color:var(--ink-soft); padding:8px 10px; border-bottom:2px solid var(--hair); overflow-wrap:break-word;}
+  table.ref td{padding:9px 10px; border-bottom:1px solid var(--hair); vertical-align:top; overflow-wrap:break-word; word-break:break-word; white-space:normal;}
+  table.ref tr.hidden{display:none;}
+
+  /* live demo */
+  .demo-box{background:var(--paper-card); border:2px dashed var(--hair); border-radius:14px; padding:22px;}
+  .demo-row{display:flex; gap:8px; margin-bottom:12px;}
+  .demo-row input{flex:1; padding:10px 12px; border-radius:9px; border:1px solid var(--hair); font-size:.92rem; font-family:inherit;}
+  .demo-row button{padding:10px 16px; border-radius:9px; border:none; background:var(--ink); color:#fff; font-weight:700; cursor:pointer;}
+  .demo-out{min-height:70px; font-size:.9rem;}
+  .demo-card{border:1px solid var(--hair); border-radius:10px; padding:14px; background:#fff; display:flex; gap:12px; align-items:flex-start;}
+  .demo-card .tag{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; font-weight:800;}
+  .demo-note{font-size:.74rem; color:var(--ink-soft); margin-top:12px;}
+  .demo-examples{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:14px;}
+
+  /* changelog */
+  .changelog-entry{display:flex; gap:16px; padding:12px 0; border-bottom:1px dashed var(--hair);}
+  .changelog-entry:last-child{border-bottom:none;}
+  .changelog-date{flex-shrink:0; width:96px; font-family:monospace; font-size:.78rem; color:var(--ink-soft); padding-top:2px;}
+  .changelog-body b{display:block; font-size:.9rem; margin-bottom:2px;}
+  .changelog-body p{margin:0; font-size:.85rem; color:var(--ink-soft);}
+
+  /* about */
+  .about{display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap;}
+  .avatar{width:96px; height:96px; border-radius:50%; overflow:hidden; flex-shrink:0; position:relative; isolation:isolate; box-shadow:0 0 0 1px var(--hair),0 12px 24px -10px rgba(30,20,10,.55),0 1px 0 rgba(255,255,255,.7);}
+  .avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .pill-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px;}
+  .pill{background:var(--paper-card); border:1px solid var(--hair); border-radius:999px; padding:6px 12px; font-size:.78rem;}
+
+  /* copy-link button on eyebrow */
+  .copy-link-btn{margin-left:10px; font-size:.68rem; padding:3px 9px; border-radius:6px; border:1px solid var(--hair); background:#fff; cursor:pointer; color:var(--ink-soft);}
+  .copy-link-btn.copied{color:#2F5C3D; border-color:#2F5C3D;}
+
+  footer{padding:34px 0 60px; font-size:.8rem; color:var(--ink-soft); text-align:center; background:linear-gradient(180deg,transparent,rgba(0,0,0,.03));}
+  .backtotop{display:inline-block; margin-top:14px; font-size:.78rem; text-decoration:none; color:var(--ink-soft); border-bottom:1px dotted var(--ink-soft);}
+  ::selection{background:#E7D9C2;}
+
+  /* monogram avatar (replaces photo) */
+  .avatar-mono{
+    width:100%; height:100%; display:flex; align-items:center; justify-content:center;
+    font-family:Georgia,serif; font-weight:800; color:#fff; letter-spacing:.02em;
+    background:linear-gradient(135deg,#4a4038 0%,#8a6f52 55%,#3a332c 100%);
+    position:relative; isolation:isolate; overflow:hidden;
+  }
+  .avatar-mono::after{
+    content:""; position:absolute; z-index:1; pointer-events:none; top:-30%; left:-40%; width:70%; height:160%;
+    background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.5) 45%,rgba(255,255,255,0) 65%); transform:rotate(18deg);
+  }
+  .avatar-mono-xl{font-size:2.1rem;}
+  .avatar-mono-lg{font-size:1.6rem;}
+  .avatar-mono-sm{font-size:.85rem;}
+  .avatar-mono-xs{font-size:.72rem;}
+
+  /* ============ 3D DECORATIVE ELEMENTS ============ */
+  /* hero card stack — front page, before the guide begins */
+  .hero-3d{margin-top:38px;}
+  .hero-3d-stage{perspective:1100px; width:290px; height:170px; position:relative;}
+  .hero-3d-card{
+    position:absolute; width:150px; height:88px; border-radius:14px; left:0; top:0;
+    background:linear-gradient(180deg,#fffefb,var(--paper-card)); border:1px solid var(--hair);
+    box-shadow:0 22px 40px -18px rgba(30,20,10,.5), 0 2px 6px rgba(30,20,10,.15);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    transform-style:preserve-3d; transition:transform .3s ease, box-shadow .3s ease;
+    text-decoration:none; color:var(--ink); cursor:pointer;
+  }
+  .hero-3d-card .step-badge{font-size:1.1rem; font-weight:800; font-family:Georgia,serif;}
+  .hero-3d-card .lb{font-size:.72rem; font-weight:800; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;}
+  .hero-3d-card.card-a{transform:translate3d(0,64px,0) rotateY(-16deg) rotateX(4deg); z-index:1; border-top:3px solid var(--base);}
+  .hero-3d-card.card-a .step-badge{color:var(--base);}
+  .hero-3d-card.card-b{transform:translate3d(70px,28px,40px) rotateY(-6deg) rotateX(3deg); z-index:2; border-top:3px solid var(--med);}
+  .hero-3d-card.card-b .step-badge{color:var(--med);}
+  .hero-3d-card.card-c{transform:translate3d(140px,-8px,80px) rotateY(6deg) rotateX(2deg); z-index:3; border-top:3px solid var(--expert);}
+  .hero-3d-card.card-c .step-badge{color:var(--expert);}
+  .hero-3d-card:hover{box-shadow:0 30px 50px -18px rgba(30,20,10,.6);}
+  .hero-3d-stage:hover .hero-3d-card.card-a{transform:translate3d(0,64px,0) rotateY(-22deg) rotateX(6deg) scale(1.04);}
+  .hero-3d-stage:hover .hero-3d-card.card-b{transform:translate3d(70px,28px,40px) rotateY(-10deg) rotateX(5deg) scale(1.06);}
+  .hero-3d-stage:hover .hero-3d-card.card-c{transform:translate3d(140px,-8px,80px) rotateY(3deg) rotateX(2deg) scale(1.08);}
+  .hero-3d-card:hover{z-index:9 !important;}
+  .hero-3d-caption{margin-top:14px; font-size:.76rem; color:var(--ink-soft); max-width:300px;}
+
+  /* hero side 3D — why dashboards matter */
+  .hero-3d-row{display:flex; gap:44px; flex-wrap:wrap; align-items:flex-start;}
+  .hero-why-3d{display:flex; flex-direction:column; gap:14px; perspective:900px; padding-top:6px;}
+  .why-card{
+    width:230px; padding:12px 14px; border-radius:12px; background:linear-gradient(180deg,#fffefb,var(--paper-card));
+    border:1px solid var(--hair); border-left:3px solid var(--slt);
+    box-shadow:0 14px 26px -16px rgba(30,20,10,.45); display:flex; flex-direction:column; gap:2px;
+    transform-style:preserve-3d; transition:transform .3s ease, box-shadow .3s ease;
+  }
+  .why-card.why-1{transform:rotateY(-6deg) rotateX(2deg) translateZ(0);}
+  .why-card.why-2{transform:rotateY(-6deg) rotateX(2deg) translateZ(14px);}
+  .why-card.why-3{transform:rotateY(-6deg) rotateX(2deg) translateZ(28px);}
+  .why-card:hover{transform:rotateY(0deg) rotateX(0deg) translateZ(34px) scale(1.03); box-shadow:0 20px 36px -16px rgba(30,20,10,.55);}
+  .why-ic{font-size:1.1rem;}
+  .why-t{font-size:.86rem; font-weight:800; margin-top:2px;}
+  .why-s{font-size:.74rem; color:var(--ink-soft); line-height:1.4;}
+  @media(max-width:760px){.hero-3d-row{gap:28px;} .why-card{width:100%;}}
+
+  /* cadence fan-stack — mid-page */
+  .fan-3d{margin:8px 0 26px; display:flex; justify-content:center;}
+  .fan-3d-stage{perspective:900px; display:flex; align-items:flex-end; height:100px;}
+  .fan-card{
+    width:84px; height:68px; margin-left:-26px; border-radius:10px; background:var(--paper-card); border:1px solid var(--hair);
+    box-shadow:0 14px 26px -14px rgba(30,20,10,.5); display:flex; align-items:center; justify-content:center;
+    font-size:.72rem; font-weight:800; color:var(--ink-soft); transform-style:preserve-3d; transition:transform .3s ease;
+  }
+  .fan-card:first-child{margin-left:0;}
+  .fan-card.f1{transform:rotate(-14deg) translateY(6px); z-index:1;}
+  .fan-card.f2{transform:rotate(-5deg) translateY(1px); z-index:2;}
+  .fan-card.f3{transform:rotate(5deg) translateY(1px); z-index:3;}
+  .fan-card.f4{transform:rotate(14deg) translateY(6px); z-index:4; border-top:3px solid var(--cadence); color:var(--cadence);}
+  .fan-3d-stage:hover .fan-card{transform:rotate(0deg) translateY(-10px);}
+  .fan-3d-stage:hover .fan-card.f1{transform:rotate(-22deg) translateY(-4px);}
+  .fan-3d-stage:hover .fan-card.f2{transform:rotate(-8deg) translateY(-12px);}
+  .fan-3d-stage:hover .fan-card.f3{transform:rotate(8deg) translateY(-12px);}
+  .fan-3d-stage:hover .fan-card.f4{transform:rotate(22deg) translateY(-4px);}
+
+  /* templates paper-stack — mid-page */
+  .papers-3d{margin:8px 0 26px; display:flex; justify-content:center;}
+  .papers-3d-stage{perspective:1000px; width:220px; height:110px; position:relative;}
+  .paper{position:absolute; left:20px; top:0; width:180px; height:90px; border-radius:10px; background:var(--paper-card); border:1px solid var(--hair); box-shadow:0 10px 20px -12px rgba(30,20,10,.4); transform-style:preserve-3d; transition:transform .3s ease;}
+  .paper.p1{transform:rotate(-8deg) translate(-8px,10px);}
+  .paper.p2{transform:rotate(4deg) translate(6px,4px);}
+  .paper.p3{transform:rotate(-1deg); z-index:2; border-top:3px solid var(--tmpl); display:flex; align-items:center; gap:6px; padding:0 14px; font-size:.76rem; font-weight:700; color:var(--ink-soft);}
+  .papers-3d-stage:hover .paper.p1{transform:rotate(-14deg) translate(-16px,16px);}
+  .papers-3d-stage:hover .paper.p2{transform:rotate(9deg) translate(12px,8px);}
+  .papers-3d-stage:hover .paper.p3{transform:rotate(-2deg) scale(1.03);}
+
+  /* SLT flip-card — mid-page, demonstrates the "Best" tier insight */
+  .flip-3d{margin:18px 0 26px; display:flex; flex-direction:column; align-items:center;}
+  .flip-3d-stage{perspective:1000px; width:220px; height:110px;}
+  .flip-3d-inner{position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .6s cubic-bezier(.4,.2,.2,1);}
+  .flip-3d-stage:hover .flip-3d-inner{transform:rotateY(180deg);}
+  .flip-face{position:absolute; inset:0; border-radius:14px; backface-visibility:hidden; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:10px;
+    box-shadow:0 18px 32px -16px rgba(30,20,10,.45); border:1px solid var(--hair);}
+  .flip-front{background:linear-gradient(180deg,#fffefb,var(--paper-card)); border-top:3px solid var(--slt);}
+  .flip-front .ff-n{font-size:1.7rem; font-weight:800; color:var(--slt); font-family:Georgia,serif;}
+  .flip-front .ff-l{font-size:.72rem; color:var(--ink-soft); margin-top:4px;}
+  .flip-back{background:var(--slt); color:#fff; transform:rotateY(180deg); font-size:.82rem; font-style:italic; line-height:1.4;}
+  .flip-3d-caption{margin-top:12px; font-size:.76rem; color:var(--ink-soft); text-align:center; max-width:260px;}
+
+  /* scroll reveal */
+  .reveal{opacity:0; transform:translateY(14px); transition:opacity .5s ease, transform .5s ease;}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+
+  /* floating widget */
+  .float-fab{position:fixed; bottom:20px; right:20px; z-index:60; display:flex; align-items:center; gap:8px; padding:11px 16px 11px 10px; border-radius:999px; border:none; cursor:pointer;
+    background:linear-gradient(180deg,#4a4038,var(--accent) 55%,#0f0d0b); color:#fff; box-shadow:0 14px 28px -8px rgba(0,0,0,.55); transition:transform .15s, box-shadow .15s;}
+  .float-fab:hover{transform:translateY(-3px); box-shadow:0 18px 34px -10px rgba(0,0,0,.6);}
+  .float-fab-avatar{width:32px; height:32px; border-radius:50%; overflow:hidden; flex-shrink:0; border:2px solid rgba(255,255,255,.35);}
+  .float-fab-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .float-fab-label{font-size:.82rem; font-weight:700; white-space:nowrap;}
+  @media(max-width:480px){.float-fab-label{display:none;} .float-fab{padding:10px;}}
+  .float-panel{position:fixed; bottom:78px; right:20px; z-index:60; width:320px; max-width:calc(100vw - 40px); background:var(--paper-card); border:1px solid var(--hair); border-radius:16px;
+    box-shadow:0 24px 50px -20px rgba(0,0,0,.5); opacity:0; transform:translateY(10px) scale(.97); pointer-events:none; transition:opacity .18s, transform .18s;}
+  .float-panel.open{opacity:1; transform:translateY(0) scale(1); pointer-events:auto;}
+  .float-panel-head{display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--hair);}
+  .float-panel-avatar{width:38px; height:38px; border-radius:50%; overflow:hidden; flex-shrink:0;}
+  .float-panel-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+  .float-panel-title{font-weight:800; font-size:.9rem;}
+  .float-panel-sub{font-size:.72rem; color:var(--ink-soft);}
+  .float-close{margin-left:auto; background:none; border:none; font-size:1.2rem; cursor:pointer; color:var(--ink-soft); line-height:1;}
+  .float-close:hover{color:var(--ink);}
+  .float-section{padding:14px 16px; border-bottom:1px dashed var(--hair);}
+  .float-section:last-child{border-bottom:none;}
+  .float-section-lbl{font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--ink-soft); font-weight:800; margin-bottom:8px;}
+  .float-row{display:flex; gap:6px;}
+  .float-row input, .float-section > input{width:100%; padding:9px 11px; border-radius:8px; border:1px solid var(--hair); font-size:.85rem; font-family:inherit;}
+  .float-row button{padding:9px 14px; border-radius:8px; border:none; background:#3a332c; color:#fff; font-weight:700; font-size:.8rem; cursor:pointer;}
+  .float-result{margin-top:10px; font-size:.82rem; display:none; border-left:2px solid #3a332c; background:var(--paper); border-radius:0 6px 6px 0; padding:8px 10px;}
+  .float-finder-status{font-size:.76rem; color:var(--ink-soft); margin-top:8px;}
+</style>
+</head>
+<body>
+
+<div class="disclaimer-bar">
+  <div class="wrap">
+    <span><b>Independent, unofficial guide</b> — not affiliated with, endorsed by, or reviewed by any software vendor.</span>
+    <span class="sep">·</span>
+    <span><b>For educational purposes only</b> — sourced strictly from publicly available material and general design practice; verify current product details independently.</span>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="wrap topbar-row1">
+    <span class="progress-pct" id="progressPct">0%</span>
+    <span class="brand serif">Dashboard Playbook</span>
+  </div>
+  <div class="wrap topbar-row2">
+    <nav class="topnav" id="topnav"></nav>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<nav class="dot-rail" id="dotRail" aria-label="Section mini-map"></nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">An Interactive Field Guide</div>
+    <h1 class="title serif">Your Dashboard Playbook</h1>
+    <p class="subtitle">Every interactive dashboard, kanban and status-report element you can build with AI copilot tools — base to expert level, matched to audience and reporting cadence, with copy-ready prompts throughout.</p>
+    <div class="hero-author">
+      <div class="hero-author-avatar"><div class="avatar-mono avatar-mono-lg">SK</div></div>
+      <div class="hero-author-info">
+        <div class="hero-author-name">Sujit Kulkarni</div>
+        <div class="hero-author-desc">Compiled this guide by synthesizing general dashboard/UX practice with publicly available documentation on AI copilot dashboard-building capabilities. For educational use only.</div>
+        <div class="hero-author-creds">15 yrs · Investment Banking &middot; AI Enthusiast &middot; Claude Enthusiast 💚</div>
+      </div>
+    </div>
+    <div class="stats-strip" id="statsStrip"></div>
+
+    <div class="ask-box">
+      <div class="ask-header">
+        <div class="ask-avatar"><div class="avatar-mono avatar-mono-sm">SK</div></div>
+        <div class="ask-header-text">
+          <div class="lbl">Ask Sujit</div>
+          <div class="sub">Type a question — I'll search this page and hand back the closest matching section. No AI, no network call, entirely on your device.</div>
+        </div>
+      </div>
+      <div class="ask-row">
+        <div class="ask-input-wrap">
+          <input id="askInput" type="text" placeholder="e.g. what's best for a weekly review?" onkeydown="if(event.key==='Enter')runAsk()">
+          <span class="kbd-hint">↵ Enter</span>
+        </div>
+        <button onclick="runAsk()">Ask</button>
+      </div>
+      <div class="ask-suggest">
+        <span class="try-lbl">Try:</span>
+        <span class="chip-btn" onclick="askExample('what should a kanban board have')">Kanban basics?</span>
+        <span class="chip-btn" onclick="askExample('slt executive dashboard')">SLT dashboard?</span>
+        <span class="chip-btn" onclick="askExample('monthly status report')">Monthly reporting?</span>
+        <span class="chip-btn" onclick="askExample('project status template')">Status report layout?</span>
+      </div>
+      <div id="askResult"></div>
+      <div class="runs-locally">100% client-side search over this page's own text — nothing is sent anywhere.</div>
+    </div>
+
+    <div class="builder-box">
+      <div class="builder-header">
+        <div class="lbl">🛠 Sujit's Dashboard Prompt Builder</div>
+        <div class="sub">Answer a few quick questions, get a ready-to-paste prompt for your AI copilot tool.</div>
+      </div>
+      <div class="builder-grid">
+        <label class="builder-field">
+          <span>What are you building?</span>
+          <select id="bpType">
+            <option value="interactive dashboard">Dashboard</option>
+            <option value="kanban board">Kanban board</option>
+            <option value="project status report">Status report</option>
+          </select>
+        </label>
+        <label class="builder-field">
+          <span>Who's it for?</span>
+          <select id="bpAudience">
+            <option value="team">My team</option>
+            <option value="exec">Executive / SLT</option>
+          </select>
+        </label>
+        <label class="builder-field">
+          <span>How often will it be viewed?</span>
+          <select id="bpCadence">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="bi-weekly / sprint">Bi-weekly / Sprint</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </label>
+        <label class="builder-field">
+          <span>Level of detail?</span>
+          <select id="bpLevel">
+            <option value="base, foundations-only">Foundations (simple)</option>
+            <option value="intermediate, interactive" selected>Intermediate (interactive)</option>
+            <option value="expert, advanced">Expert (advanced)</option>
+          </select>
+        </label>
+      </div>
+      <div class="builder-check-row">
+        <span class="builder-check-lbl">Include:</span>
+        <label class="bp-chip"><input type="checkbox" class="bp-elem" value="KPI cards with trend arrows" checked>KPI cards</label>
+        <label class="bp-chip"><input type="checkbox" class="bp-elem" value="a slicer to filter the view" checked>Slicers</label>
+        <label class="bp-chip"><input type="checkbox" class="bp-elem" value="one or two charts">Charts</label>
+        <label class="bp-chip"><input type="checkbox" class="bp-elem" value="RAG status badges">RAG badges</label>
+        <label class="bp-chip"><input type="checkbox" class="bp-elem" value="a kanban board">Kanban board</label>
+        <label class="bp-chip"><input type="checkbox" class="bp-elem" value="tooltips on hover for detail">Tooltips</label>
+      </div>
+      <button type="button" class="builder-btn" onclick="buildPrompt()">Generate my prompt</button>
+      <div id="builderResultWrap" class="builder-result-wrap">
+        <textarea id="builderOutput" class="builder-output" readonly rows="3"></textarea>
+        <button type="button" class="builder-copy-btn" onclick="copyBuilderPrompt()">Copy prompt</button>
+      </div>
+    </div>
+
+    <div class="hero-3d-row">
+      <div class="hero-3d" aria-hidden="false">
+        <div class="hero-3d-stage">
+          <a class="hero-3d-card card-a" href="#foundations"><span class="step-badge">①</span><span class="lb">Foundations</span></a>
+          <a class="hero-3d-card card-b" href="#intermediate"><span class="step-badge">②</span><span class="lb">Intermediate</span></a>
+          <a class="hero-3d-card card-c" href="#expert"><span class="step-badge">③</span><span class="lb">Expert</span></a>
+        </div>
+        <div class="hero-3d-caption">Good → Better → Best. Climb the steps, or jump straight to a level.</div>
+      </div>
+
+      <div class="hero-why-3d" aria-hidden="true">
+        <div class="why-card why-1"><span class="why-ic">⚡</span><span class="why-t">Faster decisions</span><span class="why-s">No digging through spreadsheets to answer "where do we stand?"</span></div>
+        <div class="why-card why-2"><span class="why-ic">🎯</span><span class="why-t">One source of truth</span><span class="why-s">Everyone looks at the same numbers, not five conflicting exports.</span></div>
+        <div class="why-card why-3"><span class="why-ic">🔁</span><span class="why-t">Less status-chasing</span><span class="why-s">A live view replaces the "can you send me an update?" email.</span></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- OVERVIEW -->
+<section class="section" id="overview">
+  <div class="wrap">
+    <div class="eyebrow">Start here</div>
+    <h2 class="serif">What's In This Guide</h2>
+    <div class="tag">One flowchart, six deep-dive stages — click any node to jump straight there.</div>
+    <div class="hub-wrap">
+      <svg class="lines" id="linesSvg"></svg>
+      <div class="hub-center">
+        <span class="name">AI Copilot</span>
+        <span class="sub">the workspace</span>
+      </div>
+      <div class="spokes" id="spokes"></div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORY SECTIONS (rendered by JS) -->
+<div id="categorySections"></div>
+
+<!-- CADENCE -->
+<section class="section" id="cadence">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--cadence)">🕐 Reporting rhythm</div>
+    <h2 class="serif">Match the Layout to the Cadence</h2>
+    <div class="tag">The right elements change with how often the view gets read.</div>
+
+    <div class="fan-3d" aria-hidden="true">
+      <div class="fan-3d-stage">
+        <div class="fan-card f1">Daily</div>
+        <div class="fan-card f2">Weekly</div>
+        <div class="fan-card f3">Bi-weekly</div>
+        <div class="fan-card f4">Monthly</div>
+      </div>
+    </div>
+
+    <div class="tabs" id="cadenceTabs"></div>
+    <div id="cadencePanels"></div>
+  </div>
+</section>
+
+<!-- TEMPLATES -->
+<section class="section" id="templates">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--tmpl)">📄 Ready-to-use layouts</div>
+    <h2 class="serif">Project Status Report Templates</h2>
+    <div class="tag">Four layouts covering the most common status-reporting situations.</div>
+
+    <div class="papers-3d" aria-hidden="true">
+      <div class="papers-3d-stage">
+        <div class="paper p1"></div>
+        <div class="paper p2"></div>
+        <div class="paper p3 front"><span class="rag g"></span> Status: On Track</div>
+      </div>
+    </div>
+
+    <div id="templatesList"></div>
+  </div>
+</section>
+
+<!-- STEP BY STEP -->
+<section class="section" id="howto">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--cadence)">🪜 Step by step</div>
+    <h2 class="serif">From Blank Page to Dashboard</h2>
+    <div class="tag">Everything above is the menu. This is the order you actually work through it in, with a prompt for each step.</div>
+    <ol class="step-list">
+      <li><b>Gather your data.</b> Have it in Excel, a SharePoint library, or just described in chat — Copilot can read files in place or work from what you type.</li>
+      <li><b>Pick your level.</b> <a href="#foundations">Foundations</a>, <a href="#intermediate">Intermediate</a>, or <a href="#expert">Expert</a> — match it to how much time you have and how often the audience will interact with it.</li>
+      <li><b>Pick your audience.</b> A team-facing operating view, or an <a href="#slt">Executive/SLT</a> readout — they need different amounts of detail.</li>
+      <li><b>Pick your cadence.</b> <a href="#cadence">Daily, Weekly, Bi-weekly/Sprint, or Monthly</a> — this decides which elements earn their place.</li>
+      <li><b>Write one combined prompt.</b> Stack the choices above into a single request rather than a vague one. See the example below.</li>
+      <li><b>Review and refine one thing at a time.</b> Don't ask for five changes in one message — ask for one, check it, then the next. Big multi-part edits are where generation quality drops.</li>
+      <li><b>Export or share.</b> Turn the result into a Copilot Page, or download the HTML/PowerPoint/Excel output depending on where it needs to live.</li>
+    </ol>
+
+    <div class="caveat"><b>Prompt:</b> "Build a weekly team-level dashboard: KPI cards with week-over-week trend arrows, a bar chart of output by owner, a slicer for owner, and a kanban board highlighting items due this week. Keep it to base and intermediate elements — no drill-downs."</div>
+    <div class="caveat"><b>Prompt:</b> "Build a monthly executive dashboard: 4 KPI cards with sparklines and trend vs. target, a RAG status table by workstream, a budget gauge, and a one-line insight under each chart. Minimal low-saturation palette, full detail in a separate Details tab."</div>
+
+    <div class="caveat" style="margin-top:0;"><b>Rule of thumb:</b> name the level, the audience, and the cadence explicitly in the prompt. Those three words do more work than any amount of extra styling detail.</div>
+  </div>
+</section>
+
+<!-- PALETTE -->
+<section class="section" id="palette">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--story)">🎨 Visual polish</div>
+    <h2 class="serif">Professional Color Palettes</h2>
+    <div class="tag">Three proven, low-risk palettes — pick one, hand Copilot the exact hex codes instead of a vague "make it look nice."</div>
+
+    <div class="grid3">
+      <div class="palette-card" data-pal="blue">
+        <div class="swatch-row"><span class="swatch" style="background:#F4F6F9"></span><span class="swatch" style="background:#FFFFFF"></span><span class="swatch" style="background:#2C5C8A"></span><span class="swatch" style="background:#1B2733"></span></div>
+        <h4>Corporate Blue</h4>
+        <p class="hex-list">bg #F4F6F9 · card #FFFFFF · text #1B2733 · accent #2C5C8A</p>
+        <button type="button" class="preview-btn" onclick="previewPalette('blue')">Preview</button>
+      </div>
+      <div class="palette-card" data-pal="earth">
+        <div class="swatch-row"><span class="swatch" style="background:#F5F1EA"></span><span class="swatch" style="background:#FFFDF9"></span><span class="swatch" style="background:#A6683F"></span><span class="swatch" style="background:#2A2420"></span></div>
+        <h4>Muted Earth</h4>
+        <p class="hex-list">bg #F5F1EA · card #FFFDF9 · text #2A2420 · accent #A6683F</p>
+        <button type="button" class="preview-btn" onclick="previewPalette('earth')">Preview</button>
+      </div>
+      <div class="palette-card" data-pal="mono">
+        <div class="swatch-row"><span class="swatch" style="background:#F2F2F2"></span><span class="swatch" style="background:#FFFFFF"></span><span class="swatch" style="background:#1F7A6C"></span><span class="swatch" style="background:#1A1A1A"></span></div>
+        <h4>Monochrome + Accent</h4>
+        <p class="hex-list">bg #F2F2F2 · card #FFFFFF · text #1A1A1A · accent #1F7A6C</p>
+        <button type="button" class="preview-btn" onclick="previewPalette('mono')">Preview</button>
+      </div>
+    </div>
+
+    <div class="live-preview" id="livePreview">
+      <div class="lp-kpi"><span class="lp-n" id="lpNum">$482K</span><span class="lp-l">Revenue — <span id="lpTag">On Track</span></span></div>
+      <div class="lp-bar"><div class="lp-bar-fill" id="lpBarFill"></div></div>
+      <div class="lp-note" id="lpNote">Pick a palette above to preview it here.</div>
+    </div>
+    <div class="caveat"><b>Prompt:</b> "Use this exact palette: background [bg hex], cards [card hex], text [text hex], accent [accent hex]. Apply it consistently across every card, chart, and badge — no other colors."</div>
+  </div>
+</section>
+
+<!-- STORYTELLING & ACCESSIBILITY -->
+<section class="section" id="storytelling">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--story)">🎨 Visual polish</div>
+    <h2 class="serif">Data Storytelling &amp; Accessibility</h2>
+    <div class="tag">The difference between a dashboard that informs and one that just displays.</div>
+
+    <div class="grid2">
+      <div class="box" style="--c:var(--story)"><h4>Lead with the headline</h4><p>Put the single most important number top-left — that's where the eye lands first. Everything else supports it.</p></div>
+      <div class="box" style="--c:var(--story)"><h4>One message per screen</h4><p>If you can't summarize the point in one sentence, it's two dashboards, not one.</p></div>
+      <div class="box" style="--c:var(--story)"><h4>One metric per card</h4><p>Resist cramming three numbers into one KPI card — split it into three cards instead.</p></div>
+      <div class="box" style="--c:var(--story)"><h4>Bold sparingly</h4><p>Bold or color only the one number that matters. If everything is emphasized, nothing is.</p></div>
+      <div class="box" style="--c:var(--story)"><h4>Don't rely on color alone</h4><p>Pair every RAG badge with an icon or label too (●On Track, ▲At Risk, ✕Off Track) — around 1 in 12 men have some form of color blindness.</p></div>
+      <div class="box" style="--c:var(--story)"><h4>Contrast &amp; size</h4><p>Aim for at least 4.5:1 text contrast, and keep body text no smaller than 14px — dashboards get projected and shrunk more than you'd expect.</p></div>
+    </div>
+    <div class="caveat"><b>Prompt:</b> "Make sure every status badge pairs a color with an icon or text label, not color alone. Keep body text at least 14px and headline numbers high-contrast against the background."</div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER -->
+<section class="section" id="beforeafter">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--story)">🎨 Visual polish</div>
+    <h2 class="serif">Before vs. After: What "Clean" Looks Like</h2>
+    <div class="tag">Illustrative mockups, not real dashboards — the point is the contrast in density and hierarchy, not the specific content.</div>
+    <div class="grid2">
+      <div class="ba-panel ba-cluttered">
+        <div class="ba-label">✕ Cluttered</div>
+        <div class="ba-row">
+          <span class="ba-chip" style="background:#F2C5C0">Sales</span><span class="ba-chip" style="background:#C9E7C0">Ops</span>
+          <span class="ba-chip" style="background:#C0D8F2">HR</span><span class="ba-chip" style="background:#F2E1A6">Finance</span>
+          <span class="ba-chip" style="background:#DCC0F2">Legal</span>
+        </div>
+        <div class="ba-grid">
+          <div class="ba-box"></div><div class="ba-box"></div><div class="ba-box"></div>
+          <div class="ba-box"></div><div class="ba-box"></div><div class="ba-box"></div>
+        </div>
+        <p class="ba-note">6 chart types, 5 clashing colors, no clear headline, tiny labels.</p>
+      </div>
+      <div class="ba-panel ba-clean">
+        <div class="ba-label" style="color:var(--slt)">✓ Clean</div>
+        <div class="ba-hero-num">$482K <span class="rag g"></span></div>
+        <div class="ba-sub">Revenue — On Track</div>
+        <div class="ba-grid ba-grid-clean">
+          <div class="ba-box tall"></div><div class="ba-box"></div>
+        </div>
+        <p class="ba-note">One headline number, one accent color, generous white space.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINDER / REFERENCE -->
+<section class="section" id="finder">
+  <div class="wrap">
+    <div class="eyebrow">🔍 Find an Element</div>
+    <h2 class="serif">Searchable Reference Table</h2>
+    <div class="tag">Filter by level or category, or search by name — updates live.</div>
+    <div class="finder-box">
+      <input id="finderInput" type="text" placeholder="e.g. tooltip, kanban, gauge, RAG..." oninput="applyFinder()">
+      <div class="finder-row">
+        <span class="finder-lbl">Level:</span>
+        <button class="finder-chip active" data-lv="all" onclick="setFinderLevel('all',this)">All</button>
+        <button class="finder-chip" data-lv="base" onclick="setFinderLevel('base',this)">Base</button>
+        <button class="finder-chip" data-lv="med" onclick="setFinderLevel('med',this)">Intermediate</button>
+        <button class="finder-chip" data-lv="expert" onclick="setFinderLevel('expert',this)">Expert</button>
+      </div>
+      <div class="finder-status" id="finderStatus"></div>
+      <div class="ref-table-wrap">
+        <table class="ref">
+          <colgroup><col style="width:22%"><col style="width:13%"><col style="width:16%"><col style="width:49%"></colgroup>
+          <thead><tr><th>Element</th><th>Level</th><th>Category</th><th>Best for</th></tr></thead>
+          <tbody id="refBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section class="section" id="glossary">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--base)">📖 Glossary</div>
+    <h2 class="serif">Terms &amp; Prompts Used in This Guide</h2>
+    <div class="tag">Two lists: the short-form codes and abbreviations, and every copy-ready prompt from this guide gathered in one place.</div>
+
+    <div class="glossary-sub-head">📟 Codes &amp; Abbreviations</div>
+    <div class="grid2">
+      <div class="box" style="--c:var(--base)"><h4>KPI</h4><p>Key Performance Indicator — a single tracked number, like revenue or task count.</p></div>
+      <div class="box" style="--c:var(--base)"><h4>RAG</h4><p>Red / Amber / Green — a three-color status shorthand for at-a-glance health.</p></div>
+      <div class="box" style="--c:var(--med)"><h4>Slicer</h4><p>A filter control (buttons, tabs, dropdown) that narrows what a view shows.</p></div>
+      <div class="box" style="--c:var(--med)"><h4>Sparkline</h4><p>A tiny trend line inside a KPI card, with no axis labels.</p></div>
+      <div class="box" style="--c:var(--expert)"><h4>Drill-down</h4><p>Clicking through from a summary to more detail, e.g. company → team.</p></div>
+      <div class="box" style="--c:var(--expert)"><h4>Cross-filtering</h4><p>Clicking one chart automatically filters every other chart on the page.</p></div>
+      <div class="box" style="--c:var(--expert)"><h4>Swimlane</h4><p>A horizontal grouping on a kanban board, usually by owner or workstream.</p></div>
+      <div class="box" style="--c:var(--expert)"><h4>WIP limit</h4><p>Work-in-progress limit — a cap on how many items can sit in one kanban column at once.</p></div>
+      <div class="box" style="--c:var(--slt)"><h4>SLT</h4><p>Senior Leadership Team — shorthand for an executive audience.</p></div>
+      <div class="box" style="--c:var(--slt)"><h4>Overlay</h4><p>Any UI layer sitting above the main page — a modal, tooltip, or side drawer.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Cadence</h4><p>How often a view is read and updated — daily, weekly, sprint, or monthly.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Burndown / Burnup chart</h4><p>A chart showing work remaining (burndown) or completed (burnup) across a sprint.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Velocity</h4><p>The average amount of work a team completes per sprint, used to forecast future sprints.</p></div>
+      <div class="box" style="--c:var(--tmpl)"><h4>Status report</h4><p>A periodic summary of a project's health, milestones, risks, and next steps.</p></div>
+      <div class="box" style="--c:var(--tmpl)"><h4>Portfolio rollup</h4><p>A single view listing multiple projects side by side, usually with a RAG badge each.</p></div>
+    </div>
+
+    <div class="glossary-sub-head" style="margin-top:36px;">💬 Prompts — every copy-ready prompt in this guide</div>
+    <button type="button" class="download-btn" onclick="downloadAllPrompts()">⬇ Download all prompts (.txt)</button>
+    <div id="promptGlossaryList" class="prompt-glossary-list"></div>
+  </div>
+</section>
+
+<!-- REVIEW CHECKLIST -->
+<section class="section" id="checklist">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--trouble)">✅ Quality gate</div>
+    <h2 class="serif">Before You Hit Send: Review Checklist</h2>
+    <div class="tag">Click to check off — nothing here is saved, it just helps you go through the list once before sharing.</div>
+    <ul class="check-list" id="reviewChecklist">
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>Every number spot-checked against the source data</li>
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>No slicer, tab, or filter that does nothing when clicked</li>
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>Tested at a narrow (mobile) width, not just full screen</li>
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>RAG status uses an icon or label, not color alone</li>
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>One clear headline takeaway is visible in the first 3 seconds</li>
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>Colors and fonts are consistent across every card and chart</li>
+      <li onclick="this.classList.toggle('done')"><span class="cb"></span>No placeholder text, dummy links, or "lorem ipsum" left in</li>
+    </ul>
+    <div class="caveat"><b>Self-critique prompt — paste this back into Copilot before sending:</b> "Review this dashboard critically: check for visual clutter, inconsistent colors or fonts, unclear hierarchy, and confirm every filter actually works. Suggest 3 specific improvements."</div>
+  </div>
+</section>
+
+<!-- EXPORT & HANDOFF -->
+<section class="section" id="handoff">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--cadence)">📤 Last mile</div>
+    <h2 class="serif">Export &amp; Handoff</h2>
+    <div class="tag">Where the dashboard lives after you build it changes what you should ask for.</div>
+    <div class="grid2">
+      <div class="box" style="--c:var(--cadence)"><h4>Keep as a Copilot Page</h4><p>Best default — stays interactive (slicers, pop-ups, kanban drag-and-drop all keep working), and is easy to keep updating.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Export to Word</h4><p>Good for a written status report; ask Copilot to "convert this into a Word document" — tables carry over cleanly, charts may need to become static images.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Export to PowerPoint</h4><p>Best for the steering-committee deck template — ask for "one slide per section, with the KPI summary first."</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Embed in SharePoint</h4><p>Keeps interactivity alive for a team audience that returns to it regularly, unlike a flattened export.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>PDF export</h4><p>Fine for a one-off static leave-behind or an email attachment — but it flattens everything, so use it only for the final snapshot, never as your working copy.</p></div>
+      <div class="box" style="--c:var(--cadence)"><h4>Keep one source of truth</h4><p>Treat the interactive version as the master copy, and generate flattened exports (Word/PPT/PDF) from it only when a specific audience needs a static file.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section class="section" id="demo">
+  <div class="wrap">
+    <div class="eyebrow">Try It</div>
+    <h2 class="serif">★ Live Demo — Cadence Matcher</h2>
+    <div class="tag">Describe your reporting situation the way you'd actually ask your AI copilot tool. This simulates, in your browser, how you'd map a request to the right layout.</div>
+    <div class="demo-box">
+      <div class="demo-row">
+        <input id="demoInput" type="text" placeholder="e.g. weekly team review of open tasks" onkeydown="if(event.key==='Enter')runDemo()">
+        <button onclick="runDemo()">Match a layout</button>
+      </div>
+      <div class="demo-examples" id="demoExamples"></div>
+      <div class="demo-out" id="demoOut"><span style="color:var(--ink-soft); font-size:.86rem;">Try one of the example tasks above, or type your own.</span></div>
+      <div class="demo-note">Simplified, illustrative keyword-matcher — not an actual AI model, not a network call. Real prompting is far more flexible than this.</div>
+    </div>
+  </div>
+</section>
+
+<!-- TROUBLESHOOTING -->
+<section class="section" id="troubleshoot">
+  <div class="wrap">
+    <div class="eyebrow" style="color:var(--trouble)">🛠 When It Goes Wrong</div>
+    <h2 class="serif">Quick Fixes for Bad Generations</h2>
+    <div class="tag">You're staring at a broken or wrong result on screen. Here's what to do immediately, before you start over from scratch.</div>
+
+    <div class="grid2">
+      <div class="box" style="--c:var(--trouble)"><h4>Blank page / nothing renders</h4><p>Ask: "regenerate this as a single self-contained HTML file with no external dependencies or CDN links." Broken renders are usually a missing script reference, not a design problem.</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Numbers don't match your data</h4><p>Point at the source directly: "re-check every figure against [filename] — do not estimate or round, use the exact values." Vague prompts invite the model to fill gaps itself.</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Categories or labels you never gave it</h4><p>Say: "only use categories and labels present in the uploaded data — do not invent or infer new ones." This is the single most common cause of "wrong data pulled."</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Chart doesn't update with new data</h4><p>Re-upload or re-reference the file explicitly in the next message — don't assume it remembers a file from three prompts ago.</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Colors clash or text is unreadable</h4><p>Give exact hex codes instead of describing a vibe: "use #1B1D1A for text, #F2F1EC for background, one accent color only."</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Layout breaks on mobile / table overflows</h4><p>Ask for it explicitly: "make this responsive, wrap long text instead of overflowing, no fixed-width tables." (This exact fix is what repaired the reference table earlier in this guide.)</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Kanban drag-and-drop doesn't work</h4><p>Ask for "vanilla JavaScript drag-and-drop, no external libraries" — sandboxed environments often can't load outside packages.</p></div>
+      <div class="box" style="--c:var(--trouble)"><h4>Prompt only partly followed</h4><p>You likely asked for too much in one message. Split it: get the base layout right first, then add slicers, then charts, then polish — one request per message.</p></div>
+    </div>
+
+    <div class="caveat" style="margin-top:22px;"><b>General habit that fixes most of the above:</b> after 2–3 failed patch attempts on the same issue, stop patching. Ask for a full, clean regeneration with a more specific prompt instead — small incremental fixes on a broken base tend to compound the problem rather than solve it.</div>
+    <div class="caveat"><b>Before you trust a number:</b> spot-check at least two or three figures against the source yourself. AI-generated dashboards are convenient, not infallible — a five-second manual check catches most "confidently wrong" outputs.</div>
+  </div>
+</section>
+
+<!-- CHANGELOG -->
+<section class="section" id="changelog">
+  <div class="wrap">
+    <div class="eyebrow">★ Changelog</div>
+    <h2 class="serif">What's Changed</h2>
+    <div class="tag">This guide is maintained, not a one-off snapshot.</div>
+    <div id="changelogList">
+      <div class="changelog-entry">
+        <div class="changelog-date">Jul 2026</div>
+        <div class="changelog-body"><b>Guide compiled &amp; published</b><p>Initial pass covering base-to-expert dashboard elements, SLT guidance, reporting cadence, and status-report templates, written for use with AI copilot tools generally.</p></div>
+      </div>
+      <div class="changelog-entry">
+        <div class="changelog-date">Jul 2026</div>
+        <div class="changelog-body"><b>Interactive rebuild</b><p>Added the hub-and-spoke flowchart, live cadence-matcher demo, client-side search, scrollspy navigation, and the glossy card treatment throughout.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about" style="border-bottom:none;">
+  <div class="wrap">
+    <div class="eyebrow">★ About the Curator</div>
+    <h2 class="serif">Sujit Kulkarni</h2>
+    <div class="about">
+      <div class="avatar"><div class="avatar-mono avatar-mono-xl">SK</div></div>
+      <div style="flex:1; min-width:240px;">
+        <p>This guide was compiled by <b>Sujit Kulkarni</b>. He's spent 15 years in the investment banking sector across a range of functions, and alongside that has been a hands-on, curious learner of AI — exploring machine learning, deep learning, and no-code/low-code tools out of genuine interest. He put this guide together to make dashboard and reporting design with AI copilot tools a little easier to navigate. It is compiled strictly from publicly available sources and is intended for educational purposes only.</p>
+        <div class="pill-row">
+          <span class="pill">15 yrs · Investment Banking</span>
+          <span class="pill">AI Enthusiast</span>
+          <span class="pill">Eager Learner</span>
+          <span class="pill">No-Code / Low-Code Curious</span>
+          <span class="pill">Claude Enthusiast 💚</span>
+        </div>
+      </div>
+    </div>
+    <div class="caveat" style="margin-top:22px;"><b>Note on sourcing:</b> This document is compiled strictly from publicly available sources and general dashboard/UX design practice, and is intended strictly for educational purposes. No content is reproduced verbatim from any source, no proprietary or confidential material is included, and it does not constitute official guidance from, or endorsement by, any software vendor. Product capabilities change over time — always verify current behaviour against the vendor's own official documentation before relying on this guide.</div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div>All sources noted inline above. AI copilot tools' exact capabilities change over time — verify current behaviour before relying on anything here. <b>For educational purposes only. Last verified: July 2026.</b></div>
+    <a class="backtotop" href="#top">↑ Back to top</a>
+  </div>
+</footer>
+<span id="top"></span>
+
+<!-- FLOATING ASK + FIND WIDGET -->
+<button class="float-fab" id="floatFabBtn" onclick="toggleFloatWidget()" aria-expanded="false" aria-label="Open Ask Sujit and element search">
+  <span class="float-fab-avatar"><div class="avatar-mono avatar-mono-xs">SK</div></span>
+  <span class="float-fab-label">Ask &amp; Find</span>
+</button>
+
+<div class="float-panel" id="floatPanel">
+  <div class="float-panel-head">
+    <span class="float-panel-avatar"><div class="avatar-mono avatar-mono-sm">SK</div></span>
+    <div>
+      <div class="float-panel-title">Ask Sujit &amp; Find an Element</div>
+      <div class="float-panel-sub">Quick access from anywhere on the page</div>
+    </div>
+    <button class="float-close" onclick="toggleFloatWidget(false)" aria-label="Close">&times;</button>
+  </div>
+  <div class="float-section">
+    <div class="float-section-lbl">Ask a question</div>
+    <div class="float-row">
+      <input id="floatAskInput" type="text" placeholder="e.g. weekly cadence?" onkeydown="if(event.key==='Enter')runFloatAsk()">
+      <button onclick="runFloatAsk()">Ask</button>
+    </div>
+    <div id="floatAskResult" class="float-result"></div>
+  </div>
+  <div class="float-section">
+    <div class="float-section-lbl">Find an element</div>
+    <input id="floatFinderInput" type="text" placeholder="e.g. tooltip, kanban..." oninput="runFloatFinder()">
+    <div id="floatFinderStatus" class="float-finder-status"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================ DATA ============================================================ */
+const CATS = [
+  {
+    id:"foundations", num:"1", label:"Foundations", color:"var(--base)", colorHex:"#5B6B84",
+    tagline:"The minimum viable dashboard.",
+    blurb:"Static-friendly, quick to build, understandable at a glance — no interactivity required. Good enough for a personal tracker, a first draft, or a one-off update.",
+    prompt:"Build a simple HTML dashboard with a title, 3 KPI cards, one bar chart, and a data table below.",
+    items:[
+      {name:"KPI card", desc:"One number, one label, optionally a comparison (\"+12% vs last month\").", lvl:"base"},
+      {name:"Basic chart", desc:"A single bar or line chart — one metric over time or by category.", lvl:"base"},
+      {name:"Simple table", desc:"Rows and columns, no sorting or filtering — just the data laid out clearly.", lvl:"base"},
+      {name:"Status badge", desc:"A colored label (red/amber/green) showing state at a glance.", lvl:"base"},
+      {name:"Static header", desc:"Title, date range, and owner — orients the reader before they scan the data.", lvl:"base"},
+      {name:"Legend", desc:"Explains what colors/icons mean — small, but removes ambiguity.", lvl:"base"},
+    ]
+  },
+  {
+    id:"intermediate", num:"2", label:"Intermediate", color:"var(--med)", colorHex:"#B9764F",
+    tagline:"Adds interactivity so the reader can explore, not just view.",
+    blurb:"Good for team operating dashboards and recurring weekly reviews.",
+    prompt:"Add slicers for region and month, tooltips on the chart, and a pop-up when I click a table row showing full details.",
+    items:[
+      {name:"Slicer", desc:"Button/tab/dropdown filter — narrow the view by category, owner, or region.", lvl:"med"},
+      {name:"Tabs", desc:"Switch between related views without leaving the page.", lvl:"med"},
+      {name:"Tooltip", desc:"Hover for exact values or context, keeping the base visual uncluttered.", lvl:"med"},
+      {name:"Search box", desc:"Live-filters a table or card list as the reader types.", lvl:"med"},
+      {name:"Sort controls", desc:"Click a column header to reorder a table.", lvl:"med"},
+      {name:"Pop-up / modal", desc:"Click for a detail view without navigating away from the dashboard.", lvl:"med"},
+      {name:"Sparkline", desc:"A tiny inline trend line inside a KPI card — high signal, no space cost.", lvl:"med"},
+      {name:"Progress bar / gauge", desc:"Shows % complete toward a goal or threshold.", lvl:"med"},
+      {name:"Date range picker", desc:"Lets the reader choose the period they care about.", lvl:"med"},
+    ]
+  },
+  {
+    id:"expert", num:"3", label:"Expert", color:"var(--expert)", colorHex:"#7A5FA6",
+    tagline:"Multi-layer, dynamic dashboards.",
+    blurb:"For live operations, program-level tracking, or anywhere the audience needs to go from summary to root cause without leaving the page.",
+    prompt:"Add drill-down navigation with breadcrumbs, a side-panel overlay for details, and cross-filtering so clicking one chart filters the others.",
+    items:[
+      {name:"Drill-down + breadcrumbs", desc:"Company → division → team, with a visible path back up.", lvl:"expert"},
+      {name:"Overlay side panel", desc:"A drawer that slides in from the edge for detail, without losing the main view.", lvl:"expert"},
+      {name:"Drag-and-drop board", desc:"Move kanban cards between columns; state updates live.", lvl:"expert"},
+      {name:"Cross-filtering", desc:"Clicking one chart filters every other chart on the page.", lvl:"expert"},
+      {name:"Heat map", desc:"Color-intensity grid — fast pattern recognition across two dimensions.", lvl:"expert"},
+      {name:"Swimlanes", desc:"Group kanban rows by owner, priority, or workstream.", lvl:"expert"},
+      {name:"Toast / snackbar", desc:"Brief confirmation on an action (e.g. \"Card moved to Done\").", lvl:"expert"},
+      {name:"Dark / light toggle", desc:"Useful for ops-center displays running continuously.", lvl:"expert"},
+      {name:"Annotation layer", desc:"Comments or markers pinned to a specific data point or card.", lvl:"expert"},
+    ]
+  },
+  {
+    id:"slt", num:"4", label:"Executive / SLT", color:"var(--slt)", colorHex:"#2F6E4F",
+    tagline:"Instant comprehension, not comprehensiveness.",
+    blurb:"Fewer elements, chosen deliberately, beat a complete set for a leadership audience.",
+    prompt:"Build a clean executive dashboard: 4 KPI cards with sparklines and trend arrows, one trend line and one comparison bar chart, a status badge per KPI, a simple time-period slicer, tooltips for detail, and a one-line insight summary under each chart. Minimal, low-saturation palette, generous white space, full data in a separate Details tab.",
+    items:[
+      {name:"Good", desc:"3–5 KPI cards with plain numbers, one chart, and a RAG badge per metric.", lvl:"base"},
+      {name:"Better", desc:"+ sparklines and trend arrows in the KPI cards, one slicer for time period, tooltips for exact detail on hover.", lvl:"med"},
+      {name:"Best", desc:"+ a one-line auto-generated \"what this means\" insight under each chart, full detail pushed to a separate Details tab.", lvl:"expert"},
+    ],
+    avoid:"Avoid for this audience: search boxes, dense data tables, sliders, dark-mode toggles, sidebars, accordions, more than two chart types on one screen. These read as operational tooling, not a leadership readout."
+  },
+];
+
+const CADENCE = [
+  {id:"daily", label:"Daily", h:"The stand-up view", body:"What's happening today, fast. Not enough new data day-to-day to justify trend charts.",
+   use:"A KPI strip (today's counts), status badges, a kanban board filtered to today's items, live counters.", skip:"Trend charts, monthly comparisons, narrative text.",
+   prompt:"Build a daily stand-up dashboard: today's task counts by status, a kanban board of in-progress items, and red/amber/green badges — no charts, just current state."},
+  {id:"weekly", label:"Weekly", h:"The team/ops review", body:"How did this week go vs. last week, and what's due next week.",
+   use:"KPI cards with week-over-week trend arrows, one bar chart of weekly throughput, a kanban board with items due this week highlighted, a slicer by owner.", skip:"Deep drill-downs — weekly reviews move fast.",
+   prompt:"Build a weekly dashboard: KPI cards comparing this week to last week, a bar chart of weekly output by owner, a slicer for owner, and a kanban board highlighting items due this week."},
+  {id:"biweekly", label:"Bi-weekly / Sprint", h:"The delivery review", body:"Sprint progress against a goal, and velocity trend over recent sprints.",
+   use:"A sprint goal card, burndown/burnup chart, velocity sparkline, kanban with WIP limits and swimlanes, a blockers list.", skip:"Monthly financials or portfolio-level rollups — keep it team-scoped.",
+   prompt:"Build a sprint dashboard: sprint goal card, burndown chart, velocity sparkline across the last 6 sprints, a kanban board with swimlanes by workstream and a WIP limit warning, and a blockers list."},
+  {id:"monthly", label:"Monthly", h:"The leadership/steering view", body:"Trend over time against target, budget/spend health, and the story behind the numbers.",
+   use:"Exec-style KPI cards, a monthly trend line vs. target, a RAG status per workstream, a budget gauge, a short narrative summary, full detail in an appendix tab.", skip:"Daily operational detail — summarize it, don't display it.",
+   prompt:"Build a monthly leadership dashboard: KPI cards with trend vs. target, a monthly trend line chart, a RAG status table by workstream, a budget gauge, and a short narrative insight box — with full data in a separate Details tab."},
+];
+
+const TEMPLATES = [
+  {name:"1. One-page RAG status", pairs:"Pairs with: weekly or bi-weekly",
+   body:"The fastest way to communicate status to anyone who doesn't need full context. Project name and overall RAG badge at top, 3 KPI numbers, milestones hit this period and coming up next, an open risks/issues list, and any decisions needed.",
+   mock:[["Project Name — Green"],["% Complete","Budget Used","Days to Milestone"],["Milestones this period","Next period"],["Risks / Issues","Decisions needed"]]},
+  {name:"2. Steering committee deck", pairs:"Pairs with: monthly",
+   body:"For leadership sponsors who need the story, not just the numbers. Executive summary, a scope/schedule/budget RAG trio, a milestone timeline chart, a risks-and-mitigations table, and a clear asks/decisions section.",
+   mock:[["Executive summary"],["Scope","Schedule","Budget"],["Milestone timeline"],["Risks & mitigations","Asks / decisions"]]},
+  {name:"3. Sprint/team status", pairs:"Pairs with: bi-weekly",
+   body:"Sprint goal at the top, a burndown chart, what was completed vs. carried over, current blockers, and a short preview of next sprint's focus.",
+   mock:[["Sprint goal"],["Burndown chart"],["Completed","Carried over","Blockers"],["Next sprint preview"]]},
+  {name:"4. Portfolio / program rollup", pairs:"Pairs with: monthly",
+   body:"Multiple projects as rows: RAG badge per project, trend arrow vs. last period, owner, and next milestone date. Best as a table with a slicer by division, and a pop-up per row for detail.",
+   mock:[["Project","RAG","Trend","Owner","Next milestone"],["Project A","Project B","Project C"]]},
+];
+
+const DEMO_EXAMPLES = ["today's task queue","weekly team review of open tasks","sprint burndown and velocity","monthly leadership review with budget","board for leadership steering committee"];
+
+const DEMO_RULES = [
+  {kw:["today","daily","stand-up","stand up","queue"], cadence:"Daily", tip:"KPI strip + kanban of today's items + status badges. No charts needed.", tag:"var(--cadence)"},
+  {kw:["week","weekly"], cadence:"Weekly", tip:"KPI cards with week-over-week trend + bar chart of weekly output + kanban with due-this-week highlighted.", tag:"var(--cadence)"},
+  {kw:["sprint","burndown","velocity","biweekly","bi-weekly"], cadence:"Bi-weekly / Sprint", tip:"Sprint goal card + burndown chart + velocity sparkline + kanban with WIP limits and swimlanes.", tag:"var(--cadence)"},
+  {kw:["month","monthly","budget","steering","leadership","executive","slt"], cadence:"Monthly / Executive", tip:"KPI cards with trend vs target + monthly trend line + RAG table by workstream + budget gauge + narrative summary.", tag:"var(--slt)"},
+];
+
+
+/* ============================================================ RENDER: TOPNAV + DOT RAIL ============================================================ */
+const PN_ORDER = ["overview","foundations","intermediate","expert","slt","cadence","templates","howto","palette","storytelling","beforeafter","finder","glossary","checklist","handoff","demo","troubleshoot","changelog","about"];
+const PN_LABELS = {overview:"Overview",foundations:"① Foundations",intermediate:"② Intermediate",expert:"③ Expert",slt:"★ Executive/SLT",cadence:"🕐 Cadence",templates:"📄 Templates",howto:"🪜 Step by Step",palette:"🎨 Palettes",storytelling:"🎨 Storytelling & A11y",beforeafter:"🎨 Before/After",finder:"🔍 Reference",glossary:"📖 Glossary",checklist:"✅ Checklist",handoff:"📤 Export & Handoff",demo:"★ Demo",troubleshoot:"🛠 Troubleshoot",changelog:"★ Changelog",about:"★ About"};
+document.getElementById("topnav").innerHTML = PN_ORDER.map(id=>`<a href="#${id}">${PN_LABELS[id]}</a>`).join("");
+
+/* ============================================================ RENDER: HUB + SPOKES ============================================================ */
+const spokeCats = CATS.concat([{id:"cadence",label:"Cadence",colorHex:"#3A6EA5"},{id:"templates",label:"Templates",colorHex:"#A6483F"}]);
+document.getElementById("spokes").innerHTML = spokeCats.map(c=>`
+  <a class="node" href="#${c.id}">
+    <span class="icon" style="background:${c.colorHex}">${c.num||"★"}</span>
+    <span class="lbl">${c.label}</span>
+  </a>`).join("");
+
+function drawLines(){
+  const svg = document.getElementById("linesSvg");
+  const hub = document.querySelector(".hub-center");
+  const wrap = document.querySelector(".hub-wrap");
+  if(!svg||!hub||!wrap) return;
+  const wrapRect = wrap.getBoundingClientRect();
+  const hubRect = hub.getBoundingClientRect();
+  const hx = hubRect.left + hubRect.width/2 - wrapRect.left;
+  const hy = hubRect.bottom - wrapRect.top;
+  let paths = "";
+  document.querySelectorAll(".node").forEach(node=>{
+    const r = node.getBoundingClientRect();
+    const nx = r.left + r.width/2 - wrapRect.left;
+    const ny = r.top - wrapRect.top;
+    const midY = (hy+ny)/2;
+    paths += `<path d="M${hx},${hy} C${hx},${midY} ${nx},${midY} ${nx},${ny}"/>`;
+  });
+  svg.innerHTML = paths;
+}
+window.addEventListener("load", drawLines);
+window.addEventListener("resize", drawLines);
+
+/* ============================================================ RENDER: CATEGORY SECTIONS ============================================================ */
+document.getElementById("categorySections").innerHTML = CATS.map(c=>`
+  <section class="section" id="${c.id}">
+    <div class="wrap">
+      <div class="crew-head">
+        <div class="icon-wrap" style="--crew:${c.colorHex}">${c.num}</div>
+        <div>
+          <div class="crew-badge" style="color:${c.colorHex}">${c.tagline}</div>
+          <h2 class="serif">${c.num} · ${c.label}</h2>
+        </div>
+      </div>
+      <p class="tag">${c.blurb}</p>
+      <div class="skills-grid">
+        ${c.items.map(it=>`
+          <div class="skill-card" style="--crew:${c.colorHex}">
+            <div class="skill-name">${it.name}</div>
+            <div class="skill-desc">${it.desc}</div>
+            <span class="src-tag src-${it.lvl}">${it.lvl==="base"?"base":it.lvl==="med"?"intermediate":"expert"}</span>
+          </div>`).join("")}
+      </div>
+      ${c.id==="slt"?`
+      <div class="flip-3d" aria-hidden="true">
+        <div class="flip-3d-stage">
+          <div class="flip-3d-inner">
+            <div class="flip-face flip-front"><span class="ff-n">+18%</span><span class="ff-l">Revenue vs target</span></div>
+            <div class="flip-face flip-back">"Revenue is ahead of target, driven mainly by Q3 renewals."</div>
+          </div>
+        </div>
+        <div class="flip-3d-caption">Hover the card — this is the "Best" tier one-line insight in action.</div>
+      </div>`:""}
+      ${c.avoid?`<div class="avoid">${c.avoid}</div>`:""}
+      <div class="caveat"><b>Prompt tip:</b> "${c.prompt}"</div>
+    </div>
+  </section>`).join("");
+
+/* ============================================================ RENDER: CADENCE TABS ============================================================ */
+document.getElementById("cadenceTabs").innerHTML = CADENCE.map((c,i)=>`<button class="tab-btn${i===0?' active':''}" data-tab="${c.id}" onclick="setCadenceTab('${c.id}',this)">${c.label}</button>`).join("");
+document.getElementById("cadencePanels").innerHTML = CADENCE.map((c,i)=>`
+  <div class="tab-panel${i===0?' active':''}" data-panel="${c.id}">
+    <h4>${c.h}</h4>
+    <p>${c.body}</p>
+    <p><b>Use:</b> ${c.use} <b>Skip:</b> ${c.skip}</p>
+    <div class="caveat"><b>Prompt:</b> "${c.prompt}"</div>
+  </div>`).join("");
+function setCadenceTab(id, btn){
+  document.querySelectorAll("#cadenceTabs .tab-btn").forEach(b=>b.classList.toggle("active", b===btn));
+  document.querySelectorAll("#cadencePanels .tab-panel").forEach(p=>p.classList.toggle("active", p.dataset.panel===id));
+}
+
+/* ============================================================ RENDER: TEMPLATES ============================================================ */
+document.getElementById("templatesList").innerHTML = TEMPLATES.map(t=>`
+  <div class="tmpl-card">
+    <h4>${t.name}</h4>
+    <div class="pairs">${t.pairs}</div>
+    <p>${t.body}</p>
+    <div class="mock">
+      ${t.mock.map(row=>`<div class="mock-row">${row.map(cell=>{
+        const ragMatch = cell.match(/^(.*) — (Green|Amber|Red)$/);
+        if(ragMatch){
+          const cls = ragMatch[2]==="Green"?"g":ragMatch[2]==="Amber"?"a":"r";
+          return `<div class="mock-box"><span class="rag ${cls}"></span>${ragMatch[1]}</div>`;
+        }
+        return `<div class="mock-box">${cell}</div>`;
+      }).join("")}</div>`).join("")}
+    </div>
+  </div>`).join("");
+
+/* ============================================================ RENDER: FINDER / REFERENCE TABLE ============================================================ */
+const REF = [];
+CATS.forEach(c=>{ if(c.id!=="slt") c.items.forEach(it=>REF.push({name:it.name, lvl:it.lvl, cat:c.label, best:it.desc})); });
+const CADENCE_LABEL = {base:"Base", med:"Intermediate", expert:"Expert"};
+function renderRef(){
+  document.getElementById("refBody").innerHTML = REF.map(r=>`
+    <tr data-lvl="${r.lvl}" data-text="${(r.name+' '+r.best+' '+r.cat).toLowerCase()}">
+      <td><b>${r.name}</b></td><td>${CADENCE_LABEL[r.lvl]}</td><td>${r.cat}</td><td>${r.best}</td>
+    </tr>`).join("");
+}
+renderRef();
+
+/* ============================================================ RENDER: PROMPT GLOSSARY ============================================================ */
+const PROMPT_GLOSSARY = [];
+CATS.forEach(c=>{ if(c.prompt) PROMPT_GLOSSARY.push({src:c.label, color:c.colorHex, text:c.prompt}); });
+CADENCE.forEach(c=>{ if(c.prompt) PROMPT_GLOSSARY.push({src:"Cadence — "+c.label, color:"#3A6EA5", text:c.prompt}); });
+PROMPT_GLOSSARY.push({src:"Step by Step — Weekly, team-level", color:"#3A6EA5", text:"Build a weekly team-level dashboard: KPI cards with week-over-week trend arrows, a bar chart of output by owner, a slicer for owner, and a kanban board highlighting items due this week. Keep it to base and intermediate elements — no drill-downs."});
+PROMPT_GLOSSARY.push({src:"Step by Step — Monthly, executive", color:"#3A6EA5", text:"Build a monthly executive dashboard: 4 KPI cards with sparklines and trend vs. target, a RAG status table by workstream, a budget gauge, and a one-line insight under each chart. Minimal low-saturation palette, full detail in a separate Details tab."});
+
+document.getElementById("promptGlossaryList").innerHTML = PROMPT_GLOSSARY.map((p,i)=>`
+  <div class="prompt-glossary-item" style="--c:${p.color}">
+    <div class="pg-src">${p.src}</div>
+    <p class="pg-text">"${p.text}"</p>
+    <button type="button" class="pg-copy" data-idx="${i}" onclick="copyGlossaryPrompt(${i}, this)">Copy prompt</button>
+  </div>`).join("");
+
+function copyGlossaryPrompt(idx, btn){
+  const text = PROMPT_GLOSSARY[idx].text;
+  navigator.clipboard?.writeText(text).then(()=>{
+    btn.textContent = "Copied ✓"; btn.classList.add("copied");
+    setTimeout(()=>{ btn.textContent = "Copy prompt"; btn.classList.remove("copied"); }, 1600);
+  }).catch(()=>{});
+}
+
+/* ============================================================ PALETTE PREVIEWER ============================================================ */
+const PALETTES = {
+  blue: {bg:"#F4F6F9", card:"#FFFFFF", text:"#1B2733", accent:"#2C5C8A", note:"Corporate Blue — safe default for most business audiences."},
+  earth:{bg:"#F5F1EA", card:"#FFFDF9", text:"#2A2420", accent:"#A6683F", note:"Muted Earth — warmer, less corporate, good for internal team views."},
+  mono: {bg:"#F2F2F2", card:"#FFFFFF", text:"#1A1A1A", accent:"#1F7A6C", note:"Monochrome + Accent — high contrast, one accent color, very clean."},
+};
+function previewPalette(key){
+  const p = PALETTES[key];
+  if(!p) return;
+  const box = document.getElementById("livePreview");
+  box.style.background = p.bg;
+  document.getElementById("lpNum").style.color = p.accent;
+  document.getElementById("lpBarFill").style.background = p.accent;
+  document.getElementById("lpNote").textContent = p.note;
+}
+
+/* ============================================================ DOWNLOAD ALL PROMPTS ============================================================ */
+function downloadAllPrompts(){
+  const lines = PROMPT_GLOSSARY.map(p=>`${p.src}\n${p.text}\n`).join("\n---\n\n");
+  const header = "SUJIT'S DASHBOARD PLAYBOOK — ALL PROMPTS\n" + "=".repeat(42) + "\n\n";
+  const blob = new Blob([header + lines], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "dashboard-prompts.txt";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+let finderLevel = "all";
+function setFinderLevel(lv, btn){
+  finderLevel = lv;
+  document.querySelectorAll(".finder-chip").forEach(b=>b.classList.toggle("active", b===btn));
+  applyFinder();
+}
+function applyFinder(){
+  const q = document.getElementById("finderInput").value.trim().toLowerCase();
+  let shown = 0;
+  document.querySelectorAll("#refBody tr").forEach(row=>{
+    let match = true;
+    if(finderLevel!=="all" && row.dataset.lvl!==finderLevel) match = false;
+    if(q && !row.dataset.text.includes(q)) match = false;
+    row.classList.toggle("hidden", !match);
+    if(match) shown++;
+  });
+  document.getElementById("finderStatus").innerHTML = shown===REF.length ? `Showing all <b>${REF.length}</b> elements.` : `Showing <b>${shown}</b> of ${REF.length} elements.` + (shown===0?" No matches.":"");
+}
+applyFinder();
+
+/* ============================================================ RENDER: STATS STRIP ============================================================ */
+document.getElementById("statsStrip").innerHTML = `
+  <div class="stat-pill"><span class="n">${REF.length}</span><span class="l">Elements</span></div>
+  <div class="stat-pill"><span class="n">4</span><span class="l">Cadences</span></div>
+  <div class="stat-pill"><span class="n">4</span><span class="l">Templates</span></div>
+  <div class="stat-pill"><span class="n">3</span><span class="l">Skill levels</span></div>`;
+
+/* ============================================================ LIVE DEMO (cadence matcher) ============================================================ */
+document.getElementById("demoExamples").innerHTML = DEMO_EXAMPLES.map(e=>`<span class="chip-btn" onclick="document.getElementById('demoInput').value='${e}'; runDemo();">${e}</span>`).join("");
+function runDemo(){
+  const q = document.getElementById("demoInput").value.trim().toLowerCase();
+  const out = document.getElementById("demoOut");
+  if(!q){ out.innerHTML = `<span style="color:var(--ink-soft); font-size:.86rem;">Type a task or click an example above.</span>`; return; }
+  let match = null;
+  for(const rule of DEMO_RULES){ if(rule.kw.some(k=>q.includes(k))){ match = rule; break; } }
+  if(match){
+    out.innerHTML = `<div class="demo-card"><div><div class="tag" style="color:${match.tag}">${match.cadence}</div><p style="margin:6px 0 0; font-size:.88rem;">${match.tip}</p></div></div>`;
+  } else {
+    out.innerHTML = `<span style="color:var(--ink-soft); font-size:.86rem;">No confident match — try mentioning "daily", "weekly", "sprint", or "monthly".</span>`;
+  }
+}
+
+/* ============================================================ ASK SUJIT (local keyword search) ============================================================ */
+const ASK_DB = [
+  {kw:["kanban","board","drag"], id:"expert", label:"Expert — Drag-and-drop board & swimlanes"},
+  {kw:["slt","executive","leadership","c-suite"], id:"slt", label:"Executive / SLT dashboards"},
+  {kw:["weekly","week"], id:"cadence", label:"Cadence — Weekly"},
+  {kw:["monthly","month","budget"], id:"cadence", label:"Cadence — Monthly"},
+  {kw:["daily","stand-up","standup"], id:"cadence", label:"Cadence — Daily"},
+  {kw:["sprint","biweekly","bi-weekly","burndown"], id:"cadence", label:"Cadence — Bi-weekly/Sprint"},
+  {kw:["status report","status","template","rag"], id:"templates", label:"Project Status Report Templates"},
+  {kw:["slicer","filter"], id:"intermediate", label:"Intermediate — Slicers & filters"},
+  {kw:["tooltip","pop-up","modal","overlay"], id:"intermediate", label:"Intermediate — Pop-ups & tooltips"},
+  {kw:["foundation","basic","kpi card"], id:"foundations", label:"Foundations — Base elements"},
+  {kw:["drill","cross-filter","heat map"], id:"expert", label:"Expert — Drill-down & cross-filtering"},
+  {kw:["step by step","how do i start","where do i start","prompt"], id:"howto", label:"Step by Step — From Blank Page to Dashboard"},
+  {kw:["glossary","definition","what does","what is a"], id:"glossary", label:"Glossary — Terms Used in This Guide"},
+  {kw:["wrong","broken","failed","error","not working","fix","debug","troubleshoot"], id:"troubleshoot", label:"Troubleshooting — Quick Fixes for Bad Generations"},
+  {kw:["color","palette","hex","theme"], id:"palette", label:"Professional Color Palettes"},
+  {kw:["accessible","accessibility","contrast","colorblind","storytelling"], id:"storytelling", label:"Data Storytelling & Accessibility"},
+  {kw:["clutter","before and after","clean vs"], id:"beforeafter", label:"Before vs. After: What Clean Looks Like"},
+  {kw:["checklist","review","before i send","before sending"], id:"checklist", label:"Review Checklist"},
+  {kw:["export","handoff","powerpoint","word","pdf","sharepoint"], id:"handoff", label:"Export & Handoff"},
+];
+function askExample(q){ document.getElementById("askInput").value = q; runAsk(); }
+
+/* ============================================================ PROMPT BUILDER ============================================================ */
+function buildPrompt(){
+  try{
+    const type = document.getElementById("bpType").value;
+    const audience = document.getElementById("bpAudience").value;
+    const cadence = document.getElementById("bpCadence").value;
+    const level = document.getElementById("bpLevel").value;
+    const elements = Array.from(document.querySelectorAll(".bp-elem:checked")).map(el=>el.value);
+    const audienceText = audience === "exec" ? "an Executive/SLT audience" : "my team";
+    const elementsText = elements.length ? elements.join(", ") : "the standard elements for this level";
+
+    let promptText = `Build a ${cadence} ${type} for ${audienceText}. Include ${elementsText}. Keep it at ${level} level of detail.`;
+    if(audience === "exec"){
+      promptText += " Use a minimal, low-saturation color palette with generous white space, and push full data into a separate Details tab.";
+    }
+
+    document.getElementById("builderOutput").value = promptText;
+    document.getElementById("builderResultWrap").style.display = "block";
+  }catch(err){
+    const wrap = document.getElementById("builderResultWrap");
+    const out = document.getElementById("builderOutput");
+    if(wrap && out){ out.value = "Something went wrong generating the prompt — please refresh the page and try again."; wrap.style.display = "block"; }
+  }
+}
+function copyBuilderPrompt(){
+  const text = document.getElementById("builderOutput").value;
+  const btn = document.querySelector(".builder-copy-btn");
+  navigator.clipboard?.writeText(text).then(()=>{
+    btn.textContent = "Copied ✓";
+    btn.classList.add("copied");
+    setTimeout(()=>{ btn.textContent = "Copy prompt"; btn.classList.remove("copied"); }, 1600);
+  }).catch(()=>{});
+}
+function runAsk(){
+  const q = document.getElementById("askInput").value.trim().toLowerCase();
+  const box = document.getElementById("askResult");
+  if(!q){ box.style.display="none"; return; }
+  let hit = null;
+  for(const row of ASK_DB){ if(row.kw.some(k=>q.includes(k))){ hit = row; break; } }
+  box.style.display = "block";
+  box.innerHTML = hit
+    ? `Closest match: <a href="#${hit.id}">${hit.label} →</a>`
+    : `No confident match — try a section name like "kanban", "SLT", "weekly", or "status report".`;
+}
+
+/* ============================================================ SCROLLSPY + PROGRESS + DOT RAIL ============================================================ */
+const ID_TO_COLOR = {overview:"#3a332c",foundations:"#5B6B84",intermediate:"#B9764F",expert:"#7A5FA6",slt:"#2F6E4F",cadence:"#3A6EA5",templates:"#A6483F",howto:"#3A6EA5",palette:"#2C7A6B",storytelling:"#2C7A6B",beforeafter:"#2C7A6B",finder:"#3a332c",glossary:"#5B6B84",checklist:"#B23A2E",handoff:"#3A6EA5",demo:"#3a332c",troubleshoot:"#B23A2E",changelog:"#3a332c",about:"#3a332c"};
+function setProgressColor(color){
+  const fill = document.getElementById("progressFill"); const pct = document.getElementById("progressPct");
+  if(fill){ fill.style.background = color; fill.style.boxShadow = `0 0 10px 1px ${color}`; }
+  if(pct){ pct.style.color = color; pct.style.borderColor = color; }
+}
+setProgressColor("#3a332c");
+document.getElementById("dotRail").innerHTML = PN_ORDER.map(id=>`<button class="dot" data-id="${id}" style="--dot-color:${ID_TO_COLOR[id]}" onclick="document.getElementById('${id}').scrollIntoView({behavior:'smooth'})" aria-label="Jump to ${PN_LABELS[id]}"><span class="dot-label">${PN_LABELS[id]}</span></button>`).join("");
+const dots = Array.from(document.querySelectorAll(".dot-rail .dot"));
+const navLinks = Array.from(document.querySelectorAll("#topnav a"));
+const spySections = PN_ORDER.map(id=>document.getElementById(id)).filter(Boolean);
+const spyObserver = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      navLinks.forEach(a=>a.classList.toggle("active", a.getAttribute("href")==="#"+entry.target.id));
+      dots.forEach(d=>d.classList.toggle("active", d.dataset.id===entry.target.id));
+      setProgressColor(ID_TO_COLOR[entry.target.id]||"#3a332c");
+    }
+  });
+}, {rootMargin:"-35% 0px -55% 0px", threshold:0});
+spySections.forEach(s=>spyObserver.observe(s));
+function updateProgress(){
+  const doc = document.documentElement;
+  const scrollable = doc.scrollHeight - doc.clientHeight;
+  const pct = scrollable>0 ? (doc.scrollTop/scrollable)*100 : 0;
+  const fill = document.getElementById("progressFill"); const label = document.getElementById("progressPct");
+  if(fill) fill.style.width = pct+"%";
+  if(label) label.textContent = Math.round(pct)+"%";
+}
+window.addEventListener("scroll", updateProgress, {passive:true});
+window.addEventListener("resize", updateProgress);
+updateProgress();
+
+/* copy-link on eyebrows */
+document.querySelectorAll(".section[id] .eyebrow").forEach(eyebrow=>{
+  const sectionId = eyebrow.closest(".section[id]").id;
+  const btn = document.createElement("button");
+  btn.className = "copy-link-btn"; btn.type="button"; btn.textContent = "🔗 Copy link";
+  btn.onclick = ()=>{
+    const url = location.href.split("#")[0] + "#" + sectionId;
+    navigator.clipboard?.writeText(url).then(()=>{ btn.textContent="✓ Copied"; btn.classList.add("copied"); setTimeout(()=>{ btn.textContent="🔗 Copy link"; btn.classList.remove("copied"); },1600); }).catch(()=>{});
+  };
+  eyebrow.appendChild(btn);
+});
+
+/* copy-prompt buttons on caveat blocks */
+document.querySelectorAll(".caveat").forEach(el=>{
+  if(el.textContent.trim().startsWith("Prompt")){
+    const text = el.textContent.replace(/^Prompt(\s*tip)?:\s*/i,"").trim().replace(/^"|"$/g,"");
+    const btn = document.createElement("button");
+    btn.textContent = "Copy prompt";
+    btn.style.cssText = "margin-left:10px;font-size:.7rem;padding:3px 9px;border-radius:6px;border:1px solid var(--hair);background:#fff;cursor:pointer;";
+    btn.onclick = ()=>{ navigator.clipboard?.writeText(text).then(()=>{ btn.textContent="Copied ✓"; setTimeout(()=>btn.textContent="Copy prompt",1400); }); };
+    el.appendChild(document.createElement("br")); el.appendChild(btn);
+  }
+});
+
+/* scroll reveal */
+const revealTargets = document.querySelectorAll(".skill-card, .box, .tmpl-card, .demo-card");
+revealTargets.forEach(el=>el.classList.add("reveal"));
+const revealObserver = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{ if(entry.isIntersecting){ entry.target.classList.add("in-view"); revealObserver.unobserve(entry.target); } });
+}, {threshold:0.1, rootMargin:"0px 0px -8% 0px"});
+revealTargets.forEach(el=>revealObserver.observe(el));
+
+/* keyboard nav j/k */
+document.addEventListener("keydown", e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="TEXTAREA") return;
+  const currentIdx = PN_ORDER.findIndex(id=>navLinks.find(a=>a.classList.contains("active") && a.getAttribute("href")==="#"+id));
+  if(currentIdx===-1) return;
+  if(e.key==="j"||e.key==="ArrowDown"){ const next=PN_ORDER[currentIdx+1]; if(next){ e.preventDefault(); document.getElementById(next).scrollIntoView({behavior:"smooth"}); } }
+  else if(e.key==="k"||e.key==="ArrowUp"){ const prev=PN_ORDER[currentIdx-1]; if(prev){ e.preventDefault(); document.getElementById(prev).scrollIntoView({behavior:"smooth"}); } }
+});
+
+/* floating widget */
+function toggleFloatWidget(forceState){
+  const panel = document.getElementById("floatPanel"); const btn = document.getElementById("floatFabBtn");
+  const willOpen = typeof forceState==="boolean" ? forceState : !panel.classList.contains("open");
+  panel.classList.toggle("open", willOpen);
+  btn.setAttribute("aria-expanded", willOpen?"true":"false");
+  if(willOpen) document.getElementById("floatAskInput").focus();
+}
+function runFloatAsk(){
+  document.getElementById("askInput").value = document.getElementById("floatAskInput").value;
+  runAsk();
+  const src = document.getElementById("askResult"); const dest = document.getElementById("floatAskResult");
+  dest.innerHTML = src.innerHTML; dest.style.display = src.innerHTML.trim() ? "block":"none";
+}
+function runFloatFinder(){
+  document.getElementById("finderInput").value = document.getElementById("floatFinderInput").value;
+  applyFinder();
+  document.getElementById("floatFinderStatus").innerHTML = document.getElementById("finderStatus").innerHTML;
+}
+document.addEventListener("click", e=>{
+  const panel = document.getElementById("floatPanel"); const fab = document.getElementById("floatFabBtn");
+  if(panel.classList.contains("open") && !panel.contains(e.target) && !fab.contains(e.target)) toggleFloatWidget(false);
+});
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") toggleFloatWidget(false); });
+</script>
+</body>
+</html>
