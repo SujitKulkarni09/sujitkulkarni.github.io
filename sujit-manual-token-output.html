@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sujit Kulkarni's Model — Word to Output, Step by Step</title>
+<meta name="description" content="An interactive 3D simulator showing how a language model turns words into tokens, vectors, embeddings, and finally an output — with live step-by-step commentary.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#05060F;
+  --panel:rgba(20,24,48,.55);
+  --panel-solid:#101226;
+  --border:rgba(140,170,255,.22);
+  --cyan:#4CE0E8;
+  --magenta:#FF4FD8;
+  --violet:#8B6BFF;
+  --amber:#FFD24C;
+  --green:#4CFFB0;
+  --text:#EAF0FF;
+  --dim:#8993B8;
+  --display:'Orbitron', sans-serif;
+  --sans:'Inter', -apple-system, sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0; padding:0; background:var(--bg); color:var(--text); font-family:var(--sans);}
+body{position:relative; min-height:100vh; overflow-x:hidden;}
+#starfield{position:fixed; inset:0; z-index:0; pointer-events:none;}
+.wrap{position:relative; z-index:1; max-width:1020px; margin:0 auto; padding:40px 20px 100px;}
+
+::selection{background:var(--violet); color:#fff;}
+
+/* ===== header ===== */
+.eyebrow{
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--cyan); margin-bottom:8px; display:flex; align-items:center; gap:8px;
+}
+.eyebrow::before{content:""; width:7px; height:7px; border-radius:50%; background:var(--cyan); box-shadow:0 0 8px 2px var(--cyan); display:inline-block;}
+h1{
+  font-family:var(--display); font-weight:800; font-size:clamp(2.1rem,5vw,3.2rem); margin:0 0 8px;
+  background:linear-gradient(90deg,#fff 10%,var(--cyan) 45%,var(--violet) 75%,var(--magenta) 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  letter-spacing:.01em;
+}
+.sub{color:var(--dim); font-size:1.02rem; max-width:660px;}
+
+/* ===== glass panel base ===== */
+.glass{
+  background:var(--panel); border:1px solid var(--border); border-radius:16px;
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  box-shadow:0 0 0 1px rgba(255,255,255,.02) inset, 0 20px 50px -25px rgba(0,0,0,.6);
+}
+
+/* ===== input row ===== */
+.input-card{padding:20px 22px; margin-top:26px;}
+.input-row{display:flex; gap:10px; flex-wrap:wrap;}
+#sentence{
+  flex:1; min-width:220px; background:rgba(0,0,0,.35); border:1px solid var(--border); color:var(--text);
+  font-family:var(--mono); font-size:1rem; padding:13px 15px; border-radius:10px;
+}
+#sentence:focus{outline:none; border-color:var(--cyan); box-shadow:0 0 0 3px rgba(76,224,232,.15);}
+.run-btn{
+  background:linear-gradient(135deg,var(--cyan),var(--violet)); color:#04050D; border:none; font-weight:700;
+  font-family:var(--sans); padding:13px 24px; border-radius:10px; cursor:pointer; font-size:.95rem;
+  box-shadow:0 8px 24px -8px rgba(76,224,232,.5);
+}
+.run-btn:hover{filter:brightness(1.08); transform:translateY(-1px);}
+.examples{display:flex; gap:8px; flex-wrap:wrap; margin-top:13px;}
+.chip{
+  font-family:var(--mono); font-size:.74rem; color:var(--dim); border:1px solid var(--border);
+  padding:6px 12px; border-radius:20px; cursor:pointer; background:rgba(255,255,255,.02);
+  transition:border-color .2s, color .2s, transform .15s;
+}
+.chip:hover{border-color:var(--amber); color:var(--amber); transform:translateY(-1px);}
+
+/* ===== progress rail ===== */
+.rail{display:flex; gap:7px; margin:26px 0 8px; flex-wrap:wrap;}
+.step-pip{
+  flex:1; min-width:88px; text-align:center; padding:10px 6px; border-radius:10px; border:1px solid var(--border);
+  font-family:var(--mono); font-size:.66rem; color:var(--dim); background:rgba(255,255,255,.02); cursor:pointer;
+  transition:all .2s;
+}
+.step-pip .n{display:block; font-family:var(--display); font-weight:700; font-size:.95rem; margin-bottom:2px; color:var(--dim);}
+.step-pip.active{border-color:var(--cyan); color:var(--cyan); box-shadow:0 0 16px -4px var(--cyan);}
+.step-pip.active .n{color:var(--cyan);}
+.step-pip.done{border-color:var(--green); color:var(--green);}
+.step-pip.done .n{color:var(--green);}
+
+/* ===== stage ===== */
+.stage{padding:28px 26px; margin-top:10px; min-height:280px; position:relative; overflow:hidden;}
+.stage h2{
+  font-family:var(--display); font-size:1.35rem; margin:0 0 4px; font-weight:700; letter-spacing:.02em;
+  background:linear-gradient(90deg,var(--cyan),var(--violet)); -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.stage .stage-sub{color:var(--dim); font-size:.86rem; margin-bottom:20px;}
+
+/* commentary */
+.commentary{
+  margin-top:22px; background:rgba(0,0,0,.35); border:1px solid var(--border); border-left:3px solid var(--magenta);
+  border-radius:0 12px 12px 0; padding:15px 18px; position:relative;
+}
+.commentary::before{content:"◆ SUJIT SAYS"; display:block; font-family:var(--mono); font-size:.64rem;
+  letter-spacing:.1em; text-transform:uppercase; color:var(--magenta); margin-bottom:6px;}
+.commentary p{margin:0; font-size:.97rem; color:var(--text); line-height:1.6;}
+
+/* controls */
+.controls{display:flex; gap:10px; margin-top:22px; align-items:center; flex-wrap:wrap;}
+.ctrl-btn{
+  background:rgba(255,255,255,.03); border:1px solid var(--border); color:var(--text); font-family:var(--sans);
+  padding:10px 18px; border-radius:10px; cursor:pointer; font-size:.88rem; font-weight:600;
+}
+.ctrl-btn:hover{border-color:var(--text);}
+.ctrl-btn:disabled{opacity:.3; cursor:not-allowed;}
+.ctrl-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--violet)); color:#04050D; border:none;}
+.auto-toggle{display:flex; align-items:center; gap:6px; font-size:.82rem; color:var(--dim); margin-left:auto;}
+
+/* ===== token chips (cheap 3D tilt) ===== */
+.token-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:6px; perspective:600px;}
+.tok{
+  background:linear-gradient(135deg,var(--amber),#F2A33D); color:#231702; font-family:var(--mono); font-weight:700; font-size:.95rem;
+  padding:10px 16px; border-radius:10px; position:relative; opacity:0; transform:translateY(10px) rotateX(0deg);
+  animation:popIn .4s ease forwards; box-shadow:0 8px 20px -8px rgba(255,210,76,.5); transition:transform .2s;
+  cursor:default;
+}
+.tok:hover{transform:rotateX(12deg) rotateY(-6deg) translateY(-2px);}
+.tok .id{display:block; font-size:.62rem; font-weight:600; color:#4A3410; margin-top:3px;}
+@keyframes popIn{to{opacity:1; transform:translateY(0) rotateX(0deg);}}
+
+/* ===== vector bars ===== */
+.vec-col{display:flex; flex-direction:column; align-items:center; gap:4px;}
+.vec-label{font-family:var(--mono); font-size:.72rem; color:var(--dim); margin-bottom:2px;}
+.vec-bars{display:flex; gap:3px; align-items:flex-end; height:70px;}
+.vec-bar{width:9px; border-radius:2px 2px 0 0; transition:height .4s ease;}
+.vec-grid{display:flex; gap:16px; flex-wrap:wrap; margin-top:8px;}
+
+/* ===== 3D canvas containers ===== */
+.canvas-3d{
+  width:100%; height:320px; border-radius:12px; border:1px solid var(--border); background:radial-gradient(ellipse at center, #0A0E22 0%, #05060F 80%);
+  margin-top:10px; cursor:grab; position:relative;
+}
+.canvas-3d:active{cursor:grabbing;}
+.canvas-3d canvas{display:block; border-radius:12px;}
+.canvas-hint{position:absolute; bottom:8px; right:12px; font-family:var(--mono); font-size:.66rem; color:var(--dim); opacity:.7;}
+
+/* ===== output bars ===== */
+.out-row{display:flex; align-items:center; gap:10px; margin:8px 0;}
+.out-label{font-family:var(--mono); width:80px; font-size:.85rem; color:var(--text); flex-shrink:0;}
+.out-track{flex:1; background:rgba(0,0,0,.35); border-radius:6px; height:20px; overflow:hidden; border:1px solid var(--border);}
+.out-fill{height:100%; background:linear-gradient(90deg,var(--violet),var(--cyan)); width:0%; transition:width .6s ease, background .3s ease;}
+.out-fill.top{background:linear-gradient(90deg,var(--magenta),var(--amber)); box-shadow:0 0 12px rgba(255,79,216,.5);}
+.out-pct{font-family:var(--mono); font-size:.78rem; color:var(--dim); width:48px; text-align:right; flex-shrink:0;}
+
+/* final sentence */
+.final-sentence{
+  font-family:var(--mono); font-size:1.1rem; margin-top:14px; padding:15px 17px; background:rgba(0,0,0,.35);
+  border-radius:10px; border:1px dashed var(--border);
+}
+.final-sentence .new-word{color:var(--amber); font-weight:700; text-shadow:0 0 12px rgba(255,210,76,.5);}
+
+footer{position:relative; z-index:1; max-width:1020px; margin:0 auto; padding:10px 20px 40px; color:var(--dim); font-size:.74rem; font-family:var(--mono);}
+</style>
+</head>
+<body>
+<canvas id="starfield"></canvas>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">An interactive 3D simulator</div>
+    <h1>Sujit Kulkarni's Model</h1>
+    <p class="sub">Type any short phrase and watch, step by step, exactly what happens inside a language model between your words and its output — with live commentary and a real 3D view of the network at work.</p>
+  </header>
+
+  <div class="input-card glass">
+    <div class="input-row">
+      <input id="sentence" type="text" value="the cat sat on the" maxlength="40">
+      <button class="run-btn" id="runBtn">▶ Run the Model</button>
+    </div>
+    <div class="examples">
+      <button class="chip" data-ex="the cat sat on the">the cat sat on the</button>
+      <button class="chip" data-ex="once upon a">once upon a</button>
+      <button class="chip" data-ex="I love eating">I love eating</button>
+      <button class="chip" data-ex="artificial intelligence is">artificial intelligence is</button>
+    </div>
+  </div>
+
+  <div class="rail" id="rail"></div>
+
+  <div class="stage glass" id="stage">
+    <h2>Ready when you are</h2>
+    <div class="stage-sub">Press "Run the Model" above to begin.</div>
+    <div class="commentary"><p>Type a short phrase, then hit Run. I'll walk you through every step the model takes — from your raw text all the way to its predicted next word.</p></div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn" disabled>← Back</button>
+    <button class="ctrl-btn primary" id="nextBtn" disabled>Next step →</button>
+    <label class="auto-toggle"><input type="checkbox" id="autoPlay"> Auto-play</label>
+  </div>
+
+</div>
+
+<footer>Sujit Kulkarni's Model is a simplified, illustrative simulation for teaching purposes — token IDs, vector values, and network activity are generated locally in your browser, not from a real trained model.</footer>
+
+<script>
+/* ============ starfield background ============ */
+(function(){
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let w,h,stars;
+  function resize(){
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    stars = Array.from({length: Math.floor((w*h)/9000)}, ()=>({
+      x: Math.random()*w, y: Math.random()*h, r: Math.random()*1.4+0.2,
+      tw: Math.random()*Math.PI*2, speed: Math.random()*0.02+0.005
+    }));
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = '#05060F';
+    ctx.fillRect(0,0,w,h);
+    stars.forEach(s=>{
+      s.tw += s.speed;
+      const alpha = 0.35 + Math.abs(Math.sin(s.tw))*0.65;
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(180,200,255,${alpha})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ============ deterministic pseudo-random helpers ============ */
+function hashStr(s){
+  let h = 2166136261;
+  for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ============ mock tokenizer ============ */
+function tokenize(sentence){
+  const words = sentence.trim().split(/\s+/).filter(Boolean);
+  const tokens = [];
+  words.forEach(w=>{
+    if(w.length > 5){
+      const cut = Math.ceil(w.length/2);
+      tokens.push(w.slice(0,cut));
+      tokens.push(w.slice(cut));
+    } else {
+      tokens.push(w);
+    }
+  });
+  return tokens;
+}
+function tokenId(tok){ return hashStr(tok.toLowerCase()) % 50000; }
+function embedding(tok, dims=6){
+  const rnd = mulberry32(hashStr(tok.toLowerCase()+"_emb"));
+  const vec = [];
+  for(let i=0;i<dims;i++) vec.push((rnd()*2-1));
+  return vec;
+}
+
+/* ============ candidate next words ============ */
+const NEXT_WORD_MAP = {
+  "the cat sat on the": ["mat","floor","sofa","chair","roof","bed"],
+  "once upon a": ["time","dream","hill","castle","forest","star"],
+  "i love eating": ["pizza","mangoes","chocolate","noodles","fruit","rice"],
+  "artificial intelligence is": ["everywhere","powerful","changing","complex","useful","new"],
+};
+function candidates(sentence){
+  const key = sentence.trim().toLowerCase();
+  if(NEXT_WORD_MAP[key]) return NEXT_WORD_MAP[key];
+  const generic = ["time","house","light","water","world","story"];
+  return generic;
+}
+function logitsFor(sentence){
+  const cands = candidates(sentence);
+  const rnd = mulberry32(hashStr(sentence.toLowerCase()));
+  const raw = cands.map((c,i)=> (i===0 ? 3.2 : 1.5) + rnd()*1.8 - 0.9);
+  return cands.map((c,i)=>({word:c, logit: raw[i]}));
+}
+function softmax(items){
+  const max = Math.max(...items.map(i=>i.logit));
+  const exps = items.map(i=>Math.exp(i.logit - max));
+  const sum = exps.reduce((a,b)=>a+b,0);
+  return items.map((it,i)=>({...it, prob: exps[i]/sum}));
+}
+
+/* ============ step definitions ============ */
+let tokens = [], ids = [], vecs = [], sentence = "";
+let currentStep = -1;
+let active3D = null; // holds cleanup fn for any live three.js scene
+const STEP_META = [
+  {key:"input",   label:"Input"},
+  {key:"tokens",  label:"Tokens"},
+  {key:"ids",     label:"Token IDs"},
+  {key:"embed",   label:"Embeddings"},
+  {key:"position",label:"+ Position"},
+  {key:"network", label:"Neural Layers"},
+  {key:"logits",  label:"Logits"},
+  {key:"output",  label:"Output"},
+];
+
+function renderRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = STEP_META.map((s,i)=>`
+    <div class="step-pip ${i===currentStep?'active':(i<currentStep?'done':'')}" data-i="${i}">
+      <span class="n">${i+1}</span>${s.label}
+    </div>`).join('');
+  rail.querySelectorAll('.step-pip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const i = +el.dataset.i;
+      if(i <= Math.max(currentStep, 0) && tokens.length){ currentStep = i; renderStep(); }
+    });
+  });
+}
+
+function barColor(v){ return v >= 0 ? 'var(--cyan)' : 'var(--magenta)'; }
+
+function teardown3D(){
+  if(active3D){ try{ active3D(); }catch(e){} active3D = null; }
+}
+
+/* ============ 3D: embedding scatter ============ */
+function build3DEmbeddingScatter(container){
+  const w = container.clientWidth, h = container.clientHeight;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 100);
+  camera.position.set(3.2,2.4,4.6);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(w,h);
+  container.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0x8899ff, 1.2));
+  const pt = new THREE.PointLight(0x4ce0e8, 1.4); pt.position.set(4,4,4); scene.add(pt);
+
+  const group = new THREE.Group(); scene.add(group);
+  const gridHelper = new THREE.GridHelper(6, 10, 0x2a3560, 0x1a2040);
+  group.add(gridHelper);
+
+  const colors = [0x4CE0E8, 0xFF4FD8, 0x8B6BFF, 0xFFD24C, 0x4CFFB0, 0xFF8C69];
+  tokens.forEach((tok, i)=>{
+    const v = vecs[i];
+    const x = v[0]*2.2, y = (v[1]*2.2)+1, z = v[2]*2.2;
+    const geo = new THREE.SphereGeometry(0.14, 20, 20);
+    const mat = new THREE.MeshStandardMaterial({color: colors[i%colors.length], emissive: colors[i%colors.length], emissiveIntensity:0.5});
+    const sph = new THREE.Mesh(geo, mat);
+    sph.position.set(x,y,z);
+    group.add(sph);
+    // glow halo
+    const haloGeo = new THREE.SphereGeometry(0.26, 16, 16);
+    const haloMat = new THREE.MeshBasicMaterial({color: colors[i%colors.length], transparent:true, opacity:.18});
+    const halo = new THREE.Mesh(haloGeo, haloMat);
+    halo.position.set(x,y,z);
+    group.add(halo);
+    // label sprite
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = 64;
+    const ctx2 = canvas.getContext('2d');
+    ctx2.fillStyle = '#EAF0FF';
+    ctx2.font = '34px sans-serif';
+    ctx2.fillText(tok, 4, 42);
+    const tex = new THREE.CanvasTexture(canvas);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true}));
+    sprite.scale.set(1.4,0.35,1);
+    sprite.position.set(x, y+0.3, z);
+    group.add(sprite);
+  });
+
+  let rotY = 0.4, rotX = 0.15, dragging=false, prevX=0, prevY=0;
+  function onDown(e){ dragging=true; prevX=(e.touches?e.touches[0].clientX:e.clientX); prevY=(e.touches?e.touches[0].clientY:e.clientY); }
+  function onUp(){ dragging=false; }
+  function onMove(e){
+    if(!dragging) return;
+    const cx=(e.touches?e.touches[0].clientX:e.clientX), cy=(e.touches?e.touches[0].clientY:e.clientY);
+    rotY += (cx-prevX)*0.008; rotX += (cy-prevY)*0.008;
+    prevX=cx; prevY=cy;
+  }
+  renderer.domElement.addEventListener('mousedown', onDown);
+  renderer.domElement.addEventListener('touchstart', onDown);
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove);
+
+  let raf;
+  function animate(){
+    raf = requestAnimationFrame(animate);
+    if(!dragging) rotY += 0.0025;
+    group.rotation.y = rotY;
+    group.rotation.x = rotX*0.5;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  return function cleanup(){
+    cancelAnimationFrame(raf);
+    renderer.domElement.removeEventListener('mousedown', onDown);
+    renderer.domElement.removeEventListener('touchstart', onDown);
+    window.removeEventListener('mouseup', onUp);
+    window.removeEventListener('touchend', onUp);
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('touchmove', onMove);
+    renderer.dispose();
+    if(container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+  };
+}
+
+/* ============ 3D: neural network ============ */
+function build3DNetwork(container){
+  const w = container.clientWidth, h = container.clientHeight;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, w/h, 0.1, 200);
+  camera.position.set(0,1.6,9);
+  const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true});
+  renderer.setSize(w,h);
+  container.appendChild(renderer.domElement);
+
+  scene.add(new THREE.AmbientLight(0x8899ff, 1.0));
+
+  const group = new THREE.Group(); scene.add(group);
+
+  const layerCount = 3, nodesPerLayer = 5;
+  const layerX = [-3.2, 0, 3.2];
+  const layerColors = [0x4CE0E8, 0x8B6BFF, 0xFF4FD8];
+  const nodes = [];
+
+  for(let l=0; l<layerCount; l++){
+    const layerNodes = [];
+    for(let n=0; n<nodesPerLayer; n++){
+      const y = (n - (nodesPerLayer-1)/2) * 1.15;
+      const geo = new THREE.SphereGeometry(0.22, 20, 20);
+      const mat = new THREE.MeshStandardMaterial({color: layerColors[l], emissive: layerColors[l], emissiveIntensity:0.7});
+      const sph = new THREE.Mesh(geo, mat);
+      sph.position.set(layerX[l], y, 0);
+      group.add(sph);
+      const haloMat = new THREE.MeshBasicMaterial({color: layerColors[l], transparent:true, opacity:.16});
+      const halo = new THREE.Mesh(new THREE.SphereGeometry(0.4,16,16), haloMat);
+      halo.position.copy(sph.position);
+      group.add(halo);
+      layerNodes.push(sph);
+    }
+    nodes.push(layerNodes);
+  }
+
+  const pulseLines = [];
+  for(let l=0; l<layerCount-1; l++){
+    nodes[l].forEach((n1)=>{
+      nodes[l+1].forEach((n2, j)=>{
+        const points = [n1.position.clone(), n2.position.clone()];
+        const geo = new THREE.BufferGeometry().setFromPoints(points);
+        const flow = (j%2===0);
+        const mat = new THREE.LineBasicMaterial({color: flow? 0x4CFFB0 : 0x2a3560, transparent:true, opacity: flow?0.55:0.2});
+        const line = new THREE.Line(geo, mat);
+        group.add(line);
+        if(flow) pulseLines.push(mat);
+      });
+    });
+  }
+
+  const labelDefs = [
+    {text:"Attention", x:layerX[0]}, {text:"Feed-forward", x:layerX[1]}, {text:"Attention", x:layerX[2]}
+  ];
+  labelDefs.forEach(d=>{
+    const canvas = document.createElement('canvas');
+    canvas.width = 300; canvas.height = 60;
+    const ctx2 = canvas.getContext('2d');
+    ctx2.fillStyle = '#8993B8';
+    ctx2.font = '28px monospace';
+    ctx2.fillText(d.text, 4, 40);
+    const tex = new THREE.CanvasTexture(canvas);
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, transparent:true}));
+    sprite.scale.set(2.2,0.44,1);
+    sprite.position.set(d.x, -3.4, 0);
+    group.add(sprite);
+  });
+
+  let rotY = 0.25, dragging=false, prevX=0;
+  function onDown(e){ dragging=true; prevX=(e.touches?e.touches[0].clientX:e.clientX); }
+  function onUp(){ dragging=false; }
+  function onMove(e){
+    if(!dragging) return;
+    const cx=(e.touches?e.touches[0].clientX:e.clientX);
+    rotY += (cx-prevX)*0.01; prevX=cx;
+  }
+  renderer.domElement.addEventListener('mousedown', onDown);
+  renderer.domElement.addEventListener('touchstart', onDown);
+  window.addEventListener('mouseup', onUp);
+  window.addEventListener('touchend', onUp);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('touchmove', onMove);
+
+  let t = 0, raf;
+  function animate(){
+    raf = requestAnimationFrame(animate);
+    t += 0.05;
+    if(!dragging) rotY += 0.0035;
+    group.rotation.y = rotY;
+    pulseLines.forEach((m,i)=>{ m.opacity = 0.35 + Math.abs(Math.sin(t + i*0.4))*0.5; });
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  return function cleanup(){
+    cancelAnimationFrame(raf);
+    renderer.domElement.removeEventListener('mousedown', onDown);
+    renderer.domElement.removeEventListener('touchstart', onDown);
+    window.removeEventListener('mouseup', onUp);
+    window.removeEventListener('touchend', onUp);
+    window.removeEventListener('mousemove', onMove);
+    window.removeEventListener('touchmove', onMove);
+    renderer.dispose();
+    if(container.contains(renderer.domElement)) container.removeChild(renderer.domElement);
+  };
+}
+
+function renderStep(){
+  teardown3D();
+  renderRail();
+  const stage = document.getElementById('stage');
+  const meta = STEP_META[currentStep];
+  document.getElementById('prevBtn').disabled = currentStep <= 0;
+  document.getElementById('nextBtn').disabled = currentStep >= STEP_META.length - 1;
+  document.getElementById('nextBtn').textContent = currentStep >= STEP_META.length - 1 ? "Done ✓" : "Next step →";
+
+  let html = "";
+
+  if(meta.key === "input"){
+    html = `
+      <h2>1 · Your raw input</h2>
+      <div class="stage-sub">This is all the model starts with — plain text, nothing else.</div>
+      <div class="final-sentence">"${sentence}"</div>
+      <div class="commentary"><p>The model never sees letters or meaning directly. Everything from here on is a translation of this exact string into something it can compute with.</p></div>`;
+  }
+
+  else if(meta.key === "tokens"){
+    html = `
+      <h2>2 · Tokenization</h2>
+      <div class="stage-sub">Your sentence is split into tokens — chunks of text, not always whole words.</div>
+      <div class="token-row">${tokens.map((t,i)=>`<span class="tok" style="animation-delay:${i*0.08}s">${t}</span>`).join('')}</div>
+      <div class="commentary"><p>Longer words get split into pieces (like real subword tokenizers do). This is exactly why a model can struggle to count letters inside a word — it often never sees the word as one whole unit.</p></div>`;
+  }
+
+  else if(meta.key === "ids"){
+    html = `
+      <h2>3 · Token → ID</h2>
+      <div class="stage-sub">Each token is looked up in a fixed vocabulary and replaced with a number.</div>
+      <div class="token-row">${tokens.map((t,i)=>`<span class="tok" style="animation-delay:${i*0.08}s">${t}<span class="id">#${ids[i]}</span></span>`).join('')}</div>
+      <div class="commentary"><p>From this point on, the model only ever works with these ID numbers — your original text is gone. Same word, same ID, every single time.</p></div>`;
+  }
+
+  else if(meta.key === "embed"){
+    html = `
+      <h2>4 · ID → Embedding vector</h2>
+      <div class="stage-sub">Each ID looks up a vector — shown here as bars, and as real points in 3D "meaning space" below. Drag to rotate.</div>
+      <div class="vec-grid">${tokens.map((t,i)=>`
+        <div class="vec-col">
+          <div class="vec-label">${t}</div>
+          <div class="vec-bars">${vecs[i].map(v=>`<div class="vec-bar" style="height:${Math.abs(v)*60+6}px; background:${barColor(v)};"></div>`).join('')}</div>
+        </div>`).join('')}</div>
+      <div class="canvas-3d" id="embed3d"><span class="canvas-hint">drag to rotate</span></div>
+      <div class="commentary"><p>Words with similar meaning end up close together in this space. This is the exact same mechanism used later for search and retrieval — just applied here to feed the model itself.</p></div>`;
+  }
+
+  else if(meta.key === "position"){
+    html = `
+      <h2>5 · Add position information</h2>
+      <div class="stage-sub">A small position signal gets added to each vector so order isn't lost.</div>
+      <div class="vec-grid">${tokens.map((t,i)=>{
+        const shifted = vecs[i].map((v,d)=> v + Math.sin((i+1)*(d+1))*0.15);
+        return `<div class="vec-col">
+          <div class="vec-label">${t} <span style="color:var(--dim)">(pos ${i})</span></div>
+          <div class="vec-bars">${shifted.map(v=>`<div class="vec-bar" style="height:${Math.min(Math.abs(v),1)*60+6}px; background:${barColor(v)};"></div>`).join('')}</div>
+        </div>`;
+      }).join('')}</div>
+      <div class="commentary"><p>Without this step, "dog bites man" and "man bites dog" would look identical to the model — same tokens, same vectors, no sense of order. This small nudge fixes that.</p></div>`;
+  }
+
+  else if(meta.key === "network"){
+    html = `
+      <h2>6 · Flow through neural layers</h2>
+      <div class="stage-sub">A real 3D view of vectors passing through attention and feed-forward blocks. Drag to rotate.</div>
+      <div class="canvas-3d" id="net3d" style="height:360px;"><span class="canvas-hint">drag to rotate</span></div>
+      <div class="commentary"><p>Attention lets every token "look at" every other token and decide what's relevant (glowing connections). Feed-forward layers then reshape that information. Real models repeat this dozens of times.</p></div>`;
+  }
+
+  else if(meta.key === "logits"){
+    const items = logitsFor(sentence);
+    const maxAbs = Math.max(...items.map(i=>Math.abs(i.logit)));
+    html = `
+      <h2>7 · Output scores (logits)</h2>
+      <div class="stage-sub">The final layer scores every candidate next-token — shown here for a handful of candidates.</div>
+      ${items.map(it=>`
+        <div class="out-row">
+          <div class="out-label">${it.word}</div>
+          <div class="out-track"><div class="out-fill" style="width:${(it.logit/ (maxAbs*1.2) )*50+40}%;"></div></div>
+          <div class="out-pct">${it.logit.toFixed(2)}</div>
+        </div>`).join('')}
+      <div class="commentary"><p>These raw scores ("logits") aren't probabilities yet — they're just relative preferences. A real model scores tens of thousands of candidates this same way, all at once.</p></div>`;
+  }
+
+  else if(meta.key === "output"){
+    const items = softmax(logitsFor(sentence)).sort((a,b)=>b.prob-a.prob);
+    const top = items[0];
+    html = `
+      <h2>8 · Softmax → prediction</h2>
+      <div class="stage-sub">Scores become probabilities. The model picks (or samples) the top one.</div>
+      ${items.map(it=>`
+        <div class="out-row">
+          <div class="out-label">${it.word}</div>
+          <div class="out-track"><div class="out-fill ${it===top?'top':''}" style="width:${(it.prob*100).toFixed(1)}%;"></div></div>
+          <div class="out-pct">${(it.prob*100).toFixed(1)}%</div>
+        </div>`).join('')}
+      <div class="final-sentence">"${sentence} <span class="new-word">${top.word}</span>"</div>
+      <div class="commentary"><p>That's one full forward pass — done. To generate a whole sentence, this entire pipeline repeats once per new word, each time feeding the growing sentence back in as input.</p></div>`;
+  }
+
+  stage.innerHTML = html;
+
+  if(meta.key === "embed"){
+    const c = document.getElementById('embed3d');
+    if(c) active3D = build3DEmbeddingScatter(c);
+  }
+  if(meta.key === "network"){
+    const c = document.getElementById('net3d');
+    if(c) active3D = build3DNetwork(c);
+  }
+}
+
+function runSimulation(){
+  sentence = document.getElementById('sentence').value.trim();
+  if(!sentence){ return; }
+  tokens = tokenize(sentence);
+  ids = tokens.map(tokenId);
+  vecs = tokens.map(t=>embedding(t));
+  currentStep = 0;
+  renderStep();
+}
+
+document.getElementById('runBtn').addEventListener('click', runSimulation);
+document.getElementById('sentence').addEventListener('keydown', e=>{ if(e.key==='Enter') runSimulation(); });
+document.querySelectorAll('.chip').forEach(ch=>{
+  ch.addEventListener('click', ()=>{
+    document.getElementById('sentence').value = ch.dataset.ex;
+    runSimulation();
+  });
+});
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(currentStep < STEP_META.length-1){ currentStep++; renderStep(); }
+});
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(currentStep > 0){ currentStep--; renderStep(); }
+});
+
+let autoTimer = null;
+document.getElementById('autoPlay').addEventListener('change', e=>{
+  if(e.target.checked){
+    autoTimer = setInterval(()=>{
+      if(currentStep < STEP_META.length-1 && tokens.length){ currentStep++; renderStep(); }
+      else { e.target.checked = false; clearInterval(autoTimer); }
+    }, 3600);
+  } else {
+    clearInterval(autoTimer);
+  }
+});
+</script>
+</body>
+</html>
