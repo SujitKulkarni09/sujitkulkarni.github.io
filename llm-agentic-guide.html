@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Context Window — A Field Guide from LLM to Agentic AI</title>
+<meta name="description" content="An independent, interactive field guide: from tokens to agents, with nuances and failure modes throughout. Compiled by Sujit Kulkarni for educational purposes only.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+  :root{
+    --ink:#0F1419;
+    --surface:#161D24;
+    --surface-2:#1D262E;
+    --line:#2A353F;
+    --text:#E7EBEE;
+    --muted:#8996A3;
+    --amber:#E8A33D;
+    --teal:#4FA5A0;
+    --danger:#D9695F;
+    --mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'Inter', -apple-system, sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600&display=swap');
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--ink); color:var(--text);
+    font-family:var(--sans); line-height:1.6; font-size:16px;
+  }
+  h1,h2,h3{font-family:var(--serif); font-weight:600; margin:0 0 .4em; color:#fff;}
+  .eyebrow{
+    font-family:var(--mono); font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+    color:var(--amber); display:flex; align-items:center; gap:.5em; margin-bottom:.8em;
+  }
+  .eyebrow::before{content:"◇"; color:var(--teal);}
+  a{color:var(--teal);}
+  code, .tok{font-family:var(--mono);}
+  section{max-width:920px; margin:0 auto; padding:64px 24px; border-bottom:1px solid var(--line);}
+  .wrap{max-width:1080px; margin:0 auto;}
+
+  /* ===== Context meter header ===== */
+  #meter-bar{
+    position:fixed; top:0; left:0; height:3px; width:0%; background:linear-gradient(90deg,var(--teal),var(--amber));
+    z-index:200; transition:width .1s linear;
+  }
+  header.hero{
+    max-width:1080px; margin:0 auto; padding:90px 24px 60px; text-align:left; position:relative;
+  }
+  .ctx-readout{
+    font-family:var(--mono); font-size:.78rem; color:var(--muted); position:fixed; top:14px; right:20px; z-index:190;
+    background:rgba(15,20,25,.85); border:1px solid var(--line); padding:6px 12px; border-radius:4px;
+    backdrop-filter:blur(6px);
+  }
+  .ctx-readout b{color:var(--amber);}
+  header.hero h1{font-size:clamp(2.1rem,5vw,3.4rem); max-width:820px; line-height:1.08;}
+  header.hero p.sub{color:var(--muted); font-size:1.08rem; max-width:640px;}
+  .byline{
+    display:flex; gap:14px; align-items:center; margin-top:30px; font-family:var(--mono); font-size:.82rem; color:var(--muted);
+  }
+  .byline .dot{width:8px;height:8px;border-radius:50%;background:var(--teal);}
+  .disclaimer-strip{
+    font-family:var(--mono); font-size:.72rem; color:var(--muted); background:var(--surface); border:1px solid var(--line);
+    padding:10px 16px; border-radius:6px; margin-top:26px; max-width:640px;
+  }
+
+  /* ===== Nav hub ===== */
+  .hub{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:40px;}
+  .hub a{
+    display:block; background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 14px;
+    text-decoration:none; color:var(--text); transition:transform .15s ease, border-color .15s ease;
+  }
+  .hub a:hover{transform:translateY(-3px); border-color:var(--amber);}
+  .hub .n{font-family:var(--mono); color:var(--amber); font-size:.75rem;}
+  .hub .t{font-weight:600; margin-top:4px; font-size:.95rem;}
+  @media (max-width:780px){.hub{grid-template-columns:repeat(2,1fr);}}
+
+  /* ===== cards ===== */
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:28px;}
+  @media (max-width:700px){.grid{grid-template-columns:1fr;}}
+  .card{
+    background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:20px 22px;
+    perspective:900px;
+  }
+  .card h4{margin:0 0 8px; font-family:var(--sans); font-weight:600; color:#fff; font-size:1rem;}
+  .card p{margin:0; color:var(--muted); font-size:.92rem;}
+  .card.tilt{transition:transform .12s ease;}
+  .card.tilt:hover{border-color:var(--teal);}
+
+  /* failure mode callout */
+  .fail{
+    border-left:3px solid var(--danger); background:rgba(217,105,95,.07); padding:14px 18px; border-radius:0 8px 8px 0;
+    margin:18px 0;
+  }
+  .fail .eyebrow{color:var(--danger);}
+  .fail .eyebrow::before{content:"⚠";}
+
+  /* prompt block */
+  .prompt{
+    background:#0C1216; border:1px solid var(--line); border-radius:8px; padding:14px 18px; margin:16px 0;
+    font-family:var(--mono); font-size:.85rem; color:var(--amber); position:relative; white-space:pre-wrap;
+  }
+  .prompt::before{content:"PROMPT"; position:absolute; top:-9px; left:12px; background:var(--ink); padding:0 8px;
+    font-size:.62rem; letter-spacing:.1em; color:var(--muted);}
+
+  table{width:100%; border-collapse:collapse; margin-top:16px; font-size:.88rem;}
+  th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--line);}
+  th{font-family:var(--mono); font-size:.7rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+
+  .lvl-badge{display:inline-block; font-family:var(--mono); font-size:.68rem; padding:2px 8px; border-radius:20px; border:1px solid var(--line); color:var(--muted);}
+  .lvl-1{border-color:var(--teal); color:var(--teal);}
+  .lvl-2{border-color:var(--amber); color:var(--amber);}
+  .lvl-3{border-color:var(--danger); color:var(--danger);}
+
+  /* embedding explorer */
+  #embed-canvas{width:100%; height:420px; background:#0A0F13; border-radius:10px; border:1px solid var(--line); cursor:grab;}
+  .explorer-controls{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+  .explorer-controls button{
+    font-family:var(--mono); font-size:.78rem; background:var(--surface); border:1px solid var(--line); color:var(--text);
+    padding:8px 14px; border-radius:6px; cursor:pointer;
+  }
+  .explorer-controls button.active{border-color:var(--amber); color:var(--amber);}
+
+  /* tokenizer viz */
+  .tok-input{width:100%; padding:12px 14px; font-family:var(--mono); font-size:1rem; background:#0C1216; border:1px solid var(--line); color:var(--text); border-radius:6px;}
+  #tok-output{display:flex; flex-wrap:wrap; gap:6px; margin-top:16px; min-height:40px;}
+  .tok-chip{padding:6px 12px; border-radius:5px; font-family:var(--mono); font-size:.9rem; color:#0F1419; font-weight:600;}
+
+  /* agent slider */
+  .slider-row{display:flex; align-items:center; gap:14px; margin-top:14px;}
+  .slider-row label{font-family:var(--mono); font-size:.8rem; color:var(--muted); width:170px;}
+  input[type=range]{flex:1; accent-color:var(--amber);}
+  #agent-result{
+    margin-top:18px; font-family:var(--mono); font-size:2rem; color:var(--amber);
+  }
+  #agent-result span{font-size:.9rem; color:var(--muted); display:block; margin-top:4px;}
+
+  /* prompt builder */
+  .pb-row{display:flex; flex-direction:column; gap:6px; margin-bottom:16px;}
+  .pb-row label{font-family:var(--mono); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; color:var(--muted);}
+  select{
+    background:var(--surface); border:1px solid var(--line); color:var(--text); padding:10px 12px; border-radius:6px; font-family:var(--sans);
+  }
+  #pb-output{margin-top:10px;}
+  .btn{
+    background:var(--amber); color:#1A1206; border:none; padding:10px 20px; border-radius:6px; font-weight:600; cursor:pointer;
+    font-family:var(--sans);
+  }
+
+  /* graveyard */
+  .grave{border:1px dashed var(--line); border-radius:8px; padding:16px 20px; margin:14px 0; opacity:.88;}
+  .grave h4{color:var(--muted); text-decoration:line-through; text-decoration-color:var(--danger);}
+
+  footer{max-width:1080px; margin:0 auto; padding:50px 24px 90px; color:var(--muted); font-size:.82rem; font-family:var(--mono);}
+
+  ::selection{background:var(--amber); color:#1A1206;}
+</style>
+</head>
+<body>
+
+<div id="meter-bar"></div>
+<div class="ctx-readout">context filled: <b id="ctx-pct">0%</b></div>
+
+<header class="hero" id="top">
+  <div class="eyebrow">Field Guide · v1 · Jul 2026</div>
+  <h1>The Context Window</h1>
+  <p class="sub">A working reference from raw tokens to multi-agent systems — with the nuances, failure modes, and dead ends included, not just the happy path.</p>
+  <div class="byline"><span class="dot"></span> Compiled by Sujit Kulkarni · for personal / educational reference</div>
+  <div class="disclaimer-strip">Independent, unofficial notes. Sourced from publicly available documentation and general ML/systems practice. Not affiliated with any AI lab. Verify current specifics (APIs, benchmarks, model behavior) independently — this field moves fast.</div>
+
+  <nav class="hub">
+    <a href="#foundations"><div class="n">01</div><div class="t">Foundations</div></a>
+    <a href="#tokenization"><div class="n">02</div><div class="t">Tokenization &amp; Attention</div></a>
+    <a href="#rag"><div class="n">03</div><div class="t">RAG</div></a>
+    <a href="#agents"><div class="n">04</div><div class="t">Tools &amp; Agents</div></a>
+    <a href="#multiagent"><div class="n">05</div><div class="t">Multi-Agent</div></a>
+    <a href="#trust"><div class="n">06</div><div class="t">Evaluation &amp; Guardrails</div></a>
+    <a href="#graveyard"><div class="n">07</div><div class="t">Graveyard</div></a>
+    <a href="#checklist"><div class="n">08</div><div class="t">Build Checklist</div></a>
+  </nav>
+</header>
+
+<!-- ===================== FOUNDATIONS ===================== -->
+<section id="foundations">
+  <span class="lvl-badge lvl-1">Foundations</span>
+  <div class="eyebrow">Start here</div>
+  <h2>From tokens to a working model</h2>
+  <p style="color:var(--muted); max-width:680px;">The chain is: text → tokens → embeddings → transformer layers → next-token prediction, repeated at scale until capability emerges. Everything downstream — RAG, agents, evaluation — is scaffolding built around this one core loop.</p>
+
+  <div class="grid">
+    <div class="card tilt"><h4>Tokens, not words</h4><p>Models never see letters or whole words directly. Text is split into subword pieces by a tokenizer (commonly byte-pair encoding), and the model operates entirely on those piece-IDs.</p></div>
+    <div class="card tilt"><h4>Embeddings</h4><p>Each token ID maps to a vector — a point in high-dimensional space where distance and direction encode meaning. This same mechanism resurfaces later, unchanged, as the backbone of retrieval.</p></div>
+    <div class="card tilt"><h4>Why transformers over RNNs</h4><p>Self-attention lets every token look at every other token in one step, in parallel — RNNs had to pass information sequentially, which made long-range dependencies slow to learn and slower to train.</p></div>
+    <div class="card tilt"><h4>Pretraining, plainly</h4><p>The entire base model is trained on one task: predict the next token. Scaling data, parameters, and compute together produces roughly predictable improvement — this is what "scaling laws" refers to.</p></div>
+  </div>
+
+  <div class="fail">
+    <div class="eyebrow">Nuance</div>
+    <p><b>Emergent capability may be partly a measurement artifact.</b> Smooth, continuous improvement in the underlying loss can look like a sudden jump in capability purely because of how a benchmark scores answers — right/wrong is discontinuous even when the model's certainty was rising gradually beneath it.</p>
+  </div>
+
+  <h3 style="margin-top:36px;">From base model to assistant</h3>
+  <p style="color:var(--muted);">A freshly pretrained model completes text — it doesn't follow instructions. Instruction tuning teaches it to respond to commands; RLHF or DPO then aligns its outputs with what humans actually prefer. This two-step process is the difference between a raw next-token predictor and something that behaves like an assistant.</p>
+
+  <div class="fail">
+    <div class="eyebrow">Nuance</div>
+    <p><b>Alignment optimizes for preference, not truth.</b> A reward model trained on "which answer do people like better" will happily learn that confident, agreeable answers score higher than correct-but-unwelcome ones — this is the mechanical root of sycophancy, not a separate bug bolted on top.</p>
+  </div>
+</section>
+
+<!-- ===================== TOKENIZATION ===================== -->
+<section id="tokenization">
+  <span class="lvl-badge lvl-1">Foundations · Nuance-heavy</span>
+  <div class="eyebrow">Where it gets strange</div>
+  <h2>Tokenization &amp; attention nuances</h2>
+  <p style="color:var(--muted); max-width:680px;">Live demo — type any word and see roughly how a BPE-style tokenizer would chop it up. This is why counting letters in a word so often goes wrong.</p>
+
+  <input class="tok-input" id="tok-input" placeholder="try: strawberry" value="strawberry">
+  <div id="tok-output"></div>
+  <p style="color:var(--muted); font-size:.82rem; margin-top:10px;">Illustrative simulation only — a simplified mock splitter, not a real production tokenizer. The point it demonstrates is real: the model reasons over these chunks, not over individual letters, so "count the r's in strawberry" requires indirect reasoning about pieces it never directly inspected.</p>
+
+  <div class="grid" style="margin-top:32px;">
+    <div class="card tilt"><h4>Same root cause, many symptoms</h4><p>Poor letter-counting, weak string reversal, shaky arithmetic on long numbers, and inconsistent rhyming with rare words all trace back to the same thing: no direct character-level access.</p></div>
+    <div class="card tilt"><h4>Tokenization is not language-neutral</h4><p>English text tokenizes efficiently; many other languages fragment into far more tokens per sentence — meaning worse effective context length <i>and</i> higher cost for an equivalent amount of meaning.</p></div>
+    <div class="card tilt"><h4>Lost in the middle</h4><p>Retrieval accuracy across a long context is not flat — models attend well to the very start and very end, and measurably worse to facts buried in the middle, regardless of the context window's advertised size.</p></div>
+    <div class="card tilt"><h4>Effective context &lt; advertised context</h4><p>A "1M token window" passing a single needle-in-haystack test says little about multi-hop tasks that require connecting several scattered facts across that same window — that's a much harder, separately-measured failure mode.</p></div>
+  </div>
+
+  <div class="fail">
+    <div class="eyebrow">Strange but true</div>
+    <p><b>Temperature 0 is not fully deterministic in practice.</b> Floating-point non-associativity across batched GPU execution means identical prompts at temperature 0 can still occasionally return different completions from the same API — determinism is closer to "very likely," not guaranteed.</p>
+  </div>
+
+  <div class="fail">
+    <div class="eyebrow">Strange but true</div>
+    <p><b>Prompt caching rewards stable prefixes.</b> Providers that cache repeated context charge less for tokens that appeared identically in a prior call — which means <i>where</i> you place the variable part of a prompt (end, not beginning) directly affects cost, independent of content.</p>
+  </div>
+</section>
+
+<!-- ===================== RAG ===================== -->
+<section id="rag">
+  <span class="lvl-badge lvl-2">Intermediate</span>
+  <div class="eyebrow">Knowledge limits</div>
+  <h2>Retrieval-augmented generation</h2>
+  <p style="color:var(--muted); max-width:680px;">The pipeline: chunk documents → embed chunks → store in a vector index → embed the query → retrieve nearest chunks → stuff them into the prompt. Same embedding mechanism from Foundations, now applied to search instead of model input.</p>
+
+  <div class="grid">
+    <div class="card tilt"><h4>Chunking strategy matters more than the model</h4><p>Fixed-size, recursive, and semantic chunking produce meaningfully different retrieval quality on the same documents — this is usually the highest-leverage tuning knob in a RAG system, and the most neglected one.</p></div>
+    <div class="card tilt"><h4>Hybrid search</h4><p>Pure vector similarity misses exact keyword matches (names, IDs, codes). Combining BM25 keyword search with vector search, then reranking, typically beats either alone.</p></div>
+    <div class="card tilt"><h4>Rerankers</h4><p>A cross-encoder reranker scores query-chunk pairs jointly (slower, more accurate) after a fast initial vector retrieval narrows the field — a two-stage retrieve-then-rerank pipeline is now closer to standard practice than an optional extra.</p></div>
+    <div class="card tilt"><h4>RAG-specific evaluation</h4><p>Faithfulness (does the answer only use retrieved content), context precision, and context recall are measured separately — a fluent, well-cited-looking answer can still fail all three.</p></div>
+  </div>
+
+  <div class="fail">
+    <div class="eyebrow">Why RAG still hallucinates</div>
+    <p><b>Retrieval gives you relevant chunks, not sufficient chunks.</b> If the retrieved context doesn't fully answer the question, the model fills the gap with something plausible-sounding rather than saying so — retrieval reduces hallucination, it doesn't eliminate it.</p>
+  </div>
+  <div class="fail">
+    <div class="eyebrow">Why RAG still hallucinates</div>
+    <p><b>Embedding similarity ≠ factual relevance.</b> A chunk can sit close in vector space while actually answering an adjacent, different question — the model then confidently blends or misapplies it.</p>
+  </div>
+  <div class="fail">
+    <div class="eyebrow">Why RAG still hallucinates</div>
+    <p><b>Conflicting or redundant chunks get blended.</b> If two retrieved passages disagree (an old policy doc and its update, say), the model can synthesize a plausible-sounding answer that neither source actually states.</p>
+  </div>
+
+  <div class="prompt">Chunk this document semantically (not fixed-size), embed with a sentence-transformer model, and retrieve top-8 candidates before reranking down to top-3 with a cross-encoder. Answer only from the reranked chunks — if they don't contain the answer, say so explicitly rather than filling the gap.</div>
+</section>
+
+<!-- ===================== AGENTS ===================== -->
+<section id="agents">
+  <span class="lvl-badge lvl-2">Intermediate → Expert</span>
+  <div class="eyebrow">Static answers → actions</div>
+  <h2>Tool use &amp; agent loops</h2>
+  <p style="color:var(--muted); max-width:680px;">A tool call is a single action: the model emits structured intent, code executes it, the result feeds back in. An <b>agent</b> is what happens when that becomes a loop — plan, act, observe, replan — with memory tracking state across steps.</p>
+
+  <div class="grid">
+    <div class="card tilt"><h4>ReAct pattern</h4><p>Interleave reasoning traces with actions ("Thought → Action → Observation") rather than reasoning silently then acting once — this measurably reduces compounding errors on multi-step tasks.</p></div>
+    <div class="card tilt"><h4>Reflexion / self-critique loops</h4><p>Adding an explicit self-critique step after a failed attempt, then retrying with that critique in context, tends to outperform simply retrying the same action.</p></div>
+    <div class="card tilt"><h4>Plan-and-execute vs. reactive</h4><p>Reactive agents decide one step at a time (flexible, but can wander). Plan-and-execute agents commit to a multi-step plan upfront, then execute it (more predictable, but brittle if the plan was wrong).</p></div>
+    <div class="card tilt"><h4>Tool schema design</h4><p>Vague tool descriptions and overlapping tool purposes are a leading cause of wrong tool selection — this is a prompt-engineering problem wearing an API costume.</p></div>
+  </div>
+
+  <h3 style="margin-top:36px;">Live demo — compounding error math</h3>
+  <p style="color:var(--muted);">Agents fail more from small errors accumulating over many steps than from any single bad decision. Drag the sliders.</p>
+  <div class="slider-row"><label>Steps in the task</label><input type="range" id="steps" min="1" max="40" value="20"><span id="steps-val" class="tok">20</span></div>
+  <div class="slider-row"><label>Per-step accuracy</label><input type="range" id="acc" min="50" max="100" value="95"><span id="acc-val" class="tok">95%</span></div>
+  <div id="agent-result">36%<span>estimated end-to-end task success (accuracy^steps)</span></div>
+
+  <div class="fail">
+    <div class="eyebrow">Agent-specific strangeness</div>
+    <p><b>Tool-output hallucination.</b> If a real tool result isn't clearly delimited from the model's own generated text in context, the model can "continue" a plausible-looking fake result instead of waiting for the actual one — a formatting problem that looks like a reasoning failure.</p>
+  </div>
+
+  <div class="prompt">Use the ReAct pattern: on each step, output a Thought, then an Action (one tool call), then wait for the Observation before continuing. Stop and ask for clarification after 3 consecutive failed tool calls rather than retrying indefinitely.</div>
+</section>
+
+<!-- ===================== MULTI-AGENT ===================== -->
+<section id="multiagent">
+  <span class="lvl-badge lvl-3">Expert</span>
+  <div class="eyebrow">One agent → many</div>
+  <h2>Multi-agent systems</h2>
+  <p style="color:var(--muted); max-width:680px;">Complex tasks get split across specialized agents — a planner, a coder, a critic — that hand work to each other rather than one agent doing everything in one long loop.</p>
+
+  <div class="grid">
+    <div class="card tilt"><h4>Orchestrator–worker</h4><p>One agent decomposes the task and dispatches subtasks to worker agents, then assembles their results — good for parallelizable, well-scoped subtasks.</p></div>
+    <div class="card tilt"><h4>Debate / voting</h4><p>Multiple agents independently attempt the same task, then a judge (or majority vote) selects the best answer — trades cost for reliability on ambiguous tasks.</p></div>
+    <div class="card tilt"><h4>Shared vs. isolated context</h4><p>Shared context between agents avoids repeated re-explaining but risks one agent's error contaminating all of them; isolated context is more robust but costs more in redundant setup.</p></div>
+    <div class="card tilt"><h4>Agent-to-agent protocols</h4><p>Standardized handoff formats (context, task, and tool-access exchanged in a defined shape rather than free-form text) are what let agents built by different teams or vendors interoperate at all.</p></div>
+  </div>
+
+  <div class="fail">
+    <div class="eyebrow">Nuance</div>
+    <p><b>More agents ≠ more reliability.</b> Every additional handoff is another point where context can be dropped, misread, or subtly altered — multi-agent systems often need <i>more</i> evaluation and tracing per task, not less, to be trustworthy.</p>
+  </div>
+</section>
+
+<!-- ===================== TRUST / EVAL ===================== -->
+<section id="trust">
+  <span class="lvl-badge lvl-3">Runs alongside everything</span>
+  <div class="eyebrow">Does it work, and can it be trusted?</div>
+  <h2>Evaluation &amp; guardrails</h2>
+
+  <div class="grid">
+    <div class="card tilt"><h4>LLM-as-judge bias</h4><p>A model judging outputs — including its own family's outputs — tends to show self-preference bias, and in pairwise comparisons, whichever answer is shown first often gets a small unearned edge.</p></div>
+    <div class="card tilt"><h4>Benchmark contamination</h4><p>If benchmark questions leaked into pretraining data, a high score reflects memorization, not capability — this is why held-out, frequently-refreshed evals matter more than a single static leaderboard number.</p></div>
+    <div class="card tilt"><h4>Prompt injection via retrieved content</h4><p>Injection doesn't require a malicious user — a poisoned web page or document pulled in by RAG or a browsing tool can carry instructions the model treats as legitimate, unless retrieved content is explicitly untrusted by design.</p></div>
+    <div class="card tilt"><h4>Structured-output tax</h4><p>Forcing strict JSON-schema-constrained decoding can measurably degrade reasoning quality on harder tasks — sometimes it's better to let the model reason freely first, then parse structure out afterward.</p></div>
+  </div>
+
+  <div class="fail">
+    <div class="eyebrow">Nuance</div>
+    <p><b>Inverse scaling exists.</b> A handful of tasks get <i>worse</i>, not better, with more scale or more RLHF — larger, more aligned models can become more confidently wrong or more sycophantic on specific tasks, not uniformly more capable.</p>
+  </div>
+</section>
+
+<!-- ===================== GRAVEYARD ===================== -->
+<section id="graveyard">
+  <div class="eyebrow">What didn't survive contact with reality</div>
+  <h2>The graveyard</h2>
+  <p style="color:var(--muted); max-width:680px;">Useful judgment often comes from knowing what was tried and abandoned, not just what shipped.</p>
+
+  <div class="grave"><h4>Fully unconstrained autonomous agents</h4><p style="color:var(--muted);">Early "give it a goal and let it run indefinitely" agents tended to wander, loop, or burn budget on self-invented subtasks with no real stopping condition — task decomposition with explicit checkpoints replaced this pattern.</p></div>
+  <div class="grave"><h4>Pure symbolic planners for open-domain tasks</h4><p style="color:var(--muted);">Rigid, hand-coded planning worked for narrow domains but couldn't handle the ambiguity of real-world instructions — this is most of why LLM-based planning displaced it for general-purpose agents.</p></div>
+  <div class="grave"><h4>One giant prompt instead of retrieval</h4><p style="color:var(--muted);">Stuffing an entire knowledge base into context worked briefly at small scale, then hit cost and lost-in-the-middle limits — RAG exists largely because this doesn't scale.</p></div>
+</section>
+
+<!-- ===================== EMBEDDING EXPLORER (3D) ===================== -->
+<section id="embed3d">
+  <div class="eyebrow">One real 3D demo — earns its place</div>
+  <h2>Embedding space explorer</h2>
+  <p style="color:var(--muted); max-width:680px;">A handful of word embeddings, projected into 3D and rotatable, so the classic "king − man + woman ≈ queen" relationship is something you can actually see cluster, not just read about. Drag to rotate, scroll to zoom.</p>
+  <div id="embed-canvas"></div>
+  <div class="explorer-controls">
+    <button class="active" data-cluster="royalty">Royalty</button>
+    <button data-cluster="animals">Animals</button>
+    <button data-cluster="emotions">Emotions</button>
+  </div>
+  <p style="color:var(--muted); font-size:.8rem; margin-top:10px;">Illustrative positions for teaching purposes — hand-placed to demonstrate the clustering concept clearly, not output from a real embedding model.</p>
+</section>
+
+<!-- ===================== PROMPT BUILDER ===================== -->
+<section id="builder">
+  <div class="eyebrow">Tool</div>
+  <h2>Starter-prompt builder</h2>
+  <p style="color:var(--muted);">Pick your situation, get a ready-to-paste starting prompt for whatever you're building.</p>
+
+  <div class="pb-row"><label>What are you building</label>
+    <select id="pb-what"><option>a RAG pipeline</option><option>a single tool-using agent</option><option>a multi-agent workflow</option><option>an evaluation harness</option></select>
+  </div>
+  <div class="pb-row"><label>Stage</label>
+    <select id="pb-stage"><option>prototype</option><option>production</option></select>
+  </div>
+  <div class="pb-row"><label>Top priority</label>
+    <select id="pb-priority"><option>accuracy</option><option>cost</option><option>latency</option></select>
+  </div>
+  <button class="btn" onclick="buildPrompt()">Generate prompt</button>
+  <div id="pb-output"></div>
+</section>
+
+<!-- ===================== CHECKLIST ===================== -->
+<section id="checklist">
+  <div class="eyebrow">Before you ship it</div>
+  <h2>Build checklist</h2>
+  <table>
+    <tr><th>Check</th><th>Why</th></tr>
+    <tr><td>Retrieved context spot-checked against source</td><td>catches silent RAG hallucination</td></tr>
+    <tr><td>Tool descriptions don't overlap in purpose</td><td>prevents wrong-tool selection</td></tr>
+    <tr><td>Agent has an explicit stop condition</td><td>prevents unbounded loops / runaway cost</td></tr>
+    <tr><td>Eval set is held-out, not benchmark-contaminated</td><td>score reflects real capability</td></tr>
+    <tr><td>Retrieved / tool content treated as untrusted input</td><td>reduces injection risk</td></tr>
+    <tr><td>Tested with an adversarial or edge-case prompt</td><td>surfaces failure modes before users do</td></tr>
+  </table>
+</section>
+
+<footer>
+  Compiled by Sujit Kulkarni · independent personal reference, not affiliated with or endorsed by any AI lab · sourced from publicly available documentation and general ML/systems practice · no proprietary or confidential material included · verify current model-specific behavior independently, this field moves fast · last updated Jul 2026
+</footer>
+
+<script>
+// ---- context meter ----
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const pct = (h.scrollTop)/(h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('meter-bar').style.width = pct + '%';
+  document.getElementById('ctx-pct').textContent = Math.round(pct) + '%';
+});
+
+// ---- tokenizer mock visualizer ----
+const tokColors = ['#E8A33D','#4FA5A0','#D9695F','#8996A3','#C77DFF','#5BC0EB'];
+function mockTokenize(word){
+  // illustrative only: naive syllable-ish / chunk splitter, not a real BPE table
+  word = word.trim();
+  if(!word) return [];
+  const chunks = [];
+  let i = 0;
+  const sizes = [3,2,4,2,3];
+  let s = 0;
+  while(i < word.length){
+    const size = sizes[s % sizes.length];
+    chunks.push(word.slice(i, i+size));
+    i += size; s++;
+  }
+  return chunks;
+}
+function renderTokens(){
+  const val = document.getElementById('tok-input').value;
+  const chunks = mockTokenize(val);
+  const out = document.getElementById('tok-output');
+  out.innerHTML = '';
+  chunks.forEach((c, idx)=>{
+    const chip = document.createElement('span');
+    chip.className = 'tok-chip';
+    chip.style.background = tokColors[idx % tokColors.length];
+    chip.textContent = c;
+    out.appendChild(chip);
+  });
+}
+document.getElementById('tok-input').addEventListener('input', renderTokens);
+renderTokens();
+
+// ---- agent compounding slider ----
+function updateAgent(){
+  const steps = +document.getElementById('steps').value;
+  const acc = +document.getElementById('acc').value / 100;
+  document.getElementById('steps-val').textContent = steps;
+  document.getElementById('acc-val').textContent = Math.round(acc*100) + '%';
+  const result = Math.pow(acc, steps) * 100;
+  document.getElementById('agent-result').innerHTML = result.toFixed(1) + '%<span>estimated end-to-end task success (accuracy^steps)</span>';
+}
+document.getElementById('steps').addEventListener('input', updateAgent);
+document.getElementById('acc').addEventListener('input', updateAgent);
+updateAgent();
+
+// ---- prompt builder ----
+function buildPrompt(){
+  const what = document.getElementById('pb-what').value;
+  const stage = document.getElementById('pb-stage').value;
+  const priority = document.getElementById('pb-priority').value;
+  let extra = '';
+  if(what.includes('RAG')) extra = 'Use hybrid search (BM25 + vector) with a reranking step, and require the model to say "not found in context" rather than filling gaps.';
+  if(what.includes('single tool')) extra = 'Use the ReAct pattern (Thought/Action/Observation) with a hard stop after 3 consecutive tool failures.';
+  if(what.includes('multi-agent')) extra = 'Define a strict handoff schema between agents (task, context, tool-access) rather than free-form text handoffs.';
+  if(what.includes('evaluation')) extra = 'Use a held-out eval set, not a public benchmark, and randomize answer order to reduce position bias in pairwise judging.';
+  let stageNote = stage === 'production' ? 'Include logging/tracing on every step and a fallback path for tool or API failure.' : 'Keep it minimal — a single working path end-to-end, error handling can come later.';
+  let priNote = {accuracy:'Bias every ambiguous design choice toward correctness over speed or cost.', cost:'Prefer smaller models and caching where accuracy allows it.', latency:'Prefer parallel tool calls and streaming responses over sequential steps.'}[priority];
+
+  const text = `Build ${what} for a ${stage} context. ${extra} ${stageNote} ${priNote}`;
+  document.getElementById('pb-output').innerHTML = '<div class="prompt">'+text+'</div>';
+}
+
+// ---- 3D embedding explorer (three.js) ----
+(function(){
+  const container = document.getElementById('embed-canvas');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, container.clientWidth/container.clientHeight, 0.1, 100);
+  camera.position.set(4,3,6);
+  const renderer = new THREE.WebGLRenderer({antialias:true});
+  renderer.setSize(container.clientWidth, container.clientHeight);
+  renderer.setClearColor(0x0A0F13);
+  container.appendChild(renderer.domElement);
+
+  const light = new THREE.PointLight(0xffffff, 1); light.position.set(5,5,5); scene.add(light);
+  scene.add(new THREE.AmbientLight(0x556677));
+
+  const clusters = {
+    royalty: [
+      {label:'king', pos:[1,1,0], color:0xE8A33D},
+      {label:'queen', pos:[1,-0.8,0.6], color:0xE8A33D},
+      {label:'man', pos:[2,1,-1], color:0x4FA5A0},
+      {label:'woman', pos:[2,-0.8,-0.4], color:0x4FA5A0},
+      {label:'prince', pos:[0.4,1.6,0.8], color:0xE8A33D},
+      {label:'princess', pos:[0.4,-0.2,1.3], color:0xE8A33D},
+    ],
+    animals: [
+      {label:'cat', pos:[1,1,0], color:0x4FA5A0},
+      {label:'kitten', pos:[1.4,1.3,0.3], color:0x4FA5A0},
+      {label:'dog', pos:[-1,1,0], color:0xE8A33D},
+      {label:'puppy', pos:[-1.4,1.3,0.3], color:0xE8A33D},
+      {label:'lion', pos:[1,-1,0.6], color:0xD9695F},
+      {label:'wolf', pos:[-1,-1,0.6], color:0xD9695F},
+    ],
+    emotions: [
+      {label:'happy', pos:[1,1,0], color:0xE8A33D},
+      {label:'joyful', pos:[1.3,1.4,0.2], color:0xE8A33D},
+      {label:'sad', pos:[-1,-1,0], color:0x4FA5A0},
+      {label:'gloomy', pos:[-1.3,-1.4,0.2], color:0x4FA5A0},
+      {label:'angry', pos:[-1,1,-0.8], color:0xD9695F},
+      {label:'furious', pos:[-1.3,1.3,-1.1], color:0xD9695F},
+    ]
+  };
+
+  let group = new THREE.Group();
+  scene.add(group);
+
+  function drawCluster(name){
+    scene.remove(group);
+    group = new THREE.Group();
+    const pts = clusters[name];
+    pts.forEach(p=>{
+      const geo = new THREE.SphereGeometry(0.14, 24, 24);
+      const mat = new THREE.MeshStandardMaterial({color:p.color});
+      const sphere = new THREE.Mesh(geo, mat);
+      sphere.position.set(...p.pos);
+      group.add(sphere);
+
+      const canvas = document.createElement('canvas');
+      canvas.width = 256; canvas.height = 64;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#E7EBEE';
+      ctx.font = '32px sans-serif';
+      ctx.fillText(p.label, 4, 42);
+      const tex = new THREE.CanvasTexture(canvas);
+      const spriteMat = new THREE.SpriteMaterial({map:tex, transparent:true});
+      const sprite = new THREE.Sprite(spriteMat);
+      sprite.scale.set(1.6,0.4,1);
+      sprite.position.set(p.pos[0], p.pos[1]+0.32, p.pos[2]);
+      group.add(sprite);
+    });
+    const gridHelper = new THREE.GridHelper(6, 12, 0x2A353F, 0x2A353F);
+    group.add(gridHelper);
+    scene.add(group);
+  }
+  drawCluster('royalty');
+
+  document.querySelectorAll('.explorer-controls button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.explorer-controls button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      drawCluster(btn.dataset.cluster);
+    });
+  });
+
+  // simple drag-to-rotate
+  let isDragging = false, prevX=0, prevY=0;
+  let rotY = 0.4, rotX = 0.3;
+  renderer.domElement.addEventListener('mousedown', e=>{isDragging=true; prevX=e.clientX; prevY=e.clientY;});
+  window.addEventListener('mouseup', ()=>isDragging=false);
+  window.addEventListener('mousemove', e=>{
+    if(!isDragging) return;
+    rotY += (e.clientX - prevX) * 0.008;
+    rotX += (e.clientY - prevY) * 0.008;
+    prevX = e.clientX; prevY = e.clientY;
+  });
+  renderer.domElement.addEventListener('wheel', e=>{
+    camera.position.multiplyScalar(1 + e.deltaY*0.001);
+  });
+
+  function animate(){
+    requestAnimationFrame(animate);
+    group.rotation.y = rotY;
+    group.rotation.x = rotX * 0.4;
+    renderer.render(scene, camera);
+  }
+  animate();
+
+  window.addEventListener('resize', ()=>{
+    camera.aspect = container.clientWidth/container.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(container.clientWidth, container.clientHeight);
+  });
+})();
+</script>
+</body>
+</html>
