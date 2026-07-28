@@ -1,0 +1,2202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>An Independent Study Guide to n8n Automation — Notes by Sujit Kulkarni</title>
+<meta name="description" content="An independent, unofficial study guide and set of personal notes on n8n automation — from a first workflow to production-grade automation and AI agents. Compiled by Sujit Kulkarni. Not affiliated with n8n GmbH.">
+<meta name="author" content="Sujit Kulkarni">
+<meta property="og:title" content="An Independent Study Guide to n8n Automation">
+<meta property="og:description" content="Unofficial, independent study notes on n8n automation — from a first workflow to production-grade automation and AI agents. Compiled by Sujit Kulkarni.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="An Independent Study Guide to n8n Automation">
+<meta name="twitter:description" content="Unofficial study notes on n8n automation, compiled by Sujit Kulkarni.">
+<style>
+:root{
+  --paper:#F5F0E6; --paper-card:#FFFDF8; --ink:#201C18; --ink-soft:#5B5348; --hair:#DED5C0;
+  --p0:#B9764F; --p1:#8C6FB0; --p2:#5C8AAE; --p3:#6E9C6E; --p4:#C0577A; --p5:#A68A3C;
+  --p6:#4C8C8C; --p7:#B04A4A; --p8:#6B6458; --accent:#1B1B1B;
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{margin:0; padding-bottom:34px; background:var(--paper); color:var(--ink); font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif; line-height:1.6;}
+body{background:radial-gradient(ellipse 900px 500px at 15% -10%, rgba(255,255,255,.55), transparent 60%), var(--paper);}
+.serif{font-family:Georgia,"Iowan Old Style","Palatino Linotype",serif;}
+a{color:inherit;}
+.wrap{max-width:980px; margin:0 auto; padding:0 22px;}
+.eyebrow{text-transform:uppercase; letter-spacing:.14em; font-size:.72rem; font-weight:700; color:var(--ink-soft);}
+
+/* topbar */
+.topbar{position:sticky; top:0; z-index:60; background:rgba(245,240,230,.94); backdrop-filter:blur(6px); border-bottom:1px solid var(--hair); box-shadow:0 1px 0 rgba(255,255,255,.6), 0 2px 10px rgba(0,0,0,.04);}
+.topbar .wrap{display:flex; align-items:center; gap:14px;}
+.topbar-row1{padding-top:9px; padding-bottom:5px;}
+.topbar-row2{padding-top:0; padding-bottom:8px;}
+.brand{font-weight:800; font-size:.92rem; white-space:nowrap; flex-shrink:0;}
+.topnav{display:flex; gap:2px; flex-wrap:nowrap; width:100%; overflow-x:auto; scrollbar-width:none;}
+.topnav::-webkit-scrollbar{display:none;}
+.topnav a{font-size:.74rem; padding:7px 9px; border-radius:7px; white-space:nowrap; text-decoration:none; color:var(--ink-soft); border:1px solid transparent; flex-shrink:0;}
+.topnav a:hover, .topnav a.active{border-color:var(--hair); color:var(--ink); background:var(--paper-card);}
+.progress-track{position:absolute; left:0; right:0; bottom:-5px; height:5px; background:rgba(0,0,0,.08);}
+.progress-fill{height:100%; width:0%; background:var(--p0); border-radius:0 3px 3px 0; box-shadow:0 0 10px 1px var(--p0); transition:width .1s linear, background-color .35s ease;}
+
+/* hero */
+header.hero{padding:56px 0 36px; border-bottom:1px solid var(--hair); position:relative; overflow:hidden;
+  background:radial-gradient(ellipse 700px 340px at 82% -8%, rgba(255,255,255,.65), transparent 65%), linear-gradient(180deg, rgba(255,255,255,.35), transparent 40%);}
+header.hero::before{content:"UNOFFICIAL STUDY NOTES — n8n AUTOMATION"; position:absolute; top:20px; right:22px; font-size:.6rem; letter-spacing:.16em; font-weight:800; color:var(--ink-soft); opacity:.55; text-transform:uppercase;}
+.kicker{font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft); font-weight:700;}
+h1.title{font-size:2.5rem; margin:.35em 0 .1em; line-height:1.1; background:linear-gradient(180deg,#4a3d30 0%,#1a1512 45%,#4a3d30 100%); -webkit-background-clip:text; background-clip:text; color:transparent;}
+.subtitle{font-size:1.1rem; color:var(--ink-soft); max-width:640px;}
+
+.avatar,.ask-avatar,.hero-author-avatar{position:relative; isolation:isolate; overflow:hidden; box-shadow:0 0 0 1px var(--hair), 0 12px 24px -10px rgba(30,20,10,.55), 0 1px 0 rgba(255,255,255,.7);}
+.avatar::after,.ask-avatar::after,.hero-author-avatar::after{content:""; position:absolute; z-index:2; pointer-events:none; top:-30%; left:-40%; width:70%; height:160%; background:linear-gradient(100deg, rgba(255,255,255,0) 0%, rgba(255,255,255,.85) 45%, rgba(255,255,255,0) 65%); transform:rotate(18deg);}
+.init-avatar{display:flex; align-items:center; justify-content:center; background:linear-gradient(160deg,#4a4038,#1B1B1B 70%); color:#F1E9DA; font-family:Georgia,serif; font-weight:800; letter-spacing:.03em; user-select:none;}
+.hero-author-avatar.init-avatar{font-size:1.6rem;}
+.ask-avatar.init-avatar{font-size:.82rem;}
+.hero-author{display:flex; align-items:center; gap:16px; margin-top:22px; padding:14px 20px 14px 14px; background:var(--paper-card); border:1px solid var(--hair); border-radius:18px; max-width:580px; box-shadow:0 16px 32px -22px rgba(30,20,10,.45);}
+.hero-author-avatar{width:78px; height:78px; border-radius:50%; flex-shrink:0; border:3px solid #fff;}
+.hero-author-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+.hero-author-name{font-family:Georgia,serif; font-weight:800; font-size:1.15rem;}
+.hero-author-desc{font-size:.85rem; color:var(--ink-soft); margin-top:3px; max-width:400px;}
+.hero-author-creds{font-size:.72rem; color:var(--ink-soft); margin-top:7px; font-weight:700;}
+
+.ask-box{margin-top:24px; background:var(--paper-card); border:1px solid var(--hair); border-left:3px solid #3a332c; border-radius:12px; padding:18px 20px; max-width:640px; box-shadow:0 10px 24px -18px rgba(30,20,10,.35);}
+.ask-header{display:flex; align-items:flex-start; gap:12px; margin-bottom:14px;}
+.ask-avatar{width:34px; height:34px; border-radius:50%; overflow:hidden; flex-shrink:0; border:2px solid var(--paper-card);}
+.ask-avatar img{width:100%; height:100%; object-fit:cover; display:block;}
+.ask-header-text .lbl{font-weight:800; font-size:1.02rem;}
+.ask-header-text .sub{color:var(--ink-soft); font-size:.83rem; margin-top:3px;}
+.ask-row{display:flex; gap:8px;}
+.ask-row input{width:100%; padding:11px 14px; border-radius:9px; border:1px solid var(--hair); font-size:.9rem; font-family:inherit; background:#fff;}
+.ask-row input:focus{border-color:#3a332c; box-shadow:0 0 0 3px rgba(58,51,44,.1); outline:none;}
+.ask-row button{padding:11px 18px; border-radius:9px; border:none; background:linear-gradient(180deg,#4a4038,#1B1B1B 55%,#0f0d0b); color:#fff; font-weight:700; cursor:pointer; font-size:.86rem;}
+.ask-suggest{margin-top:11px; font-size:.77rem; color:var(--ink-soft); display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+.chip-btn{border:1px solid var(--hair); background:#fff; border-radius:999px; padding:5px 12px; font-size:.77rem; cursor:pointer; color:var(--ink-soft);}
+.chip-btn:hover{border-color:#3a332c; color:var(--ink);}
+#askResult{margin-top:13px; font-size:.88rem; display:none; border-left:3px solid #3a332c; background:var(--paper); border-radius:0 8px 8px 0; padding:10px 14px;}
+
+/* sections */
+.section{padding:50px 0; border-bottom:1px solid var(--hair);}
+.section h2{font-size:1.6rem; margin:0 0 4px;}
+.section .tag{font-size:.8rem; color:var(--ink-soft); margin-bottom:22px;}
+.section h3{font-size:1.12rem; margin:34px 0 8px; color:var(--part-color,var(--ink));}
+.section h3 .num{font-family:monospace; font-size:.85rem; color:var(--ink-soft); margin-right:8px;}
+.section h3.topic-h3{cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px; user-select:none; padding:4px 6px 4px 0; border-radius:8px; transition:background .15s;}
+.section h3.topic-h3:hover{background:rgba(0,0,0,.03);}
+.section h3.topic-h3 .tp-left{display:flex; align-items:baseline; min-width:0;}
+.topic-chevron{font-size:.68rem; color:var(--ink-soft); transition:transform .18s ease; flex-shrink:0; margin-left:0;}
+.section h3.topic-h3.open .topic-chevron{transform:rotate(90deg); color:var(--part-color,var(--ink));}
+.topic-h3 .tp-right{display:flex; align-items:center; gap:6px; flex-shrink:0; margin-left:10px;}
+.topic-link-btn{border:none; background:none; cursor:pointer; font-size:.78rem; padding:3px 5px; border-radius:6px; color:var(--ink-soft); line-height:1;}
+.topic-link-btn:hover{background:rgba(0,0,0,.06); color:var(--ink);}
+body.dark-mode .topic-link-btn:hover{background:rgba(255,255,255,.08);}
+.topic-link-btn.copied{color:#3f5c46;}
+.topic-body{display:none; overflow:hidden;}
+.topic-body.open{display:block; animation:topicReveal .18s ease;}
+@keyframes topicReveal{from{opacity:0; transform:translateY(-3px);} to{opacity:1; transform:translateY(0);}}
+.section p{margin:8px 0; font-size:.95rem;}
+
+.box{background:var(--paper-card); border:1px solid var(--hair); border-radius:14px; padding:16px 18px; position:relative; overflow:hidden; isolation:isolate;
+  box-shadow:0 1px 0 rgba(255,255,255,.95) inset, 0 18px 28px -18px rgba(30,20,10,.5), 0 2px 7px rgba(30,20,10,.12); border-top:2px solid var(--part-color,#333); margin:14px 0;}
+.box h4{margin:0 0 8px; font-size:.76rem; text-transform:uppercase; letter-spacing:.07em; color:var(--ink-soft);}
+.click-box{background:#FBF3E7; border:1px solid #E8D3B0; border-radius:10px; padding:13px 16px; font-size:.87rem; margin:12px 0;}
+.click-box b{color:#7A4A22;}
+
+.table-scroll{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:14px 0; border-radius:10px; position:relative;}
+.table-scroll table{margin:0;}
+@media(max-width:700px){
+  .table-scroll{box-shadow:inset -14px 0 10px -12px rgba(0,0,0,.18);}
+  .table-scroll table{min-width:560px;}
+}
+table{width:100%; border-collapse:collapse; margin:14px 0; font-size:.86rem; background:#fff; border-radius:10px; overflow:hidden;}
+table th{background:var(--part-color,#333); color:#fff; text-align:left; padding:8px 10px; font-size:.72rem; text-transform:uppercase; letter-spacing:.04em; white-space:nowrap;}
+table td{padding:8px 10px; border-bottom:1px solid var(--hair);}
+table tr:last-child td{border-bottom:none;}
+
+pre{background:#1B1B1B; color:#F1E9DA; padding:13px 15px; border-radius:10px; overflow-x:auto; font-size:.8rem; line-height:1.55; margin:10px 0;}
+code{font-family:"SFMono-Regular",Consolas,monospace; background:rgba(0,0,0,.06); padding:1px 5px; border-radius:4px; font-size:.86em;}
+pre code{background:none; padding:0;}
+
+.step-list{counter-reset:step; list-style:none; padding:0; margin:10px 0;}
+.step-list li{counter-increment:step; position:relative; padding-left:34px; margin-bottom:10px; font-size:.9rem;}
+.step-list li::before{content:counter(step); position:absolute; left:0; top:0; width:24px; height:24px; border-radius:50%; background:var(--part-color,#333); color:#fff; font-size:.72rem; display:flex; align-items:center; justify-content:center; font-weight:700;}
+
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+@media(max-width:700px){.grid2{grid-template-columns:1fr;}}
+ul.plain, ol.plain{margin:8px 0; padding-left:20px; font-size:.92rem;}
+ul.plain li, ol.plain li{margin-bottom:5px;}
+
+/* finder */
+.finder-box{background:var(--paper-card); border:1px solid var(--hair); border-radius:14px; padding:16px 18px; max-width:100%; box-shadow:0 14px 30px -22px rgba(30,20,10,.4);}
+#finderInput{width:100%; padding:12px 16px; border-radius:10px; border:1px solid var(--hair); font-size:.96rem; font-family:inherit; background:#fff; margin-bottom:12px;}
+#finderInput:focus{border-color:#3a332c; box-shadow:0 0 0 3px rgba(58,51,44,.1); outline:none;}
+.finder-status{font-size:.82rem; color:var(--ink-soft); margin-top:8px; padding-top:10px; border-top:1px dashed var(--hair);}
+.finder-status b{color:var(--ink);}
+.toc-list{margin:0;}
+.toc-group{border-bottom:1px solid var(--hair);}
+.toc-group:last-child{border-bottom:none;}
+.toc-part-btn{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
+  background:none; border:none; text-align:left; cursor:pointer; padding:9px 2px;
+  font-weight:800; font-size:.82rem; color:var(--ink); font-family:inherit;
+}
+.toc-part-btn .tp-label{display:flex; align-items:baseline; gap:8px;}
+.toc-part-btn .tp-eyebrow{font-size:.66rem; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-soft); font-weight:800;}
+.toc-part-btn .tp-count{font-size:.7rem; color:var(--ink-soft); font-weight:600;}
+.toc-part-btn .tp-chevron{font-size:.7rem; color:var(--ink-soft); transition:transform .15s ease; flex-shrink:0;}
+.toc-group.open .tp-chevron{transform:rotate(90deg);}
+.toc-sub{list-style:none; padding:0 0 10px 2px; margin:0; columns:2; column-gap:20px; display:none;}
+.toc-group.open .toc-sub{display:block;}
+@media(max-width:700px){.toc-sub{columns:1;}}
+.toc-sub li{break-inside:avoid; margin-bottom:5px; font-size:.83rem;}
+.toc-sub li.hidden{display:none;}
+.toc-sub a{text-decoration:none; color:var(--ink-soft); border-bottom:1px dotted transparent;}
+.toc-sub a:hover{color:var(--ink); border-color:var(--ink);}
+
+/* dot rail */
+.dot-rail{position:fixed; right:14px; top:50%; transform:translateY(-50%); z-index:40; display:flex; flex-direction:column; gap:5px;}
+.dot-rail .dot{width:9px; height:9px; border-radius:50%; border:none; background:var(--hair); cursor:pointer; padding:0; position:relative;}
+.dot-rail .dot.active{background:var(--dot-color,#333); transform:scale(1.3);}
+.dot-rail .dot.complete{box-shadow:0 0 0 2px var(--dot-color,#333);}
+@media(max-width:900px){.dot-rail{display:none;}}
+
+footer{padding:30px 0 60px; font-size:.8rem; color:var(--ink-soft); text-align:center; background:linear-gradient(180deg,transparent,rgba(0,0,0,.03));}
+.disclaimer-bar{background:#1B1B1B; color:#EFE7D8; font-size:.72rem; padding:8px 0;}
+.disclaimer-bar .wrap{display:flex; flex-wrap:wrap; gap:6px 10px; align-items:center; justify-content:center; text-align:center;}
+.disclaimer-bar b{color:#F3C98B;}
+.credit-footer{position:fixed; left:0; right:0; bottom:0; z-index:68; height:34px; line-height:34px; background:#1B1B1B; color:#B9AF9C; font-size:.72rem; text-align:center; letter-spacing:.02em; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; padding:0 12px; box-shadow:0 -4px 14px rgba(0,0,0,.15);}
+.credit-footer b{color:#F1E9DA; font-weight:700;}
+
+.float-fab{position:fixed; bottom:54px; right:20px; z-index:70; width:54px; height:54px; border-radius:50%; border:none; background:linear-gradient(180deg,#4a4038,#1B1B1B); color:#F1E9DA; font-family:Georgia,serif; font-size:.95rem; font-weight:800; letter-spacing:.02em; cursor:pointer; box-shadow:0 12px 28px -10px rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;}
+.remote-nav{position:fixed; right:20px; bottom:118px; z-index:65; display:flex; flex-direction:column; background:var(--paper-card); border:1px solid var(--hair); border-radius:14px; box-shadow:0 12px 26px -12px rgba(0,0,0,.4); overflow:hidden;}
+.remote-nav button{width:44px; height:34px; border:none; background:none; cursor:pointer; font-size:.78rem; color:var(--ink-soft); border-bottom:1px solid var(--hair); font-family:inherit;}
+.remote-nav button:last-child{border-bottom:none;}
+.remote-nav button:hover{background:var(--paper); color:var(--ink);}
+.remote-nav .rn-label{font-size:.52rem; text-transform:uppercase; letter-spacing:.06em; text-align:center; color:var(--ink-soft); padding:3px 2px 5px; border-bottom:1px solid var(--hair); max-width:44px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+@media(max-width:480px){.remote-nav button{width:38px; height:30px;} .remote-nav .rn-label{max-width:38px; font-size:.5rem;}}
+.float-panel{position:fixed; bottom:246px; right:20px; z-index:70; width:320px; max-width:calc(100vw - 40px); background:var(--paper-card); border:1px solid var(--hair); border-radius:16px; box-shadow:0 20px 50px -20px rgba(0,0,0,.4); padding:16px; display:none;}
+.float-panel.open{display:block;}
+.float-panel-title{font-weight:800; font-size:.92rem; margin-bottom:8px;}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+::selection{background:#E7D9C2;}
+
+/* ============================================================
+   ADD-ONS — reader friendliness & fun breaks (purely additive)
+   ============================================================ */
+
+/* dark mode: redefine the palette on body.dark-mode, everything
+   else already reads from these custom properties, so it cascades */
+body.dark-mode{
+  --paper:#1B1917; --paper-card:#252320; --ink:#EDE7DC; --ink-soft:#A79E8E; --hair:#3A352E;
+  background:var(--paper);
+}
+body.dark-mode header.hero{background:none;}
+body.dark-mode h1.title{background:none; -webkit-text-fill-color:initial; color:var(--ink);}
+body.dark-mode table{background:var(--paper-card);}
+body.dark-mode .box,body.dark-mode .click-box{box-shadow:none;}
+
+/* topbar utility controls: font-size + dark mode toggle */
+.util-controls{display:flex; align-items:center; gap:6px; margin-left:auto; flex-shrink:0;}
+.util-btn{border:1px solid var(--hair); background:var(--paper-card); color:var(--ink-soft); border-radius:7px; width:26px; height:26px; font-size:.72rem; cursor:pointer; display:flex; align-items:center; justify-content:center; font-family:inherit;}
+.util-btn:hover{border-color:var(--ink); color:var(--ink);}
+
+/* sticky mini-breadcrumb, sits just under the topbar */
+.mini-breadcrumb{
+  position:sticky; top:0; z-index:55; background:rgba(245,240,230,.97); border-bottom:1px solid var(--hair);
+  font-size:.7rem; color:var(--ink-soft); padding:5px 0; text-align:center; opacity:0; transition:opacity .2s;
+}
+body.dark-mode .mini-breadcrumb{background:rgba(27,25,23,.97);}
+.mini-breadcrumb.show{opacity:1;}
+.mini-breadcrumb b{color:var(--ink); font-weight:700;}
+
+/* resume banner in hero */
+.resume-banner{margin-top:16px; max-width:640px; background:var(--paper-card); border:1px dashed var(--hair); border-radius:10px; padding:10px 14px; font-size:.85rem; display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.resume-banner a{font-weight:700; color:var(--ink); text-decoration:none; border-bottom:1px dotted var(--ink);}
+.resume-banner button{border:none; background:none; color:var(--ink-soft); cursor:pointer; font-size:.8rem;}
+
+/* mark-as-read checkbox on each topic heading */
+.topic-read-cb{flex-shrink:0; width:15px; height:15px; margin-right:10px; accent-color:var(--part-color,#333); cursor:pointer;}
+.section h3.topic-h3.is-read .tp-left{color:var(--ink-soft); text-decoration:line-through; text-decoration-color:var(--hair);}
+.read-progress{font-size:.78rem; color:var(--ink-soft); margin-bottom:10px;}
+.read-progress b{color:var(--ink);}
+
+/* copy-to-clipboard on code blocks */
+.code-wrap{position:relative;}
+.copy-btn{position:absolute; top:8px; right:8px; font-size:.68rem; padding:4px 9px; border-radius:6px; border:1px solid #3a352e; background:#2a2622; color:#F1E9DA; cursor:pointer; font-family:inherit;}
+.copy-btn:hover{background:#3a352e;}
+.copy-btn.copied{background:#3f5c46; border-color:#3f5c46;}
+
+/* related-topics footer inside each expanded topic */
+.related-box{margin-top:16px; padding-top:10px; border-top:1px dashed var(--hair); font-size:.8rem; color:var(--ink-soft);}
+.related-box b{color:var(--ink-soft); font-weight:700; text-transform:uppercase; font-size:.65rem; letter-spacing:.06em; margin-right:8px;}
+.related-box a{color:var(--ink); text-decoration:none; border-bottom:1px dotted var(--hair); margin-right:12px;}
+.related-box a:hover{border-color:var(--ink);}
+
+/* highlight-on-jump */
+.topic-h3.just-jumped{animation:flashHighlight 1.6s ease;}
+@keyframes flashHighlight{0%{background:rgba(255,196,102,.55);} 100%{background:transparent;}}
+
+/* fun / entertainment breaks */
+.fun-note{margin-top:18px; padding:12px 16px; border-radius:10px; background:var(--paper); border-left:3px solid var(--part-color,#333); font-size:.88rem; font-style:italic; color:var(--ink-soft);}
+.myth-box{margin:16px 0; border-radius:12px; overflow:hidden; border:1px solid var(--hair);}
+.myth-box .mb-row{padding:10px 14px; font-size:.88rem;}
+.myth-box .mb-myth{background:#F6E2DD; color:#7A2E22;}
+.myth-box .mb-reality{background:#E1EEE3; color:#28532F;}
+.myth-box b{text-transform:uppercase; font-size:.68rem; letter-spacing:.06em; display:block; margin-bottom:2px; opacity:.8;}
+.quiz-box{margin-top:20px; background:var(--paper-card); border:1px solid var(--hair); border-radius:14px; padding:16px 18px;}
+.quiz-box .qz-q{font-weight:700; font-size:.95rem; margin-bottom:10px;}
+.quiz-box .qz-opts{display:flex; flex-wrap:wrap; gap:8px;}
+.quiz-box .qz-opt{border:1px solid var(--hair); background:#fff; border-radius:8px; padding:7px 13px; font-size:.84rem; cursor:pointer; font-family:inherit;}
+body.dark-mode .quiz-box .qz-opt{background:var(--paper-card);}
+.quiz-box .qz-opt.correct{background:#DCEEDD; border-color:#3f5c46; font-weight:700;}
+.quiz-box .qz-opt.wrong{background:#F6DEDA; border-color:#7A2E22;}
+.quiz-box .qz-fb{margin-top:10px; font-size:.84rem; display:none;}
+.quiz-box .qz-fb.show{display:block;}
+.trivia-break{padding:26px 0; text-align:center; background:linear-gradient(180deg, rgba(0,0,0,.02), transparent);}
+.trivia-break .tb-inner{max-width:640px; margin:0 auto; padding:0 22px; font-size:.92rem; font-style:italic; color:var(--ink-soft);}
+.trivia-break .tb-label{display:block; font-style:normal; font-size:.66rem; text-transform:uppercase; letter-spacing:.1em; font-weight:800; color:var(--ink-soft); margin-bottom:6px; opacity:.7;}
+.finish-box{margin-top:20px; text-align:center; padding:26px 20px; border-radius:16px; background:linear-gradient(160deg,#2a2521,#1B1B1B); color:#F1E9DA;}
+.finish-box .fb-title{font-family:Georgia,serif; font-size:1.3rem; font-weight:800; margin-bottom:6px;}
+.finish-box p{color:#cdc3b3; font-size:.9rem;}
+
+/* print stylesheet: expand everything, strip the chrome */
+@media print{
+  .topbar,.dot-rail,.float-fab,.float-panel,.remote-nav,.disclaimer-bar,.mini-breadcrumb,.resume-banner,.util-controls,.credit-footer{display:none !important;}
+  .topic-body{display:block !important;}
+  .topic-chevron,.topic-read-cb,.copy-btn,.topic-link-btn{display:none !important;}
+  body{background:#fff !important; color:#000 !important;}
+  .box,.click-box,table{box-shadow:none !important;}
+  a{color:#000 !important;}
+}
+.cheat-print-only{display:none;}
+@media print{
+  body.cheat-print-mode > *:not(#cheatSheetPrintArea){display:none !important;}
+  body.cheat-print-mode #cheatSheetPrintArea{display:block !important; padding:0 10px;}
+  #cheatSheetPrintArea h1{font-size:20px; margin-bottom:2px;}
+  #cheatSheetPrintArea h2{font-size:15px; margin:16px 0 6px; border-bottom:1px solid #ccc; padding-bottom:2px;}
+  #cheatSheetPrintArea table{width:100%; border-collapse:collapse; font-size:11px;}
+  #cheatSheetPrintArea th,#cheatSheetPrintArea td{border:1px solid #ccc; padding:4px 6px; text-align:left;}
+  #cheatSheetPrintArea th{background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+}
+@media(max-width:560px){
+  .util-controls .util-label{display:none;}
+}
+
+/* ============================================================
+   ROUND 2 ADD-ONS — purely additive, nothing above changes
+   ============================================================ */
+
+/* skip-to-content link */
+.skip-link{
+  position:absolute; left:-999px; top:auto; width:1px; height:1px; overflow:hidden;
+  background:#1B1B1B; color:#F1E9DA; padding:10px 16px; border-radius:0 0 8px 0; z-index:100; font-size:.85rem;
+}
+.skip-link:focus{left:0; top:0; width:auto; height:auto; overflow:visible;}
+
+/* visible keyboard focus everywhere */
+a:focus-visible, button:focus-visible, input:focus-visible, .topic-h3:focus-visible, .toc-part-btn:focus-visible{
+  outline:2px solid var(--part-color,#3a332c); outline-offset:2px;
+}
+
+/* respect reduced-motion preference */
+@media (prefers-reduced-motion: reduce){
+  *, *::before, *::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+}
+
+/* expand/collapse-all per part */
+.part-toggle-all{
+  border:1px solid var(--hair); background:var(--paper-card); color:var(--ink-soft); border-radius:7px;
+  padding:4px 11px; font-size:.72rem; cursor:pointer; font-family:inherit; margin-left:10px; white-space:nowrap;
+}
+.part-toggle-all:hover{border-color:var(--ink); color:var(--ink);}
+
+/* search-term highlighting */
+mark.hl{background:#F3D48A; color:#201C18; border-radius:2px; padding:0 1px;}
+body.dark-mode mark.hl{background:#8a6a2a; color:#EDE7DC;}
+.hl-note{font-size:.7rem; color:var(--ink-soft); font-style:italic;}
+
+/* part icon motif */
+.part-icon{margin-right:6px; font-size:.9em;}
+
+/* changelog / last-updated */
+.meta-footer{max-width:640px; margin:18px auto 0; font-size:.78rem; color:var(--ink-soft); text-align:left;}
+.meta-footer summary{cursor:pointer; font-weight:700; color:var(--ink-soft);}
+.meta-footer ul{margin:8px 0 0; padding-left:18px;}
+.meta-footer li{margin-bottom:4px;}
+
+/* toolbar extra buttons (download, reset, export, import, shuffle, share-progress) */
+.toc-actions{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0 4px;}
+.toc-actions button{border:1px solid var(--hair); background:#fff; color:var(--ink-soft); border-radius:8px; padding:6px 12px; font-size:.78rem; cursor:pointer; font-family:inherit;}
+.toc-actions button:hover{border-color:var(--ink); color:var(--ink);}
+body.dark-mode .toc-actions button{background:var(--paper-card);}
+.toc-actions .toc-fb{font-size:.76rem; color:var(--ink-soft); align-self:center;}
+
+/* inline SVG diagrams */
+.diagram-wrap{margin:16px 0; background:var(--paper-card); border:1px solid var(--hair); border-radius:12px; padding:14px; overflow-x:auto;}
+.diagram-wrap svg{display:block; margin:0 auto; max-width:100%; height:auto;}
+.diagram-wrap .dg-box{fill:var(--paper); stroke:var(--part-color,#333); stroke-width:1.5;}
+.diagram-wrap .dg-text{font-family:"Segoe UI",system-ui,sans-serif; font-size:11px; fill:var(--ink);}
+.diagram-wrap .dg-arrow{stroke:var(--ink-soft); stroke-width:1.5; fill:none; marker-end:url(#dgArrow);}
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+<div id="cheatSheetPrintArea" class="cheat-print-only" aria-hidden="true"></div>
+
+<div class="disclaimer-bar"><div class="wrap"><span>Independent, unofficial study notes — not affiliated with, endorsed by, or sponsored by n8n GmbH.</span><span>&middot;</span><span><b>n8n</b> is a trademark of n8n GmbH.</span><span>&middot;</span><span>Compiled from <b>publicly available</b> information and general public knowledge.</span></div></div>
+
+<div class="topbar">
+  <div class="wrap topbar-row1">
+    <div class="brand">Unofficial Guide to n8n Automation</div>
+    <div class="util-controls">
+      <span class="util-label" style="font-size:.68rem; color:var(--ink-soft); margin-right:2px;">Text</span>
+      <button class="util-btn" onclick="adjustFontSize(-1)" aria-label="Decrease text size">A&minus;</button>
+      <button class="util-btn" onclick="adjustFontSize(1)" aria-label="Increase text size">A+</button>
+      <button class="util-btn" id="darkModeBtn" onclick="toggleDarkMode()" aria-label="Toggle dark mode">&#9789;</button>
+    </div>
+  </div>
+  <div class="wrap topbar-row2"><nav class="topnav" id="topnav"></nav></div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+<div class="mini-breadcrumb" id="miniBreadcrumb"></div>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Personal study notes — layman to confident, one continuous guide</div>
+    <h1 class="title serif">An Independent Guide to n8n Automation</h1>
+    <p class="subtitle">Unofficial notes covering everything from "what even is a workflow?" to production-grade AI agents — explained in plain language, with exactly what to click, in one page you can search top to bottom.</p>
+    <div class="hero-author">
+      <div class="hero-author-avatar init-avatar" aria-hidden="true">SK</div>
+      <div class="hero-author-info">
+        <div class="hero-author-name">Sujit Kulkarni</div>
+        <div class="hero-author-desc">Compiled this guide — drawing only on publicly available, verifiable n8n documentation and general public knowledge.</div>
+        <div class="hero-author-creds">15 yrs Investment Banking &middot; AI Enthusiast &middot; n8n Enthusiast 💚</div>
+      </div>
+    </div>
+    <div class="ask-box">
+      <div class="ask-header">
+        <div class="ask-avatar init-avatar" aria-hidden="true">SK</div>
+        <div class="ask-header-text"><div class="lbl">Ask Sujit</div><div class="sub">Type any n8n term or question — jump straight to the right section.</div></div>
+      </div>
+      <div class="ask-row">
+        <input id="askInput" type="text" placeholder="e.g. webhook, error handling, cron..." onkeydown="if(event.key==='Enter')runAsk()">
+        <button onclick="runAsk()">Go</button>
+      </div>
+      <div class="ask-suggest">
+        <span class="try-lbl">Try:</span>
+        <button class="chip-btn" onclick="quickAsk('webhook')">Webhook</button>
+        <button class="chip-btn" onclick="quickAsk('expression')">Expressions</button>
+        <button class="chip-btn" onclick="quickAsk('error')">Error handling</button>
+        <button class="chip-btn" onclick="quickAsk('ai agent')">AI Agent</button>
+      </div>
+      <div id="askResult"></div>
+    </div>
+    <div id="resumeBanner"></div>
+  </div>
+</header>
+
+<main id="main-content">
+<section class="section" id="toc" style="--part-color:#3a332c">
+  <div class="wrap">
+    <div class="eyebrow">Full Index</div>
+    <h2>Every topic in this guide</h2>
+    <div class="tag">Filter to jump straight to any of the topics below — or just scroll, everything follows in order.</div>
+    <div class="finder-box">
+      <div class="read-progress" id="readProgress"></div>
+      <div class="toc-actions">
+        <button type="button" onclick="gotoRandomTopic()">🎲 Random topic</button>
+        <button type="button" onclick="downloadMarkdown()">⬇ Download as Markdown</button>
+        <button type="button" onclick="window.print()">🖨 Save as PDF</button>
+        <button type="button" onclick="printCheatSheet()">📎 Cheat-sheet only</button>
+        <button type="button" onclick="shareProgress()">📋 Copy my progress</button>
+        <button type="button" onclick="exportProgress()">Export progress</button>
+        <button type="button" onclick="document.getElementById('importProgressFile').click()">Import progress</button>
+        <button type="button" onclick="resetProgress()">Reset progress</button>
+        <input type="file" id="importProgressFile" accept="application/json" style="display:none" onchange="importProgress(this.files[0])">
+        <span class="toc-fb" id="tocActionFb"></span>
+      </div>
+      <input id="finderInput" type="text" placeholder="Search all topics (e.g. 'oauth', 'cron', 'agent')..." oninput="applyFinder()">
+      <div class="toc-list" id="tocList"></div>
+      <div class="finder-status" id="finderStatus"></div>
+    </div>
+  </div>
+</section>
+<section class="section" id="part0" style="--part-color:var(--p0)">
+  <div class="wrap">
+    <div class="eyebrow">Part 0</div>
+    <h2>Orientation</h2>
+    <div class="tag">What n8n actually is, why it exists, and getting it running on your machine for the first time.</div>
+
+    <h3 id="p0-1"><span class="num">01</span>What is n8n?</h3>
+    <p>n8n (pronounced "n-eight-n," short for "nodemation" — the "8" stands for the eight letters between the n's) is a tool for building automated workflows by connecting things together visually, instead of writing a program from scratch. You drag "nodes" onto a canvas, each node does one job (fetch an email, check a condition, save a row to a spreadsheet), and you draw lines between them to say what happens next. When something triggers the workflow — a new email, a scheduled time, a form submission — n8n runs through the nodes in order and does the work automatically, without you touching it.</p>
+    <p>Think of it like a flowchart that actually runs. You're not just documenting a process, you're building it.</p>
+
+    <h3 id="p0-2"><span class="num">02</span>History &amp; background</h3>
+    <p>n8n started as an open-source alternative to paid automation tools, built by a small team frustrated with the limits and pricing of existing "no-code" automation platforms. It's released under a "fair-code" license (more on that below), which means the source is visible and self-hosting is free, while the company still funds development through a paid cloud product and enterprise features. This model has let n8n grow a large community of self-hosters alongside its commercial offering.</p>
+
+    <h3 id="p0-3"><span class="num">03</span>Why learn n8n?</h3>
+    <div class="grid2">
+      <div class="box"><h4>Business automation</h4><p>Automate repetitive tasks — data entry, notifications, report generation — so people stop doing them by hand.</p></div>
+      <div class="box"><h4>AI automation</h4><p>Wire up AI models and agents to real business data and real actions, not just a chat window.</p></div>
+      <div class="box"><h4>CRM automation</h4><p>Capture leads, keep customer records in sync across tools, automate follow-ups.</p></div>
+      <div class="box"><h4>Marketing automation</h4><p>Automate email sequences, social posting, ad reporting, campaign tracking.</p></div>
+      <div class="box"><h4>Data processing</h4><p>Move, clean and reshape data between apps and databases without custom scripts.</p></div>
+      <div class="box"><h4>DevOps</h4><p>Automate deployments, monitoring alerts, log shipping and infrastructure housekeeping.</p></div>
+      <div class="box"><h4>Customer support</h4><p>Auto-route tickets, draft responses, escalate based on rules.</p></div>
+      <div class="box"><h4>Personal productivity</h4><p>Automate your own daily admin — reminders, digests, file organizing.</p></div>
+      <div class="box"><h4>Developer-friendly</h4><p>Drop into JavaScript/Python via the Code node whenever a visual node isn't enough.</p></div>
+      <div class="box"><h4>Open-source &amp; self-hosted</h4><p>Run it on your own server, keep your data under your own control.</p></div>
+      <div class="box"><h4>Scalable</h4><p>The same tool takes you from a five-minute personal automation to an enterprise workload.</p></div>
+      <div class="box"><h4>Cost-effective</h4><p>Self-hosting removes the per-task pricing that makes high-volume automation expensive elsewhere.</p></div>
+    </div>
+
+    <h3 id="p0-4"><span class="num">04</span>n8n vs Zapier vs Make vs Power Automate</h3>
+    <table>
+      <tr><th>Tool</th><th>Hosting</th><th>Pricing model</th><th>Custom code</th><th>Best for</th></tr>
+      <tr><td>n8n</td><td>Self-hosted (free) or Cloud</td><td>Free self-hosted; execution/active-workflow tiers on Cloud</td><td>Full JS/Python via Code node</td><td>Technical users, high-volume, full control</td></tr>
+      <tr><td>Zapier</td><td>Cloud only</td><td>Per task/month, tiered</td><td>Limited (Code by Zapier, restricted)</td><td>Simple integrations, non-technical teams</td></tr>
+      <tr><td>Make (Integromat)</td><td>Cloud only</td><td>Per operation, tiered</td><td>Limited</td><td>Visual, operation-heavy workflows</td></tr>
+      <tr><td>Power Automate</td><td>Cloud / on-prem (Microsoft ecosystem)</td><td>Per user/flow, licensing-based</td><td>Limited, Power Fx expressions</td><td>Organizations deep in Microsoft 365</td></tr>
+    </table>
+    <p>The practical difference: Zapier and Make charge by usage volume, which gets expensive fast at scale. n8n's self-hosted option removes that ceiling entirely — you pay for your own server, not per execution — at the cost of you (or your team) managing the hosting yourself.</p>
+
+    <h3 id="p0-5"><span class="num">05</span>Licensing model explained</h3>
+    <p>n8n uses a "fair-code" license (Sustainable Use License), which sits between fully open-source and fully proprietary. In practice: you can self-host n8n for free, including for internal business use, and you can view and modify the source. What you can't do is take n8n and resell it as a competing hosted service. Certain advanced features (like SSO, advanced permissions, and some enterprise governance tools) are reserved for paid Enterprise plans. Always check n8n's current official licensing page for the exact, up-to-date terms, since licensing details can change.</p>
+
+    <h3 id="p0-6"><span class="num">06</span>Installation &amp; setup</h3>
+    <p>There are several ways to get n8n running, from a five-minute local test to a production server:</p>
+    <div class="box"><h4>Quick local test (npx)</h4>
+      <pre><code>npx n8n</code></pre>
+      <p>This downloads and starts n8n temporarily — nothing is installed permanently. Good for a first look, not for real use.</p>
+    </div>
+    <div class="box"><h4>Docker (recommended for real use)</h4>
+      <pre><code>docker volume create n8n_data
+docker run -it --rm --name n8n -p 5678:5678 \
+  -v n8n_data:/home/node/.n8n \
+  docker.n8n.io/n8nio/n8n</code></pre>
+      <p>This keeps your data in a Docker volume so it survives restarts.</p>
+    </div>
+    <div class="box"><h4>Docker Compose</h4>
+      <p>For anything beyond a quick test, a <code>docker-compose.yml</code> file lets you also run a proper database (Postgres) alongside n8n, set environment variables, and manage restarts cleanly. This is the standard approach for a small production instance.</p>
+    </div>
+    <div class="box"><h4>npm global install</h4>
+      <pre><code>npm install n8n -g
+n8n start</code></pre>
+      <p>Installs n8n directly via Node.js. Useful if you already manage Node versions and want it as a normal CLI tool.</p>
+    </div>
+    <div class="box"><h4>Kubernetes</h4><p>For larger, team-managed deployments, n8n can run as a Kubernetes deployment, typically paired with queue mode (covered in Part 5) so multiple workers share the load.</p></div>
+    <div class="box"><h4>One-click platforms (Railway, Render, etc.)</h4><p>Several hosting platforms offer a one-click n8n template, which handles the Docker setup for you — a middle ground between "npx test" and "manage your own server."</p></div>
+    <div class="box"><h4>n8n Cloud</h4><p>n8n's own hosted offering — no installation at all, you sign up and get a ready-to-use instance. Trades self-hosting control for zero maintenance.</p></div>
+
+    <div class="click-box"><b>Where to click — first login:</b> after starting n8n, open your browser to <code>http://localhost:5678</code>. On first run you'll see a setup screen: enter an email, first name, last name, and password, then click <b>Next</b> / <b>Get Started</b>. This creates your owner account. You'll land on an empty canvas titled "My workflow."</div>
+
+    <h3 id="p0-7"><span class="num">07</span>Your first workflow, click by click</h3>
+    <ol class="step-list">
+      <li>On the empty canvas, click the <b>+</b> button (or the large "Add first step" tile in the middle of the canvas).</li>
+      <li>A panel opens on the right listing trigger types. Click <b>Trigger manually</b> — this adds a "When clicking 'Execute workflow'" node.</li>
+      <li>Hover over the small dot on the right edge of that node, click and drag out a line, then release over empty canvas — a search box appears. Type <code>Set</code> and click the <b>Edit Fields (Set)</b> node to drop it and auto-connect it.</li>
+      <li>Click the new Set node to open its panel on the right. Click <b>Add Field</b>, choose type <b>String</b>, set the name to <code>message</code> and the value to <code>Hello from my first workflow</code>.</li>
+      <li>Click the <b>Test workflow</b> button (top right of the canvas, or the play icon on the trigger node).</li>
+      <li>n8n runs the workflow instantly. Click the Set node again — its output panel on the right now shows the data it produced, including your <code>message</code> field.</li>
+    </ol>
+    <p>That's the entire mental model of n8n in six clicks: a trigger starts things, nodes do work, data flows left to right, and you can inspect exactly what happened at every step.</p>
+
+    <h3 id="p0-8"><span class="num">08</span>Interface tour</h3>
+    <table>
+      <tr><th>Area</th><th>What it's for</th></tr>
+      <tr><td>Canvas (center)</td><td>Where you build workflows — drag nodes, draw connections.</td></tr>
+      <tr><td><b>+</b> button / node panel</td><td>Search and add any node, trigger, or app integration.</td></tr>
+      <tr><td>Top-right toggle</td><td>Activate / deactivate the workflow (make it live or not).</td></tr>
+      <tr><td>"Executions" tab (left sidebar)</td><td>History of every past run, success or failure, with full data for each.</td></tr>
+      <tr><td>"Credentials" (left sidebar)</td><td>Where all your saved API keys/logins live, reusable across workflows.</td></tr>
+      <tr><td>Settings (gear icon)</td><td>Environment variables, users, community nodes, instance-wide options.</td></tr>
+      <tr><td>Node right-panel</td><td>Opens when you click a node — parameters on the left half, live output data on the right half.</td></tr>
+    </table>
+
+    <h3 id="p0-6a"><span class="num">06a</span>Node-vs-code philosophy</h3>
+    <p>A recurring decision in n8n is: drag a node, or drop into the Code node and write JavaScript? General rule of thumb — use a node when one exists for what you need (it's faster, more readable, and easier for someone else to maintain later); reach for Code when the transformation is genuinely custom (complex math, unusual string parsing, logic that would take five chained nodes to express). Overusing Code makes workflows opaque; avoiding it entirely makes some tasks needlessly painful. Most solid workflows are 80% nodes, 20% Code where it earns its place.</p>
+
+    <h3 id="p0-6b"><span class="num">06b</span>Fair-code vs open-source vs proprietary</h3>
+    <p>It helps to place n8n on a spectrum. Fully open-source (MIT/Apache-style) software can be freely resold and rehosted by anyone, including as a competing paid service. Fully proprietary software hides its source entirely. Fair-code sits between: the source is visible, self-hosting is unrestricted for your own use, but turning the product itself into a competing commercial hosting service is restricted. n8n's specific terms are set out in its official license — treat this section as a mental model, not a substitute for reading the current license text.</p>
+    <div class="myth-box">
+      <div class="mb-row mb-myth"><b>Myth</b>"Fair-code" and "open-source" mean the same thing.</div>
+      <div class="mb-row mb-reality"><b>Reality</b>They don't — fair-code adds one specific restriction (no reselling it as a competing hosted service) that plain open-source licenses don't have. Small print, big difference if you're building a business on top of it.</div>
+    </div>
+
+    <h3 id="p0-6c"><span class="num">06c</span>Sizing a self-hosted instance</h3>
+    <ul class="plain">
+      <li><b>Light personal use</b> (a handful of workflows, low volume): a small cloud VM (1 vCPU, 1–2GB RAM) with SQLite is usually enough to start.</li>
+      <li><b>Small team / moderate volume</b>: move to Postgres instead of SQLite for reliability, and give the instance 2–4GB RAM.</li>
+      <li><b>High volume / many concurrent executions</b>: this is when queue mode (Part 5) becomes worth the setup effort — separating the main n8n process from "worker" processes that actually execute workflows, backed by Redis.</li>
+    </ul>
+
+  </div>
+</section>
+<section class="section" id="part1" style="--part-color:var(--p1)">
+  <div class="wrap">
+    <div class="eyebrow">Part 1</div>
+    <h2>Foundations</h2>
+    <div class="tag">The mental model underneath every n8n workflow — get this right and everything else clicks faster.</div>
+
+    <h3 id="p1-9"><span class="num">09</span>Core concepts</h3>
+    <table>
+      <tr><th>Term</th><th>What it means</th></tr>
+      <tr><td>Workflow</td><td>A saved collection of connected nodes that together automate a task.</td></tr>
+      <tr><td>Node</td><td>A single step that performs one action (fetch data, transform it, send it somewhere).</td></tr>
+      <tr><td>Trigger</td><td>The special first node that starts a workflow (a webhook call, a schedule, a manual click).</td></tr>
+      <tr><td>Action</td><td>Any node after the trigger that does something with the data.</td></tr>
+      <tr><td>Connection</td><td>The line between two nodes — defines the order and the flow of data.</td></tr>
+      <tr><td>Execution</td><td>One complete run of a workflow from trigger to finish, logged with its data.</td></tr>
+      <tr><td>Credentials</td><td>Securely stored login details / API keys a node uses to connect to a service.</td></tr>
+      <tr><td>Data flow</td><td>The way information passes from node to node, transformed at each step.</td></tr>
+    </table>
+
+    <h3 id="p1-10"><span class="num">10</span>n8n architecture</h3>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 780 150" role="img" aria-label="Diagram: Trigger leads to Workflow, then Nodes, Transform data, Decision, API calls and integrations, then Output, which can loop back to Trigger.">
+        <defs>
+          <marker id="dgArrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6 z" fill="#8a8272"></path>
+          </marker>
+        </defs>
+        <g class="dg-text">
+          <rect class="dg-box" x="10" y="40" width="90" height="50" rx="8"></rect>
+          <text x="55" y="70" text-anchor="middle">Trigger</text>
+          <rect class="dg-box" x="120" y="40" width="90" height="50" rx="8"></rect>
+          <text x="165" y="70" text-anchor="middle">Workflow</text>
+          <rect class="dg-box" x="230" y="40" width="90" height="50" rx="8"></rect>
+          <text x="275" y="70" text-anchor="middle">Nodes</text>
+          <rect class="dg-box" x="340" y="40" width="90" height="50" rx="8"></rect>
+          <text x="385" y="64" text-anchor="middle">Transform</text>
+          <text x="385" y="77" text-anchor="middle">data</text>
+          <rect class="dg-box" x="450" y="40" width="90" height="50" rx="8"></rect>
+          <text x="495" y="70" text-anchor="middle">Decision</text>
+          <rect class="dg-box" x="560" y="40" width="90" height="50" rx="8"></rect>
+          <text x="605" y="64" text-anchor="middle">API /</text>
+          <text x="605" y="77" text-anchor="middle">integrations</text>
+          <rect class="dg-box" x="670" y="40" width="90" height="50" rx="8"></rect>
+          <text x="715" y="70" text-anchor="middle">Output</text>
+        </g>
+        <line class="dg-arrow" x1="100" y1="65" x2="118" y2="65"></line>
+        <line class="dg-arrow" x1="210" y1="65" x2="228" y2="65"></line>
+        <line class="dg-arrow" x1="320" y1="65" x2="338" y2="65"></line>
+        <line class="dg-arrow" x1="430" y1="65" x2="448" y2="65"></line>
+        <line class="dg-arrow" x1="540" y1="65" x2="558" y2="65"></line>
+        <line class="dg-arrow" x1="650" y1="65" x2="668" y2="65"></line>
+        <path class="dg-arrow" d="M715,90 C715,130 55,130 55,92" fill="none"></path>
+        <text x="385" y="145" text-anchor="middle" style="font-size:9px; fill:var(--ink-soft);">loops / repeats where needed</text>
+      </svg>
+    </div>
+    <ol class="step-list">
+      <li><b>Trigger</b> — something starts the workflow (webhook, schedule, manual run, app event).</li>
+      <li><b>Workflow</b> — the saved sequence of nodes that will run.</li>
+      <li><b>Nodes</b> — each one fetches, filters, transforms, or calls out to an API.</li>
+      <li><b>Transform data</b> — data gets cleaned, mapped, or reshaped as needed.</li>
+      <li><b>Decision</b> — conditional nodes (IF/Switch) route data down different paths.</li>
+      <li><b>API calls / integrations</b> — the workflow talks to external apps, databases, or services.</li>
+      <li><b>Output</b> — the final result is delivered — an email sent, a row saved, a message posted.</li>
+    </ol>
+    <p>Workflows can also loop back — repeating steps for each item in a list, or waiting and retrying — rather than running strictly in one straight line.</p>
+
+    <h3 id="p1-11"><span class="num">11</span>Types of nodes</h3>
+    <div class="grid2">
+      <div class="box"><h4>Trigger nodes</h4><p>Start a workflow: Schedule/Cron, Webhook, Email Trigger, Chat Trigger, Manual Trigger, Form Trigger.</p></div>
+      <div class="box"><h4>Core nodes</h4><p>Control and transform data: Set, IF, Switch, Merge, Wait, Loop Over Items, Code, Function.</p></div>
+      <div class="box"><h4>App nodes</h4><p>Connect to 400+ specific apps: Gmail, Google Sheets, Slack, Notion, Airtable, Google Drive, Discord, GitHub, and many more.</p></div>
+      <div class="box"><h4>AI nodes</h4><p>AI Agent, Chat Model, Embeddings, Vector Store, Memory, Retriever.</p></div>
+      <div class="box"><h4>Utility nodes</h4><p>HTTP Request, Set Binary Data, NoOp, Error Trigger — general-purpose helpers that don't belong to one specific app.</p></div>
+    </div>
+
+    <h3 id="p1-12"><span class="num">12</span>Data types in n8n</h3>
+    <table>
+      <tr><th>Type</th><th>Example</th><th>Use case</th></tr>
+      <tr><td>String</td><td><code>"Hello n8n"</code></td><td>Names, messages, emails, descriptions</td></tr>
+      <tr><td>Number</td><td><code>42</code>, <code>3.14</code></td><td>Counts, amounts, prices, scores</td></tr>
+      <tr><td>Boolean</td><td><code>true</code> / <code>false</code></td><td>Conditions, flags, toggles</td></tr>
+      <tr><td>Array</td><td><code>["Apple","Banana"]</code></td><td>Lists of items, looping data</td></tr>
+      <tr><td>Object</td><td><code>&#123;"name":"John"&#125;</code></td><td>Structured records, API responses</td></tr>
+      <tr><td>Null</td><td><code>null</code></td><td>Missing/empty values</td></tr>
+      <tr><td>Nested object/array</td><td><code>&#123;"user":&#123;"skills":["JS"]&#125;&#125;</code></td><td>Complex data from APIs or databases</td></tr>
+      <tr><td>Binary</td><td>file bytes</td><td>Images, PDFs, uploads, downloads</td></tr>
+    </table>
+
+    <h3 id="p1-13"><span class="num">13</span>The n8n data structure</h3>
+    <p>Every node passes data as a list of "items." Each item is an object with a <code>json</code> property (the structured data) and, optionally, a <code>binary</code> property (file data). This is why an expression like <code>&#123;&#123; $json.name &#125;&#125;</code> works everywhere — every node's output is standardized into this same item shape, regardless of which app it came from.</p>
+    <p>n8n also tracks <b>pairedItem</b> information behind the scenes — a link from each output item back to the input item(s) it came from. This is what lets n8n correctly map data back through Merge and other multi-input nodes, and it's the usual culprit when you see "can't find pairing" errors after heavy custom transformation in a Code node — the fix is usually to preserve or manually set <code>pairedItem</code> in your returned items.</p>
+
+    <h3 id="p1-14"><span class="num">14</span>Execution modes</h3>
+    <div class="grid2">
+      <div class="box"><h4>Manual</h4><p>You click "Test workflow" yourself. Best for building and debugging.</p></div>
+      <div class="box"><h4>Triggered</h4><p>Runs automatically whenever its trigger condition fires — time-based, event-based, or webhook-based.</p></div>
+      <div class="box"><h4>Webhook</h4><p>A specific case of triggered mode where an external system calls your workflow's URL directly, in real time.</p></div>
+      <div class="box"><h4>Queue mode</h4><p>For scaling: a "main" process receives triggers and hands executions off to separate "worker" processes via a Redis-backed queue, so heavy workflows don't block the whole instance. Covered in depth in Part 5.</p></div>
+    </div>
+
+    <h3 id="p1-15"><span class="num">15</span>Popular triggers</h3>
+    <table>
+      <tr><th>Trigger</th><th>Fires when...</th><th>Best for</th></tr>
+      <tr><td>Cron / Schedule</td><td>A defined time or interval is reached</td><td>Reports, backups, data sync</td></tr>
+      <tr><td>Webhook</td><td>An HTTP request hits your workflow's URL</td><td>Real-time integrations, payments, IoT</td></tr>
+      <tr><td>Form Trigger</td><td>Someone submits a native n8n form</td><td>Lead capture, feedback forms</td></tr>
+      <tr><td>Email Trigger</td><td>A new email arrives</td><td>Inbox monitoring, alerts</td></tr>
+      <tr><td>Chat Trigger</td><td>A chat message is received</td><td>Chatbots, assistants</td></tr>
+      <tr><td>App triggers (Sheets/Drive/GitHub/Slack/Notion...)</td><td>Something changes in that app</td><td>App-specific automation</td></tr>
+      <tr><td>Manual Trigger</td><td>You click "Execute"</td><td>Testing, one-off runs</td></tr>
+    </table>
+    <p><b>Polling vs event-based:</b> some triggers (like many app triggers) work by <i>polling</i> — n8n checks the app every so often ("any new rows since last check?"). Others, like webhooks, are <i>event-based</i> — the app pushes data to n8n the instant something happens, with no delay and no wasted checks. Event-based is more efficient and immediate where it's available.</p>
+
+    <h3 id="p1-9a"><span class="num">09a</span>Sticky Notes &amp; documenting your workflow</h3>
+    <p>The Sticky Note node isn't a functional step — it's a colored text box you drop onto the canvas to leave notes for your future self or teammates ("this branch handles refunds," "TODO: add retry here"). Add one via the <b>+</b> panel, search <code>Sticky Note</code>. Cheap habit, huge payoff once a workflow has more than five or six nodes.</p>
+
+    <h3 id="p1-9b"><span class="num">09b</span>Pin Data</h3>
+    <p>Pin Data freezes a node's current output so that re-running the workflow doesn't re-fetch it — useful when you're iterating on nodes downstream of a slow or rate-limited API call. <b>Where to click:</b> run the workflow once, then click the node whose output you want to freeze, click the pin icon in its output panel. A pin icon appears on the node; unpin the same way when you're done testing.</p>
+
+    <h3 id="p1-9c"><span class="num">09c</span>Partial execution &amp; "test step"</h3>
+    <p>You don't have to run an entire workflow to check one node. Click any node, then click <b>Test step</b> (or the small play icon on the node itself) to run just that node using whatever data is currently available upstream. This is the fastest debugging loop in n8n — build one node, test it, move to the next.</p>
+
+    <h3 id="p1-10a"><span class="num">10a</span>Activation vs deactivation</h3>
+    <p>The toggle in the top-right of the canvas switches a workflow between <b>Active</b> and <b>Inactive</b>. Inactive workflows can still be run manually, but their triggers (webhooks, schedules, app polling) are switched off — no live traffic reaches them. Activating a workflow registers its webhook URL and starts its schedules for real; this is the step people most often forget after building something that "works" in testing but never fires on its own.</p>
+
+    <h3 id="p1-10b"><span class="num">10b</span>Static data &amp; node versions</h3>
+    <p>Workflow-level <b>static data</b> (accessed via <code>$getWorkflowStaticData</code> in a Code node) lets a workflow remember a small piece of state between separate executions — for example, "the ID of the last row I processed," so a polling workflow doesn't reprocess old data. Separately, n8n nodes carry an internal <b>version number</b>; when n8n upgrades a node's behavior, older workflows keep running the version they were built with unless you explicitly update the node, which is why upgrading n8n rarely breaks existing workflows outright.</p>
+
+    <div class="quiz-box keep-visible">
+      <div class="qz-q">Quick check: what starts every workflow in n8n?</div>
+      <div class="qz-opts">
+        <button class="qz-opt" type="button" onclick="checkQuiz(this,false)">The Set node</button>
+        <button class="qz-opt" type="button" onclick="checkQuiz(this,true)">A Trigger node</button>
+        <button class="qz-opt" type="button" onclick="checkQuiz(this,false)">A database connection</button>
+      </div>
+      <div class="qz-fb">Correct answer: <b>a Trigger node</b>. Manual, Webhook, Schedule and the rest are all the entry point — nothing else runs until one of them fires.</div>
+    </div>
+  </div>
+</section>
+<section class="section" id="part2" style="--part-color:var(--p2)">
+  <div class="wrap">
+    <div class="eyebrow">Part 2</div>
+    <h2>Core Skills</h2>
+    <div class="tag">The handful of nodes and concepts that show up in almost every workflow you'll ever build.</div>
+
+    <h3 id="p2-16"><span class="num">16</span>The seven core nodes, deep-dive</h3>
+    <table>
+      <tr><th>Node</th><th>What it does</th><th>Where to click</th></tr>
+      <tr><td>Set (Edit Fields)</td><td>Create, update or replace values</td><td>Add node → click <b>Add Field</b> → choose type → enter name/value</td></tr>
+      <tr><td>IF</td><td>Splits data into True/False paths based on a condition</td><td>Add node → click <b>Add Condition</b> → pick field, operator, value</td></tr>
+      <tr><td>Switch</td><td>Routes to multiple outputs based on matching a value</td><td>Add node → set the value to check → add one "Case" per output</td></tr>
+      <tr><td>Merge</td><td>Combines two or more input branches into one</td><td>Drag two connections into it → choose mode (Append/Combine/etc.) in its panel</td></tr>
+      <tr><td>Wait</td><td>Pauses execution for a set time or until a condition/webhook</td><td>Add node → choose "Wait Amount" or "Wait Until" → set duration</td></tr>
+      <tr><td>Loop Over Items (Split in Batches)</td><td>Repeats a set of steps for each item, in batches</td><td>Add node → connect its "loop" output back into the nodes to repeat, "done" output onward</td></tr>
+      <tr><td>Code</td><td>Custom JavaScript (or Python) for anything the above can't do</td><td>Add node → write code in the editor panel → click outside to save</td></tr>
+    </table>
+
+    <h3 id="p2-17"><span class="num">17</span>Control flow nodes</h3>
+    <p>Beyond the core seven, n8n has a fuller family of flow-control nodes: <b>Stop and Error</b> (deliberately fail a workflow with a custom message), <b>Continue on Fail</b> (a per-node setting, found in the node's "Settings" tab, that lets the workflow keep going even if that node errors), and <b>NoOp</b> (does nothing — useful as a placeholder while sketching a workflow's shape before filling in the real logic).</p>
+    <div class="click-box"><b>Where to click — Continue on Fail:</b> click any node → the small "..." or settings icon on the node panel → toggle <b>Continue On Fail</b>. The node's error output can then be wired to a separate handling path instead of stopping the whole run.</div>
+
+    <h3 id="p2-18"><span class="num">18</span>Data transformation nodes</h3>
+    <table>
+      <tr><th>Node</th><th>Purpose</th></tr>
+      <tr><td>Filter</td><td>Keeps only items matching a condition, drops the rest</td></tr>
+      <tr><td>Sort</td><td>Orders items ascending/descending by a field</td></tr>
+      <tr><td>Limit</td><td>Keeps only the first N items (pagination, "top 10")</td></tr>
+      <tr><td>Split In Batches</td><td>Breaks a large list into fixed-size chunks for processing</td></tr>
+      <tr><td>Aggregate</td><td>Combines many items into one (sums, counts, grouped lists)</td></tr>
+      <tr><td>Item Lists</td><td>Array operations — combine, split, remove duplicates, extract fields</td></tr>
+    </table>
+
+    <h3 id="p2-19"><span class="num">19</span>Expressions in n8n</h3>
+    <p>An expression is n8n's way of inserting dynamic values into any field. Anything wrapped in <code>&#123;&#123; &#125;&#125;</code> is evaluated at run time rather than treated as literal text.</p>
+    <table>
+      <tr><th>Purpose</th><th>Expression</th></tr>
+      <tr><td>Get a field</td><td><code>&#123;&#123; $json.name &#125;&#125;</code></td></tr>
+      <tr><td>Current date/time</td><td><code>&#123;&#123; $now &#125;&#125;</code></td></tr>
+      <tr><td>Math</td><td><code>&#123;&#123; 5 + 10 &#125;&#125;</code></td></tr>
+      <tr><td>String concatenation</td><td><code>&#123;&#123; $json.first + ' ' + $json.last &#125;&#125;</code></td></tr>
+      <tr><td>Uppercase / lowercase</td><td><code>&#123;&#123; $json.name.toUpperCase() &#125;&#125;</code></td></tr>
+      <tr><td>Add a day</td><td><code>&#123;&#123; $now.plus(&#123;days:1&#125;) &#125;&#125;</code></td></tr>
+      <tr><td>Substring</td><td><code>&#123;&#123; $json.text.substring(0,5) &#125;&#125;</code></td></tr>
+      <tr><td>Data from another node</td><td><code>&#123;&#123; $node["HTTP Request"].json.data &#125;&#125;</code></td></tr>
+    </table>
+
+    <h3 id="p2-20"><span class="num">20</span>Variables in n8n</h3>
+    <table>
+      <tr><th>Variable</th><th>Gives you</th></tr>
+      <tr><td><code>$json</code></td><td>The current item's data</td></tr>
+      <tr><td><code>$node</code></td><td>Data from a named node elsewhere in the workflow</td></tr>
+      <tr><td><code>$items</code></td><td>All input items as an array</td></tr>
+      <tr><td><code>$input</code></td><td>Input data available to a Code node (<code>.all()</code>, <code>.first()</code>)</td></tr>
+      <tr><td><code>$vars</code></td><td>Workflow-level variables you've defined</td></tr>
+      <tr><td><code>$env</code></td><td>Environment variables from the instance</td></tr>
+      <tr><td><code>$binary</code></td><td>Binary/file data on the current item</td></tr>
+      <tr><td><code>$credentials</code></td><td>Limited credential fields, where explicitly allowed</td></tr>
+      <tr><td><code>$execution</code></td><td>Info about the current run (ID, mode, start time)</td></tr>
+      <tr><td><code>$now</code> / <code>$today</code></td><td>Current timestamp / date</td></tr>
+      <tr><td><code>$workflow</code></td><td>Info about the workflow itself (its ID, name)</td></tr>
+    </table>
+
+    <h3 id="p2-21"><span class="num">21</span>Working with JSON</h3>
+    <p>Because everything in n8n is JSON under the hood, reading nested data is just chaining dots and brackets: <code>$json.user.address.city</code> for a nested object, <code>$json.items[0].name</code> for the first element of an array. When a field name has spaces or special characters, use bracket syntax instead: <code>$json["Full Name"]</code>. The <b>Edit Fields (Set)</b> node's mapping mode lets you drag a field from the input panel directly onto an output field, which writes the correct expression for you automatically — a good way to learn the syntax by watching what n8n generates.</p>
+
+    <h3 id="p2-22"><span class="num">22</span>Dates &amp; times</h3>
+    <p>n8n uses the Luxon library for date handling under expressions and Code nodes. <code>$now</code> gives the current moment, <code>$today</code> the current date. Common patterns: <code>$now.toFormat('yyyy-MM-dd')</code> to format a date, <code>$now.plus(&#123;days:7&#125;)</code> to add time, and <code>$now.setZone('Asia/Kolkata')</code> to convert timezones. Always be explicit about timezones in scheduled workflows — a Cron trigger's time is based on the instance's configured timezone, which is easy to get wrong when your server and your users are in different regions.</p>
+
+    <h3 id="p2-23"><span class="num">23</span>Regular expressions</h3>
+    <p>Inside a Code node, or in the IF node's "Regex" operator, standard JavaScript regular expressions work as expected — e.g. matching an email pattern before accepting form input, or extracting a specific pattern (like an order number) out of a longer text string with <code>.match(/ORD-\d+/)</code>.</p>
+
+    <h3 id="p2-24"><span class="num">24</span>Pagination patterns</h3>
+    <p>Many APIs return data one "page" at a time. The common n8n pattern is: an HTTP Request node inside a loop, where each iteration reads a "next page" token or offset from the previous response and feeds it into the next request's query parameters, stopping when the API signals there's no more data (an empty result, or a missing "next" token). n8n's HTTP Request node also has a built-in pagination option in its parameters for APIs that follow standard patterns, which can remove the need to build the loop manually.</p>
+
+    <h3 id="p2-25"><span class="num">25</span>Sub-workflows</h3>
+    <p>The <b>Execute Workflow</b> node lets one workflow call another as a reusable building block — passing data in, getting a result back — the same way a function call works in programming. This is how you avoid duplicating the same 10-node sequence across five different workflows: build it once, call it from anywhere.</p>
+
+    <h3 id="p2-16a"><span class="num">16a</span>Split Out vs Item Lists</h3>
+    <p>These overlap in purpose and cause confusion. <b>Split Out</b> takes one item containing an array field and turns each array element into its own separate item — useful right after an API call that returns a list nested inside one response object. <b>Item Lists</b> (now largely folded into other nodes in newer versions) historically handled broader array operations like removing duplicates or combining lists. If you're on a recent n8n version, check the current node picker — some of this functionality has been consolidated, so search by task ("split," "aggregate") rather than by an exact remembered node name.</p>
+
+    <h3 id="p2-16b"><span class="num">16b</span>Aggregate, in depth</h3>
+    <p>Aggregate does the reverse of Split Out — many items become one, grouped as needed. Typical use: after looping through 50 rows and doing something to each, Aggregate collapses them back into a single item containing an array, ready to be written as one batch instead of 50 separate write operations.</p>
+
+    <h3 id="p2-16c"><span class="num">16c</span>Compare Datasets</h3>
+    <p>The Compare Datasets node takes two inputs and tells you what's new, what's removed, and what changed between them — handy for sync workflows (e.g., "what changed in this spreadsheet since last time I checked").</p>
+
+    <h3 id="p2-16d"><span class="num">16d</span>Rename Keys / Edit Fields naming history</h3>
+    <p>The node currently called <b>Edit Fields (Set)</b> was previously just called <b>Set</b>, and some older tutorials/templates still refer to it that way — they're the same node. If you import an older workflow and see a node simply labeled "Set," that's this node under its earlier name.</p>
+
+    <h3 id="p2-16e"><span class="num">16e</span>Convert to File / Extract From File</h3>
+    <p><b>Convert to File</b> turns JSON data into a downloadable file (CSV, JSON, or others) as binary output — useful before emailing a report or uploading to storage. <b>Extract From File</b> does the reverse: reads an uploaded/incoming file (CSV, spreadsheet, PDF text) and turns it back into structured JSON items you can work with.</p>
+
+    <h3 id="p2-19a"><span class="num">19a</span>Arrays at scale (map/filter/reduce in Code)</h3>
+    <p>Inside a Code node, you have the full power of JavaScript array methods on <code>$input.all()</code>: <code>.map()</code> to transform every item, <code>.filter()</code> to keep only some, <code>.reduce()</code> to collapse an array into a single summary value (a total, a count, a grouped object). This is the escape hatch for logic that would need an unreasonable number of chained nodes to express visually.</p>
+    <pre><code>// Example: sum a field across all items in a Code node
+const total = items.reduce((sum, item) => sum + item.json.amount, 0);
+return [&#123; json: &#123; total &#125; &#125;];</code></pre>
+
+    <h3 id="p2-19b"><span class="num">19b</span>Item-pairing gotchas</h3>
+    <p>The most common confusing error in n8n is data seeming to "disappear" or nodes complaining they can't match items after a Merge or a heavy Code transformation. This almost always comes back to <code>pairedItem</code> (see §13) getting lost — usually because a Code node built brand-new output items without preserving a link back to their source. Fix: when returning items from Code, keep the original item object as a base and only edit its <code>.json</code>, rather than constructing a completely new item from scratch.</p>
+
+    <div class="quiz-box keep-visible">
+      <div class="qz-q">Quick check: which core node do you reach for when nothing visual quite covers what you need?</div>
+      <div class="qz-opts">
+        <button class="qz-opt" type="button" onclick="checkQuiz(this,false)">IF</button>
+        <button class="qz-opt" type="button" onclick="checkQuiz(this,true)">Code</button>
+        <button class="qz-opt" type="button" onclick="checkQuiz(this,false)">Merge</button>
+      </div>
+      <div class="qz-fb">Correct answer: <b>Code</b> — your escape hatch for custom JavaScript logic when a chain of visual nodes would be slower or messier (see §16a).</div>
+    </div>
+  </div>
+</section>
+<section class="section" id="part3" style="--part-color:var(--p3)">
+  <div class="wrap">
+    <div class="eyebrow">Part 3</div>
+    <h2>Connecting to the World</h2>
+    <div class="tag">Webhooks, APIs, auth, databases, cloud apps and files — how n8n talks to everything else.</div>
+
+    <h3 id="p3-26"><span class="num">26</span>Webhooks</h3>
+    <p>A webhook is a URL that n8n generates for you; when an external system sends an HTTP request to that URL, your workflow runs instantly with whatever data was sent — the opposite of n8n having to go ask for data.</p>
+    <div class="click-box"><b>Where to click:</b> add a <b>Webhook</b> node → its panel shows a <b>Test URL</b> and, once the workflow is activated, a separate <b>Production URL</b> — copy whichever you need with the copy icon next to it. Set the HTTP Method (usually POST) in the same panel.</div>
+    <p><b>Security:</b> for anything beyond a private test, don't leave a webhook wide open. Options include: requiring a header/basic-auth credential (set directly on the Webhook node's Authentication field), validating an HMAC signature the sender includes (checked in a Code or IF node against a shared secret), and, on self-hosted instances, restricting which IPs can reach the endpoint at the network/firewall level.</p>
+
+    <h3 id="p3-27"><span class="num">27</span>HTTP Request node</h3>
+    <table>
+      <tr><th>Parameter</th><th>Description</th></tr>
+      <tr><td>Method</td><td>GET, POST, PUT, PATCH, DELETE</td></tr>
+      <tr><td>URL</td><td>The endpoint to call</td></tr>
+      <tr><td>Authentication</td><td>None, Basic, Bearer, API Key, OAuth1/2, Custom</td></tr>
+      <tr><td>Headers</td><td>Key-value pairs (Content-Type, Authorization, etc.)</td></tr>
+      <tr><td>Query parameters</td><td>Appended to the URL as <code>?key=value</code></td></tr>
+      <tr><td>Body</td><td>JSON, form-data, raw, or binary payload for POST/PUT</td></tr>
+      <tr><td>Response format</td><td>JSON, text, file/binary</td></tr>
+      <tr><td>Options</td><td>Timeout, redirects, SSL verification, pagination, retry-on-fail</td></tr>
+    </table>
+    <p>Retries and errors: in the node's <b>Settings</b> tab you can turn on <b>Retry On Fail</b> with a set number of attempts and a wait time between them — the single most useful setting for calling flaky third-party APIs reliably.</p>
+
+    <h3 id="p3-28"><span class="num">28</span>Authentication, in depth</h3>
+    <table>
+      <tr><th>Type</th><th>How it works</th><th>Typical use</th></tr>
+      <tr><td>API Key</td><td>A static key sent as a header or query param</td><td>Most REST APIs, simple services</td></tr>
+      <tr><td>Basic Auth</td><td>Username + password sent encoded in the header</td><td>Legacy APIs, internal tools</td></tr>
+      <tr><td>Bearer Token</td><td>A token sent in the Authorization header</td><td>APIs using JWTs, many modern services</td></tr>
+      <tr><td>OAuth1</td><td>Older signed-request delegated auth</td><td>A handful of legacy APIs (e.g. some Twitter/X endpoints)</td></tr>
+      <tr><td>OAuth2</td><td>Delegated access via a consent screen, with token refresh</td><td>Google, Slack, Microsoft, most modern platforms</td></tr>
+      <tr><td>Custom / HMAC</td><td>Custom signing logic you build yourself</td><td>Bespoke or internal APIs</td></tr>
+    </table>
+    <div class="click-box"><b>Where to click — OAuth2 setup:</b> Credentials → <b>New</b> → pick the app's OAuth2 credential type → fill in Client ID/Secret from that app's developer console → click <b>Connect my account</b> → a consent screen opens in a popup → approve it → n8n stores and auto-refreshes the token from then on.</div>
+    <p><b>Refresh-token failures:</b> if an OAuth2 connection suddenly starts failing after working fine, the refresh token itself may have been revoked (password changed, app access revoked, long inactivity). The fix is almost always to reconnect the credential from scratch via the same "Connect my account" flow, rather than trying to debug the token.</p>
+
+    <h3 id="p3-29"><span class="num">29</span>Databases</h3>
+    <table>
+      <tr><th>Database</th><th>Type</th><th>Good for</th></tr>
+      <tr><td>PostgreSQL</td><td>SQL</td><td>Web apps, analytics, general-purpose production use</td></tr>
+      <tr><td>MySQL</td><td>SQL</td><td>Web applications, CMS platforms</td></tr>
+      <tr><td>SQLite</td><td>SQL (file-based)</td><td>Lightweight apps, prototypes, small n8n instances</td></tr>
+      <tr><td>Microsoft SQL Server</td><td>SQL</td><td>Enterprise apps, BI</td></tr>
+      <tr><td>MongoDB</td><td>NoSQL (document)</td><td>Flexible schemas, content management</td></tr>
+      <tr><td>Redis</td><td>NoSQL (key-value)</td><td>Caching, sessions, queues</td></tr>
+      <tr><td>Cassandra</td><td>NoSQL (wide-column)</td><td>Very high-volume, high-availability data</td></tr>
+      <tr><td>Google BigQuery</td><td>Data warehouse</td><td>Analytics on large datasets</td></tr>
+    </table>
+    <p>Common operations across all of them: Select (read), Insert (add), Update (modify), Delete (remove), and Execute Query (raw SQL for anything the built-in operations don't cover directly).</p>
+    <div class="click-box"><b>Where to click:</b> add the relevant database node → its <b>Credential</b> dropdown → <b>Create New</b> → enter host, port, database name, username, password → <b>Save</b> → back in the node, pick the Operation (e.g. "Execute Query") and write your SQL in the Query field.</div>
+
+    <h3 id="p3-30"><span class="num">30</span>Cloud apps</h3>
+    <table>
+      <tr><th>App</th><th>Typical actions</th></tr>
+      <tr><td>Google Sheets</td><td>Read, Append, Update, Clear a range</td></tr>
+      <tr><td>Gmail</td><td>Send, Read, Search, Label</td></tr>
+      <tr><td>Slack</td><td>Send Message, Create Channel, Get Messages</td></tr>
+      <tr><td>Notion</td><td>Create Page, Update, Query a database</td></tr>
+      <tr><td>Airtable</td><td>List, Create, Update, Delete records</td></tr>
+      <tr><td>Google Drive</td><td>Upload, Download, Search, Share</td></tr>
+      <tr><td>Microsoft OneDrive / Dropbox</td><td>Upload, Download, List, Delete</td></tr>
+    </table>
+    <p>Setup for almost all of these follows the same OAuth2 "Connect my account" flow described in §28 — once connected, the node's Operation and Resource dropdowns determine what specific action it performs.</p>
+
+    <h3 id="p3-31"><span class="num">31</span>File operations</h3>
+    <table>
+      <tr><th>Node</th><th>Does</th></tr>
+      <tr><td>Read Binary File</td><td>Reads a file from the local filesystem into the workflow</td></tr>
+      <tr><td>Write Binary File</td><td>Writes binary data out to the filesystem</td></tr>
+      <tr><td>Move Binary Data</td><td>Renames/organizes files, converts between binary and JSON representations</td></tr>
+      <tr><td>Delete File</td><td>Removes a file</td></tr>
+      <tr><td>S3 / Google Drive / Dropbox / OneDrive</td><td>Upload, download, list, delete in cloud storage</td></tr>
+    </table>
+    <p>Binary data in n8n travels alongside the JSON item it belongs to (see §13) — this is why you can, in one workflow, generate a PDF, attach it directly to an email node, and send both the message and the file together without saving anything to disk in between.</p>
+
+    <h3 id="p3-32"><span class="num">32</span>GraphQL in n8n</h3>
+    <p>There's no dedicated GraphQL node — instead, you use the HTTP Request node in POST mode, set the body to your GraphQL query/mutation as a JSON payload (typically a <code>query</code> field and a <code>variables</code> object), and point it at the API's GraphQL endpoint. Authentication works the same as any other HTTP Request call.</p>
+
+    <h3 id="p3-33"><span class="num">33</span>Rate limiting &amp; throttling</h3>
+    <p>When calling an API that limits how many requests you can make per minute, the common patterns are: a <b>Wait</b> node inserted inside a loop to space out calls, the HTTP Request node's built-in retry-with-backoff (Settings tab) for handling occasional 429 "too many requests" responses gracefully, and Split In Batches to process large datasets in smaller, paced chunks rather than firing hundreds of parallel requests at once.</p>
+
+    <h3 id="p3-26a"><span class="num">26a</span>Multipart/form-data uploads</h3>
+    <p>To upload a file to an API that expects <code>multipart/form-data</code> (common for file-upload endpoints), set the HTTP Request node's Body Content Type to "Form-Data," then add a parameter of type "n8n Binary File" pointing at the binary property on your incoming item (usually named <code>data</code>). This tells n8n to encode the request the way the receiving server expects, instead of sending raw JSON.</p>
+
+    <h3 id="p3-26b"><span class="num">26b</span>Custom API wrapper pattern</h3>
+    <p>For an undocumented or awkward internal API, a useful pattern is to build one small "connector" sub-workflow (see §25) that handles auth, base URL, and error normalization for that API once, then have every other workflow call that sub-workflow instead of repeating the HTTP Request setup everywhere. Change the API's auth once, in one place, instead of hunting through every workflow that touches it.</p>
+
+    <h3 id="p3-26c"><span class="num">26c</span>Where n8n doesn't fit: WebSockets / long-polling</h3>
+    <p>n8n is built around discrete request/response and event-triggered execution — it isn't designed to hold open a persistent two-way WebSocket connection indefinitely inside a single node. For genuinely real-time, bidirectional streaming needs, a small dedicated service that receives the WebSocket stream and then calls an n8n webhook per event is the more realistic pattern than trying to force it entirely inside n8n.</p>
+
+    <h3 id="p3-26d"><span class="num">26d</span>Native Form Trigger &amp; Form node</h3>
+    <p>n8n can host its own simple web forms without needing Typeform or Google Forms — the <b>Form Trigger</b> node generates a hosted form URL with fields you define directly in the node, and the newer <b>Form</b> node (used mid-workflow) can show additional form steps, enabling basic multi-step forms natively. Good for quick internal intake forms where you don't want a separate tool in the stack.</p>
+
+    <h3 id="p3-26e"><span class="num">26e</span>Respond to Webhook node</h3>
+    <p>By default, a Webhook node waits until the whole workflow finishes before sending a response back to the caller. The <b>Respond to Webhook</b> node lets you send a custom status code, headers, and body back explicitly — including sending an immediate "received, thanks" response while the rest of the workflow keeps processing in the background (set the Webhook node's "Respond" option to "Using Respond to Webhook Node" and place that node early in the flow).</p>
+
+    <h3 id="p3-26f"><span class="num">26f</span>Chat Trigger &amp; built-in Chat UI</h3>
+    <p>The Chat Trigger node comes with a ready-made, embeddable chat window — useful for testing or lightly deploying a chatbot workflow (Part 4) without building a separate frontend. Add the node, and n8n gives you a shareable chat link/widget that sends each message into your workflow as a trigger.</p>
+
+    <p class="fun-note keep-visible">Somewhere, right now, an unsecured webhook is quietly making someone's Monday a lot more interesting than planned. Lock yours down (§26) before it's your turn.</p>
+  </div>
+</section>
+<section class="section" id="part4" style="--part-color:var(--p4)">
+  <div class="wrap">
+    <div class="eyebrow">Part 4</div>
+    <h2>Intelligence &amp; Automation</h2>
+    <div class="tag">Wiring AI models and agents into real workflows — not just a chat window, but actions with consequences.</div>
+
+    <h3 id="p4-34"><span class="num">34</span>AI features &amp; components</h3>
+    <table>
+      <tr><th>Node</th><th>Purpose</th></tr>
+      <tr><td>AI Agent</td><td>An autonomous node that can reason and decide which tools to call to complete a task</td></tr>
+      <tr><td>Chat Model (OpenAI/Claude/Gemini/etc.)</td><td>Connects to an LLM for text generation, chat, summarization</td></tr>
+      <tr><td>Embeddings</td><td>Converts text into vector representations for semantic search</td></tr>
+      <tr><td>Vector Store</td><td>Stores and searches embeddings for retrieval (RAG)</td></tr>
+      <tr><td>Memory</td><td>Keeps conversation history/context across messages</td></tr>
+      <tr><td>Retriever</td><td>Fetches relevant chunks of stored knowledge for a query</td></tr>
+      <tr><td>Text Classifier</td><td>Categorizes text (sentiment, intent, routing)</td></tr>
+      <tr><td>Content Moderation</td><td>Flags unsafe or inappropriate content before it's acted on</td></tr>
+      <tr><td>Image Generation</td><td>Creates images from text prompts</td></tr>
+    </table>
+    <div class="click-box"><b>Where to click:</b> add an <b>AI Agent</b> node → in its panel, click <b>Add Chat Model</b> to connect an LLM, click <b>Add Tool</b> to give it capabilities (an HTTP Request, a database lookup, another sub-workflow), and optionally <b>Add Memory</b> to retain conversation context.</div>
+
+    <h3 id="p4-35"><span class="num">35</span>Building a RAG pipeline, step by step</h3>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 780 100" role="img" aria-label="Diagram: Documents flow through a Text Splitter, Embeddings, and a Vector Store, which a Retriever queries at question time to feed a Chat Model that produces a grounded answer.">
+        <g class="dg-text">
+          <rect class="dg-box" x="10" y="20" width="100" height="50" rx="8"></rect>
+          <text x="60" y="50" text-anchor="middle">Documents</text>
+          <rect class="dg-box" x="130" y="20" width="100" height="50" rx="8"></rect>
+          <text x="180" y="44" text-anchor="middle">Text</text>
+          <text x="180" y="57" text-anchor="middle">Splitter</text>
+          <rect class="dg-box" x="250" y="20" width="100" height="50" rx="8"></rect>
+          <text x="300" y="50" text-anchor="middle">Embeddings</text>
+          <rect class="dg-box" x="370" y="20" width="100" height="50" rx="8"></rect>
+          <text x="420" y="44" text-anchor="middle">Vector</text>
+          <text x="420" y="57" text-anchor="middle">Store</text>
+          <rect class="dg-box" x="490" y="20" width="100" height="50" rx="8"></rect>
+          <text x="540" y="50" text-anchor="middle">Retriever</text>
+          <rect class="dg-box" x="610" y="20" width="80" height="50" rx="8"></rect>
+          <text x="650" y="44" text-anchor="middle">Chat</text>
+          <text x="650" y="57" text-anchor="middle">Model</text>
+          <rect class="dg-box" x="700" y="20" width="70" height="50" rx="8"></rect>
+          <text x="735" y="44" text-anchor="middle">Grounded</text>
+          <text x="735" y="57" text-anchor="middle">answer</text>
+        </g>
+        <line class="dg-arrow" x1="110" y1="45" x2="128" y2="45"></line>
+        <line class="dg-arrow" x1="230" y1="45" x2="248" y2="45"></line>
+        <line class="dg-arrow" x1="350" y1="45" x2="368" y2="45"></line>
+        <line class="dg-arrow" x1="470" y1="45" x2="488" y2="45"></line>
+        <line class="dg-arrow" x1="590" y1="45" x2="608" y2="45"></line>
+        <line class="dg-arrow" x1="690" y1="45" x2="698" y2="45"></line>
+        <text x="540" y="90" text-anchor="middle" style="font-size:9px; fill:var(--ink-soft);">query time: incoming question is embedded the same way, then retrieved</text>
+      </svg>
+    </div>
+    <ol class="step-list">
+      <li>Load your source documents (files, a Notion database, scraped pages) with the relevant file/app node.</li>
+      <li>Use a Text Splitter (in the AI nodes panel) to break long documents into manageable chunks.</li>
+      <li>Pass each chunk through an <b>Embeddings</b> node to generate its vector representation.</li>
+      <li>Store the chunks and their vectors in a <b>Vector Store</b> node (e.g. Pinecone, or a self-hosted option).</li>
+      <li>At query time, embed the incoming question the same way, and use a <b>Retriever</b> to pull the most relevant stored chunks.</li>
+      <li>Feed those chunks plus the original question into a Chat Model node as context, so the model answers grounded in your actual data instead of guessing.</li>
+    </ol>
+
+    <h3 id="p4-36"><span class="num">36</span>Building a chatbot, step by step</h3>
+    <ol class="step-list">
+      <li>Add a <b>Chat Trigger</b> node — this gives you a ready chat UI and starts the workflow on each incoming message.</li>
+      <li>Connect it to an <b>AI Agent</b> node (or a plain Chat Model for simpler bots).</li>
+      <li>Add a <b>Memory</b> node so the bot remembers earlier turns in the same conversation.</li>
+      <li>Add any tools the bot needs (looking up an order, checking a knowledge base) as Tool connections on the Agent.</li>
+      <li>Test in the built-in chat panel, then activate the workflow to make it live.</li>
+    </ol>
+
+    <h3 id="p4-37"><span class="num">37</span>How the AI Agent picks and calls tools</h3>
+    <p>An Agent node is given a goal (the incoming message/instruction) and a list of tools it's allowed to use — each tool described in plain language ("looks up a customer's order status," "sends a Slack message"). The underlying LLM reasons about which tool, if any, would help answer the request, calls it (n8n actually executes that connected node), reads the result, and decides whether it needs another tool call or can now respond. This loop can repeat several times before the Agent gives its final answer — which is why Agent workflows can feel slower than a single Chat Model call, and why giving an Agent too many overlapping tools tends to make its choices less reliable.</p>
+    <div class="myth-box">
+      <div class="mb-row mb-myth"><b>Myth</b>An AI Agent always knows the right tool to use.</div>
+      <div class="mb-row mb-reality"><b>Reality</b>It's a confident guesser with a toolbox — hand it too many overlapping tools and its choices get noticeably less reliable, not more capable.</div>
+    </div>
+
+    <h3 id="p4-38"><span class="num">38</span>Prompt engineering basics for n8n AI nodes</h3>
+    <ul class="plain">
+      <li>Be specific about the output format you want ("respond only with valid JSON matching this shape...") if a downstream node needs to parse the result.</li>
+      <li>Give the model the minimum context it actually needs — bloated prompts cost more and can dilute relevance.</li>
+      <li>For Agents, write tool descriptions the way you'd explain the tool to a new colleague, not just a technical function name — clearer descriptions produce better tool selection.</li>
+      <li>Test prompts directly in the node before wiring the whole workflow around them; expression previews let you see exactly what's being sent.</li>
+    </ul>
+
+    <h3 id="p4-39"><span class="num">39</span>Cost control for AI nodes</h3>
+    <ul class="plain">
+      <li>Set explicit token/length limits where the node allows it, rather than letting responses run unbounded.</li>
+      <li>Cache repeated lookups (e.g. store an embedding once instead of re-generating it every run) using a database or the Vector Store itself.</li>
+      <li>Choose the smallest model that reliably does the job for a given step — not every task needs your most expensive model.</li>
+      <li>Log token usage where the provider's node exposes it, so cost creep is visible before it becomes a surprise.</li>
+    </ul>
+
+    <h3 id="p4-34a"><span class="num">34a</span>Structured output parsing from LLMs</h3>
+    <p>When a downstream node needs to act on an LLM's answer programmatically (not just display it), ask the model for JSON in a specific shape, and use n8n's <b>Output Parser</b> option on the Chat Model / Agent node (or a Code node fallback) to validate and parse it before anything downstream trusts it. Never wire a raw, unvalidated LLM string straight into an action like "send this email" or "run this database update" — validate the shape and sanity-check the content first.</p>
+
+    <h3 id="p4-34b"><span class="num">34b</span>Multi-agent orchestration</h3>
+    <p>For complex tasks, one workflow can coordinate several specialized Agents — for example, a "router" Agent that classifies the incoming request and hands it to a "billing" Agent or a "technical support" Agent sub-workflow, each with its own narrow toolset. This tends to produce more reliable results than one Agent with a huge, overlapping list of tools trying to do everything.</p>
+
+    <h3 id="p4-34c"><span class="num">34c</span>Local/open-source LLMs (Ollama) vs hosted APIs</h3>
+    <p>The Ollama node lets n8n talk to locally-run open-source models instead of a hosted provider's API — useful for cost control, data privacy (nothing leaves your server), or offline use. Trade-off: local models typically need meaningful GPU/CPU resources on the host machine and may lag behind the largest hosted models in raw capability, so the right choice depends on whether privacy/cost or peak capability matters more for a given workflow.</p>
+
+    <h3 id="p4-38a"><span class="num">38a</span>Guardrails before real-world actions</h3>
+    <p>Any time an AI node's output is about to trigger something consequential — sending an email, writing to a database, making a payment call — add an explicit validation step between the AI and the action: a Code or IF node checking the output is well-formed, within expected bounds, and doesn't contain anything obviously wrong, before the action node runs. This single habit prevents the most common category of "AI automation gone wrong" stories.</p>
+  </div>
+</section>
+<section class="section" id="part5" style="--part-color:var(--p5)">
+  <div class="wrap">
+    <div class="eyebrow">Part 5</div>
+    <h2>Production-Grade</h2>
+    <div class="tag">Taking a workflow from "works on my machine" to something a real team can rely on.</div>
+
+    <h3 id="p5-40"><span class="num">40</span>Scheduling</h3>
+    <table>
+      <tr><th>Option</th><th>Example</th></tr>
+      <tr><td>Interval</td><td>Every 15 minutes</td></tr>
+      <tr><td>Daily</td><td>At 09:00 every day</td></tr>
+      <tr><td>Weekly</td><td>Every Monday at 10:00</td></tr>
+      <tr><td>Monthly</td><td>On the 1st of every month</td></tr>
+      <tr><td>Cron expression</td><td><code>0 9 * * 1-5</code> — 9am, weekdays only</td></tr>
+    </table>
+    <p><b>Cron cheat-sheet</b> (minute hour day month weekday): <code>* * * * *</code> every minute · <code>0 * * * *</code> every hour · <code>0 0 * * *</code> every day at midnight · <code>0 9 * * 1</code> every Monday at 9am · <code>0 0 1 * *</code> first of every month.</p>
+
+    <h3 id="p5-41"><span class="num">41</span>Environment variables</h3>
+    <div class="click-box"><b>Where to click:</b> Settings (gear icon) → <b>Environment Variables</b> → <b>Add Variable</b> → enter a Key (e.g. <code>API_KEY</code>) and Value → Save. Use it anywhere with <code>&#123;&#123; $env.API_KEY &#125;&#125;</code>.</div>
+    <p>Keep separate variable values (and ideally separate n8n instances or workspaces) for development, staging, and production, so a workflow tested against a sandbox API key can be promoted without silently pointing at production data.</p>
+
+    <h3 id="p5-42"><span class="num">42</span>Error handling</h3>
+    <p>Every workflow can have a designated <b>Error Workflow</b> that runs automatically whenever any node in the main workflow fails.</p>
+    <ol class="step-list">
+      <li>Build a separate workflow starting with an <b>Error Trigger</b> node.</li>
+      <li>In it, add whatever handling you want — a Slack alert, a logged database row, a retry call.</li>
+      <li>Open the main workflow's Settings → set <b>Error Workflow</b> to the one you just built.</li>
+      <li>Save and activate both.</li>
+    </ol>
+    <table>
+      <tr><th>Expression</th><th>Returns</th></tr>
+      <tr><td><code>&#123;&#123; $json.error.message &#125;&#125;</code></td><td>The error message</td></tr>
+      <tr><td><code>&#123;&#123; $json.error.name &#125;&#125;</code></td><td>Error type</td></tr>
+      <tr><td><code>&#123;&#123; $json.execution.id &#125;&#125;</code></td><td>ID of the failed run</td></tr>
+      <tr><td><code>&#123;&#123; $json.node.name &#125;&#125;</code></td><td>Which node failed</td></tr>
+    </table>
+
+    <h3 id="p5-43"><span class="num">43</span>Logging &amp; monitoring</h3>
+    <p>n8n's Executions tab is your first stop — every run, success or failure, is logged with full input/output data per node, filterable by status. For anything beyond a handful of workflows, pair this with: an Error Workflow (§42) that posts failures to Slack/email so you don't have to check manually, and, for self-hosted instances, exporting execution metrics to whatever monitoring stack your team already uses (log aggregation, uptime alerts) — n8n doesn't lock you into a specific tool here.</p>
+
+    <h3 id="p5-44"><span class="num">44</span>DevOps integrations</h3>
+    <table>
+      <tr><th>Tool</th><th>Category</th><th>Use case</th></tr>
+      <tr><td>GitHub / GitLab</td><td>Source control</td><td>Repo events, PRs, issues, webhooks</td></tr>
+      <tr><td>Jenkins / CircleCI</td><td>CI/CD</td><td>Trigger and monitor build pipelines</td></tr>
+      <tr><td>Docker</td><td>Containerization</td><td>Build images, run containers</td></tr>
+      <tr><td>Kubernetes</td><td>Orchestration</td><td>Deployments, scaling, pod status</td></tr>
+      <tr><td>Terraform</td><td>Infrastructure as code</td><td>Plan/apply automation</td></tr>
+      <tr><td>AWS</td><td>Cloud platform</td><td>EC2, S3, Lambda, CloudWatch</td></tr>
+      <tr><td>Prometheus / Grafana</td><td>Monitoring</td><td>Metrics, alerts, dashboards</td></tr>
+    </table>
+
+    <h3 id="p5-45"><span class="num">45</span>Scaling n8n (queue mode)</h3>
+    <p>In queue mode, a "main" n8n process still handles the editor UI and receives triggers, but instead of executing workflows itself it pushes each execution onto a Redis-backed queue. Separate "worker" processes (which you can run several of, on the same or different machines) pull jobs from that queue and actually run them. This lets you scale execution capacity horizontally by adding more workers, independent of the main process — the standard approach once a single instance can't keep up with concurrent load.</p>
+
+    <h3 id="p5-46"><span class="num">46</span>Version control for workflows</h3>
+    <p>A workflow can be exported as JSON (from the workflow menu, "Download") and committed to a normal git repository, giving you real diffs, history, and rollback outside of n8n itself. Some teams script this export/import as part of a proper CI pipeline, so workflow changes go through the same review process as code.</p>
+
+    <h3 id="p5-47"><span class="num">47</span>Security hardening checklist</h3>
+    <ul class="plain">
+      <li>Store all secrets in Credentials or Environment Variables — never hardcoded in a node's fields or expressions.</li>
+      <li>Protect webhook endpoints with authentication or signature validation (§26).</li>
+      <li>Limit which network addresses can reach a self-hosted instance's admin UI.</li>
+      <li>Use least-privilege database users and API keys wherever a service supports scoped permissions.</li>
+      <li>On Enterprise plans, use role-based access control to limit who can view/edit which workflows and credentials.</li>
+      <li>Rotate credentials periodically, and immediately after any team member with access leaves.</li>
+    </ul>
+
+    <h3 id="p5-48"><span class="num">48</span>Best practices, annotated</h3>
+    <table>
+      <tr><th>Practice</th><th>Why it matters</th></tr>
+      <tr><td>Keep workflows simple &amp; modular</td><td>Smaller sub-workflows are easier to test, reuse, and debug than one giant chain</td></tr>
+      <tr><td>Use environment variables</td><td>Keeps secrets out of workflow definitions and out of version control</td></tr>
+      <tr><td>Handle errors gracefully</td><td>Prevents silent failures from going unnoticed</td></tr>
+      <tr><td>Optimize performance</td><td>Filter early, paginate, avoid processing more than you need</td></tr>
+      <tr><td>Validate &amp; clean data</td><td>Bad input compounds into bad output further downstream</td></tr>
+      <tr><td>Schedule wisely</td><td>Avoid heavy jobs during peak hours; keep timezones explicit</td></tr>
+      <tr><td>Secure your workflows</td><td>Least-privilege credentials, restricted access</td></tr>
+      <tr><td>Name things clearly</td><td>A workflow six months from now should explain itself</td></tr>
+      <tr><td>Test thoroughly</td><td>Cover edge cases, not just the happy path</td></tr>
+      <tr><td>Monitor &amp; log</td><td>You can't fix what you don't know failed</td></tr>
+      <tr><td>Back up regularly</td><td>Export and version workflows, don't rely on memory</td></tr>
+      <tr><td>Least privilege</td><td>Grant only the access a user or credential actually needs</td></tr>
+    </table>
+
+    <h3 id="p5-40a"><span class="num">40a</span>Multi-environment strategy</h3>
+    <p>A durable pattern for teams: separate instances (or at minimum separate credential sets and environment variables) for development, staging, and production, with workflows promoted between them deliberately — export/import or git-based (§46) — rather than editing "the one instance" directly for both testing and live traffic.</p>
+
+    <h3 id="p5-40b"><span class="num">40b</span>Team collaboration &amp; permissions</h3>
+    <p>On team/enterprise setups, workflows and credentials can be shared across specific users or groups rather than being all-or-nothing. Role-based access control (who can view vs edit vs manage credentials) is one of the features reserved for paid Enterprise tiers (§5) — self-hosted community use typically has simpler, coarser permission handling.</p>
+
+    <h3 id="p5-40c"><span class="num">40c</span>Backup &amp; disaster recovery</h3>
+    <p>For self-hosted instances, back up both the underlying database (Postgres/SQLite holding workflows, credentials, execution history) and your environment configuration, on a real schedule — not just an occasional manual export. Test the restore process at least once; a backup you've never restored from is an assumption, not a plan.</p>
+
+    <h3 id="p5-42a"><span class="num">42a</span>Blue-green / canary rollout for workflow changes</h3>
+    <p>For a business-critical workflow, avoid editing the live version directly. Duplicate it, make and test changes on the copy, then switch traffic over (repoint the webhook, or swap which workflow is activated) once you're confident — giving you an instant rollback path if something's wrong, the same discipline used for deploying application code.</p>
+
+    <h3 id="p5-42b"><span class="num">42b</span>Rotating secrets without downtime</h3>
+    <p>Where a service supports it, create the new credential/key alongside the old one, update the workflow's credential reference, confirm it works, and only then revoke the old key — rather than revoking first and discovering the break in production.</p>
+
+    <p class="fun-note keep-visible">Somewhere between "it works on my machine" and "it works in production" lives a Retry On Fail setting nobody turned on. Ask us how we know.</p>
+  </div>
+</section>
+
+<div class="trivia-break">
+  <div class="tb-inner">
+    <span class="tb-label">Halfway breather</span>
+    n8n's name is short for "nodemation" — the "8" simply counts the eight letters sitting between the n and the n, the same trick as "i18n" for internationalization. Stretch your eyes for a second, then it's on to extending n8n itself.
+  </div>
+</div>
+
+<section class="section" id="part6" style="--part-color:var(--p6)">
+  <div class="wrap">
+    <div class="eyebrow">Part 6</div>
+    <h2>Extending n8n</h2>
+    <div class="tag">What to do when a built-in node isn't enough, and how to manage n8n itself programmatically.</div>
+
+    <h3 id="p6-49"><span class="num">49</span>Community nodes</h3>
+    <p>Beyond the built-in node library, the community publishes additional nodes (as npm packages) for niche apps and services.</p>
+    <div class="click-box"><b>Where to click:</b> Settings → <b>Community Nodes</b> → <b>Install</b> → type the npm package name → confirm the install dialog. n8n will restart the relevant part of the instance and the new node appears in your node search.</div>
+    <p>Only install community nodes from sources you trust — since a community node can run arbitrary code inside your instance, treat installing one with the same caution you'd apply to installing any third-party package.</p>
+
+    <h3 id="p6-50"><span class="num">50</span>Building a custom node</h3>
+    <p>When even a community node doesn't exist for what you need, n8n supports building your own: scaffold a new node project (n8n provides a starter template), define its parameters and execution logic in TypeScript, test it locally against your own instance, then optionally publish it to npm and submit it for community verification. This is a meaningfully bigger undertaking than building a workflow — reach for it only when a Code node genuinely can't cover the need and you expect to reuse the integration repeatedly.</p>
+
+    <h3 id="p6-51"><span class="num">51</span>n8n's own API</h3>
+    <p>n8n exposes a REST API for managing the instance itself, separate from any workflow you build inside it — letting you programmatically list/create/update workflows, trigger and inspect executions, and manage credentials and users. This is how larger organizations manage n8n at scale — deploying workflow changes via CI/CD, or building an internal admin tool on top of it — rather than only ever clicking through the UI.</p>
+
+    <h3 id="p6-52"><span class="num">52</span>n8n CLI basics</h3>
+    <p>The <code>n8n</code> command line tool (available wherever you've installed n8n via npm) supports operations like starting the instance, exporting/importing workflows and credentials in bulk, and running database migrations — useful for scripting instance setup or migrating between environments without doing it by hand through the UI.</p>
+
+    <h3 id="p6-53"><span class="num">53</span>Templates &amp; the community library</h3>
+    <p>n8n maintains a public library of pre-built workflow templates covering common use cases, which you can import as a starting point and adapt rather than building from a blank canvas every time. Importing a template is the fastest way to see a well-structured example of patterns covered elsewhere in this guide (error handling, sub-workflows, AI agents) in a real, working context.</p>
+
+    <h3 id="p6-49a"><span class="num">49a</span>Local webhook testing &amp; tunneling</h3>
+    <p>While developing a webhook-triggered workflow on a machine that isn't publicly reachable (your laptop, a local Docker instance), a tunneling tool exposes a temporary public URL that forwards to your local n8n instance, so external services can actually reach your Test URL during development. Once you deploy to a properly hosted instance, the tunnel is no longer needed — it's a development convenience, not a production setup.</p>
+
+    <h3 id="p6-49b"><span class="num">49b</span>Custom node development lifecycle</h3>
+    <ol class="step-list">
+      <li>Scaffold the project using n8n's node starter template.</li>
+      <li>Define the node's parameters (what shows in its right-panel UI) and its execution function (what it actually does with input data).</li>
+      <li>Run it against a local n8n instance in development mode to test it live.</li>
+      <li>Package and publish it to npm under the expected naming convention for n8n community nodes.</li>
+      <li>Optionally submit it for n8n's community verification process, which adds a level of trust signal for other users installing it.</li>
+    </ol>
+
+    <h3 id="p6-49c"><span class="num">49c</span>n8n embed / white-labeling</h3>
+    <p>For teams building automation into their own product, n8n offers ways to embed its workflow-building experience or run it under your own branding rather than exposing the standalone n8n UI directly to your end customers — a path worth knowing about if you're building a SaaS product with automation as a feature, rather than using n8n purely as an internal tool.</p>
+  </div>
+</section>
+<section class="section" id="part6b" style="--part-color:var(--p6)">
+  <div class="wrap">
+    <div class="eyebrow">Part 6.5</div>
+    <h2>Design Patterns</h2>
+    <div class="tag">Shapes that show up again and again once you've built enough workflows — and the shapes to avoid.</div>
+
+    <h3 id="p6b-1"><span class="num">·</span>Fan-out / fan-in</h3>
+    <p>One item triggers several parallel branches (fan-out — e.g. notify Slack, log to a database, and send an email all at once), which later reconverge through a Merge node (fan-in) before a final shared step. Good for independent actions that don't depend on each other's results.</p>
+
+    <h3 id="p6b-2"><span class="num">·</span>Batch processing</h3>
+    <p>Split In Batches breaks a large dataset into fixed-size chunks and loops through them, so you're never holding an unreasonable amount of data in memory at once, and a failure partway through only affects the current batch rather than the whole dataset.</p>
+
+    <h3 id="p6b-3"><span class="num">·</span>Polling-vs-webhook hybrid</h3>
+    <p>When an app only offers polling but you want faster reaction times, a tight polling schedule (e.g. every minute) combined with a static-data "last seen" marker (§10b) approximates near-real-time behavior without needing true webhook support from that app.</p>
+
+    <h3 id="p6b-4"><span class="num">·</span>Retry-with-backoff</h3>
+    <p>Instead of retrying a failed call immediately (and possibly hitting the same transient issue again instantly), wait progressively longer between attempts — a Wait node with an increasing duration, or the HTTP Request node's built-in retry settings, before giving up and routing to error handling.</p>
+
+    <h3 id="p6b-5"><span class="num">·</span>Idempotency keys</h3>
+    <p>For workflows that might run twice for the same event (a webhook retried by the sender, a manual re-run), include a unique identifier from the source event and check whether you've already processed it (e.g. against a database) before taking action again — prevents duplicate emails, duplicate charges, duplicate records.</p>
+
+    <h3 id="p6b-6"><span class="num">·</span>Dead-letter handling</h3>
+    <p>Rather than letting a permanently failing item vanish, route items that exhaust their retries into a dedicated "failed items" log (a database table, a spreadsheet) for manual review later — so persistent failures are visible and actionable instead of silently lost.</p>
+
+    <h3 id="p6b-7"><span class="num">·</span>Anti-patterns to avoid</h3>
+    <ul class="plain">
+      <li><b>Monolithic workflows</b> — one 80-node workflow doing five unrelated jobs is hard to test, hard to debug, and risky to edit.</li>
+      <li><b>Hardcoded secrets</b> — any API key or password typed directly into a node's field instead of a Credential or Environment Variable.</li>
+      <li><b>Missing error paths</b> — a workflow with no Error Workflow and no Continue On Fail anywhere is one bad API response away from silently going dark.</li>
+      <li><b>Unbounded loops</b> — a Loop Over Items with no limit and no failure exit can run far longer, and cost far more (especially with AI nodes), than intended.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="section" id="part7" style="--part-color:var(--p7)">
+  <div class="wrap">
+    <div class="eyebrow">Part 7</div>
+    <h2>Career &amp; Practice</h2>
+    <div class="tag">Interview prep, a learning roadmap, projects to build, and the mistakes almost everyone makes early on.</div>
+
+    <h3 id="p7-54"><span class="num">54</span>Common interview questions</h3>
+    <table>
+      <tr><th>#</th><th>Question</th><th>What a strong answer covers</th></tr>
+      <tr><td>1</td><td>What is n8n?</td><td>Visual, node-based workflow automation tool; self-hostable, fair-code licensed</td></tr>
+      <tr><td>2</td><td>How is n8n different from Zapier or Make?</td><td>Self-hosting, no per-task pricing ceiling, full custom code via Code node</td></tr>
+      <tr><td>3</td><td>What are the main features of n8n?</td><td>400+ integrations, visual builder, Code node, AI nodes, self-hosting, fair pricing</td></tr>
+      <tr><td>4</td><td>Is n8n open source?</td><td>Fair-code licensed — source visible, free self-hosting, restrictions on reselling as a competing service</td></tr>
+      <tr><td>5</td><td>What are the workflow execution modes?</td><td>Manual, triggered, webhook, queue mode</td></tr>
+      <tr><td>6</td><td>How do workflows work?</td><td>Trigger starts it, nodes process data left to right, connections define order</td></tr>
+      <tr><td>7</td><td>Difference between Trigger and Action nodes?</td><td>Trigger starts the workflow; Action nodes do work after that</td></tr>
+      <tr><td>8</td><td>How do you pass data between nodes?</td><td>Items with a <code>json</code> (and optional <code>binary</code>) property, accessed via expressions</td></tr>
+      <tr><td>9</td><td>What are expressions? Give an example.</td><td><code>&#123;&#123; &#125;&#125;</code> syntax; e.g. <code>&#123;&#123; $json.name &#125;&#125;</code></td></tr>
+      <tr><td>10</td><td>How do you handle errors in a workflow?</td><td>Error Workflow + Error Trigger, Continue On Fail, Stop and Error</td></tr>
+      <tr><td>11</td><td>How do you connect to an API?</td><td>HTTP Request node, with the right auth type configured</td></tr>
+      <tr><td>12</td><td>How do you work with databases?</td><td>Database-specific nodes or HTTP-style query execution; Select/Insert/Update/Delete</td></tr>
+      <tr><td>13</td><td>How do you use webhooks?</td><td>Webhook node generates a URL; external system POSTs to it to trigger the workflow</td></tr>
+      <tr><td>14</td><td>How do you handle authentication?</td><td>Credentials store; API Key/Basic/Bearer/OAuth1/OAuth2/Custom</td></tr>
+      <tr><td>15</td><td>How do you transform or manipulate data?</td><td>Set, Filter, Sort, Aggregate, Item Lists, Code node</td></tr>
+      <tr><td>16</td><td>What are environment variables in n8n?</td><td>Instance-level key-value config accessed via <code>$env</code></td></tr>
+      <tr><td>17</td><td>How do you schedule workflows?</td><td>Schedule/Cron Trigger node, with interval or cron expression</td></tr>
+      <tr><td>18</td><td>How do you manage large datasets?</td><td>Split In Batches, pagination, Limit, queue mode for heavy load</td></tr>
+      <tr><td>19</td><td>How do you handle file operations?</td><td>Binary data model, Read/Write Binary File, cloud storage nodes</td></tr>
+      <tr><td>20</td><td>How can you make a workflow reusable?</td><td>Sub-workflows via Execute Workflow node</td></tr>
+      <tr><td>21</td><td>How do AI nodes work in n8n?</td><td>Agent/Chat Model/Embeddings/Vector Store/Memory/Retriever, composable</td></tr>
+      <tr><td>22</td><td>Which AI integrations are available?</td><td>OpenAI, Anthropic Claude, Google Gemini, Cohere, Hugging Face, Ollama (local)</td></tr>
+      <tr><td>23</td><td>How can n8n be used for RAG or chatbots?</td><td>Embeddings + Vector Store + Retriever pipeline; Chat Trigger + Agent + Memory</td></tr>
+      <tr><td>24</td><td>How do you integrate LLMs into a workflow?</td><td>Chat Model node connected to an Agent or directly in a chain</td></tr>
+      <tr><td>25</td><td>What are the use cases of AI in n8n?</td><td>Summarization, classification, chatbots, RAG, content generation, moderation</td></tr>
+      <tr><td>26</td><td>How do you deploy n8n in production?</td><td>Docker/Docker Compose/Kubernetes, Postgres backend, reverse proxy, HTTPS</td></tr>
+      <tr><td>27</td><td>How do you handle credentials securely?</td><td>Credentials store (encrypted), never hardcoded, least privilege, rotation</td></tr>
+      <tr><td>28</td><td>How can n8n be integrated into CI/CD pipelines?</td><td>Workflow JSON export/import via git + n8n CLI/API in a pipeline</td></tr>
+      <tr><td>29</td><td>How do you monitor and log workflows?</td><td>Executions tab, Error Workflow alerts, external monitoring integration</td></tr>
+      <tr><td>30</td><td>What are best practices in n8n workflows?</td><td>Modular design, error handling, env vars, testing, naming, least privilege</td></tr>
+    </table>
+    <div class="box"><h4>Bonus interview tip</h4><p>Be ready to walk through one real workflow you've built, end to end, explaining trigger, data flow, decisions, and how you handled a failure case — interviewers consistently rate a concrete walkthrough higher than reciting definitions.</p></div>
+
+    <h3 id="p7-55"><span class="num">55</span>Learning roadmap</h3>
+    <ol class="step-list">
+      <li><b>Understand the basics</b> — what n8n is, workflows, nodes, executions, the UI. <i>~1–2 days.</i></li>
+      <li><b>Work with basic nodes</b> — Trigger and Action nodes, passing data, expressions. <i>~2–3 days.</i></li>
+      <li><b>Data handling &amp; transformations</b> — Set, Code, Filter, Sort, arrays/objects. <i>~1 week.</i></li>
+      <li><b>Integrations &amp; APIs</b> — HTTP Request, webhooks, authentication types. <i>~1 week.</i></li>
+      <li><b>Databases &amp; storage</b> — connecting SQL/NoSQL, CRUD operations. <i>~3–4 days.</i></li>
+      <li><b>Advanced workflows</b> — IF/Switch/Merge/Loop, error handling, reusable sub-workflows. <i>~1 week.</i></li>
+      <li><b>AI &amp; automation</b> — AI nodes, chatbots, RAG, agents. <i>~1–2 weeks.</i></li>
+      <li><b>Scheduling &amp; triggers</b> — cron, event-based triggers, recurring automation. <i>~2–3 days.</i></li>
+      <li><b>DevOps &amp; deployment</b> — self-hosting, environment variables, credentials, CI/CD. <i>~1 week.</i></li>
+      <li><b>Optimize &amp; scale</b> — performance, large data, queue mode, monitoring. <i>~1 week.</i></li>
+      <li><b>Build real projects</b> — end-to-end automations solving real problems, ongoing.</li>
+    </ol>
+    <p>Total: roughly 6–10 weeks of steady, part-time learning to go from zero to comfortably building production workflows — faster if you're already comfortable with APIs and JSON, slower if those are new concepts too, and that's fine either way.</p>
+
+    <h3 id="p7-56"><span class="num">56</span>Mini project ideas</h3>
+    <table>
+      <tr><th>#</th><th>Project</th><th>#</th><th>Project</th></tr>
+      <tr><td>1</td><td>Auto email responder by keyword</td><td>16</td><td>Broken link checker with report</td></tr>
+      <tr><td>2</td><td>Google Sheets row notifier</td><td>17</td><td>Create issue-tracker ticket from email</td></tr>
+      <tr><td>3</td><td>Messaging-app notification sender</td><td>18</td><td>Webhook data logger to a database</td></tr>
+      <tr><td>4</td><td>Daily calendar summary</td><td>19</td><td>AI content summarizer</td></tr>
+      <tr><td>5</td><td>RSS feed to email digest</td><td>20</td><td>Auto-translate incoming messages</td></tr>
+      <tr><td>6</td><td>Form-submission notifier</td><td>21</td><td>New-post alert for a social account</td></tr>
+      <tr><td>7</td><td>Save tagged posts to a spreadsheet</td><td>22</td><td>New-video monitor for a channel</td></tr>
+      <tr><td>8</td><td>Weather alert bot</td><td>23</td><td>Scheduled database backup to cloud storage</td></tr>
+      <tr><td>9</td><td>Auto file organizer by type</td><td>24</td><td>Team reminder bot</td></tr>
+      <tr><td>10</td><td>PDF-to-text extractor</td><td>25</td><td>E-commerce order notifier</td></tr>
+      <tr><td>11</td><td>New-page notifier for a workspace</td><td>26</td><td>Repository star/watch notifier</td></tr>
+      <tr><td>12</td><td>Record sync between two tools</td><td>27</td><td>Contact form to CRM</td></tr>
+      <tr><td>13</td><td>Price tracker with daily updates</td><td>28</td><td>Automated birthday wishes</td></tr>
+      <tr><td>14</td><td>Multi-source daily report generator</td><td>29</td><td>URL shortener with logging</td></tr>
+      <tr><td>15</td><td>Scheduled website screenshot maker</td><td>30</td><td>Daily motivation message sender</td></tr>
+    </table>
+
+    <div class="box"><h4>Build-along: Project 6 — Form-submission notifier (full walkthrough)</h4>
+    <ol class="step-list">
+      <li>Add a <b>Form Trigger</b> node, define the fields you want (name, email, message) directly in its panel.</li>
+      <li>Connect a <b>Set</b> node to tidy the incoming data — e.g. combine first/last name into one field.</li>
+      <li>Connect an <b>IF</b> node checking whether the message field is empty — route empty submissions to a NoOp (ignore) branch.</li>
+      <li>On the "has content" branch, connect a Slack or email node to notify your team, using expressions to include the submitter's details in the message.</li>
+      <li>Add an Error Workflow (per §42) so a failed notification doesn't silently vanish.</li>
+      <li>Activate the workflow and test with a real submission through the generated form URL.</li>
+    </ol>
+    </div>
+
+    <div class="box"><h4>Build-along: Project 19 — AI content summarizer (full walkthrough)</h4>
+    <ol class="step-list">
+      <li>Trigger: Webhook (receiving a URL or pasted text) or a Form Trigger for manual submissions.</li>
+      <li>Add an HTTP Request node if summarizing a URL, to fetch the page content first.</li>
+      <li>Add a Chat Model node with a prompt like "Summarize the following text in 3 bullet points: &#123;&#123; $json.content &#125;&#125;".</li>
+      <li>Add a Set node to format the final output the way you want it delivered.</li>
+      <li>Connect to Slack/Email/Sheets to deliver the summary wherever your team needs it.</li>
+    </ol>
+    </div>
+
+    <div class="box"><h4>Build-along: Project 23 — Scheduled database backup (full walkthrough)</h4>
+    <ol class="step-list">
+      <li>Trigger: Schedule node, set to run daily at a low-traffic hour.</li>
+      <li>Add your database node's "Execute Query" operation, running a database-native export/dump command (specific syntax depends on your database).</li>
+      <li>Add Convert to File if the export needs to become a downloadable file object.</li>
+      <li>Add a cloud storage node (Drive/S3/Dropbox) to upload the resulting file.</li>
+      <li>Add a Set node to timestamp the filename so backups don't overwrite each other.</li>
+      <li>Wire up an Error Workflow — a silently failing backup is worse than no backup, because you think you're covered when you're not.</li>
+    </ol>
+    </div>
+
+    <h3 id="p7-57"><span class="num">57</span>Troubleshooting guide</h3>
+    <table>
+      <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+      <tr><td>Workflow works in test but never fires live</td><td>Workflow not activated</td><td>Toggle Active in the top right (§10a)</td></tr>
+      <tr><td>"Cannot find pairing" / data seems to vanish</td><td>Lost <code>pairedItem</code> after a Code node</td><td>Preserve original item objects when returning from Code (§19b)</td></tr>
+      <tr><td>OAuth2 credential suddenly fails</td><td>Refresh token revoked</td><td>Reconnect the credential via "Connect my account" (§28)</td></tr>
+      <tr><td>Webhook gets no data / 404</td><td>Using Test URL after activating, or vice versa</td><td>Use Production URL once active, Test URL only while building (§26)</td></tr>
+      <tr><td>Scheduled workflow fires at the wrong time</td><td>Timezone mismatch</td><td>Check instance timezone setting vs your intended local time (§22)</td></tr>
+      <tr><td>API call fails intermittently</td><td>Rate limiting / transient network issues</td><td>Enable Retry On Fail; add Wait between calls (§33)</td></tr>
+      <tr><td>Expression shows "undefined"</td><td>Referencing a field/node that doesn't exist in that item's data</td><td>Click the node and inspect its actual output data before referencing a field</td></tr>
+      <tr><td>Large dataset times out or crashes browser</td><td>Trying to process too much in one pass</td><td>Use Split In Batches / pagination (§24, §33)</td></tr>
+    </table>
+
+    <h3 id="p7-57a"><span class="num">57a</span>Common mistakes in your first five workflows</h3>
+    <ul class="plain">
+      <li>Building one giant workflow instead of breaking it into testable sub-workflows.</li>
+      <li>Forgetting to activate the workflow after testing it manually.</li>
+      <li>Hardcoding an API key directly into a node instead of using Credentials/Environment Variables.</li>
+      <li>No error handling at all — a single failed node silently ends the whole automation with no one aware.</li>
+      <li>Not checking a node's actual output data before writing the next expression against it — guessing the field names instead of looking.</li>
+    </ul>
+  </div>
+</section>
+<section class="section" id="part7b" style="--part-color:var(--p7)">
+  <div class="wrap">
+    <div class="eyebrow">Part 7.5</div>
+    <h2>Migration &amp; Comparison</h2>
+    <div class="tag">Coming from another tool? Here's how the mental model translates.</div>
+
+    <h3 id="p7b-1"><span class="num">·</span>Migrating from Zapier</h3>
+    <table>
+      <tr><th>Zapier concept</th><th>n8n equivalent</th></tr>
+      <tr><td>Zap</td><td>Workflow</td></tr>
+      <tr><td>Trigger step</td><td>Trigger node</td></tr>
+      <tr><td>Action step</td><td>Action node</td></tr>
+      <tr><td>Filter step</td><td>IF or Filter node</td></tr>
+      <tr><td>Paths</td><td>Switch node / multiple IF branches</td></tr>
+      <tr><td>Code by Zapier</td><td>Code node (with far fewer restrictions)</td></tr>
+      <tr><td>Per-task pricing</td><td>Self-hosted: no per-task cost; Cloud: execution/workflow-based tiers</td></tr>
+    </table>
+    <p>The biggest mental shift: Zapier hides most data-shape details from you; n8n shows you the actual JSON at every step, which is more powerful but means you'll want to get comfortable clicking into a node's output panel to see what you're actually working with.</p>
+
+    <h3 id="p7b-2"><span class="num">·</span>Migrating from Make (Integromat)</h3>
+    <table>
+      <tr><th>Make concept</th><th>n8n equivalent</th></tr>
+      <tr><td>Scenario</td><td>Workflow</td></tr>
+      <tr><td>Module</td><td>Node</td></tr>
+      <tr><td>Router</td><td>Switch node</td></tr>
+      <tr><td>Iterator/Aggregator</td><td>Loop Over Items / Aggregate</td></tr>
+      <tr><td>Operations-based pricing</td><td>Self-hosted: no operation cost; Cloud: execution-based tiers</td></tr>
+    </table>
+    <p>Make and n8n are visually the most similar of the major tools — both show a real canvas with connected nodes — so the adjustment is smaller than coming from Zapier's linear step list.</p>
+  </div>
+</section>
+
+<section class="section" id="part8" style="--part-color:var(--p8)">
+  <div class="wrap">
+    <div class="eyebrow">Part 8</div>
+    <h2>Reference</h2>
+    <div class="tag">The quick-lookup material — glossary, cheat-sheets, and reading the canvas itself.</div>
+
+    <h3 id="p8-58"><span class="num">58</span>Glossary</h3>
+    <table>
+      <tr><th>Term</th><th>Meaning</th></tr>
+      <tr><td>Workflow</td><td>A saved set of connected nodes automating a task</td></tr>
+      <tr><td>Node</td><td>A single step performing one action</td></tr>
+      <tr><td>Trigger</td><td>The node that starts a workflow</td></tr>
+      <tr><td>Execution</td><td>One run of a workflow, logged with its data</td></tr>
+      <tr><td>Credential</td><td>Stored login/API details a node uses</td></tr>
+      <tr><td>Expression</td><td>Dynamic value syntax, written inside <code>&#123;&#123; &#125;&#125;</code></td></tr>
+      <tr><td>Item</td><td>One unit of data flowing between nodes, with a <code>json</code> (and optional <code>binary</code>) property</td></tr>
+      <tr><td>Pinned data</td><td>A node's output frozen for repeated testing</td></tr>
+      <tr><td>Static data</td><td>Small state a workflow remembers between separate runs</td></tr>
+      <tr><td>Queue mode</td><td>Scaling setup separating trigger-receiving from execution across worker processes</td></tr>
+      <tr><td>Sub-workflow</td><td>A workflow called by another via Execute Workflow</td></tr>
+      <tr><td>Fair-code</td><td>n8n's license model — visible source, free self-hosting, resale-as-a-service restricted</td></tr>
+    </table>
+
+    <h3 id="p8-59"><span class="num">59</span>Expressions &amp; variables cheat-sheet</h3>
+    <table>
+      <tr><th>Need</th><th>Expression</th></tr>
+      <tr><td>Current item field</td><td><code>&#123;&#123; $json.fieldName &#125;&#125;</code></td></tr>
+      <tr><td>Field from another node</td><td><code>&#123;&#123; $node["Node Name"].json.fieldName &#125;&#125;</code></td></tr>
+      <tr><td>All items</td><td><code>&#123;&#123; $items() &#125;&#125;</code></td></tr>
+      <tr><td>Current date/time</td><td><code>&#123;&#123; $now &#125;&#125;</code></td></tr>
+      <tr><td>Today's date</td><td><code>&#123;&#123; $today &#125;&#125;</code></td></tr>
+      <tr><td>Environment variable</td><td><code>&#123;&#123; $env.VAR_NAME &#125;&#125;</code></td></tr>
+      <tr><td>Workflow variable</td><td><code>&#123;&#123; $vars.name &#125;&#125;</code></td></tr>
+      <tr><td>String uppercase</td><td><code>&#123;&#123; $json.text.toUpperCase() &#125;&#125;</code></td></tr>
+      <tr><td>Array length</td><td><code>&#123;&#123; $json.items.length &#125;&#125;</code></td></tr>
+      <tr><td>Ternary / conditional</td><td><code>&#123;&#123; $json.age >= 18 ? 'adult' : 'minor' &#125;&#125;</code></td></tr>
+    </table>
+
+    <h3 id="p8-60"><span class="num">60</span>Node cheat-sheet</h3>
+    <table>
+      <tr><th>Node</th><th>One-line purpose</th></tr>
+      <tr><td>Manual Trigger</td><td>Start a workflow by clicking Execute</td></tr>
+      <tr><td>Schedule Trigger</td><td>Start on a time interval or cron expression</td></tr>
+      <tr><td>Webhook</td><td>Start when an HTTP request hits a generated URL</td></tr>
+      <tr><td>Set (Edit Fields)</td><td>Create/update/replace data values</td></tr>
+      <tr><td>IF</td><td>Split into True/False paths</td></tr>
+      <tr><td>Switch</td><td>Route to multiple outputs by matching value</td></tr>
+      <tr><td>Merge</td><td>Combine multiple input branches</td></tr>
+      <tr><td>Filter</td><td>Keep only items matching a condition</td></tr>
+      <tr><td>Sort</td><td>Order items by a field</td></tr>
+      <tr><td>Limit</td><td>Keep only the first N items</td></tr>
+      <tr><td>Split In Batches</td><td>Loop through data in chunks</td></tr>
+      <tr><td>Aggregate</td><td>Combine many items into one</td></tr>
+      <tr><td>Code</td><td>Custom JavaScript/Python logic</td></tr>
+      <tr><td>HTTP Request</td><td>Call any external API</td></tr>
+      <tr><td>Wait</td><td>Pause execution</td></tr>
+      <tr><td>Execute Workflow</td><td>Call another workflow as a sub-workflow</td></tr>
+      <tr><td>Error Trigger</td><td>Starts an Error Workflow when the main one fails</td></tr>
+      <tr><td>AI Agent</td><td>Reason and decide which tools to call</td></tr>
+      <tr><td>Chat Model</td><td>Connect to an LLM</td></tr>
+      <tr><td>Vector Store</td><td>Store/search embeddings for retrieval</td></tr>
+    </table>
+
+    <h3 id="p8-58a"><span class="num">58a</span>Reading the canvas</h3>
+    <p>A green dot on a node's edge is a standard data output/input connector; dragging between two of them creates a connection. A red output on some nodes represents an explicit error path (used with Continue On Fail) — wiring something to it lets you handle failures for that specific node separately from its normal success path. Dotted vs solid connection lines generally distinguish a configured-but-not-yet-run connection from one that has live execution data flowing through it in the current view.</p>
+
+    <h3 id="p8-58b"><span class="num">58b</span>"Which node do I need?" quick lookup</h3>
+    <table>
+      <tr><th>I want to...</th><th>Use</th></tr>
+      <tr><td>Start when someone submits a form</td><td>Form Trigger</td></tr>
+      <tr><td>Start when an external system posts data to me</td><td>Webhook</td></tr>
+      <tr><td>Run every day at a set time</td><td>Schedule Trigger</td></tr>
+      <tr><td>Change or add a field</td><td>Set (Edit Fields)</td></tr>
+      <tr><td>Do something only if a condition is true</td><td>IF</td></tr>
+      <tr><td>Route to one of several outcomes</td><td>Switch</td></tr>
+      <tr><td>Repeat an action for each item in a list</td><td>Loop Over Items</td></tr>
+      <tr><td>Call any REST API</td><td>HTTP Request</td></tr>
+      <tr><td>Write custom logic nothing else covers</td><td>Code</td></tr>
+      <tr><td>Combine two data sources into one</td><td>Merge</td></tr>
+      <tr><td>Summarize/ask an LLM something</td><td>Chat Model or AI Agent</td></tr>
+    </table>
+  </div>
+</section>
+
+<section class="section" id="part9" style="--part-color:var(--p8)">
+  <div class="wrap">
+    <div class="eyebrow">Part 9</div>
+    <h2>Ecosystem &amp; Staying Current</h2>
+    <div class="tag">n8n moves fast — here's where to check what's changed, described generically since specifics shift.</div>
+
+    <h3 id="p9-1"><span class="num">·</span>Cloud vs self-hosted, at a glance</h3>
+    <table>
+      <tr><th></th><th>Self-hosted</th><th>n8n Cloud</th></tr>
+      <tr><td>Cost</td><td>Free software; you pay for hosting</td><td>Subscription, tiered by usage</td></tr>
+      <tr><td>Maintenance</td><td>You manage updates, backups, scaling</td><td>Fully managed</td></tr>
+      <tr><td>Data control</td><td>Full control, data stays on your infrastructure</td><td>Hosted on n8n's infrastructure</td></tr>
+      <tr><td>Feature availability</td><td>All community features; Enterprise features need a license</td><td>Plan-dependent</td></tr>
+    </table>
+    <p>Exact feature parity and plan details change over time — check n8n's own current pricing/docs pages before making a decision based on specifics.</p>
+
+    <h3 id="p9-2"><span class="num">·</span>Official learning resources</h3>
+    <ul class="plain">
+      <li>n8n's official documentation site — the authoritative, always-current reference for every node and concept in this guide.</li>
+      <li>n8n's official community forum — searchable real-world troubleshooting from other users and n8n staff.</li>
+      <li>n8n's official template library — working examples to import and adapt.</li>
+      <li>n8n's own official learning/academy content, where available, for structured courses straight from the source.</li>
+    </ul>
+    <p>Because this guide is a snapshot, always cross-check anything time-sensitive (pricing, newest nodes, licensing specifics) against n8n's own current, official pages.</p>
+
+    <div class="finish-box keep-visible">
+      <div class="fb-title">You've reached the end.</div>
+      <p>From "what even is a workflow?" to production-grade AI agents — that's the whole guide. Now go build something that automates away a task you never want to do by hand again.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer id="about">
+  <div class="wrap">
+    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+      <div class="avatar init-avatar" style="width:64px;height:64px;border-radius:50%;font-size:1.1rem;" aria-hidden="true">SK</div>
+      <h2 class="serif" style="margin:4px 0 0;">Sujit Kulkarni</h2>
+      <p style="max-width:600px;">This guide was sourced, curated and compiled by <b>Sujit Kulkarni</b>. He's spent 15 years in investment banking across a range of functions, and alongside that has been a hands-on, curious learner of AI and automation tooling out of genuine interest. He put this guide together to make the fast-moving world of n8n easier to understand for anyone starting from zero.</p>
+      <p style="font-size:.82rem;">Compiled from publicly available information and general public knowledge. This is an independent, unofficial set of study notes — not affiliated with, endorsed by, or sponsored by n8n GmbH. <b>n8n</b> is a trademark of n8n GmbH; its use here is purely descriptive, to identify the software these notes are about. For the authoritative, always-current reference, see n8n's own official documentation.</p>
+      <details class="meta-footer">
+        <summary>Last updated 27 Jul 2026 — changelog</summary>
+        <ul>
+          <li><b>v1.3</b> — added dark mode, font-size controls, mark-as-read tracking, resume banner, related topics, copy-to-clipboard on code, sticky breadcrumb, print stylesheet, and a handful of fun breaks.</li>
+          <li><b>v1.2</b> — added click-to-expand topics throughout and the remote part-navigation control.</li>
+          <li><b>v1.1</b> — expanded coverage to 9 parts / 100+ topics with click-by-click detail.</li>
+          <li><b>v1.0</b> — first published version.</li>
+        </ul>
+      </details>
+    </div>
+  </div>
+</footer>
+
+<div class="credit-footer">Compiled and Curated by <b>Sujit Kulkarni</b></div>
+
+<div class="remote-nav" aria-label="Quick section navigation">
+  <button onclick="remoteNav(-1)" aria-label="Previous part">&#9650;</button>
+  <div class="rn-label" id="rnLabel">Top</div>
+  <button onclick="remoteNav(1)" aria-label="Next part">&#9660;</button>
+</div>
+<button class="float-fab" id="floatFabBtn" onclick="toggleFloatWidget()" aria-label="Open Ask Sujit">SK</button>
+<div class="float-panel" id="floatPanel">
+  <div class="float-panel-title">Ask Sujit &amp; Find a Topic</div>
+  <input id="floatFinderInput" type="text" placeholder="Search all topics..." style="width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--hair);font-family:inherit;" oninput="runFloatFinder()">
+  <div id="floatFinderStatus" style="font-size:.78rem;color:var(--ink-soft);margin-top:8px;"></div>
+</div>
+
+<div class="dot-rail" id="dotRail"></div>
+
+<script>
+</script>
+<script>
+const SECTIONS = [{"id": "toc", "title": "Every topic in this guide", "eyebrow": "Full Index", "color": "#3a332c"}, {"id": "part0", "title": "Orientation", "eyebrow": "Part 0", "color": "var(--p0)"}, {"id": "part1", "title": "Foundations", "eyebrow": "Part 1", "color": "var(--p1)"}, {"id": "part2", "title": "Core Skills", "eyebrow": "Part 2", "color": "var(--p2)"}, {"id": "part3", "title": "Connecting to the World", "eyebrow": "Part 3", "color": "var(--p3)"}, {"id": "part4", "title": "Intelligence &amp; Automation", "eyebrow": "Part 4", "color": "var(--p4)"}, {"id": "part5", "title": "Production-Grade", "eyebrow": "Part 5", "color": "var(--p5)"}, {"id": "part6", "title": "Extending n8n", "eyebrow": "Part 6", "color": "var(--p6)"}, {"id": "part6b", "title": "Design Patterns", "eyebrow": "Part 6.5", "color": "var(--p6)"}, {"id": "part7", "title": "Career &amp; Practice", "eyebrow": "Part 7", "color": "var(--p7)"}, {"id": "part7b", "title": "Migration &amp; Comparison", "eyebrow": "Part 7.5", "color": "var(--p7)"}, {"id": "part8", "title": "Reference", "eyebrow": "Part 8", "color": "var(--p8)"}, {"id": "part9", "title": "Ecosystem &amp; Staying Current", "eyebrow": "Part 9", "color": "var(--p8)"}];
+const TOPICS = [{"id": "p0-1", "title": "What is n8n?", "section": "part0"}, {"id": "p0-2", "title": "History &amp; background", "section": "part0"}, {"id": "p0-3", "title": "Why learn n8n?", "section": "part0"}, {"id": "p0-4", "title": "n8n vs Zapier vs Make vs Power Automate", "section": "part0"}, {"id": "p0-5", "title": "Licensing model explained", "section": "part0"}, {"id": "p0-6", "title": "Installation &amp; setup", "section": "part0"}, {"id": "p0-7", "title": "Your first workflow, click by click", "section": "part0"}, {"id": "p0-8", "title": "Interface tour", "section": "part0"}, {"id": "p0-6a", "title": "Node-vs-code philosophy", "section": "part0"}, {"id": "p0-6b", "title": "Fair-code vs open-source vs proprietary", "section": "part0"}, {"id": "p0-6c", "title": "Sizing a self-hosted instance", "section": "part0"}, {"id": "p1-9", "title": "Core concepts", "section": "part1"}, {"id": "p1-10", "title": "n8n architecture", "section": "part1"}, {"id": "p1-11", "title": "Types of nodes", "section": "part1"}, {"id": "p1-12", "title": "Data types in n8n", "section": "part1"}, {"id": "p1-13", "title": "The n8n data structure", "section": "part1"}, {"id": "p1-14", "title": "Execution modes", "section": "part1"}, {"id": "p1-15", "title": "Popular triggers", "section": "part1"}, {"id": "p1-9a", "title": "Sticky Notes &amp; documenting your workflow", "section": "part1"}, {"id": "p1-9b", "title": "Pin Data", "section": "part1"}, {"id": "p1-9c", "title": "Partial execution &amp; \"test step\"", "section": "part1"}, {"id": "p1-10a", "title": "Activation vs deactivation", "section": "part1"}, {"id": "p1-10b", "title": "Static data &amp; node versions", "section": "part1"}, {"id": "p2-16", "title": "The seven core nodes, deep-dive", "section": "part2"}, {"id": "p2-17", "title": "Control flow nodes", "section": "part2"}, {"id": "p2-18", "title": "Data transformation nodes", "section": "part2"}, {"id": "p2-19", "title": "Expressions in n8n", "section": "part2"}, {"id": "p2-20", "title": "Variables in n8n", "section": "part2"}, {"id": "p2-21", "title": "Working with JSON", "section": "part2"}, {"id": "p2-22", "title": "Dates &amp; times", "section": "part2"}, {"id": "p2-23", "title": "Regular expressions", "section": "part2"}, {"id": "p2-24", "title": "Pagination patterns", "section": "part2"}, {"id": "p2-25", "title": "Sub-workflows", "section": "part2"}, {"id": "p2-16a", "title": "Split Out vs Item Lists", "section": "part2"}, {"id": "p2-16b", "title": "Aggregate, in depth", "section": "part2"}, {"id": "p2-16c", "title": "Compare Datasets", "section": "part2"}, {"id": "p2-16d", "title": "Rename Keys / Edit Fields naming history", "section": "part2"}, {"id": "p2-16e", "title": "Convert to File / Extract From File", "section": "part2"}, {"id": "p2-19a", "title": "Arrays at scale (map/filter/reduce in Code)", "section": "part2"}, {"id": "p2-19b", "title": "Item-pairing gotchas", "section": "part2"}, {"id": "p3-26", "title": "Webhooks", "section": "part3"}, {"id": "p3-27", "title": "HTTP Request node", "section": "part3"}, {"id": "p3-28", "title": "Authentication, in depth", "section": "part3"}, {"id": "p3-29", "title": "Databases", "section": "part3"}, {"id": "p3-30", "title": "Cloud apps", "section": "part3"}, {"id": "p3-31", "title": "File operations", "section": "part3"}, {"id": "p3-32", "title": "GraphQL in n8n", "section": "part3"}, {"id": "p3-33", "title": "Rate limiting &amp; throttling", "section": "part3"}, {"id": "p3-26a", "title": "Multipart/form-data uploads", "section": "part3"}, {"id": "p3-26b", "title": "Custom API wrapper pattern", "section": "part3"}, {"id": "p3-26c", "title": "Where n8n doesn't fit: WebSockets / long-polling", "section": "part3"}, {"id": "p3-26d", "title": "Native Form Trigger &amp; Form node", "section": "part3"}, {"id": "p3-26e", "title": "Respond to Webhook node", "section": "part3"}, {"id": "p3-26f", "title": "Chat Trigger &amp; built-in Chat UI", "section": "part3"}, {"id": "p4-34", "title": "AI features &amp; components", "section": "part4"}, {"id": "p4-35", "title": "Building a RAG pipeline, step by step", "section": "part4"}, {"id": "p4-36", "title": "Building a chatbot, step by step", "section": "part4"}, {"id": "p4-37", "title": "How the AI Agent picks and calls tools", "section": "part4"}, {"id": "p4-38", "title": "Prompt engineering basics for n8n AI nodes", "section": "part4"}, {"id": "p4-39", "title": "Cost control for AI nodes", "section": "part4"}, {"id": "p4-34a", "title": "Structured output parsing from LLMs", "section": "part4"}, {"id": "p4-34b", "title": "Multi-agent orchestration", "section": "part4"}, {"id": "p4-34c", "title": "Local/open-source LLMs (Ollama) vs hosted APIs", "section": "part4"}, {"id": "p4-38a", "title": "Guardrails before real-world actions", "section": "part4"}, {"id": "p5-40", "title": "Scheduling", "section": "part5"}, {"id": "p5-41", "title": "Environment variables", "section": "part5"}, {"id": "p5-42", "title": "Error handling", "section": "part5"}, {"id": "p5-43", "title": "Logging &amp; monitoring", "section": "part5"}, {"id": "p5-44", "title": "DevOps integrations", "section": "part5"}, {"id": "p5-45", "title": "Scaling n8n (queue mode)", "section": "part5"}, {"id": "p5-46", "title": "Version control for workflows", "section": "part5"}, {"id": "p5-47", "title": "Security hardening checklist", "section": "part5"}, {"id": "p5-48", "title": "Best practices, annotated", "section": "part5"}, {"id": "p5-40a", "title": "Multi-environment strategy", "section": "part5"}, {"id": "p5-40b", "title": "Team collaboration &amp; permissions", "section": "part5"}, {"id": "p5-40c", "title": "Backup &amp; disaster recovery", "section": "part5"}, {"id": "p5-42a", "title": "Blue-green / canary rollout for workflow changes", "section": "part5"}, {"id": "p5-42b", "title": "Rotating secrets without downtime", "section": "part5"}, {"id": "p6-49", "title": "Community nodes", "section": "part6"}, {"id": "p6-50", "title": "Building a custom node", "section": "part6"}, {"id": "p6-51", "title": "n8n's own API", "section": "part6"}, {"id": "p6-52", "title": "n8n CLI basics", "section": "part6"}, {"id": "p6-53", "title": "Templates &amp; the community library", "section": "part6"}, {"id": "p6-49a", "title": "Local webhook testing &amp; tunneling", "section": "part6"}, {"id": "p6-49b", "title": "Custom node development lifecycle", "section": "part6"}, {"id": "p6-49c", "title": "n8n embed / white-labeling", "section": "part6"}, {"id": "p6b-1", "title": "Fan-out / fan-in", "section": "part6b"}, {"id": "p6b-2", "title": "Batch processing", "section": "part6b"}, {"id": "p6b-3", "title": "Polling-vs-webhook hybrid", "section": "part6b"}, {"id": "p6b-4", "title": "Retry-with-backoff", "section": "part6b"}, {"id": "p6b-5", "title": "Idempotency keys", "section": "part6b"}, {"id": "p6b-6", "title": "Dead-letter handling", "section": "part6b"}, {"id": "p6b-7", "title": "Anti-patterns to avoid", "section": "part6b"}, {"id": "p7-54", "title": "Common interview questions", "section": "part7"}, {"id": "p7-55", "title": "Learning roadmap", "section": "part7"}, {"id": "p7-56", "title": "Mini project ideas", "section": "part7"}, {"id": "p7-57", "title": "Troubleshooting guide", "section": "part7"}, {"id": "p7-57a", "title": "Common mistakes in your first five workflows", "section": "part7"}, {"id": "p7b-1", "title": "Migrating from Zapier", "section": "part7b"}, {"id": "p7b-2", "title": "Migrating from Make (Integromat)", "section": "part7b"}, {"id": "p8-58", "title": "Glossary", "section": "part8"}, {"id": "p8-59", "title": "Expressions &amp; variables cheat-sheet", "section": "part8"}, {"id": "p8-60", "title": "Node cheat-sheet", "section": "part8"}, {"id": "p8-58a", "title": "Reading the canvas", "section": "part8"}, {"id": "p8-58b", "title": "\"Which node do I need?\" quick lookup", "section": "part8"}, {"id": "p9-1", "title": "Cloud vs self-hosted, at a glance", "section": "part9"}, {"id": "p9-2", "title": "Official learning resources", "section": "part9"}];
+
+document.addEventListener("DOMContentLoaded", () => {
+  const topnav = document.getElementById("topnav");
+  topnav.innerHTML = SECTIONS.map(s => '<a href="#' + s.id + '" data-id="' + s.id + '">' + (s.eyebrow || s.title) + '</a>').join("");
+
+  const dotRail = document.getElementById("dotRail");
+  dotRail.innerHTML = SECTIONS.map(s => '<button class="dot" data-id="' + s.id + '" data-base-title="' + s.title + '" style="--dot-color:' + resolveColor(s.color) + '" onclick="document.getElementById(\'' + s.id + '\').scrollIntoView({behavior:\'smooth\'})" aria-label="Jump to ' + s.title + '" title="' + s.title + '"></button>').join("");
+
+  const tocList = document.getElementById("tocList");
+  let tocHtml = "";
+  let lastSection = null;
+  let itemsHtml = "";
+  const groupsBySection = [];
+  TOPICS.forEach(t => {
+    if(t.section !== lastSection){
+      if(lastSection !== null){ groupsBySection[groupsBySection.length-1].items = itemsHtml; }
+      const meta = SECTIONS.find(s=>s.id===t.section);
+      groupsBySection.push({section:t.section, meta, items:""});
+      itemsHtml = "";
+      lastSection = t.section;
+    }
+    itemsHtml += '<li data-text="' + (t.title.toLowerCase()) + '"><a href="#' + t.id + '" onclick="event.stopPropagation(); event.preventDefault(); gotoTopic(\'' + t.id + '\');">' + t.title + '</a></li>';
+  });
+  if(groupsBySection.length){ groupsBySection[groupsBySection.length-1].items = itemsHtml; }
+
+  tocHtml = groupsBySection.map(g => {
+    const count = (g.items.match(/<li/g) || []).length;
+    const label = g.meta ? g.meta.eyebrow : g.section;
+    const title = g.meta ? g.meta.title : "";
+    return '<div class="toc-group" data-section="' + g.section + '">' +
+      '<button class="toc-part-btn" type="button" onclick="toggleTocGroup(this)">' +
+        '<span class="tp-label"><span class="tp-eyebrow">' + label + '</span> ' + title + '</span>' +
+        '<span style="display:flex;align-items:center;gap:8px;"><span class="tp-count">' + count + '</span><span class="tp-chevron">&#9656;</span></span>' +
+      '</button>' +
+      '<ul class="toc-sub">' + g.items + '</ul>' +
+    '</div>';
+  }).join("");
+  tocList.innerHTML = tocHtml;
+  updateFinderStatus();
+
+  setupScrollSpy();
+  bindProgress();
+  applySavedPreferences();
+  wrapScrollables();
+  wrapCodeBlocks();
+  addReadingTimes();
+  initTopicCollapse();
+  renderResumeBanner();
+  setupBreadcrumbSpy();
+  setupKeyboardShortcuts();
+  document.querySelectorAll(".qz-fb").forEach(el=>el.setAttribute("aria-live", "polite"));
+  if(location.hash && location.hash.length > 1){
+    setTimeout(()=>gotoTopic(location.hash.slice(1)), 50);
+  }
+});
+
+function wrapScrollables(){
+  document.querySelectorAll("main table").forEach(t=>{
+    if(t.parentElement.classList.contains("table-scroll")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "table-scroll";
+    t.parentNode.insertBefore(wrap, t);
+    wrap.appendChild(t);
+  });
+}
+
+function wrapCodeBlocks(){
+  document.querySelectorAll("main pre").forEach(pre=>{
+    if(pre.parentElement.classList.contains("code-wrap")) return;
+    const wrap = document.createElement("div");
+    wrap.className = "code-wrap";
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    const btn = document.createElement("button");
+    btn.className = "copy-btn";
+    btn.type = "button";
+    btn.textContent = "Copy";
+    btn.onclick = ()=>{
+      navigator.clipboard?.writeText(pre.textContent).then(()=>{
+        btn.textContent = "Copied";
+        btn.classList.add("copied");
+        setTimeout(()=>{ btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500);
+      }).catch(()=>{});
+    };
+    wrap.appendChild(btn);
+  });
+}
+
+const PART_ICONS = {toc:"🔎", part0:"🧭", part1:"🧱", part2:"🛠️", part3:"🌐", part4:"🤖", part5:"🏭", part6:"🔌", part6b:"🧩", part7:"🎓", part7b:"🔄", part8:"📖", part9:"🗺️"};
+
+function addReadingTimes(){
+  document.querySelectorAll(".section").forEach(section=>{
+    const tag = section.querySelector(".tag");
+    if(!tag) return;
+    const words = section.textContent.trim().split(/\s+/).length;
+    const mins = Math.max(1, Math.round(words/200));
+    const span = document.createElement("span");
+    span.style.cssText = "white-space:nowrap; margin-left:6px; opacity:.75;";
+    span.textContent = "· ~" + mins + " min read";
+    tag.appendChild(span);
+
+    const hasTopics = section.querySelectorAll("h3[id]").length > 0;
+    if(hasTopics){
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "part-toggle-all";
+      btn.textContent = "Expand all";
+      btn.setAttribute("data-state", "collapsed");
+      btn.onclick = ()=>toggleAllInSection(section, btn);
+      tag.appendChild(btn);
+    }
+
+    const icon = PART_ICONS[section.id];
+    const eyebrow = section.querySelector(".eyebrow");
+    if(icon && eyebrow && !eyebrow.querySelector(".part-icon")){
+      const iconSpan = document.createElement("span");
+      iconSpan.className = "part-icon";
+      iconSpan.setAttribute("aria-hidden", "true");
+      iconSpan.textContent = icon;
+      eyebrow.insertBefore(iconSpan, eyebrow.firstChild);
+    }
+  });
+}
+function toggleAllInSection(section, btn){
+  const expand = btn.dataset.state === "collapsed";
+  section.querySelectorAll(".topic-h3").forEach(h3=>{
+    const body = h3.nextElementSibling;
+    h3.classList.toggle("open", expand);
+    h3.setAttribute("aria-expanded", expand ? "true" : "false");
+    if(body && body.classList.contains("topic-body")) body.classList.toggle("open", expand);
+  });
+  btn.dataset.state = expand ? "expanded" : "collapsed";
+  btn.textContent = expand ? "Collapse all" : "Expand all";
+}
+
+/* ---- font size + dark mode ---- */
+function applySavedPreferences(){
+  const savedScale = localStorage.getItem("n8nGuideFontScale");
+  if(savedScale) document.documentElement.style.fontSize = savedScale + "%";
+  const savedDark = localStorage.getItem("n8nGuideDarkMode");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const shouldBeDark = savedDark === "1" || (savedDark === null && prefersDark);
+  if(shouldBeDark){
+    document.body.classList.add("dark-mode");
+    const btn = document.getElementById("darkModeBtn");
+    if(btn) btn.innerHTML = "&#9788;";
+  }
+}
+function adjustFontSize(dir){
+  const current = parseInt(localStorage.getItem("n8nGuideFontScale") || "100", 10);
+  const next = Math.max(85, Math.min(130, current + dir*10));
+  document.documentElement.style.fontSize = next + "%";
+  localStorage.setItem("n8nGuideFontScale", String(next));
+}
+function toggleDarkMode(){
+  const isDark = document.body.classList.toggle("dark-mode");
+  localStorage.setItem("n8nGuideDarkMode", isDark ? "1" : "0");
+  const btn = document.getElementById("darkModeBtn");
+  if(btn) btn.innerHTML = isDark ? "&#9788;" : "&#9789;";
+}
+
+/* ---- resume banner ---- */
+function renderResumeBanner(){
+  const lastId = localStorage.getItem("n8nGuideLastTopic");
+  if(!lastId || (location.hash && location.hash.length > 1)) return;
+  const topic = TOPICS.find(t=>t.id === lastId);
+  if(!topic) return;
+  const el = document.getElementById("resumeBanner");
+  if(!el) return;
+  el.innerHTML = '<div class="resume-banner"><span>Resume where you left off: <a href="#' + topic.id + '" onclick="event.preventDefault(); gotoTopic(\'' + topic.id + '\');">' + topic.title + '</a></span><button onclick="document.getElementById(\'resumeBanner\').innerHTML=\'\';" aria-label="Dismiss">&times;</button></div>';
+}
+
+/* ---- mark-as-read tracking ---- */
+function getReadSet(){
+  try{ return new Set(JSON.parse(localStorage.getItem("n8nGuideRead") || "[]")); }catch(e){ return new Set(); }
+}
+function saveReadSet(set){
+  localStorage.setItem("n8nGuideRead", JSON.stringify(Array.from(set)));
+}
+function updateReadProgress(){
+  const el = document.getElementById("readProgress");
+  if(el){
+    const read = getReadSet();
+    el.innerHTML = "You've marked <b>" + read.size + "</b> of " + TOPICS.length + " topics as read.";
+  }
+  updateDotProgress();
+}
+function updateDotProgress(){
+  document.querySelectorAll(".dot-rail .dot").forEach(dot=>{
+    const sectionId = dot.dataset.id;
+    const section = document.getElementById(sectionId);
+    if(!section) return;
+    const heads = section.querySelectorAll(".topic-h3");
+    const base = dot.dataset.baseTitle || "";
+    if(!heads.length){
+      dot.title = base;
+      dot.setAttribute("aria-label", "Jump to " + base);
+      return;
+    }
+    let readCount = 0;
+    heads.forEach(h=>{ if(h.classList.contains("is-read")) readCount++; });
+    const pct = readCount / heads.length;
+    dot.style.opacity = (0.4 + pct*0.6).toFixed(2);
+    dot.classList.toggle("complete", pct === 1);
+    const label = base + " — " + readCount + "/" + heads.length + " read";
+    dot.title = label;
+    dot.setAttribute("aria-label", "Jump to " + label);
+  });
+}
+
+/* ---- sticky mini-breadcrumb ---- */
+function setupBreadcrumbSpy(){
+  const heads = Array.from(document.querySelectorAll(".section h3.topic-h3"));
+  if(!heads.length) return;
+  const crumb = document.getElementById("miniBreadcrumb");
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        const section = entry.target.closest(".section");
+        const meta = SECTIONS.find(s=>s.id === (section && section.id));
+        const topicMeta = TOPICS.find(t=>t.id === entry.target.id);
+        const topicTitle = topicMeta ? topicMeta.title : "";
+        window.CURRENT_TOPIC_ID = entry.target.id;
+        if(crumb){
+          crumb.innerHTML = (meta ? "<b>" + meta.eyebrow + "</b> &rarr; " + topicTitle : topicTitle);
+          crumb.classList.add("show");
+        }
+      }
+    });
+  }, {rootMargin:"-10% 0px -85% 0px", threshold:0});
+  heads.forEach(h=>observer.observe(h));
+}
+
+/* ---- keyboard shortcuts: j/k or arrows between topics, / focuses search ---- */
+function setupKeyboardShortcuts(){
+  document.addEventListener("keydown", (e)=>{
+    const tag = (e.target.tagName || "").toUpperCase();
+    if(tag === "INPUT" || tag === "TEXTAREA" || e.target.isContentEditable) return;
+    if(e.key === "/"){
+      e.preventDefault();
+      const input = document.getElementById("finderInput");
+      if(input){ input.focus(); document.getElementById("toc").scrollIntoView({behavior:"smooth"}); }
+      return;
+    }
+    if(e.key === "j" || e.key === "ArrowDown" || e.key === "k" || e.key === "ArrowUp"){
+      const dir = (e.key === "j" || e.key === "ArrowDown") ? 1 : -1;
+      const currentId = window.CURRENT_TOPIC_ID;
+      let idx = TOPICS.findIndex(t=>t.id === currentId);
+      if(idx === -1) idx = 0;
+      idx = Math.max(0, Math.min(TOPICS.length-1, idx+dir));
+      e.preventDefault();
+      gotoTopic(TOPICS[idx].id);
+    }
+  });
+}
+
+/* ---- random topic shuffle ---- */
+function gotoRandomTopic(){
+  const idx = Math.floor(Math.random() * TOPICS.length);
+  gotoTopic(TOPICS[idx].id);
+}
+
+/* ---- download the whole guide as plain Markdown ---- */
+function downloadMarkdown(){
+  let md = "# An Independent Study Guide to n8n Automation\n\nCompiled by Sujit Kulkarni. Unofficial notes — not affiliated with n8n GmbH.\n\n";
+  document.querySelectorAll(".section").forEach(section=>{
+    const h2 = section.querySelector("h2");
+    if(!h2) return;
+    md += "\n## " + h2.textContent.trim() + "\n\n";
+    section.querySelectorAll("h3.topic-h3").forEach(h3=>{
+      const titleEl = h3.querySelector(".tp-left");
+      const title = titleEl ? titleEl.textContent.trim() : h3.textContent.trim();
+      md += "### " + title + "\n\n";
+      const body = h3.nextElementSibling;
+      if(body && body.classList.contains("topic-body")){
+        const text = body.textContent.replace(/\s+\n/g, "\n").replace(/[ \t]+/g, " ").trim();
+        md += text + "\n\n";
+      }
+    });
+  });
+  const blob = new Blob([md], {type:"text/markdown"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "n8n-guide.md";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  tocActionFeedback("Downloaded n8n-guide.md");
+}
+
+/* ---- standalone cheat-sheet print/export ---- */
+function printCheatSheet(){
+  const ids = ["p8-59", "p8-60"];
+  let html = "<h1>n8n Quick Cheat-Sheet</h1><p style=\"font-size:11px;color:#555;\">Unofficial notes compiled by Sujit Kulkarni — not affiliated with n8n GmbH.</p>";
+  ids.forEach(id=>{
+    const h3 = document.getElementById(id);
+    if(!h3) return;
+    const titleEl = h3.querySelector(".tp-left");
+    const title = titleEl ? titleEl.textContent.trim() : h3.textContent.trim();
+    const body = h3.nextElementSibling;
+    html += "<h2>" + title + "</h2>";
+    if(body){
+      const clone = body.cloneNode(true);
+      clone.querySelectorAll(".related-box").forEach(el=>el.remove());
+      html += clone.innerHTML;
+    }
+  });
+  const area = document.getElementById("cheatSheetPrintArea");
+  if(!area) return;
+  area.innerHTML = html;
+  document.body.classList.add("cheat-print-mode");
+  setTimeout(()=>{
+    window.print();
+  }, 50);
+}
+window.addEventListener("afterprint", ()=>{
+  document.body.classList.remove("cheat-print-mode");
+});
+
+/* ---- progress: share / export / import / reset ---- */
+function tocActionFeedback(msg){
+  const el = document.getElementById("tocActionFb");
+  if(!el) return;
+  el.textContent = msg;
+  setTimeout(()=>{ if(el.textContent === msg) el.textContent = ""; }, 2500);
+}
+function shareProgress(){
+  const read = getReadSet();
+  const pct = Math.round((read.size / TOPICS.length) * 100);
+  const text = "I've completed " + read.size + "/" + TOPICS.length + " topics (" + pct + "%) in the n8n automation guide.";
+  navigator.clipboard?.writeText(text).then(()=>{
+    tocActionFeedback("Copied: \"" + text + "\"");
+  }).catch(()=>{ tocActionFeedback(text); });
+}
+function exportProgress(){
+  const data = {
+    read: Array.from(getReadSet()),
+    lastTopic: localStorage.getItem("n8nGuideLastTopic") || null,
+    exportedAt: new Date().toISOString()
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "n8n-guide-progress.json";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  tocActionFeedback("Progress exported.");
+}
+function importProgress(file){
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if(Array.isArray(data.read)){
+        saveReadSet(new Set(data.read));
+        if(data.lastTopic) localStorage.setItem("n8nGuideLastTopic", data.lastTopic);
+        document.querySelectorAll(".topic-read-cb").forEach(cb=>{
+          const h3 = cb.closest(".topic-h3");
+          const isRead = data.read.includes(h3.id);
+          cb.checked = isRead;
+          h3.classList.toggle("is-read", isRead);
+        });
+        updateReadProgress();
+        tocActionFeedback("Progress imported (" + data.read.length + " topics).");
+      } else {
+        tocActionFeedback("That file doesn't look like a progress export.");
+      }
+    }catch(e){
+      tocActionFeedback("Couldn't read that file.");
+    }
+  };
+  reader.readAsText(file);
+}
+function resetProgress(){
+  if(!confirm("Clear your read-progress on this device? This can't be undone.")) return;
+  saveReadSet(new Set());
+  localStorage.removeItem("n8nGuideLastTopic");
+  document.querySelectorAll(".topic-read-cb").forEach(cb=>{
+    cb.checked = false;
+    const h3 = cb.closest(".topic-h3");
+    if(h3) h3.classList.remove("is-read");
+  });
+  const banner = document.getElementById("resumeBanner");
+  if(banner) banner.innerHTML = "";
+  updateReadProgress();
+  tocActionFeedback("Progress reset.");
+}
+
+window.addEventListener("hashchange", ()=>{
+  if(location.hash && location.hash.length > 1) gotoTopic(location.hash.slice(1));
+});
+
+function checkQuiz(btn, isCorrect){
+  const box = btn.closest(".quiz-box");
+  if(!box) return;
+  box.querySelectorAll(".qz-opt").forEach(o=>{ o.disabled = true; });
+  btn.classList.add(isCorrect ? "correct" : "wrong");
+  const fb = box.querySelector(".qz-fb");
+  if(fb) fb.classList.add("show");
+}
+
+function toggleTocGroup(btn){
+  btn.closest(".toc-group").classList.toggle("open");
+}
+
+function resolveColor(c){
+  if(c.charAt(0) === "#") return c;
+  const cs = getComputedStyle(document.documentElement);
+  return cs.getPropertyValue(c.replace("var(","").replace(")","")).trim() || "#333";
+}
+
+function applyFinder(){
+  const qRaw = document.getElementById("finderInput").value.trim();
+  const q = qRaw.toLowerCase();
+  const groups = document.querySelectorAll("#tocList .toc-group");
+  let visible = 0;
+  groups.forEach(g=>{
+    const items = g.querySelectorAll("li");
+    let anyMatch = false;
+    items.forEach(li=>{
+      const a = li.querySelector("a");
+      if(a && !a.dataset.orig) a.dataset.orig = a.textContent;
+      const match = !q || li.dataset.text.indexOf(q) !== -1;
+      li.classList.toggle("hidden", !match);
+      if(match){ anyMatch = true; visible++; }
+      if(a){
+        const orig = a.dataset.orig;
+        let note = li.querySelector(".hl-note");
+        if(!q){
+          a.textContent = orig;
+          if(note) note.remove();
+        } else if(match){
+          const idx = orig.toLowerCase().indexOf(q);
+          if(idx !== -1){
+            a.innerHTML = orig.slice(0, idx) + '<mark class="hl">' + orig.slice(idx, idx+qRaw.length) + '</mark>' + orig.slice(idx+qRaw.length);
+            if(note) note.remove();
+          } else {
+            a.textContent = orig;
+            if(!note){ note = document.createElement("span"); note.className = "hl-note"; li.appendChild(note); }
+            note.textContent = " — mentioned in topic text";
+          }
+        } else if(note){
+          note.remove();
+        }
+      }
+    });
+    g.style.display = (q && !anyMatch) ? "none" : "";
+    if(q && anyMatch) g.classList.add("open");
+    if(!q) g.classList.remove("open");
+  });
+  updateFinderStatus(visible);
+}
+function updateFinderStatus(visible){
+  const status = document.getElementById("finderStatus");
+  const total = TOPICS.length;
+
+  if(visible === undefined || visible === total){
+    status.innerHTML = 'Showing all <b>' + total + '</b> topics.';
+  } else {
+    status.innerHTML = 'Showing <b>' + visible + '</b> of ' + total + ' topics.' + (visible===0 ? " No matches &mdash; try a broader term." : "");
+  }
+}
+
+function quickAsk(term){
+  document.getElementById("askInput").value = term;
+  runAsk();
+}
+function runAsk(){
+  const q = document.getElementById("askInput").value.trim().toLowerCase();
+  const result = document.getElementById("askResult");
+  if(!q){ result.style.display="none"; return; }
+  let match = TOPICS.find(t => t.title.toLowerCase().indexOf(q) !== -1);
+  if(!match) match = TOPICS.find(t => t.id.toLowerCase().indexOf(q) !== -1);
+  if(match){
+    const meta = SECTIONS.find(s=>s.id===match.section);
+    result.innerHTML = 'Best match: <a href="#' + match.id + '" onclick="event.preventDefault(); gotoTopic(\'' + match.id + '\');">' + match.title + '</a> &mdash; in ' + (meta ? meta.title : match.section) + '.';
+    result.style.display = "block";
+  } else {
+    result.innerHTML = 'No exact match for "' + q + '" &mdash; try the full index below, or a broader term.';
+    result.style.display = "block";
+  }
+}
+
+function setupScrollSpy(){
+  const spySections = SECTIONS.map(s=>document.getElementById(s.id)).filter(Boolean);
+  const navLinks = Array.from(document.querySelectorAll("#topnav a"));
+  const dots = Array.from(document.querySelectorAll(".dot-rail .dot"));
+  const observer = new IntersectionObserver((entries)=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        navLinks.forEach(a=>a.classList.toggle("active", a.dataset.id === entry.target.id));
+        dots.forEach(d=>d.classList.toggle("active", d.dataset.id === entry.target.id));
+        const meta = SECTIONS.find(s=>s.id===entry.target.id);
+        if(meta){
+          setProgressColor(resolveColor(meta.color));
+          window.CURRENT_SECTION_ID = entry.target.id;
+          const label = document.getElementById("rnLabel");
+          if(label) label.textContent = meta.eyebrow || meta.title;
+        }
+      }
+    });
+  }, {rootMargin:"-35% 0px -55% 0px", threshold:0});
+  spySections.forEach(s=>observer.observe(s));
+}
+function remoteNav(dir){
+  const currentId = window.CURRENT_SECTION_ID || SECTIONS[0].id;
+  let idx = SECTIONS.findIndex(s=>s.id===currentId);
+  if(idx === -1) idx = 0;
+  idx = Math.max(0, Math.min(SECTIONS.length-1, idx+dir));
+  const target = document.getElementById(SECTIONS[idx].id);
+  if(target) target.scrollIntoView({behavior:"smooth", block:"start"});
+}
+
+/* click-drop: collapse every topic (h3 + its content) so the long guide is skimmable */
+function initTopicCollapse(){
+  const readSet = getReadSet();
+  document.querySelectorAll(".section").forEach(section=>{
+    const wrap = section.querySelector(".wrap");
+    if(!wrap) return;
+    const children = Array.from(wrap.children);
+    let currentBody = null;
+    const h3sInSection = [];
+    children.forEach(child=>{
+      if(child.tagName === "H3"){
+        child.classList.add("topic-h3");
+        h3sInSection.push(child);
+
+        const leftSpan = document.createElement("span");
+        leftSpan.className = "tp-left";
+        while(child.firstChild) leftSpan.appendChild(child.firstChild);
+
+        const cb = document.createElement("input");
+        cb.type = "checkbox";
+        cb.className = "topic-read-cb";
+        cb.title = "Mark as read";
+        cb.checked = readSet.has(child.id);
+        if(cb.checked) child.classList.add("is-read");
+        cb.addEventListener("click", (e)=>{ e.stopPropagation(); });
+        cb.addEventListener("change", ()=>{
+          const set = getReadSet();
+          if(cb.checked){ set.add(child.id); child.classList.add("is-read"); }
+          else{ set.delete(child.id); child.classList.remove("is-read"); }
+          saveReadSet(set);
+          updateReadProgress();
+        });
+        leftSpan.insertBefore(cb, leftSpan.firstChild);
+        child.appendChild(leftSpan);
+
+        const chev = document.createElement("span");
+        chev.className = "topic-chevron";
+        chev.innerHTML = "&#9656;";
+
+        const linkBtn = document.createElement("button");
+        linkBtn.type = "button";
+        linkBtn.className = "topic-link-btn";
+        linkBtn.title = "Copy link to this topic";
+        linkBtn.setAttribute("aria-label", "Copy link to this topic");
+        linkBtn.innerHTML = "&#128279;";
+        linkBtn.addEventListener("click", (e)=>{
+          e.stopPropagation();
+          const url = location.origin + location.pathname + "#" + child.id;
+          const done = ()=>{
+            linkBtn.classList.add("copied");
+            linkBtn.innerHTML = "&#10003;";
+            setTimeout(()=>{ linkBtn.classList.remove("copied"); linkBtn.innerHTML = "&#128279;"; }, 1300);
+          };
+          if(navigator.clipboard && navigator.clipboard.writeText){
+            navigator.clipboard.writeText(url).then(done).catch(done);
+          } else { done(); }
+        });
+
+        const tpRight = document.createElement("span");
+        tpRight.className = "tp-right";
+        tpRight.appendChild(linkBtn);
+        tpRight.appendChild(chev);
+        child.appendChild(tpRight);
+
+        const body = document.createElement("div");
+        body.className = "topic-body";
+        body.id = child.id + "-body";
+        child.insertAdjacentElement("afterend", body);
+        currentBody = body;
+
+        child.setAttribute("role", "button");
+        child.setAttribute("tabindex", "0");
+        child.setAttribute("aria-expanded", "false");
+        child.setAttribute("aria-controls", body.id);
+        child.addEventListener("click", ()=>{
+          const isOpen = child.classList.toggle("open");
+          body.classList.toggle("open", isOpen);
+          child.setAttribute("aria-expanded", isOpen ? "true" : "false");
+        });
+        child.addEventListener("keydown", (e)=>{
+          if(e.target !== child) return;
+          if(e.key === "Enter" || e.key === " "){
+            e.preventDefault();
+            child.click();
+          }
+        });
+      } else if(currentBody && child.tagName !== "H2" && !child.classList.contains("keep-visible")){
+        currentBody.appendChild(child);
+      }
+    });
+
+    /* related topics: previous + next topic within the same part */
+    h3sInSection.forEach(h3=>{
+      const idx = TOPICS.findIndex(t=>t.id === h3.id);
+      if(idx === -1) return;
+      const sameSection = TOPICS[idx].section;
+      const related = [];
+      if(idx > 0 && TOPICS[idx-1].section === sameSection) related.push(TOPICS[idx-1]);
+      if(idx < TOPICS.length-1 && TOPICS[idx+1].section === sameSection) related.push(TOPICS[idx+1]);
+      if(!related.length) return;
+      const body = h3.nextElementSibling;
+      if(!body || !body.classList.contains("topic-body")) return;
+      const box = document.createElement("div");
+      box.className = "related-box";
+      box.innerHTML = "<b>See also</b>" + related.map(r=>'<a href="#' + r.id + '" onclick="event.preventDefault(); gotoTopic(\'' + r.id + '\');">' + r.title + '</a>').join("");
+      body.appendChild(box);
+    });
+  });
+  updateReadProgress();
+  enrichSearchIndex();
+}
+function enrichSearchIndex(){
+  document.querySelectorAll("#tocList li").forEach(li=>{
+    if(li.dataset.enriched === "1") return;
+    const a = li.querySelector("a");
+    if(!a) return;
+    const id = (a.getAttribute("href") || "").slice(1);
+    const h3 = document.getElementById(id);
+    if(!h3) return;
+    const body = h3.nextElementSibling;
+    if(body && body.classList.contains("topic-body")){
+      const bodyText = body.textContent.toLowerCase().replace(/\s+/g, " ").trim();
+      li.dataset.text = (li.dataset.text || "") + " " + bodyText;
+      li.dataset.enriched = "1";
+    }
+  });
+}
+function gotoTopic(id){
+  const h3 = document.getElementById(id);
+  if(!h3) return;
+  h3.classList.add("open");
+  h3.setAttribute("aria-expanded", "true");
+  const body = h3.nextElementSibling;
+  if(body && body.classList.contains("topic-body")) body.classList.add("open");
+  h3.scrollIntoView({behavior:"smooth", block:"start"});
+  history.replaceState(null, "", "#"+id);
+  localStorage.setItem("n8nGuideLastTopic", id);
+  h3.classList.remove("just-jumped");
+  void h3.offsetWidth;
+  h3.classList.add("just-jumped");
+  setTimeout(()=>h3.classList.remove("just-jumped"), 1700);
+}
+
+function setProgressColor(color){
+  const fill = document.getElementById("progressFill");
+  if(fill){ fill.style.background = color; fill.style.boxShadow = "0 0 10px 1px " + color; }
+}
+function bindProgress(){
+  window.addEventListener("scroll", ()=>{
+    const doc = document.documentElement;
+    const scrollable = doc.scrollHeight - doc.clientHeight;
+    const pct = scrollable > 0 ? (doc.scrollTop/scrollable)*100 : 0;
+    const fill = document.getElementById("progressFill");
+    if(fill) fill.style.width = pct + "%";
+  }, {passive:true});
+}
+
+function toggleFloatWidget(){
+  const panel = document.getElementById("floatPanel");
+  panel.classList.toggle("open");
+  if(panel.classList.contains("open")) document.getElementById("floatFinderInput").focus();
+}
+function runFloatFinder(){
+  const q = document.getElementById("floatFinderInput").value.trim().toLowerCase();
+  const matches = TOPICS.filter(t=>t.title.toLowerCase().indexOf(q) !== -1).slice(0,8);
+  const status = document.getElementById("floatFinderStatus");
+  if(!q){ status.innerHTML = "Start typing to search all " + TOPICS.length + " topics."; return; }
+  if(matches.length === 0){ status.innerHTML = "No matches."; return; }
+  status.innerHTML = matches.map(m=>'<div style="margin-bottom:6px;"><a href="#' + m.id + '" onclick="event.preventDefault(); gotoTopic(\'' + m.id + '\'); toggleFloatWidget();">' + m.title + '</a></div>').join("");
+}
+document.addEventListener("click",(e)=>{
+  const panel = document.getElementById("floatPanel");
+  const fab = document.getElementById("floatFabBtn");
+  if(panel.classList.contains("open") && !panel.contains(e.target) && !fab.contains(e.target)) panel.classList.remove("open");
+});
+</script>
+</body>
+</html>
