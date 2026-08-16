@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<meta name="color-scheme" content="light">
+<title>The Corporate Decoder — Jargon, Abbreviations & Interview Guide</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ivory:#FAF6EC;
+    --ivory-2:#F1EADB;
+    --navy:#14213D;
+    --navy-deep:#0B1526;
+    --navy-soft:#2A3A5C;
+    --gold:#B8892B;
+    --gold-light:#E8C766;
+    --ink:#2A2A28;
+    --line:#DED2B5;
+    --card:#FFFEFA;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;background:var(--ivory);}
+  body{
+    color:var(--ink);
+    font-family:Georgia,'Times New Roman',serif;
+    -webkit-text-size-adjust:100%;
+    padding-bottom:60px;
+  }
+  .util{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  input, button, select, textarea { font-family:inherit; -webkit-appearance:none; appearance:none; border-radius:10px; }
+
+  header.hero{
+    background:linear-gradient(160deg,var(--navy) 0%, var(--navy-deep) 100%);
+    color:var(--ivory);
+    padding:34px 18px 22px;
+    text-align:center;
+    border-bottom:4px solid var(--gold);
+  }
+  .hero .eyebrow{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    font-size:11px;
+    color:var(--gold-light);
+    margin-bottom:10px;
+  }
+  .hero h1{
+    font-size:clamp(24px,7vw,40px);
+    margin:0 0 8px;
+    font-weight:700;
+  }
+  .hero p.sub{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:#CBD3E1;
+    font-size:14px;
+    max-width:580px;
+    margin:0 auto;
+    line-height:1.5;
+  }
+  .hero .credit{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    display:inline-block;
+    margin-top:16px;
+    padding:8px 20px;
+    border-top:1.5px solid var(--gold);
+    border-bottom:1.5px solid var(--gold);
+    color:var(--gold-light);
+    font-size:13px;
+    font-weight:700;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+  }
+
+  /* QUICK NAV */
+  nav.quicknav{
+    position:sticky; top:0; z-index:30;
+    background:var(--navy-deep);
+    border-bottom:3px solid var(--gold);
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    white-space:nowrap;
+    padding:0 8px;
+  }
+  nav.quicknav a{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    display:inline-block;
+    color:#D9DEE9;
+    text-decoration:none;
+    font-size:13px;
+    font-weight:600;
+    padding:13px 12px;
+    border-bottom:3px solid transparent;
+  }
+  nav.quicknav a:active, nav.quicknav a:focus{ color:var(--gold-light); border-bottom-color:var(--gold); }
+
+  main{max-width:900px;margin:0 auto;padding:0 12px;}
+
+  section.block{ padding-top:26px; }
+  .block-title{
+    font-size:22px;
+    color:var(--navy-deep);
+    margin:0 0 4px;
+  }
+  .block-sub{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px;
+    color:var(--navy-soft);
+    margin:0 0 16px;
+    line-height:1.5;
+  }
+
+  /* GLOSSARY CONTROLS */
+  .controls{
+    background:var(--ivory);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px;
+    margin-bottom:6px;
+  }
+  .search-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  #search{
+    flex:1;
+    min-width:160px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:16px;
+    padding:11px 14px;
+    border:1.5px solid var(--navy-soft);
+    background:var(--card);
+    color:var(--navy-deep);
+  }
+  #search:focus{outline:2px solid var(--gold);outline-offset:1px;}
+  .view-toggle{ display:flex; border:1.5px solid var(--navy); border-radius:10px; overflow:hidden; flex-shrink:0; }
+  .view-toggle button{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:13px; font-weight:600; padding:0 12px;
+    border:none; background:var(--card); color:var(--navy); min-height:40px;
+  }
+  .view-toggle button.active{background:var(--navy);color:var(--gold-light);}
+  .chip-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .chip{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:12.5px; font-weight:600; padding:7px 12px;
+    border-radius:999px; border:1.3px solid var(--navy-soft);
+    background:var(--card); color:var(--navy); white-space:nowrap; min-height:34px;
+  }
+  .chip.active{background:var(--gold);border-color:var(--gold);color:var(--navy-deep);}
+  .count-tag{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:12px; color:var(--navy-soft); margin-top:8px; text-align:right; }
+
+  .az-strip{ display:flex; overflow-x:auto; gap:4px; padding:8px 2px; -webkit-overflow-scrolling:touch; }
+  .az-strip button{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-size:12px; font-weight:700; color:var(--navy);
+    background:var(--ivory-2); border:1px solid var(--line);
+    min-width:30px; min-height:30px; flex-shrink:0;
+  }
+  .az-strip button:disabled{opacity:.3;}
+
+  .section-heading{
+    font-size:18px; color:var(--navy); border-bottom:2px solid var(--gold);
+    padding-bottom:6px; margin:22px 0 12px;
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  }
+  .section-heading .tally{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:12px; color:var(--gold); font-weight:600; }
+
+  .card{
+    background:var(--card); border:1px solid var(--line); border-left:4px solid var(--navy);
+    border-radius:8px; padding:14px 16px; margin-bottom:12px;
+  }
+  .card.hot{border-left-color:var(--gold);}
+  .card-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:6px; }
+  .term{ font-size:18px; font-weight:700; color:var(--navy-deep); }
+  .flames{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:12px; color:var(--gold); white-space:nowrap; flex-shrink:0; padding-top:2px; }
+  .cat-tag{ display:inline-block; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--navy-soft); margin-bottom:6px; }
+  .meaning{font-size:14.5px;line-height:1.5;margin:4px 0;}
+  .meaning b{color:var(--navy);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:11.5px;text-transform:uppercase;letter-spacing:.03em;}
+  .snark{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13.5px; font-style:italic;
+    color:#5B4A1F; background:#FBF2DA; border-radius:6px; padding:8px 10px; margin-top:8px; line-height:1.4;
+  }
+  #empty{ text-align:center; padding:40px 20px; color:var(--navy-soft); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; display:none; }
+
+  /* ABBREVIATIONS */
+  .abbr-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+  @media(min-width:560px){ .abbr-grid{ grid-template-columns:1fr 1fr; } }
+  .abbr-card{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+  .abbr-head{ display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; }
+  .abbr-short{ font-weight:700; color:var(--navy-deep); font-size:15px; }
+  .abbr-long{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11.5px; color:var(--gold); font-weight:700; text-transform:uppercase; letter-spacing:.02em; }
+  .abbr-def{ font-size:13.5px; line-height:1.45; margin-top:4px; }
+
+  /* TIPS */
+  .tip-card{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
+  .tip-num{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--gold); font-weight:700; margin-bottom:4px; }
+  .tip-title{ font-size:16.5px; font-weight:700; color:var(--navy-deep); margin-bottom:4px; }
+  .tip-body{ font-size:14px; line-height:1.55; }
+
+  /* ANSWER TEMPLATES */
+  .qa-card{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:14px; }
+  .qa-q{ font-size:16.5px; font-weight:700; color:var(--navy-deep); margin-bottom:8px; }
+  .qa-framework{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; color:var(--gold); font-weight:700; margin-bottom:4px; }
+  .qa-example{ font-size:14px; line-height:1.55; background:var(--ivory-2); border-radius:6px; padding:10px 12px; margin-top:6px; font-style:italic; }
+
+  /* FAQ */
+  details.faq{ background:var(--card); border:1px solid var(--line); border-radius:8px; margin-bottom:10px; padding:4px 4px; }
+  details.faq summary{
+    font-size:15.5px; font-weight:700; color:var(--navy-deep);
+    padding:12px 14px; cursor:pointer; list-style:none;
+  }
+  details.faq summary::-webkit-details-marker{ display:none; }
+  details.faq summary::before{ content:"+ "; color:var(--gold); font-weight:900; }
+  details.faq[open] summary::before{ content:"– "; }
+  details.faq .faq-a{ font-size:14px; line-height:1.55; padding:0 14px 14px 14px; }
+
+  footer{ text-align:center; padding:34px 16px 20px; color:var(--navy); }
+  footer .note{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11.5px; color:#8A7E5C; margin-top:6px; max-width:520px; margin-left:auto; margin-right:auto; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow util">Field Guide for the Modern Office</div>
+  <h1>The Corporate Decoder</h1>
+  <p class="sub">Jargon, abbreviations, interview tactics, and answer frameworks — everything you need to sound (and actually be) fluent in corporate.</p>
+  <div class="credit">Curated and Compiled by Sujit Kulkarni</div>
+</header>
+
+<nav class="quicknav util">
+  <a href="#glossary">Glossary</a>
+  <a href="#abbreviations">Abbreviations</a>
+  <a href="#interview-tips">Interview Tips</a>
+  <a href="#answer-like-pro">Answer Like a Pro</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<main>
+
+<!-- ================= GLOSSARY ================= -->
+<section class="block" id="glossary">
+  <h2 class="block-title">Jargon Glossary</h2>
+  <p class="block-sub">What people say, what it actually means, and what everyone's really thinking. 🔥 marks show how often a term gets used in the wild.</p>
+
+  <div class="controls">
+    <div class="search-row">
+      <input id="search" type="text" placeholder="Search a term..." autocomplete="off" autocapitalize="off">
+      <div class="view-toggle util">
+        <button id="btnCategory" class="active" type="button">Category</button>
+        <button id="btnAZ" type="button">A–Z</button>
+      </div>
+    </div>
+    <div class="chip-row util" id="freqChips">
+      <button class="chip active" data-freq="all" type="button">All terms</button>
+      <button class="chip" data-freq="3" type="button">🔥🔥🔥 Most used</button>
+      <button class="chip" data-freq="2" type="button">🔥🔥 Common</button>
+      <button class="chip" data-freq="1" type="button">🔥 Occasional</button>
+    </div>
+    <div class="count-tag util" id="countTag"></div>
+  </div>
+
+  <div id="azStripWrap" style="display:none;">
+    <div class="az-strip util" id="azStrip"></div>
+  </div>
+
+  <div id="glossaryMain"></div>
+  <div id="empty">No terms match that search. Try a different word, or clear the filter.</div>
+</section>
+
+<!-- ================= ABBREVIATIONS ================= -->
+<section class="block" id="abbreviations">
+  <h2 class="block-title">Abbreviations & Acronyms</h2>
+  <p class="block-sub">The alphabet soup of corporate life, grouped by where you'll actually hear it.</p>
+  <div id="abbrMain"></div>
+</section>
+
+<!-- ================= INTERVIEW TIPS ================= -->
+<section class="block" id="interview-tips">
+  <h2 class="block-title">Interview Pro Tips</h2>
+  <p class="block-sub">Real, usable advice — not satire. How to sound sharp without sounding like a buzzword generator.</p>
+  <div id="tipsMain"></div>
+</section>
+
+<!-- ================= ANSWER LIKE A PRO ================= -->
+<section class="block" id="answer-like-pro">
+  <h2 class="block-title">How to Answer Like a Pro</h2>
+  <p class="block-sub">Frameworks for the questions that come up in almost every interview, with a worked example for each.</p>
+  <div id="qaMain"></div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section class="block" id="faq">
+  <h2 class="block-title">FAQ</h2>
+  <p class="block-sub">Tap a question to expand it.</p>
+  <div id="faqMain"></div>
+</section>
+
+</main>
+
+<footer>
+  <div class="note">Field guide for corporate communication and interview prep. Not affiliated with any company, tool, or HR department mentioned or implied. Read responsibly before your next standup.</div>
+</footer>
+
+<script>
+"use strict";
+
+/* ============ GLOSSARY DATA ============ */
+var TERMS = [
+{t:"Circle back",c:"Meetings & Collaboration",f:3,m:"To revisit a topic later, once there's actually something to say.",s:"I have no answer right now, but I don't want to say no in front of everyone."},
+{t:"Take this offline",c:"Meetings & Collaboration",f:3,m:"To continue a discussion outside the current meeting, usually one-on-one.",s:"Let's not embarrass anyone in front of the group."},
+{t:"Boil the ocean",c:"Meetings & Collaboration",f:2,m:"To attempt something far too broad or ambitious for the resources available.",s:"You're overcomplicating a task that should take an afternoon."},
+{t:"Deep dive",c:"Meetings & Collaboration",f:3,m:"A detailed, thorough examination of a topic.",s:"We're about to spend an hour on one slide."},
+{t:"Synergy",c:"Meetings & Collaboration",f:3,m:"The idea that combined efforts produce more value than the sum of their parts.",s:"We're not totally sure why these two teams merged, but let's pretend it makes sense."},
+{t:"Touch base",c:"Meetings & Collaboration",f:3,m:"A brief check-in conversation.",s:"I want to schedule a meeting but calling it a 'meeting' felt too honest."},
+{t:"Parking lot",c:"Meetings & Collaboration",f:2,m:"A running list of topics deferred for later discussion.",s:"We are never, ever discussing this again."},
+{t:"Table this",c:"Meetings & Collaboration",f:2,m:"To postpone a discussion, typically because it's contentious or unresolved.",s:"This got uncomfortable fast, let's not do it right now."},
+{t:"Level set",c:"Meetings & Collaboration",f:2,m:"To align everyone's understanding before proceeding.",s:"We're all confused, so let's pretend we're starting from the same page."},
+{t:"Bandwidth",c:"Meetings & Collaboration",f:3,m:"Available time or mental capacity to take something on.",s:"I'm too busy for this, but 'no' sounded unprofessional."},
+{t:"Per my last email",c:"Email & Messaging",f:3,m:"A reference to information already stated in a previous message.",s:"Please actually read it this time. I am annoyed."},
+{t:"Looping in",c:"Email & Messaging",f:3,m:"Adding another person to an email thread or conversation.",s:"I am making this your problem too."},
+{t:"Just floating this",c:"Email & Messaging",f:2,m:"Casually proposing an idea without full commitment.",s:"I want credit if this works and zero blame if it doesn't."},
+{t:"Friendly reminder",c:"Email & Messaging",f:3,m:"A follow-up nudge about something previously requested.",s:"This is not friendly. You are late."},
+{t:"Quick question",c:"Email & Messaging",f:2,m:"A question framed as brief, regardless of actual complexity.",s:"This will take twenty minutes of your afternoon."},
+{t:"FYI",c:"Email & Messaging",f:3,m:"For your information — sharing something with no action requested.",s:"Doing nothing myself, but now it's documented that I told you."},
+{t:"Actioned",c:"Email & Messaging",f:2,m:"Handled or completed.",s:"I did the bare minimum required to close this ticket."},
+{t:"Noted",c:"Email & Messaging",f:3,m:"Acknowledged receipt of information.",s:"I heard you, and I will now proceed to ignore it."},
+{t:"Per our conversation",c:"Email & Messaging",f:2,m:"Recapping the content of a prior discussion in writing.",s:"I am building a paper trail, just in case."},
+{t:"Reaching out",c:"Email & Messaging",f:3,m:"Making contact with someone, often for the first time.",s:"I want something from you."},
+{t:"Move the needle",c:"Strategy & Planning",f:3,m:"To make a meaningful, measurable impact.",s:"Please show results. Any results. Preferably before the next review."},
+{t:"Low-hanging fruit",c:"Strategy & Planning",f:3,m:"Easy wins that require minimal effort.",s:"Do the easy stuff first so it looks like real progress."},
+{t:"North star",c:"Strategy & Planning",f:2,m:"The overarching goal that guides decision-making.",s:"The one metric leadership actually cares about this quarter."},
+{t:"Paradigm shift",c:"Strategy & Planning",f:2,m:"A fundamental change in approach or underlying assumptions.",s:"We're doing the same thing as before, just with a new buzzword."},
+{t:"Blue-sky thinking",c:"Strategy & Planning",f:1,m:"Unconstrained, imaginative brainstorming.",s:"Pitch ideas we will never actually fund."},
+{t:"Ten-thousand-foot view",c:"Strategy & Planning",f:2,m:"A high-level overview, without granular detail.",s:"Please don't ask me for specifics right now."},
+{t:"Value-add",c:"Strategy & Planning",f:3,m:"A beneficial contribution to a broader goal.",s:"Justify why this meeting, or this role, should exist."},
+{t:"Strategic alignment",c:"Strategy & Planning",f:2,m:"Ensuring goals and priorities match across teams.",s:"Getting everyone to agree with what leadership already decided."},
+{t:"Game changer",c:"Strategy & Planning",f:2,m:"Something that dramatically shifts the competitive landscape.",s:"It's a fairly small feature, but we're overselling it."},
+{t:"Whitespace",c:"Strategy & Planning",f:1,m:"An unexplored market opportunity.",s:"We don't have a product there yet, but we'd like one."},
+{t:"Empower",c:"Leadership & Management",f:3,m:"To give someone autonomy and authority to act.",s:"Figure it out yourself, I have three other meetings."},
+{t:"Servant leadership",c:"Leadership & Management",f:1,m:"A leadership style focused on supporting the team's needs.",s:"I still make all the actual decisions, just more gently."},
+{t:"Cascading",c:"Leadership & Management",f:2,m:"Passing information down through levels of the org chart.",s:"By the time it reaches you, it's the watered-down version of what leadership really said."},
+{t:"Open door policy",c:"Leadership & Management",f:2,m:"A claimed culture of easy access to leadership.",s:"My door is open. My calendar is booked through October."},
+{t:"Bandwidth constraints",c:"Leadership & Management",f:2,m:"Limited time or resources available for a task.",s:"I'm simply not prioritizing this, and I'd rather not say so directly."},
+{t:"Give 110%",c:"Leadership & Management",f:2,m:"An exhortation to put in maximum effort.",s:"Please work unpaid overtime, enthusiastically."},
+{t:"Own it",c:"Leadership & Management",f:3,m:"To take full responsibility for an outcome.",s:"If this goes wrong, it's officially on you now."},
+{t:"Actionable feedback",c:"Leadership & Management",f:2,m:"Specific, useful critique someone can act on.",s:"Feedback, but with extra steps so it sounds official."},
+{t:"Change agent",c:"Leadership & Management",f:1,m:"A person who drives organizational transformation.",s:"The person who gets quietly blamed when the reorg doesn't work."},
+{t:"Thought leader",c:"Leadership & Management",f:2,m:"A recognized, influential expert in a field.",s:"Someone with a very active LinkedIn posting schedule."},
+{t:"Right-sizing",c:"HR & People Ops",f:3,m:"Adjusting the size of a workforce, usually downward.",s:"Layoffs, just with a softer landing in the vocabulary."},
+{t:"Restructuring",c:"HR & People Ops",f:3,m:"Reorganizing the company's structure or teams.",s:"Also usually layoffs, differently packaged."},
+{t:"Culture fit",c:"HR & People Ops",f:2,m:"Alignment between a candidate and the company's values or style.",s:"Do we personally enjoy being around this person?"},
+{t:"Human capital",c:"HR & People Ops",f:2,m:"The workforce, viewed as a business asset.",s:"Employees, but described like a line item on a spreadsheet."},
+{t:"Work-life balance",c:"HR & People Ops",f:2,m:"A healthy equilibrium between job demands and personal life.",s:"We put this in the job post, then message you at 9pm."},
+{t:"Bandwidth for growth",c:"HR & People Ops",f:1,m:"Room within a role to develop new skills.",s:"We're not promoting you, but here's a vague path forward."},
+{t:"Talent acquisition",c:"HR & People Ops",f:2,m:"The process of recruiting new employees.",s:"Hiring, with a considerably fancier title."},
+{t:"Voluntary separation",c:"HR & People Ops",f:1,m:"An employee's departure framed as their own choice.",s:"Strongly encouraged to resign before being let go."},
+{t:"Onboarding journey",c:"HR & People Ops",f:2,m:"The process of orienting a new employee.",s:"A week of paperwork, dressed up as an adventure."},
+{t:"Exit interview",c:"HR & People Ops",f:2,m:"A conversation held when an employee leaves the company.",s:"Where you finally say what you actually think. Too late to matter now."},
+{t:"KPI",c:"Metrics & Performance",f:3,m:"Key Performance Indicator — a measurable value tracking success.",s:"The number someone above you decided matters most this quarter."},
+{t:"ROI",c:"Metrics & Performance",f:3,m:"Return on Investment — the value gained relative to cost.",s:"Prove this was worth the money. Quickly, please."},
+{t:"North star metric",c:"Metrics & Performance",f:2,m:"The single measure that best reflects core value delivered.",s:"The one number everyone argues about in the all-hands."},
+{t:"Move the dial",c:"Metrics & Performance",f:2,m:"To create measurable, noticeable change.",s:"Same idea as 'move the needle,' said by a different department."},
+{t:"Actionable insights",c:"Metrics & Performance",f:2,m:"Data conclusions specific enough to inform a decision.",s:"A chart with a recommendation stapled to it."},
+{t:"Data-driven",c:"Metrics & Performance",f:3,m:"Decisions made based on data rather than intuition.",s:"We looked at one spreadsheet before deciding."},
+{t:"Bang for your buck",c:"Metrics & Performance",f:1,m:"Good value relative to cost.",s:"It's cheap. We're just calling it efficient."},
+{t:"Stretch goal",c:"Metrics & Performance",f:2,m:"An ambitious target beyond the expected baseline.",s:"A goal nobody truly expects you to hit, but will still ask about."},
+{t:"Run it up the flagpole",c:"Metrics & Performance",f:1,m:"To test an idea with leadership before proceeding.",s:"Let someone more senior kill this idea for you, so you don't have to."},
+{t:"Green light",c:"Metrics & Performance",f:2,m:"Approval to proceed with a plan.",s:"Permission. Finally."},
+{t:"MVP",c:"Startup & Innovation",f:3,m:"Minimum Viable Product — the smallest version that still delivers value.",s:"The smallest thing we can ship and still technically call it done."},
+{t:"Disrupt",c:"Startup & Innovation",f:2,m:"To radically change how an industry operates.",s:"We built an app for something that already worked fine."},
+{t:"Pivot",c:"Startup & Innovation",f:3,m:"To change business direction, often significantly.",s:"Our first idea didn't work."},
+{t:"Move fast and break things",c:"Startup & Innovation",f:1,m:"Prioritizing speed of execution over caution.",s:"We'll fix the bugs later. Maybe."},
+{t:"Growth hacking",c:"Startup & Innovation",f:1,m:"Unconventional, resource-light tactics for rapid growth.",s:"Marketing, but cheaper and considerably riskier."},
+{t:"Unicorn",c:"Startup & Innovation",f:1,m:"A privately held startup valued at over a billion dollars.",s:"A company that isn't profitable yet but sounds great on paper."},
+{t:"Iterate",c:"Startup & Innovation",f:3,m:"To repeat and refine a process or product over time.",s:"We're not entirely sure what we're building yet."},
+{t:"Scalable",c:"Startup & Innovation",f:3,m:"Able to grow efficiently without a proportional rise in cost.",s:"Will it still work with ten times the users? We hope so."},
+{t:"Bleeding edge",c:"Startup & Innovation",f:1,m:"The newest, most experimental technology available.",s:"It breaks constantly, but it's exciting to talk about."},
+{t:"Product-market fit",c:"Startup & Innovation",f:2,m:"The point at which a product genuinely satisfies market demand.",s:"People are actually paying for this. Finally."},
+{t:"Pipeline",c:"Sales & Business Dev",f:3,m:"The set of potential deals currently in progress.",s:"Deals that may, or may never, actually close."},
+{t:"Close the loop",c:"Sales & Business Dev",f:2,m:"To finalize an outstanding conversation or decision.",s:"Please stop leaving me on read."},
+{t:"Value proposition",c:"Sales & Business Dev",f:3,m:"The core reason a customer should choose your product.",s:"Why you should pay us instead of the other guys."},
+{t:"Warm lead",c:"Sales & Business Dev",f:2,m:"A potential customer who has shown some interest.",s:"Someone who opened one email, once."},
+{t:"Win-win",c:"Sales & Business Dev",f:3,m:"An outcome that benefits both parties.",s:"We got what we wanted, and we're calling it fair for everyone."},
+{t:"Table stakes",c:"Sales & Business Dev",f:2,m:"The minimum requirement needed to be competitive.",s:"The bare minimum, presented like an achievement."},
+{t:"Bake it into the deal",c:"Sales & Business Dev",f:1,m:"To include something as part of a broader offer.",s:"We're giving this away for free to close faster."},
+{t:"Decision maker",c:"Sales & Business Dev",f:2,m:"The person with authority to approve a purchase.",s:"The one person whose calendar we actually, desperately need."},
+{t:"Elevator pitch",c:"Sales & Business Dev",f:2,m:"A short, persuasive summary of a business or idea.",s:"Explain your entire company before the doors open."},
+{t:"Churn",c:"Sales & Business Dev",f:3,m:"The rate at which customers stop using a product.",s:"How many people quietly gave up on us this month."},
+{t:"Asynchronous",c:"Remote Work & Culture",f:3,m:"Communication or work that doesn't happen in real time.",s:"Nobody has to be online at the same time. In theory."},
+{t:"Water cooler moment",c:"Remote Work & Culture",f:1,m:"A casual, spontaneous office interaction.",s:"Something we miss and try, unconvincingly, to fake on Slack."},
+{t:"You're on mute",c:"Remote Work & Culture",f:3,m:"A reminder that a speaker can't be heard on a call.",s:"Said by everyone, in every meeting, until the end of time."},
+{t:"Zoom fatigue",c:"Remote Work & Culture",f:2,m:"Exhaustion from an excess of video calls.",s:"The reason everyone's camera has been off since 11am."},
+{t:"Digital nomad",c:"Remote Work & Culture",f:1,m:"A remote worker who travels while working.",s:"Working from a beach and hoping nobody notices the wifi lag."},
+{t:"Hybrid model",c:"Remote Work & Culture",f:2,m:"A mix of remote and in-office working arrangements.",s:"Come into the office on the days we haven't decided yet."},
+{t:"Always-on culture",c:"Remote Work & Culture",f:1,m:"An implicit expectation of constant availability.",s:"We never said you had to reply at midnight. And yet, here we are."},
+{t:"Slack etiquette",c:"Remote Work & Culture",f:1,m:"The unwritten norms for messaging colleagues.",s:"The rules nobody tells you until the moment you break one."},
+{t:"Camera on culture",c:"Remote Work & Culture",f:1,m:"An expectation to keep video on during calls.",s:"Prove you're actually paying attention."},
+{t:"Out of office",c:"Remote Work & Culture",f:3,m:"An automated reply indicating someone is away from work.",s:"The email nobody reads before sending you five more anyway."},
+{t:"Sprint",c:"Project & Process Management",f:3,m:"A short, fixed-length cycle of focused work.",s:"A deadline, just with a trendier name."},
+{t:"Blocker",c:"Project & Process Management",f:3,m:"An obstacle preventing progress on a task.",s:"The official reason it's not my fault yet."},
+{t:"Scope creep",c:"Project & Process Management",f:3,m:"A project gradually expanding beyond its original plan.",s:"The project that, somehow, never actually ends."},
+{t:"Deliverable",c:"Project & Process Management",f:3,m:"A tangible output expected from a project.",s:"The thing due Friday. Allegedly."},
+{t:"Critical path",c:"Project & Process Management",f:2,m:"The sequence of tasks that determines overall project duration.",s:"The one task that, if it's late, makes everybody panic."},
+{t:"Kick-off meeting",c:"Project & Process Management",f:3,m:"The initial meeting that launches a new project.",s:"The only meeting with real energy, before reality sets in."},
+{t:"Retro",c:"Project & Process Management",f:2,m:"A retrospective review of what went well and what didn't.",s:"Where we agree to do better next time, and then don't."},
+{t:"Single source of truth",c:"Project & Process Management",f:2,m:"One authoritative, agreed-upon data source.",s:"The spreadsheet everyone still somehow argues over."},
+{t:"Fast-follow",c:"Project & Process Management",f:1,m:"Quickly launching a feature after a competitor does.",s:"We saw someone else do it first, and we're copying them."},
+{t:"Cross-functional",c:"Project & Process Management",f:3,m:"Involving people or teams from multiple departments.",s:"Nobody actually knows who's in charge of this."}
+];
+
+var CATEGORIES = [];
+for (var i=0;i<TERMS.length;i++){ if (CATEGORIES.indexOf(TERMS[i].c)===-1) CATEGORIES.push(TERMS[i].c); }
+
+var state = { view:'category', freq:'all', query:'' };
+
+function flameStr(f){
+  var lit = "";
+  for (var i=0;i<f;i++) lit += "\uD83D\uDD25";
+  var dim = "<span style='opacity:.15'>";
+  for (var i=0;i<(3-f);i++) dim += "\uD83D\uDD25";
+  dim += "</span>";
+  return lit + dim;
+}
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function matchesTerm(term){
+  if (state.freq !== 'all' && term.f !== Number(state.freq)) return false;
+  if (state.query){
+    var q = state.query.toLowerCase();
+    return term.t.toLowerCase().indexOf(q) > -1 ||
+           term.m.toLowerCase().indexOf(q) > -1 ||
+           term.s.toLowerCase().indexOf(q) > -1 ||
+           term.c.toLowerCase().indexOf(q) > -1;
+  }
+  return true;
+}
+
+function cardHTML(term){
+  return '<div class="card ' + (term.f===3?'hot':'') + '">' +
+    '<div class="card-top">' +
+      '<div>' +
+        '<div class="cat-tag util">' + escapeHtml(term.c) + '</div>' +
+        '<div class="term">' + escapeHtml(term.t) + '</div>' +
+      '</div>' +
+      '<div class="flames">' + flameStr(term.f) + '</div>' +
+    '</div>' +
+    '<div class="meaning"><b>What it means: </b>' + escapeHtml(term.m) + '</div>' +
+    '<div class="snark">\uD83D\uDCAC \u201C' + escapeHtml(term.s) + '\u201D</div>' +
+  '</div>';
+}
+
+function renderGlossary(){
+  var mainEl = document.getElementById('glossaryMain');
+  var emptyEl = document.getElementById('empty');
+  var filtered = [];
+  for (var i=0;i<TERMS.length;i++){ if (matchesTerm(TERMS[i])) filtered.push(TERMS[i]); }
+
+  document.getElementById('countTag').textContent = filtered.length + " of " + TERMS.length + " terms shown";
+
+  if (filtered.length===0){
+    mainEl.innerHTML = '';
+    emptyEl.style.display = 'block';
+    document.getElementById('azStripWrap').style.display = 'none';
+    return;
+  }
+  emptyEl.style.display = 'none';
+
+  if (state.view === 'category'){
+    document.getElementById('azStripWrap').style.display = 'none';
+    var html = '';
+    for (var c=0;c<CATEGORIES.length;c++){
+      var cat = CATEGORIES[c];
+      var items = filtered.filter(function(x){ return x.c===cat; }).sort(function(a,b){ return b.f-a.f; });
+      if (items.length===0) continue;
+      html += '<div class="section-heading">' + escapeHtml(cat) + '<span class="tally util">' + items.length + ' term' + (items.length===1?'':'s') + '</span></div>';
+      for (var k=0;k<items.length;k++){ html += cardHTML(items[k]); }
+    }
+    mainEl.innerHTML = html;
+  } else {
+    document.getElementById('azStripWrap').style.display = 'block';
+    var sorted = filtered.slice().sort(function(a,b){ return a.t.localeCompare(b.t); });
+    var letters = {};
+    var order = [];
+    for (var s=0;s<sorted.length;s++){
+      var l = sorted[s].t.charAt(0).toUpperCase();
+      if (!letters[l]){ letters[l]=[]; order.push(l); }
+      letters[l].push(sorted[s]);
+    }
+    order.sort();
+    var html2 = '';
+    for (var o=0;o<order.length;o++){
+      var L = order[o];
+      html2 += '<div class="section-heading" id="letter-' + L + '">' + L + '<span class="tally util">' + letters[L].length + '</span></div>';
+      for (var j=0;j<letters[L].length;j++){ html2 += cardHTML(letters[L][j]); }
+    }
+    mainEl.innerHTML = html2;
+    buildAZStrip(order);
+  }
+}
+
+function buildAZStrip(activeLetters){
+  var strip = document.getElementById('azStrip');
+  var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+  strip.innerHTML = '';
+  for (var i=0;i<alphabet.length;i++){
+    var l = alphabet[i];
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = l;
+    var active = activeLetters.indexOf(l) > -1;
+    if (!active){ btn.disabled = true; }
+    else {
+      btn.addEventListener('click', (function(letter){
+        return function(){
+          var target = document.getElementById('letter-' + letter);
+          if (target && target.scrollIntoView) target.scrollIntoView({behavior:'smooth', block:'start'});
+        };
+      })(l));
+    }
+    strip.appendChild(btn);
+  }
+}
+
+document.getElementById('search').addEventListener('input', function(e){ state.query = e.target.value; renderGlossary(); });
+document.getElementById('btnCategory').addEventListener('click', function(){
+  state.view = 'category';
+  document.getElementById('btnCategory').classList.add('active');
+  document.getElementById('btnAZ').classList.remove('active');
+  renderGlossary();
+});
+document.getElementById('btnAZ').addEventListener('click', function(){
+  state.view = 'az';
+  document.getElementById('btnAZ').classList.add('active');
+  document.getElementById('btnCategory').classList.remove('active');
+  renderGlossary();
+});
+var chipEls = document.querySelectorAll('#freqChips .chip');
+for (var ci=0; ci<chipEls.length; ci++){
+  chipEls[ci].addEventListener('click', function(){
+    for (var cj=0; cj<chipEls.length; cj++){ chipEls[cj].classList.remove('active'); }
+    this.classList.add('active');
+    state.freq = this.getAttribute('data-freq');
+    renderGlossary();
+  });
+}
+
+renderGlossary();
+
+/* ============ ABBREVIATIONS ============ */
+var ABBR_GROUPS = [
+  { group:"Everyday Office", items:[
+    ["ASAP","As Soon As Possible","Needed urgently, right now."],
+    ["EOD","End of Day","Due before the workday ends."],
+    ["COB","Close of Business","Same as EOD — end of the business day."],
+    ["EOW","End of Week","Due by Friday, typically."],
+    ["TBD","To Be Decided","Not settled yet."],
+    ["TBC","To Be Confirmed","Likely, but not locked in."],
+    ["N/A","Not Applicable","Doesn't apply here."],
+    ["FYI","For Your Information","Sharing, no action needed."],
+    ["WFH","Work From Home","Remote for the day."],
+    ["OOO","Out of Office","Away, not reachable."],
+    ["PTO","Paid Time Off","Approved leave."],
+    ["ETA","Estimated Time of Arrival","When something will be done or delivered."],
+    ["RSVP","Répondez S'il Vous Plaît (please respond)","Confirm attendance."],
+    ["AOB","Any Other Business","Catch-all agenda item at meeting's end."]
+  ]},
+  { group:"Finance & Metrics", items:[
+    ["KPI","Key Performance Indicator","A metric used to track progress toward a goal."],
+    ["KRI","Key Risk Indicator","A metric used to flag rising risk before it becomes a problem."],
+    ["ROI","Return on Investment","Value gained relative to what was spent."],
+    ["ARR","Annual Recurring Revenue","Predictable yearly revenue from subscriptions."],
+    ["MRR","Monthly Recurring Revenue","Predictable monthly subscription revenue."],
+    ["EBITDA","Earnings Before Interest, Taxes, Depreciation & Amortization","A measure of core operating profit."],
+    ["P&L","Profit and Loss (statement)","A report of revenue, costs, and resulting profit."],
+    ["YoY","Year over Year","Comparing this year's figure to the same period last year."],
+    ["QoQ","Quarter over Quarter","Comparing this quarter's figure to the last one."],
+    ["CAC","Customer Acquisition Cost","What it costs, on average, to win one new customer."],
+    ["LTV","Lifetime Value","Total revenue expected from a customer over the relationship."],
+    ["NPS","Net Promoter Score","A survey-based measure of customer loyalty."],
+    ["TAM","Total Addressable Market","The full revenue opportunity if you captured 100% of the market."],
+    ["SAM","Serviceable Addressable Market","The slice of TAM your business model can actually reach."],
+    ["SOM","Serviceable Obtainable Market","The realistic slice of SAM you can win near-term."],
+    ["CAPEX","Capital Expenditure","Spending on long-term physical or fixed assets."],
+    ["OPEX","Operating Expenditure","Day-to-day costs of running the business."]
+  ]},
+  { group:"Strategy & Operations", items:[
+    ["OKR","Objectives and Key Results","A goal-setting framework: an objective plus measurable results."],
+    ["SWOT","Strengths, Weaknesses, Opportunities, Threats","A framework for strategic analysis."],
+    ["SOP","Standard Operating Procedure","A documented, repeatable way of doing something."],
+    ["RACI","Responsible, Accountable, Consulted, Informed","A framework for clarifying who does what on a project."],
+    ["SLA","Service Level Agreement","A committed standard for response time or quality."],
+    ["MVP","Minimum Viable Product","The smallest version of a product that still delivers value."],
+    ["POC","Proof of Concept","A small-scale test to confirm an idea can work."],
+    ["RFP","Request for Proposal","A formal document inviting vendors to bid on work."],
+    ["RFQ","Request for Quote","A formal request for pricing from vendors."],
+    ["USP","Unique Selling Proposition","What sets a product apart from competitors."],
+    ["GTM","Go-to-Market (strategy)","The plan for launching and selling a product."],
+    ["PMF","Product-Market Fit","The point where a product genuinely satisfies demand."]
+  ]},
+  { group:"Org & People", items:[
+    ["C-suite","Chief-level executives (CEO, CFO, COO, etc.)","The most senior leadership tier."],
+    ["VP","Vice President","A senior leadership title, typically above director."],
+    ["SVP / EVP","Senior / Executive Vice President","Even more senior VP tiers."],
+    ["IC","Individual Contributor","An employee without direct reports."],
+    ["HRBP","HR Business Partner","An HR role embedded with a specific business unit."],
+    ["FTE","Full-Time Equivalent","A unit for measuring headcount or workload capacity."],
+    ["DEI","Diversity, Equity & Inclusion","Initiatives focused on fair, inclusive workplaces."],
+    ["L&D","Learning & Development","Training and skill-building programs."],
+    ["1:1","One-on-one (meeting)","A private check-in between a manager and report."]
+  ]},
+  { group:"Tech & Tools", items:[
+    ["API","Application Programming Interface","A way for two pieces of software to talk to each other."],
+    ["SaaS","Software as a Service","Software delivered over the internet, usually by subscription."],
+    ["CRM","Customer Relationship Management (system)","Software for tracking customer and sales interactions."],
+    ["ERP","Enterprise Resource Planning (system)","Software that integrates core business processes."],
+    ["UAT","User Acceptance Testing","Final testing by real users before launch."],
+    ["QA","Quality Assurance","The process of checking work for defects before release."]
+  ]},
+  { group:"Corporate & Legal", items:[
+    ["M&A","Mergers & Acquisitions","The buying, selling, or combining of companies."],
+    ["IPO","Initial Public Offering","A company's first sale of stock to the public."],
+    ["JV","Joint Venture","A business arrangement where two parties share resources."],
+    ["NDA","Non-Disclosure Agreement","A confidentiality contract."],
+    ["LOI","Letter of Intent","A non-binding outline of a planned deal."],
+    ["DD","Due Diligence","A thorough investigation before finalizing a deal."],
+    ["KYC","Know Your Customer","Verification process used before onboarding a client."]
+  ]}
+];
+
+(function renderAbbr(){
+  var out = "";
+  for (var g=0; g<ABBR_GROUPS.length; g++){
+    var grp = ABBR_GROUPS[g];
+    out += '<div class="section-heading">' + escapeHtml(grp.group) + '<span class="tally util">' + grp.items.length + ' terms</span></div>';
+    out += '<div class="abbr-grid">';
+    for (var i=0;i<grp.items.length;i++){
+      var it = grp.items[i];
+      out += '<div class="abbr-card">' +
+        '<div class="abbr-head"><span class="abbr-short">' + escapeHtml(it[0]) + '</span><span class="abbr-long">' + escapeHtml(it[1]) + '</span></div>' +
+        '<div class="abbr-def">' + escapeHtml(it[2]) + '</div>' +
+      '</div>';
+    }
+    out += '</div>';
+  }
+  document.getElementById('abbrMain').innerHTML = out;
+})();
+
+/* ============ INTERVIEW TIPS ============ */
+var TIPS = [
+  { title:"Mirror the job description, don't recite it", body:"Notice the 3–4 terms the posting repeats (e.g. 'cross-functional', 'data-driven') and echo them naturally when they genuinely apply to your experience. Copy-pasting their language back verbatim reads as scripted." },
+  { title:"Use the STAR method to structure stories", body:"Situation, Task, Action, Result. Interviewers are listening for structure as much as content — a rambling answer with a great outcome still lands worse than a tight one." },
+  { title:"Say 'I', not just 'we'", body:"Team accomplishments are easy to describe vaguely. Be specific about what you personally decided, built, or pushed for — that's what the interviewer is actually evaluating." },
+  { title:"Quantify wherever you can", body:"'Improved the process' is forgettable. 'Cut turnaround time by 30%' is not. If you don't have an exact number, a credible estimate ('roughly a third faster') is still far stronger than none." },
+  { title:"Prepare 3–4 flexible stories, not twenty", body:"Most interview questions are variations on: a time you led, a conflict you resolved, a failure you learned from, a result you're proud of. A handful of well-rehearsed stories can flex to cover most of them." },
+  { title:"One or two sharp terms beat ten buzzwords", body:"A well-placed 'we ran a quick MVP to validate demand' sounds fluent. Stacking five buzzwords in one sentence sounds like you're performing rather than explaining." },
+  { title:"Research their specific vocabulary", body:"Look up how the company actually talks about its own goals — their product names, their stated values, whether they use OKRs or KPIs internally. Using their real terms (accurately) signals genuine homework." },
+  { title:"Practice explaining technical work in plain language", body:"If there's any chance a non-technical person is in the room, have a jargon-free version of your work ready. Being able to downshift is itself a signal of seniority." },
+  { title:"Ask questions that use business framing", body:"'How is success measured in this role — are there specific KPIs or OKRs I'd be owning?' shows you're already thinking like someone in the seat." },
+  { title:"Keep the follow-up note human", body:"Reference one specific thing you discussed. A thank-you note stuffed with corporate phrases reads as generic — the goal is to sound like a person they'd want on the team." }
+];
+
+(function renderTips(){
+  var out = "";
+  for (var i=0;i<TIPS.length;i++){
+    out += '<div class="tip-card">' +
+      '<div class="tip-num util">Tip ' + (i+1) + '</div>' +
+      '<div class="tip-title">' + escapeHtml(TIPS[i].title) + '</div>' +
+      '<div class="tip-body">' + escapeHtml(TIPS[i].body) + '</div>' +
+    '</div>';
+  }
+  document.getElementById('tipsMain').innerHTML = out;
+})();
+
+/* ============ ANSWER LIKE A PRO ============ */
+var QA = [
+  { q:"Tell me about yourself", fw:"Framework: Present \u2192 Past \u2192 Future", ex:"\"Right now I'm a [role] focused on [core responsibility]. Before that, I [relevant past experience that built toward this]. What's drawing me to this role is [specific, genuine reason tied to the company/team].\" Keep it to about 60–90 seconds — this is a trailer, not the whole film." },
+  { q:"Why do you want to work here?", fw:"Framework: Specific reason + evidence you did the homework", ex:"\"I've been following [specific product, initiative, or public statement] and I think my background in [relevant skill] could genuinely contribute to [specific team goal] — that's a more compelling fit for me than a role where I'd just be applying the same skills in a vacuum.\" Avoid generic lines like 'great culture' or 'exciting opportunity' with nothing backing them up." },
+  { q:"What's your greatest weakness?", fw:"Framework: Genuine gap + concrete action you've taken on it", ex:"\"I used to default to doing tasks myself rather than delegating, because it felt faster. I've been deliberately handing off [specific type of task] to build trust in the process — it's slower up front but the team output is better.\" Skip the humble-brag disguised weakness ('I work too hard') — interviewers see through it instantly." },
+  { q:"Tell me about a time you failed", fw:"Framework: STAR + the lesson, stated plainly", ex:"\"On [project], I underestimated [specific factor] and we missed a deadline. Once I saw it slipping I [action taken to recover]. The real lesson was [specific, applied change to how you work now] — I've used that since on [example].\" Own the failure without over-apologizing; the lesson is the point." },
+  { q:"Why should we hire you?", fw:"Framework: Your specific edge, tied to their specific need", ex:"\"Based on what you've described, this role needs someone who can [key requirement]. In my last role I [specific proof point], which is directly the muscle you'd need here from day one.\" This is not the moment for generic enthusiasm — it's the moment for the sharpest, most relevant proof point you have." },
+  { q:"Where do you see yourself in 5 years?", fw:"Framework: Growth direction, not a job title", ex:"\"I'd like to have gone deeper into [specific skill/domain] and be someone others come to for [specific kind of judgment]. I'm less locked into a specific title and more focused on taking on bigger, more ambiguous problems over time.\" Realistic and growth-oriented beats a rehearsed org-chart answer." }
+];
+
+(function renderQA(){
+  var out = "";
+  for (var i=0;i<QA.length;i++){
+    out += '<div class="qa-card">' +
+      '<div class="qa-q">' + escapeHtml(QA[i].q) + '</div>' +
+      '<div class="qa-framework util">' + escapeHtml(QA[i].fw) + '</div>' +
+      '<div class="qa-example">' + escapeHtml(QA[i].ex) + '</div>' +
+    '</div>';
+  }
+  document.getElementById('qaMain').innerHTML = out;
+})();
+
+/* ============ FAQ ============ */
+var FAQS = [
+  { q:"What's the actual difference between a KPI and a KRI?", a:"A KPI (Key Performance Indicator) tracks progress toward a goal you want to hit — like revenue growth. A KRI (Key Risk Indicator) tracks early warning signs of something going wrong — like rising customer complaints. KPIs tell you if you're winning; KRIs tell you if you're about to lose." },
+  { q:"What's the difference between a KPI and an OKR?", a:"An OKR (Objective and Key Results) is a goal-setting framework: a qualitative Objective paired with a few measurable Key Results. A KPI is just one ongoing metric you track. In practice, KPIs often become the Key Results inside an OKR." },
+  { q:"Is it a good idea to use corporate jargon in an interview?", a:"A little, used precisely, signals fluency. Too much reads as evasive or scripted. The safest approach: use plain language for your actual story, and drop in a term only where it's genuinely the most accurate word — not to sound impressive." },
+  { q:"What does it actually mean when someone says they 'don't have bandwidth'?", a:"Almost always: this isn't a priority for me right now, or I don't want to do it and this is a polite way to decline. It's rarely a literal, hour-by-hour calendar calculation." },
+  { q:"Is 'synergy' a real business benefit or just a buzzword?", a:"Both, depending on who's using it. The underlying idea — that combining teams or products can create more value than they'd generate separately — is real and measurable. In everyday use, though, it's often deployed without any specific measurable benefit attached, which is why it gets mocked." },
+  { q:"What's the difference between ROI and NPS?", a:"ROI (Return on Investment) measures financial payback relative to cost. NPS (Net Promoter Score) measures customer loyalty via a single survey question. One is about money, the other about sentiment — they're often tracked side by side but answer different questions." },
+  { q:"My manager uses jargon I don't fully understand — what should I do?", a:"Ask, plainly and without apology: 'Can you say that in a more concrete way — what would that look like day to day?' Good managers will respect the question. If the term keeps coming up, this glossary is a reasonable place to check first." },
+  { q:"How many buzzwords is too many in one meeting?", a:"There's no fixed number, but a useful test: if you removed every buzzword from what you just said, would there still be a clear, specific point left? If not, the jargon was doing the work the substance should have been doing." },
+  { q:"Should I use jargon on my resume?", a:"Use industry-standard terms the role's applicant tracking system and recruiters will expect (KPI, ROI, cross-functional, etc.) but pair every one with a specific, quantified result. Jargon without a number attached reads as filler." },
+  { q:"What's the fastest way to sound fluent without overdoing it?", a:"Speak in specifics first, and let the occasional precise term punctuate — not replace — the specifics. 'We shipped an MVP in six weeks to validate demand before committing engineering time' sounds sharper than 'we leveraged an agile, iterative framework to drive synergistic outcomes.'" }
+];
+
+(function renderFAQ(){
+  var out = "";
+  for (var i=0;i<FAQS.length;i++){
+    out += '<details class="faq">' +
+      '<summary>' + escapeHtml(FAQS[i].q) + '</summary>' +
+      '<div class="faq-a">' + escapeHtml(FAQS[i].a) + '</div>' +
+    '</details>';
+  }
+  document.getElementById('faqMain').innerHTML = out;
+})();
+
+</script>
+</body>
+</html>
