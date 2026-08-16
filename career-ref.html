@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5">
+<meta name="color-scheme" content="light">
+<title>The Career Toolkit — Resume, Email & Negotiation</title>
+<style>
+  :root{
+    color-scheme: light;
+    --ivory:#FAF6EC;
+    --ivory-2:#F1EADB;
+    --navy:#14213D;
+    --navy-deep:#0B1526;
+    --navy-soft:#2A3A5C;
+    --gold:#B8892B;
+    --gold-light:#E8C766;
+    --ink:#2A2A28;
+    --line:#DED2B5;
+    --card:#FFFEFA;
+    --green:#3F6B4A;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;padding:0;background:var(--ivory);}
+  body{ color:var(--ink); font-family:Georgia,'Times New Roman',serif; -webkit-text-size-adjust:100%; padding-bottom:60px; }
+  .util{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;}
+  input, button, select, textarea { font-family:inherit; -webkit-appearance:none; appearance:none; border-radius:10px; }
+
+  header.hero{
+    background:linear-gradient(160deg,var(--navy) 0%, var(--navy-deep) 100%);
+    color:var(--ivory); padding:34px 18px 24px; text-align:center; border-bottom:4px solid var(--gold);
+  }
+  .hero .eyebrow{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; letter-spacing:.18em; text-transform:uppercase; font-size:11px; color:var(--gold-light); margin-bottom:10px; }
+  .hero h1{ font-size:clamp(24px,7vw,38px); margin:0 0 8px; font-weight:700; }
+  .hero p.sub{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; color:#CBD3E1; font-size:14px; max-width:580px; margin:0 auto; line-height:1.5; }
+  .hero .credit{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; display:inline-block; margin-top:16px; padding:8px 20px;
+    border-top:1.5px solid var(--gold); border-bottom:1.5px solid var(--gold); color:var(--gold-light);
+    font-size:13px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+  }
+
+  nav.quicknav{
+    position:sticky; top:0; z-index:30; background:var(--navy-deep); border-bottom:3px solid var(--gold);
+    overflow-x:auto; -webkit-overflow-scrolling:touch; white-space:nowrap; padding:0 8px;
+  }
+  nav.quicknav a{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; display:inline-block; color:#D9DEE9; text-decoration:none;
+    font-size:13px; font-weight:600; padding:13px 12px; border-bottom:3px solid transparent;
+  }
+  nav.quicknav a:active, nav.quicknav a:focus{ color:var(--gold-light); border-bottom-color:var(--gold); }
+
+  main{max-width:900px;margin:0 auto;padding:0 12px;}
+  section.block{ padding-top:26px; }
+  .block-title{ font-size:22px; color:var(--navy-deep); margin:0 0 4px; }
+  .block-sub{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:13px; color:var(--navy-soft); margin:0 0 16px; line-height:1.5; }
+  .section-heading{
+    font-size:18px; color:var(--navy); border-bottom:2px solid var(--gold); padding-bottom:6px; margin:22px 0 12px;
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  }
+  .section-heading .tally{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:12px; color:var(--gold); font-weight:600; }
+
+  /* RESUME DECODER */
+  .word-card{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--navy); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
+  .word-term{ font-size:17px; font-weight:700; color:var(--navy-deep); }
+  .word-why{ font-size:13.5px; line-height:1.5; margin:6px 0; color:#5B4A1F; background:#FBF2DA; border-radius:6px; padding:8px 10px; }
+  .word-why b{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--gold); }
+  .word-fix{ font-size:14px; line-height:1.5; margin-top:8px; }
+  .word-fix b{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--green); }
+  .word-example{ font-size:13.5px; font-style:italic; margin-top:6px; padding-left:10px; border-left:3px solid var(--green); color:var(--navy-deep); }
+
+  /* EMAIL VAULT */
+  .email-card{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:14px 16px; margin-bottom:14px; }
+  .email-scenario{ font-size:11px; text-transform:uppercase; letter-spacing:.05em; font-weight:700; color:var(--gold); font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; margin-bottom:6px; }
+  .email-subject{ font-size:15.5px; font-weight:700; color:var(--navy-deep); margin-bottom:8px; }
+  .email-subject span{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-weight:400; font-size:12px; color:var(--navy-soft); display:block; margin-bottom:2px; }
+  .email-body{ font-size:14px; line-height:1.6; white-space:pre-wrap; background:var(--ivory-2); border-radius:6px; padding:12px; }
+  .copy-btn{
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:12.5px; font-weight:700;
+    background:var(--navy); color:var(--gold-light); border:none; border-radius:8px; padding:9px 14px; margin-top:10px; min-height:38px; cursor:pointer;
+  }
+  .copy-btn.copied{ background:var(--green); color:#fff; }
+
+  /* NEGOTIATION */
+  .neg-card{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--gold); border-radius:8px; padding:14px 16px; margin-bottom:12px; }
+  .neg-scenario{ font-size:16.5px; font-weight:700; color:var(--navy-deep); margin-bottom:8px; }
+  .neg-script{ font-size:14px; font-style:italic; line-height:1.6; background:var(--ivory-2); border-radius:6px; padding:10px 12px; }
+  .tactic-card{ background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+  .tactic-line{ font-size:15px; font-weight:700; color:var(--navy-deep); }
+  .tactic-meaning{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--gold); margin-top:6px; }
+  .tactic-response{ font-size:13.5px; line-height:1.5; margin-top:2px; }
+  .principle-card{ background:var(--card); border:1px solid var(--line); border-left:4px solid var(--navy); border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+  .principle-title{ font-size:15px; font-weight:700; color:var(--navy-deep); margin-bottom:4px; }
+  .principle-body{ font-size:13.5px; line-height:1.5; }
+
+  footer{ text-align:center; padding:34px 16px 20px; color:var(--navy); }
+  footer .note{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; font-size:11.5px; color:#8A7E5C; margin-top:6px; max-width:520px; margin-left:auto; margin-right:auto; }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="eyebrow util">Field Guide for the Modern Office</div>
+  <h1>The Career Toolkit</h1>
+  <p class="sub">Fix your resume's weakest words, send emails you don't have to agonize over, and negotiate without flinching.</p>
+  <div class="credit">Curated and Compiled by Sujit Kulkarni</div>
+</header>
+
+<nav class="quicknav util">
+  <a href="#resume">Resume Decoder</a>
+  <a href="#emails">Email Templates</a>
+  <a href="#negotiation">Negotiation Playbook</a>
+</nav>
+
+<main>
+
+<!-- ================= RESUME DECODER ================= -->
+<section class="block" id="resume">
+  <h2 class="block-title">Resume Jargon Decoder</h2>
+  <p class="block-sub">The words recruiters see on every third resume — and how to say the same thing with actual evidence behind it.</p>
+  <div id="resumeMain"></div>
+</section>
+
+<!-- ================= EMAIL TEMPLATES ================= -->
+<section class="block" id="emails">
+  <h2 class="block-title">Email Templates Vault</h2>
+  <p class="block-sub">Copy-ready templates for the emails that are hardest to start writing. Tap "Copy" to grab the text, then adjust the [bracketed] parts.</p>
+  <div id="emailMain"></div>
+</section>
+
+<!-- ================= NEGOTIATION PLAYBOOK ================= -->
+<section class="block" id="negotiation">
+  <h2 class="block-title">Negotiation Playbook</h2>
+  <p class="block-sub">Scripts for the moment you're actually negotiating, plus the common tactics used on you and how to answer them.</p>
+  <div id="negMain"></div>
+</section>
+
+</main>
+
+<footer>
+  <div class="note">Career reference guide. Not legal or financial advice — for high-stakes negotiations (offers, severance, equity), consider having a professional review specifics. Not affiliated with any company or platform mentioned.</div>
+</footer>
+
+<script>
+"use strict";
+
+function escapeHtml(str){
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ============ RESUME DECODER DATA ============ */
+var RESUME_GROUPS = [
+  { group:"Overused Action Verbs", items:[
+    ["Spearheaded","Nearly every resume claims to have 'spearheaded' something — it's lost all specificity.","Say what you actually did and lead with the result.","\"Led a 5-person team to launch [X], cutting delivery time by 20%.\""],
+    ["Leveraged","Vague filler verb that doesn't say how something was used.","Name the specific tool or resource and what it produced.","\"Used existing customer data to build a churn model that flagged at-risk accounts weekly.\""],
+    ["Utilized","A longer, stiffer way of saying 'used' — adds no information.","Just say 'used', and follow it with a concrete outcome.","\"Used A/B testing to raise signup conversion by 12%.\""],
+    ["Orchestrated","Sounds grand but is often applied to routine coordination work.","Describe the actual scope — how many people, systems, or moving parts.","\"Coordinated a 3-team launch across engineering, design, and marketing.\""],
+    ["Championed","Vague enthusiasm-word with no measurable claim attached.","State what you pushed for and what changed because you did.","\"Pushed for a code-review process that cut production bugs by 40%.\""],
+    ["Streamlined","Common claim that rarely comes with a before/after number.","Give the specific before-and-after, even roughly.","\"Cut a 6-step approval process down to 2 steps, saving ~3 hours/week.\""]
+  ]},
+  { group:"Vague Qualifiers & Fluff", items:[
+    ["Results-driven","A qualifier that describes almost every candidate and proves nothing on its own.","Delete it and let an actual result do the talking.","Instead of 'results-driven professional', open directly with the result: \"Grew regional sales 18% YoY.\""],
+    ["Detail-oriented","Nearly impossible to verify and rarely followed by evidence.","Show it through a specific example of catching or preventing an error.","\"Caught a pricing error in a client contract before signing, avoiding a $40K loss.\""],
+    ["Team player","Assumed baseline, not a differentiator — every job posting expects this.","Describe a specific collaboration and what it produced.","\"Partnered with design and support to cut ticket resolution time by 25%.\""],
+    ["Hard worker","Unverifiable and generic — every candidate would claim this.","Let scope, hours, or output speak for itself instead.","Replace with a concrete workload detail: \"Managed 15 concurrent client accounts.\""],
+    ["Passionate about","Common opener that reads as filler unless backed by action.","Show the passion through what you built or pursued on your own initiative.","\"Built a side project analyzing local transit data, later adopted by the city's open-data team.\""],
+    ["Fast learner","Hard to prove and easy to claim.","Point to a specific skill picked up quickly, with a timeframe.","\"Learned SQL and shipped my first dashboard within 3 weeks of joining.\""]
+  ]},
+  { group:"Buzzwordy Soft Skills", items:[
+    ["Synergized with stakeholders","Corporate-speak that obscures who you actually worked with and why.","Name the actual stakeholders and the concrete outcome of working with them.","\"Worked with finance and product leads to align pricing before the Q3 launch.\""],
+    ["Thought leadership","Hard to substantiate without external proof.","Point to something publicly verifiable — a talk, article, or adopted framework.","\"Wrote an internal playbook on onboarding that was adopted by 3 other teams.\""],
+    ["Dynamic self-starter","A string of adjectives with nothing behind them.","Show self-direction through something you initiated without being asked.","\"Identified a gap in onboarding docs and wrote a guide now used company-wide.\""],
+    ["Cutting-edge / innovative","Subjective label that means nothing without a specific example.","Describe the actual new approach and what made it different.","\"Introduced automated testing to a team that had none, cutting release bugs by 30%.\""],
+    ["Proven track record","Claims proof without providing any.","Replace the phrase entirely with the proof itself.","Just list the result: \"Increased retention from 72% to 85% over 12 months.\""],
+    ["Go-getter","Informal filler with no measurable content.","Cut it — let the resume's actual achievements imply the trait.","No replacement needed — delete and move straight to results."]
+  ]}
+];
+
+(function renderResume(){
+  var out = "";
+  for (var g=0; g<RESUME_GROUPS.length; g++){
+    var grp = RESUME_GROUPS[g];
+    out += '<div class="section-heading">' + escapeHtml(grp.group) + '<span class="tally util">' + grp.items.length + ' terms</span></div>';
+    for (var i=0;i<grp.items.length;i++){
+      var it = grp.items[i];
+      out += '<div class="word-card">' +
+        '<div class="word-term">' + escapeHtml(it[0]) + '</div>' +
+        '<div class="word-why"><b class="util">Why it\'s weak: </b>' + escapeHtml(it[1]) + '</div>' +
+        '<div class="word-fix"><b class="util">Fix: </b>' + escapeHtml(it[2]) + '</div>' +
+        '<div class="word-example">' + escapeHtml(it[3]) + '</div>' +
+      '</div>';
+    }
+  }
+  document.getElementById('resumeMain').innerHTML = out;
+})();
+
+/* ============ EMAIL TEMPLATES DATA ============ */
+var EMAILS = [
+  { scenario:"Asking for a raise", subject:"Requesting time to discuss my compensation",
+    body:"Hi [Manager's name],\n\nI'd like to set up some time to talk about my compensation. Over the past [timeframe], I've [1-2 specific achievements with measurable impact], and I'd like to discuss aligning my salary with that scope.\n\nWould you have 20-30 minutes sometime in the next couple of weeks? Happy to work around your calendar.\n\nThanks,\n[Your name]" },
+  { scenario:"Declining a meeting", subject:"Re: [Meeting name] — won't be able to make it",
+    body:"Hi [Name],\n\nThanks for the invite — I won't be able to join this one, as it overlaps with [brief reason, optional]. Could you loop me in on the notes afterward, or let me know if there's anything specific you need from me beforehand?\n\nHappy to sync separately if useful.\n\nBest,\n[Your name]" },
+  { scenario:"Chasing a late payment or invoice", subject:"Following up on invoice #[number]",
+    body:"Hi [Name],\n\nJust following up on invoice #[number] for [amount], sent on [date], which was due on [due date]. I wanted to check if it's still in progress on your end, or if there's anything blocking payment I can help resolve.\n\nCould you let me know an updated timeline? Happy to resend the invoice if that's helpful.\n\nThanks,\n[Your name]" },
+  { scenario:"Giving hard feedback", subject:"Quick thoughts after [project/meeting]",
+    body:"Hi [Name],\n\nWanted to share some feedback on [specific situation] while it's fresh. [Specific, factual observation — what happened, not a character judgment]. I think [specific, concrete suggestion for next time] would help going forward.\n\nHappy to talk it through if useful — let me know.\n\n[Your name]" },
+  { scenario:"Following up after an interview", subject:"Thank you — following up on [role title]",
+    body:"Hi [Name],\n\nThank you for taking the time to talk through [role title] with me — I especially enjoyed our discussion about [specific topic from the conversation]. It reinforced why I think my background in [relevant skill] would fit well with [specific team goal mentioned].\n\nLet me know if there's anything further you need from my side. Looking forward to hearing about next steps.\n\nBest,\n[Your name]" },
+  { scenario:"Turning down a job offer", subject:"Re: Offer for [role title]",
+    body:"Hi [Name],\n\nThank you again for the offer, and for the time everyone took throughout the process — I really enjoyed learning about [team/company]. After careful consideration, I've decided to decline, as I've accepted another opportunity that's a closer fit for [brief, honest reason] right now.\n\nI'd love to stay in touch, and I hope our paths cross again.\n\nBest,\n[Your name]" },
+  { scenario:"Requesting a deadline extension", subject:"Requesting a short extension on [project/deliverable]",
+    body:"Hi [Name],\n\nI wanted to flag early that [project/deliverable] is at risk of slipping past [original deadline], due to [brief, honest reason]. I'd like to request until [new date] to deliver it properly.\n\nHere's where things currently stand: [1-2 line status]. Let me know if that timeline works, or if there's a way I can prioritize differently on my end.\n\nThanks for understanding,\n[Your name]" },
+  { scenario:"Resigning professionally", subject:"Resignation — [Your name]",
+    body:"Hi [Manager's name],\n\nI'm writing to let you know I've decided to resign from my role as [title], effective [last working day, typically 2 weeks out]. This wasn't an easy decision — I've genuinely valued my time here and especially [specific positive, optional].\n\nI'm committed to a smooth handover and happy to help document my work or train someone during the transition.\n\nThank you for the opportunity.\n\n[Your name]" }
+];
+
+(function renderEmails(){
+  var out = "";
+  for (var i=0;i<EMAILS.length;i++){
+    var em = EMAILS[i];
+    out += '<div class="email-card">' +
+      '<div class="email-scenario">' + escapeHtml(em.scenario) + '</div>' +
+      '<div class="email-subject"><span class="util">Subject</span>' + escapeHtml(em.subject) + '</div>' +
+      '<div class="email-body">' + escapeHtml(em.body) + '</div>' +
+      '<button type="button" class="copy-btn" data-idx="' + i + '">Copy email</button>' +
+    '</div>';
+  }
+  document.getElementById('emailMain').innerHTML = out;
+
+  var btns = document.querySelectorAll('.copy-btn');
+  for (var b=0;b<btns.length;b++){
+    btns[b].addEventListener('click', function(){
+      var idx = Number(this.getAttribute('data-idx'));
+      var em = EMAILS[idx];
+      var fullText = "Subject: " + em.subject + "\n\n" + em.body;
+      var btn = this;
+      copyToClipboard(fullText, function(success){
+        btn.textContent = success ? "Copied \u2713" : "Select & copy manually";
+        btn.classList.toggle('copied', success);
+        setTimeout(function(){ btn.textContent = "Copy email"; btn.classList.remove('copied'); }, 2200);
+      });
+    });
+  }
+})();
+
+function copyToClipboard(text, cb){
+  if (navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(function(){ cb(true); }).catch(function(){ fallbackCopy(text, cb); });
+  } else {
+    fallbackCopy(text, cb);
+  }
+}
+function fallbackCopy(text, cb){
+  try{
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    var ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    cb(!!ok);
+  } catch(e){
+    cb(false);
+  }
+}
+
+/* ============ NEGOTIATION PLAYBOOK DATA ============ */
+var NEG_SCRIPTS = [
+  { scenario:"Countering an initial salary offer", script:"\"Thank you for the offer — I'm genuinely excited about this role. Based on my experience with [specific relevant skill/achievement] and current market range for this position, I was hoping we could get closer to [target number]. Is there flexibility there?\"" },
+  { scenario:"You have a competing offer", script:"\"I want to be upfront that I've also received an offer from another company at [range, optional to disclose exact number]. This role is genuinely my preference — is there room to bring the offer closer to that range so I can confidently accept?\"" },
+  { scenario:"Negotiating non-salary perks", script:"\"I understand the salary band may be fixed at this stage. Would there be flexibility on [signing bonus / extra PTO / remote flexibility / title / start date] instead?\"" },
+  { scenario:"When they say 'this is our best and final offer'", script:"\"I appreciate you being direct about that. Before I give my final answer, is there anything on the timeline or structure — like a 6-month review with a built-in raise — that could be added instead?\"" },
+  { scenario:"Negotiating a promotion, not just an offer", script:"\"Over the past [timeframe] I've taken on [specific added scope], which is a step beyond my current title. I'd like to talk about what it would take to formalize that into a promotion and adjusted compensation.\"" }
+];
+
+var NEG_TACTICS = [
+  { line:"\"This isn't something we typically negotiate.\"", meaning:"An anchor, not always a hard fact. Ranges usually exist even when a company prefers not to advertise it.", response:"\"I understand — I just want to make sure we're both comfortable before I accept. Is there any flexibility at all, even on start date or benefits?\"" },
+  { line:"\"We need an answer by tomorrow.\"", meaning:"Manufactured urgency to prevent you from comparing offers or thinking it through.", response:"\"I want to give this the consideration it deserves — could I get until [specific, reasonable date] to confirm?\"" },
+  { line:"\"That's above the budget for this role.\"", meaning:"Could be true, or could be an opening anchor to see if you'll accept less without pushing.", response:"\"Understood. If the base is fixed, is there room on signing bonus, equity, or review timeline instead?\"" },
+  { line:"\"Everyone at this level is paid the same.\"", meaning:"A fairness framing meant to close off further discussion.", response:"\"That makes sense for the band — is there room to discuss which level this role should actually be leveled at, given the scope?\"" },
+  { line:"An unusually low first offer", meaning:"A classic anchoring tactic — starting low to shift your reference point downward.", response:"Don't anchor to their number. Counter based on your own research: \"Based on market data for this role, I was expecting closer to [target].\"" },
+  { line:"\"What's your current salary?\"", meaning:"Can be used to anchor your new offer to your old (possibly underpaid) one.", response:"\"I'd prefer to focus on the value I'd bring to this role and the market range for it, rather than my current pay.\"" },
+  { line:"Long silence after you make a counter", meaning:"Sometimes a deliberate pressure tactic to make you feel you asked for too much and fill the silence with a concession.", response:"Let it sit. Silence is not a no — wait for their actual response before offering anything further." },
+  { line:"\"We really want you, so let's not overcomplicate this.\"", meaning:"Flattery used to discourage you from pushing further on terms.", response:"\"I appreciate that, genuinely — and because I want this to work long-term, I want to make sure the terms are right from the start.\"" }
+];
+
+var NEG_PRINCIPLES = [
+  { title:"Never give the first number if you can avoid it", body:"Whoever anchors first sets the reference point for the whole conversation. If asked for a number early, redirect to a range based on market research, or ask what the budgeted range is first." },
+  { title:"Negotiate the whole package, not just base salary", body:"Signing bonus, equity, PTO, remote flexibility, title, and start date are all negotiable levers — sometimes with more room to move than base pay." },
+  { title:"Get everything in writing", body:"Verbal promises made during negotiation ('we'll revisit this in 6 months') should be confirmed in the offer letter or a follow-up email before you rely on them." },
+  { title:"Silence is a tool, not a threat", body:"A pause after you state your ask feels uncomfortable, but filling it with a concession before they've even responded gives away leverage for nothing." },
+  { title:"Know your walk-away point before the conversation starts", body:"Decide in advance the minimum you'd accept. Negotiating without that clarity makes it easy to talk yourself into a worse deal in the moment." }
+];
+
+(function renderNeg(){
+  var out = "";
+  out += '<div class="section-heading">Salary & Offer Scripts<span class="tally util">' + NEG_SCRIPTS.length + '</span></div>';
+  for (var i=0;i<NEG_SCRIPTS.length;i++){
+    out += '<div class="neg-card">' +
+      '<div class="neg-scenario">' + escapeHtml(NEG_SCRIPTS[i].scenario) + '</div>' +
+      '<div class="neg-script">' + escapeHtml(NEG_SCRIPTS[i].script) + '</div>' +
+    '</div>';
+  }
+
+  out += '<div class="section-heading">Common Tactics, Decoded<span class="tally util">' + NEG_TACTICS.length + '</span></div>';
+  for (var j=0;j<NEG_TACTICS.length;j++){
+    out += '<div class="tactic-card">' +
+      '<div class="tactic-line">' + escapeHtml(NEG_TACTICS[j].line) + '</div>' +
+      '<div class="tactic-meaning util">What it usually means</div>' +
+      '<div class="tactic-response">' + escapeHtml(NEG_TACTICS[j].meaning) + '</div>' +
+      '<div class="tactic-meaning util">What to say back</div>' +
+      '<div class="tactic-response">' + escapeHtml(NEG_TACTICS[j].response) + '</div>' +
+    '</div>';
+  }
+
+  out += '<div class="section-heading">Core Principles<span class="tally util">' + NEG_PRINCIPLES.length + '</span></div>';
+  for (var k=0;k<NEG_PRINCIPLES.length;k++){
+    out += '<div class="principle-card">' +
+      '<div class="principle-title">' + escapeHtml(NEG_PRINCIPLES[k].title) + '</div>' +
+      '<div class="principle-body">' + escapeHtml(NEG_PRINCIPLES[k].body) + '</div>' +
+    '</div>';
+  }
+
+  document.getElementById('negMain').innerHTML = out;
+})();
+
+</script>
+</body>
+</html>
