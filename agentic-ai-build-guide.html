@@ -1,0 +1,2551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>100 Agentic AI Build Ideas — The Complete Guide</title>
+<style>
+  :root{
+    --ivory:#FBF6EA;
+    --ivory-deep:#F5EEDC;
+    --navy:#0B1F3A;
+    --navy-deep:#081729;
+    --navy-soft:#1C3358;
+    --gold:#B8912F;
+    --gold-bright:#D4AF37;
+    --gold-pale:#E8D9A8;
+    --ink:#1A2233;
+    --line:#D8CBA0;
+    --panel:#FFFDF6;
+    --shadow: 0 6px 24px rgba(11,31,58,0.10);
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ivory);
+    color:var(--ink);
+    font-family: Georgia, 'Times New Roman', serif;
+    line-height:1.6;
+  }
+  .util{ font-family: 'Trebuchet MS', Verdana, Arial, sans-serif; }
+
+  /* ===== Top App Bar ===== */
+  #appbar{
+    position:sticky; top:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    background:linear-gradient(180deg,var(--navy) 0%, var(--navy-deep) 100%);
+    color:var(--gold-pale);
+    padding:14px 20px;
+    border-bottom:3px solid var(--gold);
+    box-shadow:var(--shadow);
+  }
+  #appbar .brand{
+    display:flex; align-items:center; gap:12px;
+  }
+  #appbar .brand .mark{
+    width:34px;height:34px;border-radius:50%;
+    border:2px solid var(--gold-bright);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Trebuchet MS',sans-serif; font-weight:bold; color:var(--gold-bright);
+    font-size:14px;
+  }
+  #appbar h1{
+    font-size:17px; margin:0; letter-spacing:0.4px; color:#FFF7E0;
+    font-weight:600;
+  }
+  #appbar .sub{ font-size:11px; color:var(--gold-pale); opacity:0.85; }
+
+  #navToggleBtn{
+    font-family:'Trebuchet MS',sans-serif;
+    background:transparent;
+    border:1px solid var(--gold);
+    color:var(--gold-bright);
+    padding:8px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:12.5px;
+    letter-spacing:0.5px;
+    transition: all .2s ease;
+    white-space:nowrap;
+  }
+  #navToggleBtn:hover{ background:var(--gold); color:var(--navy-deep); }
+  #navToggleBtn:focus-visible{ outline:2px solid var(--gold-bright); outline-offset:2px; }
+
+  /* ===== Layout shell ===== */
+  #shell{ display:flex; align-items:flex-start; min-height:100vh; }
+
+  /* ===== Sidebar / Index ===== */
+  #sidebar{
+    width:290px; flex-shrink:0;
+    background:var(--ivory-deep);
+    border-right:2px solid var(--line);
+    height:calc(100vh - 64px);
+    position:sticky; top:64px;
+    overflow-y:auto;
+    padding:18px 16px 40px;
+    transition: margin-left .28s ease, opacity .2s ease;
+  }
+  #sidebar.collapsed{ margin-left:-290px; opacity:0; pointer-events:none; }
+  #sidebar h2{
+    font-family:'Trebuchet MS',sans-serif;
+    font-size:12px; text-transform:uppercase; letter-spacing:1.4px;
+    color:var(--navy-soft); margin:6px 4px 12px;
+    border-bottom:1px solid var(--line); padding-bottom:8px;
+  }
+  .toc-stage{
+    display:block; text-decoration:none; color:var(--navy);
+    font-family:'Trebuchet MS',sans-serif; font-size:13.5px;
+    padding:9px 10px; border-radius:8px; margin-bottom:3px;
+    border-left:3px solid transparent;
+  }
+  .toc-stage .n{
+    display:inline-block; width:20px; color:var(--gold); font-weight:bold;
+  }
+  .toc-stage:hover, .toc-stage.active{
+    background:#fff; border-left:3px solid var(--gold-bright);
+    box-shadow:var(--shadow);
+  }
+  .toc-stage.disabled{ color:#9a9584; cursor:default; }
+  .toc-stage.disabled:hover{ background:none; border-left:3px solid transparent; box-shadow:none; }
+  .toc-note{
+    font-size:11px; color:#7d7660; font-family:'Trebuchet MS',sans-serif;
+    padding:2px 10px 14px 33px; margin-top:-4px;
+  }
+
+  /* ===== Ask Sujit static box ===== */
+  #askSujit{
+    margin-top:22px; border:1.5px solid var(--gold); border-radius:14px;
+    background:var(--panel); padding:14px; box-shadow:var(--shadow);
+  }
+  #askSujit .as-head{
+    display:flex; align-items:center; gap:8px; margin-bottom:8px;
+    font-family:'Trebuchet MS',sans-serif; font-weight:bold; color:var(--navy);
+    font-size:13px;
+  }
+  #askSujit .as-dot{
+    width:8px;height:8px;border-radius:50%;background:var(--gold-bright);
+  }
+  #askSujit input[type="text"]{
+    width:100%; padding:9px 10px; border-radius:8px;
+    border:1px solid var(--line); font-family:'Trebuchet MS',sans-serif;
+    font-size:12.5px; background:#fff; color:var(--ink);
+  }
+  #askSujit input[type="text"]:focus-visible{ outline:2px solid var(--gold-bright); }
+  #askSujit .as-hint{
+    font-size:10.5px; color:#8a8368; margin-top:6px; font-family:'Trebuchet MS',sans-serif;
+  }
+  #askSujitAnswer{
+    margin-top:10px; font-size:12.5px; font-family:'Trebuchet MS',sans-serif;
+    color:var(--navy-soft); background:var(--ivory); border-radius:8px;
+    padding:10px; display:none; border:1px dashed var(--line);
+  }
+  #askSujitAnswer a{ color:var(--navy); font-weight:bold; }
+
+  /* ===== Main content ===== */
+  #main{ flex:1; min-width:0; padding:36px 44px 100px; max-width:980px; margin:0 auto; }
+
+  #hero{
+    text-align:center; margin-bottom:44px; padding-bottom:26px;
+    border-bottom:2px solid var(--line);
+  }
+  #hero .eyebrow{
+    font-family:'Trebuchet MS',sans-serif; letter-spacing:3px; font-size:11.5px;
+    color:var(--gold); text-transform:uppercase; margin-bottom:10px;
+  }
+  #hero h1{
+    font-size:clamp(28px,4.5vw,44px); color:var(--navy); margin:0 0 8px;
+    letter-spacing:0.3px;
+  }
+  #hero h2{
+    font-family:'Trebuchet MS',sans-serif; font-weight:400; font-size:15px;
+    color:var(--navy-soft); margin:0 0 16px;
+  }
+  #hero .credit{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Trebuchet MS',sans-serif; font-size:13px; color:var(--navy);
+    letter-spacing:0.5px; margin-top:6px;
+    background:var(--gold-pale); border:1px solid var(--gold);
+    padding:7px 16px; border-radius:22px;
+  }
+  #hero .credit .star{ color:var(--gold); font-size:14px; }
+  #hero .credit b{ color:var(--navy-deep); }
+
+  /* progress rail */
+  #stageRail{
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-top:22px;
+  }
+  #stageRail span{
+    font-family:'Trebuchet MS',sans-serif; font-size:10.5px;
+    padding:5px 10px; border-radius:14px; border:1px solid var(--line);
+    color:#8a8368; background:var(--ivory-deep);
+  }
+  #stageRail span.built{
+    border-color:var(--gold); color:var(--navy); background:var(--gold-pale);
+    font-weight:bold;
+  }
+
+  section.stage{ margin-bottom:60px; scroll-margin-top:80px; }
+  section.stage .stage-head{
+    display:flex; align-items:baseline; gap:14px; margin-bottom:6px;
+  }
+  section.stage .stage-num{
+    font-family:'Trebuchet MS',sans-serif; font-size:13px; font-weight:bold;
+    color:#fff; background:var(--navy); padding:4px 11px; border-radius:20px;
+    letter-spacing:1px;
+  }
+  section.stage h2{ font-size:26px; color:var(--navy); margin:0; }
+  section.stage .goal{
+    font-family:'Trebuchet MS',sans-serif; font-size:13.5px; color:var(--gold);
+    margin:4px 0 24px 0; font-style:italic;
+  }
+
+  .idea{
+    background:var(--panel); border:1px solid var(--line); border-radius:14px;
+    margin-bottom:18px; padding:18px 22px; box-shadow:var(--shadow);
+    scroll-margin-top:80px;
+  }
+  .idea .idea-head{
+    display:flex; align-items:center; gap:12px; margin-bottom:10px;
+    flex-wrap:wrap;
+  }
+  .idea .idea-num{
+    font-family:'Trebuchet MS',sans-serif; font-weight:bold; color:var(--navy-deep);
+    background:var(--gold-pale); border:1px solid var(--gold);
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:13px;
+    flex-shrink:0;
+  }
+  .idea h3{ font-size:19px; color:var(--navy); margin:0; flex:1; }
+  .bookmark-link{
+    font-family:'Trebuchet MS',sans-serif; font-size:10.5px; color:var(--gold);
+    text-decoration:none; border:1px solid var(--gold); border-radius:12px;
+    padding:3px 9px; flex-shrink:0;
+  }
+  .bookmark-link:hover{ background:var(--gold); color:#fff; }
+
+  .panes{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width: 720px){ .panes{ grid-template-columns:1fr; } }
+  .pane{
+    border-radius:10px; padding:13px 15px; font-size:14.5px;
+  }
+  .pane.layman{ background:#FFF9EA; border-left:4px solid var(--gold-bright); }
+  .pane.technical{ background:#EEF2F8; border-left:4px solid var(--navy-soft); }
+  .pane .pane-label{
+    font-family:'Trebuchet MS',sans-serif; font-size:10.5px; text-transform:uppercase;
+    letter-spacing:1px; font-weight:bold; margin-bottom:6px;
+  }
+  .pane.layman .pane-label{ color:#8a6d1a; }
+  .pane.technical .pane-label{ color:var(--navy-soft); }
+
+  .diagram{ text-align:center; margin:16px 0 4px; }
+  .diagram svg{ max-width:100%; height:auto; }
+  .diagram-caption{
+    font-family:'Trebuchet MS',sans-serif; font-size:11px; color:#8a8368;
+    margin-top:6px;
+  }
+
+  /* ===== Footer ===== */
+  #siteFooter{
+    text-align:center; padding:34px 20px 60px; border-top:2px solid var(--line);
+    margin-top:20px;
+  }
+  #siteFooter .cred{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'Trebuchet MS',sans-serif; font-size:15px; color:var(--navy);
+    letter-spacing:0.4px;
+    background:var(--panel); border:1.5px solid var(--gold);
+    padding:10px 22px; border-radius:24px; box-shadow:var(--shadow);
+  }
+  #siteFooter .cred .star{ color:var(--gold); font-size:15px; }
+  #siteFooter .cred b{ color:var(--gold); }
+  #siteFooter .note{
+    font-family:'Trebuchet MS',sans-serif; font-size:10.5px; color:#9a9584;
+    margin-top:8px;
+  }
+
+  mark.hit{ background:var(--gold-pale); color:var(--navy-deep); padding:0 2px; border-radius:3px; }
+
+  ::selection{ background:var(--gold-pale); color:var(--navy-deep); }
+
+  /* ===== Floating Remote Control ===== */
+  #remote{
+    position:fixed; right:22px; bottom:22px; z-index:60;
+    background:linear-gradient(180deg,var(--navy) 0%, var(--navy-deep) 100%);
+    border:2px solid var(--gold);
+    border-radius:18px;
+    padding:12px 10px;
+    box-shadow:0 10px 30px rgba(11,31,58,0.35);
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    width:64px;
+    transition: transform .2s ease;
+  }
+  #remote .remote-label{
+    font-family:'Trebuchet MS',sans-serif; font-size:9px; color:var(--gold-pale);
+    letter-spacing:1.5px; text-transform:uppercase; margin-bottom:2px;
+    opacity:0.85;
+  }
+  #remote button{
+    width:42px; height:36px;
+    border-radius:9px;
+    border:1px solid var(--gold);
+    background:var(--navy-soft);
+    color:var(--gold-bright);
+    font-family:'Trebuchet MS',sans-serif;
+    font-size:15px;
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition: all .15s ease;
+  }
+  #remote button:hover{ background:var(--gold); color:var(--navy-deep); }
+  #remote button:focus-visible{ outline:2px solid var(--gold-bright); outline-offset:2px; }
+  #remote .remote-divider{
+    width:36px; height:1px; background:var(--navy-soft); margin:2px 0;
+  }
+  #remote #remoteStageLabel{
+    font-family:'Trebuchet MS',sans-serif; font-size:8.5px; color:var(--gold-pale);
+    text-align:center; line-height:1.3; min-height:22px; opacity:0.9;
+  }
+  #remote.collapsed{
+    width:auto; padding:8px;
+  }
+  #remote.collapsed .remote-body{ display:none; }
+  @media (max-width: 600px){
+    #remote{ right:12px; bottom:12px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="appbar">
+  <div class="brand">
+    <div class="mark">AI</div>
+    <div>
+      <h1>100 Agentic AI Build Ideas</h1>
+      <div class="sub">The Complete Guide · Offline Reference Edition</div>
+    </div>
+  </div>
+  <button id="navToggleBtn" class="util" onclick="toggleSidebar()">☰ Hide Navigation</button>
+</div>
+
+<div id="shell">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <nav id="sidebar" aria-label="Section index">
+    <h2>Index — One-Click Navigation</h2>
+
+    <a class="toc-stage" href="#stage-1"><span class="n">01</span>What Is Agentic AI</a>
+    <div class="toc-note">Items 1–10 · Built</div>
+
+    <a class="toc-stage" href="#stage-2"><span class="n">02</span>Use Cases</a>
+    <div class="toc-note">Items 11–20 · Built</div>
+
+    <a class="toc-stage" href="#stage-3"><span class="n">03</span>Core Components</a>
+    <div class="toc-note">Items 21–30 · Built</div>
+
+    <a class="toc-stage" href="#stage-4"><span class="n">04</span>Tools &amp; Frameworks</a>
+    <div class="toc-note">Items 31–40 · Built</div>
+
+    <a class="toc-stage" href="#stage-5"><span class="n">05</span>Design Agent</a>
+    <div class="toc-note">Items 41–50 · Built</div>
+
+    <a class="toc-stage" href="#stage-6"><span class="n">06</span>Build &amp; Test</a>
+    <div class="toc-note">Items 51–60 · Built</div>
+
+    <a class="toc-stage" href="#stage-7"><span class="n">07</span>Deploy</a>
+    <div class="toc-note">Items 61–70 · Built</div>
+
+    <a class="toc-stage" href="#stage-8"><span class="n">08</span>Monitor</a>
+    <div class="toc-note">Items 71–80 · Built</div>
+
+    <a class="toc-stage" href="#stage-9"><span class="n">09</span>Optimize</a>
+    <div class="toc-note">Items 81–90 · Built</div>
+
+    <a class="toc-stage" href="#stage-10"><span class="n">10</span>Scale</a>
+    <div class="toc-note">Items 91–100 · Built</div>
+
+    <!-- ===== Ask Sujit — static retrieval box (offline, no network, no AI generation) ===== -->
+    <div id="askSujit">
+      <div class="as-head"><span class="as-dot"></span>Ask Sujit — Page Search</div>
+      <input type="text" id="askSujitInput" placeholder="Try: 'reflex agent' or 'chatbot'…" oninput="handleAskSujit(this.value)">
+      <div class="as-hint">Offline keyword lookup across everything built so far. No internet, no external AI call — just this page.</div>
+      <div id="askSujitAnswer"></div>
+    </div>
+  </nav>
+
+  <!-- ===================== MAIN ===================== -->
+  <main id="main">
+
+    <div id="hero">
+      <div class="eyebrow util">Reference Edition · 100% Offline · Self-Contained</div>
+      <h1>100 Agentic AI Build Ideas</h1>
+      <h2 class="util">The Complete Guide — explained in plain language and in technical depth</h2>
+      <div class="credit util"><span class="star">★</span>Curated and Compiled by <b>Sujit Kulkarni</b></div>
+      <div id="stageRail" class="util">
+        <span class="built">01 What Is Agentic AI</span>
+        <span class="built">02 Use Cases</span>
+        <span class="built">03 Core Components</span>
+        <span class="built">04 Tools &amp; Frameworks</span>
+        <span class="built">05 Design Agent</span>
+        <span class="built">06 Build &amp; Test</span>
+        <span class="built">07 Deploy</span>
+        <span class="built">08 Monitor</span>
+        <span class="built">09 Optimize</span>
+        <span class="built">10 Scale</span>
+      </div>
+    </div>
+
+    <!-- ===================== STAGE 1 ===================== -->
+    <section class="stage" id="stage-1">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 01 / 10</span>
+        <h2>What Is Agentic AI</h2>
+      </div>
+      <div class="goal">Goal: Understand what agentic AI actually is before building anything with it.</div>
+
+      <!-- Item 1 -->
+      <article class="idea" id="idea-1" data-search="definition agentic ai autonomous perceive reason plan act">
+        <div class="idea-head">
+          <span class="idea-num">1</span>
+          <h3>Definition</h3>
+          <a class="bookmark-link util" href="#idea-1">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agentic AI is software that can be given a goal — like "book me the cheapest flight to Delhi next Friday" — and go do it on its own: figure out the steps, use tools like a search engine or a booking site, check its own work, and come back with a result. You don't tell it every step; you tell it the outcome.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            An agentic AI system is an LLM-driven architecture that runs an autonomous perceive–reason–plan–act loop with minimal human intervention per step. It maintains state (memory), selects and invokes external tools or APIs, evaluates intermediate results against the goal, and iterates until a termination condition is met or a human checkpoint is reached.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 2 -->
+      <article class="idea" id="idea-2" data-search="how it works agent loop perceive reason plan act">
+        <div class="idea-head">
+          <span class="idea-num">2</span>
+          <h3>How It Works</h3>
+          <a class="bookmark-link util" href="#idea-2">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Think of it like a very capable assistant on a loop: it looks at the situation, thinks about what to do next, makes a plan, does one step, checks what happened, and repeats — until the job is done.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            The canonical cycle is Perceive → Reason → Plan → Act. The agent ingests input/context (perceive), uses the LLM to interpret it against the goal (reason), decomposes the goal into an ordered action sequence (plan), and executes an action — often a tool call — before the loop re-perceives the updated state.
+          </div>
+        </div>
+        <div class="diagram">
+          <svg viewBox="0 0 340 220" width="340" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="170" cy="110" r="46" fill="#FFF9EA" stroke="#B8912F" stroke-width="2"/>
+            <text x="170" y="106" text-anchor="middle" font-family="Trebuchet MS" font-size="13" font-weight="bold" fill="#0B1F3A">GOAL</text>
+            <text x="170" y="122" text-anchor="middle" font-family="Trebuchet MS" font-size="9" fill="#8a6d1a">agent loop</text>
+
+            <g font-family="Trebuchet MS" font-size="11.5" fill="#0B1F3A">
+              <text x="170" y="26" text-anchor="middle">1. PERCEIVE</text>
+              <text x="292" y="114" text-anchor="middle">2. REASON</text>
+              <text x="170" y="204" text-anchor="middle">3. PLAN</text>
+              <text x="48" y="114" text-anchor="middle">4. ACT</text>
+            </g>
+
+            <g stroke="#B8912F" stroke-width="2" fill="none" marker-end="url(#arrow)">
+              <path d="M170,52 A80,80 0 0 1 250,90"/>
+              <path d="M258,140 A80,80 0 0 1 195,196"/>
+              <path d="M145,196 A80,80 0 0 1 82,140"/>
+              <path d="M82,90 A80,80 0 0 1 145,52"/>
+            </g>
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+                <path d="M0,0 L8,4 L0,8 z" fill="#B8912F"/>
+              </marker>
+            </defs>
+          </svg>
+          <div class="diagram-caption util">The core agentic loop — repeats until the goal is met</div>
+        </div>
+      </article>
+
+      <!-- Item 3 -->
+      <article class="idea" id="idea-3" data-search="agent vs chatbot difference reactive proactive">
+        <div class="idea-head">
+          <span class="idea-num">3</span>
+          <h3>Agent vs Chatbot</h3>
+          <a class="bookmark-link util" href="#idea-3">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            A chatbot answers what you ask, one message at a time — you're driving. An agent takes a goal and drives itself: it decides what to search, what tool to use, and when it's actually done, without you spelling out every step.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            A chatbot is typically a single-turn or multi-turn conversational responder with no independent tool-invocation loop or persistent task state beyond the chat history. An agent adds autonomous planning, tool use, self-evaluation, and multi-step execution against a defined objective, often without a human in the loop for every action.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 4 -->
+      <article class="idea" id="idea-4" data-search="key characteristics goal oriented autonomous context aware adaptive action taking">
+        <div class="idea-head">
+          <span class="idea-num">4</span>
+          <h3>Key Characteristics</h3>
+          <a class="bookmark-link util" href="#idea-4">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Five things make something "agentic": it works toward a goal, it acts without hand-holding, it pays attention to context, it adjusts when things change, and it actually takes action instead of just talking.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Goal-oriented (objective function drives behavior), autonomous (minimal per-step human input), context-aware (maintains and uses state/memory), adaptive (revises plans on new information or failure), and action-taking (executes real-world or system effects via tools, not just text generation).
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 5 -->
+      <article class="idea" id="idea-5" data-search="types of agents simple reflex model-based goal-based utility-based learning multi-agent">
+        <div class="idea-head">
+          <span class="idea-num">5</span>
+          <h3>Types of Agents</h3>
+          <a class="bookmark-link util" href="#idea-5">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Some agents just react to what's in front of them (simple reflex). Some remember the past (model-based). Some chase a specific target (goal-based). Some weigh trade-offs to pick the best option (utility-based). Some get better over time (learning). And some work in teams (multi-agent).
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Classic taxonomy (Russell &amp; Norvig), applied to modern LLM agents: Simple Reflex (condition–action rules, no internal state), Model-Based (maintains an internal world model), Goal-Based (search/planning toward an explicit goal), Utility-Based (optimizes a utility function across competing goals), Learning Agents (improve policy from feedback/experience), and Multi-Agent Systems (multiple agents coordinating, negotiating, or specializing).
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 6 -->
+      <article class="idea" id="idea-6" data-search="evolution of ai rule based machine learning deep learning generative llm agentic">
+        <div class="idea-head">
+          <span class="idea-num">6</span>
+          <h3>Evolution of AI</h3>
+          <a class="bookmark-link util" href="#idea-6">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            AI started with fixed rules ("if this, then that"), moved to systems that learn patterns from data, then to systems that can generate new text and images, and now to systems that can actually go do things for you.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Rough progression: rule-based/expert systems → statistical machine learning → deep learning (neural networks at scale) → generative AI (large pretrained transformer models producing novel content) → agentic AI (generative models wrapped in a tool-use, memory, and planning loop that acts on an environment).
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 7 -->
+      <article class="idea" id="idea-7" data-search="why it matters productivity scale automation leverage">
+        <div class="idea-head">
+          <span class="idea-num">7</span>
+          <h3>Why It Matters</h3>
+          <a class="bookmark-link util" href="#idea-7">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            It matters because it changes AI from "a tool you operate" to "a worker you assign." That's a much bigger productivity lever — one person can now supervise many tasks running in parallel instead of doing each one by hand.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Agentic systems shift the unit of automation from a single inference call to an end-to-end workflow, reducing human-in-the-loop overhead per task and enabling parallelized, asynchronous execution across many concurrent goals — with corresponding new demands on evaluation, monitoring, and governance.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 8 -->
+      <article class="idea" id="idea-8" data-search="real world impact customer support coding research operations">
+        <div class="idea-head">
+          <span class="idea-num">8</span>
+          <h3>Real-World Impact</h3>
+          <a class="bookmark-link util" href="#idea-8">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agentic AI is already showing up in customer support that resolves tickets end-to-end, coding assistants that write and test code, research assistants that read dozens of sources and summarize them, and back-office bots that handle repetitive business tasks.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Deployed patterns include autonomous support-ticket resolution with tool-based CRM actions, coding agents with edit-run-test loops, research agents performing multi-source retrieval and synthesis, and RPA-adjacent business-process agents integrated with internal systems via APIs.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 9 -->
+      <article class="idea" id="idea-9" data-search="limitations hallucination cost reliability oversight security">
+        <div class="idea-head">
+          <span class="idea-num">9</span>
+          <h3>Limitations</h3>
+          <a class="bookmark-link util" href="#idea-9">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents can still get things wrong confidently, cost more the longer they run, need careful watching so they don't go off track, and raise real security questions if you give them too much access without limits.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Known constraints include hallucination and compounding error across multi-step chains, higher token/compute cost from iterative reasoning, limited long-horizon reliability without strong evaluation harnesses, and expanded attack surface (prompt injection, excessive tool permissions) that requires guardrails, scoped credentials, and human checkpoints.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 10 -->
+      <article class="idea" id="idea-10" data-search="future outlook multi agent systems standards governance">
+        <div class="idea-head">
+          <span class="idea-num">10</span>
+          <h3>Future Outlook</h3>
+          <a class="bookmark-link util" href="#idea-10">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Expect agents to increasingly work in teams (one agent planning, others executing specialized parts), better tools for keeping them in check, and clearer rules from companies and regulators about what they're allowed to do on their own.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Trends pointing forward: maturing multi-agent orchestration standards, stronger observability/evaluation tooling as a prerequisite for production trust, growing adoption of agent control planes for policy and approval gating, and increasing regulatory attention to autonomous-action governance.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+
+    <!-- ===================== STAGE 02 ===================== -->
+    <section class="stage" id="stage-2">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 02 / 10</span>
+        <h2>Use Cases</h2>
+      </div>
+      <div class="goal">Goal: Identify high-value use cases before you commit engineering time.</div>
+
+      <!-- Item 11 -->
+      <article class="idea" id="idea-11" data-search="content creation">
+        <div class="idea-head">
+          <span class="idea-num">11</span>
+          <h3>Content Creation</h3>
+          <a class="bookmark-link util" href="#idea-11">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that draft blog posts, social captions, ad copy, or scripts, then revise their own drafts against a style guide.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Content-generation agents chain an outline step, a draft step, and a self-critique/revision step, often grounded with retrieval against a brand style guide or past examples.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 12 -->
+      <article class="idea" id="idea-12" data-search="customer support">
+        <div class="idea-head">
+          <span class="idea-num">12</span>
+          <h3>Customer Support</h3>
+          <a class="bookmark-link util" href="#idea-12">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that read a customer's message, pull up their order or account, and resolve the issue — refund, reschedule, troubleshoot — without a human touching every ticket.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Support agents combine intent classification, CRM/ticketing tool calls, and policy-constrained action execution, escalating to a human when confidence is low or the action exceeds a permission threshold.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 13 -->
+      <article class="idea" id="idea-13" data-search="data analysis">
+        <div class="idea-head">
+          <span class="idea-num">13</span>
+          <h3>Data Analysis</h3>
+          <a class="bookmark-link util" href="#idea-13">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that take a raw spreadsheet or database and come back with charts, trends, and a plain-English summary of what matters.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Data-analysis agents write and execute code (SQL/Python) against a dataset, iterate on queries based on intermediate results, and generate visualizations and natural-language summaries of statistically significant findings.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 14 -->
+      <article class="idea" id="idea-14" data-search="sales automation">
+        <div class="idea-head">
+          <span class="idea-num">14</span>
+          <h3>Sales Automation</h3>
+          <a class="bookmark-link util" href="#idea-14">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that research a lead, personalize an outreach email, and follow up automatically if there's no reply.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Sales agents integrate with CRM and enrichment APIs to build a lead profile, generate personalized outreach via LLM, and run scheduled follow-up sequences triggered by engagement or non-engagement signals.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 15 -->
+      <article class="idea" id="idea-15" data-search="marketing agents">
+        <div class="idea-head">
+          <span class="idea-num">15</span>
+          <h3>Marketing Agents</h3>
+          <a class="bookmark-link util" href="#idea-15">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that plan a content calendar, generate campaign assets, and check performance data to suggest what to try next.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Marketing agents orchestrate content generation, scheduling/publishing tool calls, and analytics-API retrieval, closing the loop by feeding performance metrics back into subsequent generation prompts.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 16 -->
+      <article class="idea" id="idea-16" data-search="devops & it">
+        <div class="idea-head">
+          <span class="idea-num">16</span>
+          <h3>DevOps & IT</h3>
+          <a class="bookmark-link util" href="#idea-16">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that watch system logs, spot something going wrong, and either fix it automatically or page a human with the right context.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            DevOps agents consume observability/log streams, apply anomaly detection or rule-based triggers, and execute remediation runbooks via infrastructure APIs, with human-in-the-loop gating for high-risk actions.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 17 -->
+      <article class="idea" id="idea-17" data-search="research agents">
+        <div class="idea-head">
+          <span class="idea-num">17</span>
+          <h3>Research Agents</h3>
+          <a class="bookmark-link util" href="#idea-17">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that read many sources on a topic, cross-check facts, and hand back a structured summary with citations.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Research agents perform iterative retrieval (search/browse tool calls), deduplicate and cross-reference sources, and synthesize findings with source attribution, often using a plan–search–synthesize loop.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 18 -->
+      <article class="idea" id="idea-18" data-search="finance & ops">
+        <div class="idea-head">
+          <span class="idea-num">18</span>
+          <h3>Finance & Ops</h3>
+          <a class="bookmark-link util" href="#idea-18">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that reconcile invoices, flag anomalies in spending, or prep a first draft of a financial report.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Finance/ops agents integrate with ERP or accounting-system APIs to extract, reconcile, and flag transaction-level anomalies, and can draft structured reports for human review before submission.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 19 -->
+      <article class="idea" id="idea-19" data-search="personal assistants">
+        <div class="idea-head">
+          <span class="idea-num">19</span>
+          <h3>Personal Assistants</h3>
+          <a class="bookmark-link util" href="#idea-19">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Agents that manage your calendar, triage your inbox, and handle small recurring tasks so you don't have to.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Personal-assistant agents integrate with calendar/email APIs, apply user-defined rules or learned preferences to triage and schedule, and execute low-risk actions autonomously while flagging ambiguous ones.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 20 -->
+      <article class="idea" id="idea-20" data-search="industry examples">
+        <div class="idea-head">
+          <span class="idea-num">20</span>
+          <h3>Industry Examples</h3>
+          <a class="bookmark-link util" href="#idea-20">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Healthcare agents that summarize patient notes, legal agents that review contracts, retail agents that manage inventory — every industry has a version of this now.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Vertical deployments layer domain-specific retrieval (clinical guidelines, case law, SKU/inventory data) and compliance constraints onto the general agent loop, typically with stricter human-approval gates.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 03 ===================== -->
+    <section class="stage" id="stage-3">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 03 / 10</span>
+        <h2>Core Components</h2>
+      </div>
+      <div class="goal">Goal: Know how agents actually work under the hood.</div>
+
+      <!-- Item 21 -->
+      <article class="idea" id="idea-21" data-search="llm (brain)">
+        <div class="idea-head">
+          <span class="idea-num">21</span>
+          <h3>LLM (Brain)</h3>
+          <a class="bookmark-link util" href="#idea-21">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            The language model is the part that actually thinks — it reads the situation and decides what to do next.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            The LLM serves as the reasoning engine: it interprets context, selects actions/tools, and generates both intermediate reasoning and final outputs, typically via a system prompt that defines its role and available actions.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 22 -->
+      <article class="idea" id="idea-22" data-search="memory">
+        <div class="idea-head">
+          <span class="idea-num">22</span>
+          <h3>Memory</h3>
+          <a class="bookmark-link util" href="#idea-22">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Memory lets an agent remember what happened earlier in a task — or even across different sessions — instead of starting from zero every time.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Memory splits into short-term (conversation/working context within a run) and long-term (persisted across sessions, often in a vector store or database), retrieved selectively to stay within context-window limits.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 23 -->
+      <article class="idea" id="idea-23" data-search="tools / actions">
+        <div class="idea-head">
+          <span class="idea-num">23</span>
+          <h3>Tools / Actions</h3>
+          <a class="bookmark-link util" href="#idea-23">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Tools are how an agent actually does things in the real world — search the web, send an email, query a database — instead of just talking.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Tools are typically exposed as callable functions with defined schemas (name, parameters, description) that the LLM selects and invokes; results are returned to the model as new context for the next reasoning step.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 24 -->
+      <article class="idea" id="idea-24" data-search="planning">
+        <div class="idea-head">
+          <span class="idea-num">24</span>
+          <h3>Planning</h3>
+          <a class="bookmark-link util" href="#idea-24">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Planning is the agent breaking a big goal into a sequence of smaller steps before it starts doing them.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Planning modules decompose a goal into an ordered or graph-structured task list, using techniques like chain-of-thought, tree-of-thought, or explicit planner/executor separation.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 25 -->
+      <article class="idea" id="idea-25" data-search="reasoning">
+        <div class="idea-head">
+          <span class="idea-num">25</span>
+          <h3>Reasoning</h3>
+          <a class="bookmark-link util" href="#idea-25">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Reasoning is the agent thinking through a problem — weighing options, checking logic — before or while it acts.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Reasoning is typically implemented via prompted step-by-step inference (chain-of-thought) or structured reasoning frameworks (ReAct: reason, act, observe), improving reliability on multi-step tasks.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 26 -->
+      <article class="idea" id="idea-26" data-search="autonomy">
+        <div class="idea-head">
+          <span class="idea-num">26</span>
+          <h3>Autonomy</h3>
+          <a class="bookmark-link util" href="#idea-26">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Autonomy is how much the agent can do on its own before it has to stop and ask a human.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Autonomy is a configurable spectrum, from fully human-approved single actions to fully unsupervised multi-step execution, usually set per task risk level via permission scopes or approval gates.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 27 -->
+      <article class="idea" id="idea-27" data-search="feedback loop">
+        <div class="idea-head">
+          <span class="idea-num">27</span>
+          <h3>Feedback Loop</h3>
+          <a class="bookmark-link util" href="#idea-27">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            The feedback loop is the agent checking its own work — did that action actually succeed? — and adjusting if not.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Feedback loops compare action results against expected outcomes or success criteria, feeding discrepancies back into the reasoning step to trigger retries, replanning, or escalation.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 28 -->
+      <article class="idea" id="idea-28" data-search="environment">
+        <div class="idea-head">
+          <span class="idea-num">28</span>
+          <h3>Environment</h3>
+          <a class="bookmark-link util" href="#idea-28">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            The environment is everything the agent operates in — the apps, files, websites, and systems it can see and touch.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            The environment defines the agent's observation and action space: available APIs, file systems, browsers, or simulated sandboxes, which bound what the agent can perceive and affect.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 29 -->
+      <article class="idea" id="idea-29" data-search="guardrails">
+        <div class="idea-head">
+          <span class="idea-num">29</span>
+          <h3>Guardrails</h3>
+          <a class="bookmark-link util" href="#idea-29">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Guardrails are the rules that stop an agent from doing something risky or out of scope, even if it technically 'could.'
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Guardrails are implemented as input/output validation, permission scoping, allow/deny lists for tools, and policy checks that intercept actions before execution, often paired with human-approval thresholds.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 30 -->
+      <article class="idea" id="idea-30" data-search="observability">
+        <div class="idea-head">
+          <span class="idea-num">30</span>
+          <h3>Observability</h3>
+          <a class="bookmark-link util" href="#idea-30">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Observability is being able to see what the agent actually did, step by step, so you can debug it when something goes wrong.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Observability captures structured traces of the full reasoning-action loop (prompts, tool calls, intermediate outputs, latencies, costs), typically instrumented via OpenTelemetry-style tracing for later inspection.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 04 ===================== -->
+    <section class="stage" id="stage-4">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 04 / 10</span>
+        <h2>Tools &amp; Frameworks</h2>
+      </div>
+      <div class="goal">Goal: Choose the right stack for the job — updated to current public information.</div>
+
+      <!-- Item 31 -->
+      <article class="idea" id="idea-31" data-search="llm providers">
+        <div class="idea-head">
+          <span class="idea-num">31</span>
+          <h3>LLM Providers</h3>
+          <a class="bookmark-link util" href="#idea-31">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            The companies whose models power the agent's 'brain' — OpenAI, Anthropic, Google, Meta, Mistral, Cohere.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Current public flagship lineups (Aug 2026): OpenAI's GPT-5.6 family (Sol/Terra/Luna tiers); Anthropic's Claude family (Haiku 4.5, Sonnet 5, Opus 5, plus the Mythos tier); Google's Gemini 3.6/3.7 Flash; Meta's open-source Llama 5; Mistral's Mistral 3 family (Large 3, Medium 3.5, Small 4).
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 32 -->
+      <article class="idea" id="idea-32" data-search="agent frameworks">
+        <div class="idea-head">
+          <span class="idea-num">32</span>
+          <h3>Agent Frameworks</h3>
+          <a class="bookmark-link util" href="#idea-32">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Frameworks are pre-built toolkits that save you from writing the whole agent loop from scratch.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Widely used frameworks include LangChain (general-purpose), LangGraph (stateful, graph-based orchestration — now a common production default), LlamaIndex (RAG-focused), CrewAI (role-based multi-agent), AutoGen (conversational multi-agent), and vendor-native SDKs like the OpenAI Agents SDK and Claude Agent SDK.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 33 -->
+      <article class="idea" id="idea-33" data-search="vector databases">
+        <div class="idea-head">
+          <span class="idea-num">33</span>
+          <h3>Vector Databases</h3>
+          <a class="bookmark-link util" href="#idea-33">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            A vector database is what lets an agent 'search by meaning' instead of exact keywords — useful for retrieving relevant memory or documents.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Vector databases (Pinecone, Weaviate, Qdrant, Milvus, Chroma, Supabase Vector) index embeddings for approximate nearest-neighbor search, underpinning retrieval-augmented generation and long-term agent memory.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 34 -->
+      <article class="idea" id="idea-34" data-search="memory stores">
+        <div class="idea-head">
+          <span class="idea-num">34</span>
+          <h3>Memory Stores</h3>
+          <a class="bookmark-link util" href="#idea-34">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Memory stores hold onto information — facts, past conversations, user preferences — between agent runs.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Common memory-store backends include Redis (fast key-value/session memory), MongoDB and PostgreSQL (structured persistent storage), Supabase, Astra DB, and Mem0 (purpose-built agent-memory layer).
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 35 -->
+      <article class="idea" id="idea-35" data-search="orchestration">
+        <div class="idea-head">
+          <span class="idea-num">35</span>
+          <h3>Orchestration</h3>
+          <a class="bookmark-link util" href="#idea-35">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Orchestration is what coordinates multiple steps, tools, or even multiple agents so they work together in the right order.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Orchestration layers (often via LangGraph, CrewAI, or a custom state machine) manage task sequencing, parallelization, retries, and handoffs between sub-agents or tool calls.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 36 -->
+      <article class="idea" id="idea-36" data-search="tooling libraries">
+        <div class="idea-head">
+          <span class="idea-num">36</span>
+          <h3>Tooling Libraries</h3>
+          <a class="bookmark-link util" href="#idea-36">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            These are the building blocks — libraries that give an agent capabilities like reading files, running code, or browsing.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Tooling libraries provide standardized function/tool interfaces (schema definitions, execution sandboxes) that the LLM can invoke, often bundled within the chosen agent framework.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 37 -->
+      <article class="idea" id="idea-37" data-search="api integrations">
+        <div class="idea-head">
+          <span class="idea-num">37</span>
+          <h3>API Integrations</h3>
+          <a class="bookmark-link util" href="#idea-37">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Integrations connect the agent to real services it needs — search engines, calculators, Notion, Zapier, and so on.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Integrations are typically implemented as authenticated API wrappers exposed as tools; common examples include Google Search, DuckDuckGo, Wolfram Alpha, Notion, Zapier, and Make (Integromat) for no-code workflow bridging.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 38 -->
+      <article class="idea" id="idea-38" data-search="hosting platforms">
+        <div class="idea-head">
+          <span class="idea-num">38</span>
+          <h3>Hosting Platforms</h3>
+          <a class="bookmark-link util" href="#idea-38">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Hosting platforms are where the agent actually runs once it's built — the servers behind the scenes.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Common deployment targets include Vercel, Railway, Render, and Fly.io for lightweight services, and AWS or Google Cloud for enterprise-scale or compliance-sensitive workloads.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 39 -->
+      <article class="idea" id="idea-39" data-search="monitoring tools">
+        <div class="idea-head">
+          <span class="idea-num">39</span>
+          <h3>Monitoring Tools</h3>
+          <a class="bookmark-link util" href="#idea-39">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Monitoring tools let you watch an agent's behavior and costs in real time once it's live, not just during testing.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Current observability platforms include LangSmith (LangChain/LangGraph-native), Arize Phoenix (open-source, OpenTelemetry-based), Langfuse (leading open-source/self-hosted option), Helicone (lightweight proxy logging), and Grafana for infra-level correlation.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 40 -->
+      <article class="idea" id="idea-40" data-search="testing tools">
+        <div class="idea-head">
+          <span class="idea-num">40</span>
+          <h3>Testing Tools</h3>
+          <a class="bookmark-link util" href="#idea-40">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Testing tools help you check an agent actually does what it's supposed to before you trust it with real users.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Testing typically combines unit tests for individual tool calls, scenario-based evaluation harnesses (scripted multi-turn tasks), and LLM-as-judge or human-graded evaluation for output quality and task success rate.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 05 ===================== -->
+    <section class="stage" id="stage-5">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 05 / 10</span>
+        <h2>Design Agent</h2>
+      </div>
+      <div class="goal">Goal: Design effective agents before you write a line of code.</div>
+
+      <!-- Item 41 -->
+      <article class="idea" id="idea-41" data-search="define objective">
+        <div class="idea-head">
+          <span class="idea-num">41</span>
+          <h3>Define Objective</h3>
+          <a class="bookmark-link util" href="#idea-41">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Start by writing down, in one clear sentence, exactly what the agent is supposed to accomplish.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            The objective becomes the agent's terminal goal state, used both to drive planning and as the success criterion for evaluation — ambiguous objectives are the single most common cause of unreliable agents.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 42 -->
+      <article class="idea" id="idea-42" data-search="define role">
+        <div class="idea-head">
+          <span class="idea-num">42</span>
+          <h3>Define Role</h3>
+          <a class="bookmark-link util" href="#idea-42">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Give the agent a clear identity — 'you are a customer support agent for X' — so its behavior stays consistent and appropriate.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            The role is encoded in the system prompt and constrains tone, scope, and decision boundaries, functioning as a behavioral prior that shapes every downstream reasoning step.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 43 -->
+      <article class="idea" id="idea-43" data-search="set constraints">
+        <div class="idea-head">
+          <span class="idea-num">43</span>
+          <h3>Set Constraints</h3>
+          <a class="bookmark-link util" href="#idea-43">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide what the agent is not allowed to do — spend over a limit, delete data, contact certain people — before it ever runs.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Constraints are enforced via permission scoping, tool allow-lists, rate/spend limits, and validation checks that reject or intercept out-of-bounds actions regardless of what the LLM proposes.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 44 -->
+      <article class="idea" id="idea-44" data-search="define tools">
+        <div class="idea-head">
+          <span class="idea-num">44</span>
+          <h3>Define Tools</h3>
+          <a class="bookmark-link util" href="#idea-44">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide exactly which tools the agent gets access to — no more than it actually needs for the job.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Tool selection should follow least-privilege principles: each exposed function increases the action space and attack surface, so tool sets are scoped tightly to the defined objective.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 45 -->
+      <article class="idea" id="idea-45" data-search="plan workflow">
+        <div class="idea-head">
+          <span class="idea-num">45</span>
+          <h3>Plan Workflow</h3>
+          <a class="bookmark-link util" href="#idea-45">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Sketch the overall path the agent will take — the big stages it moves through from start to finish.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Workflow design defines the high-level control flow (sequential, branching, or graph-based) that structures how sub-tasks, tool calls, and checkpoints relate to one another.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 46 -->
+      <article class="idea" id="idea-46" data-search="plan steps">
+        <div class="idea-head">
+          <span class="idea-num">46</span>
+          <h3>Plan Steps</h3>
+          <a class="bookmark-link util" href="#idea-46">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Break the workflow down further into the specific, concrete steps the agent will actually execute.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Step-level planning specifies discrete, executable actions with defined inputs/outputs, often generated dynamically by the LLM at runtime rather than hardcoded, within the workflow's structural bounds.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 47 -->
+      <article class="idea" id="idea-47" data-search="handle errors">
+        <div class="idea-head">
+          <span class="idea-num">47</span>
+          <h3>Handle Errors</h3>
+          <a class="bookmark-link util" href="#idea-47">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide in advance what the agent should do when something fails — retry, ask for help, or stop.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Error handling defines retry policies, fallback actions, and escalation thresholds for tool failures, invalid outputs, or unmet success criteria, preventing silent failures or runaway retry loops.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 48 -->
+      <article class="idea" id="idea-48" data-search="set memory">
+        <div class="idea-head">
+          <span class="idea-num">48</span>
+          <h3>Set Memory</h3>
+          <a class="bookmark-link util" href="#idea-48">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide what the agent should remember and for how long — some things only matter for one task, others should persist.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Memory design specifies what gets written to short-term versus long-term storage, retention/expiry policies, and retrieval strategy (recency, relevance, or explicit tagging) to keep context relevant and within window limits.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 49 -->
+      <article class="idea" id="idea-49" data-search="define triggers">
+        <div class="idea-head">
+          <span class="idea-num">49</span>
+          <h3>Define Triggers</h3>
+          <a class="bookmark-link util" href="#idea-49">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide what starts the agent running — a user message, a schedule, an event like a new email arriving.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Triggers are the entry conditions for agent execution: manual invocation, webhook events, scheduled cron jobs, or system-state changes detected via polling or event streams.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 50 -->
+      <article class="idea" id="idea-50" data-search="define prompts">
+        <div class="idea-head">
+          <span class="idea-num">50</span>
+          <h3>Define Prompts</h3>
+          <a class="bookmark-link util" href="#idea-50">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Write the actual instructions the agent sees — clear goals, available tools, and the format you want back.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Prompt design specifies role, objective, tool descriptions, output format, and behavioral constraints; well-structured prompts materially improve task success rate and reduce hallucinated tool use.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 06 ===================== -->
+    <section class="stage" id="stage-6">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 06 / 10</span>
+        <h2>Build &amp; Test</h2>
+      </div>
+      <div class="goal">Goal: Build reliable agents, not just impressive demos.</div>
+
+      <!-- Item 51 -->
+      <article class="idea" id="idea-51" data-search="set up environment">
+        <div class="idea-head">
+          <span class="idea-num">51</span>
+          <h3>Set Up Environment</h3>
+          <a class="bookmark-link util" href="#idea-51">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Get your development environment ready — the code editor, dependencies, and API keys the agent needs to run.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Environment setup includes provisioning API credentials, installing framework dependencies, and configuring a local or sandboxed execution environment for safe iterative testing.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 52 -->
+      <article class="idea" id="idea-52" data-search="connect llm">
+        <div class="idea-head">
+          <span class="idea-num">52</span>
+          <h3>Connect LLM</h3>
+          <a class="bookmark-link util" href="#idea-52">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Wire up the actual language model so the agent has something to think with.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            This involves configuring the LLM provider API (model selection, temperature, max tokens, system prompt) and handling authentication, rate limits, and response parsing.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 53 -->
+      <article class="idea" id="idea-53" data-search="add tools">
+        <div class="idea-head">
+          <span class="idea-num">53</span>
+          <h3>Add Tools</h3>
+          <a class="bookmark-link util" href="#idea-53">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Plug in the specific tools the agent needs — search, calculator, database access — one at a time.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Tools are registered with schemas the LLM can select from at runtime; each addition should be tested in isolation before being combined into the full agent loop.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 54 -->
+      <article class="idea" id="idea-54" data-search="implement logic">
+        <div class="idea-head">
+          <span class="idea-num">54</span>
+          <h3>Implement Logic</h3>
+          <a class="bookmark-link util" href="#idea-54">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Write the actual code that runs the agent's loop — perceive, reason, plan, act — and ties everything together.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Implementation wires together the LLM calls, tool execution, memory read/writes, and control flow into a working loop, typically using a framework's orchestration primitives rather than a fully custom loop.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 55 -->
+      <article class="idea" id="idea-55" data-search="handle memory">
+        <div class="idea-head">
+          <span class="idea-num">55</span>
+          <h3>Handle Memory</h3>
+          <a class="bookmark-link util" href="#idea-55">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Make sure the agent is actually storing and retrieving the right information as it works.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            This involves implementing read/write operations against the chosen memory store, with retrieval logic (similarity search, recency filtering) tuned to keep relevant context without exceeding token limits.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 56 -->
+      <article class="idea" id="idea-56" data-search="test workflows">
+        <div class="idea-head">
+          <span class="idea-num">56</span>
+          <h3>Test Workflows</h3>
+          <a class="bookmark-link util" href="#idea-56">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Run the agent through realistic scenarios end-to-end to see if it actually gets the job done.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Workflow testing runs scripted or exploratory scenarios through the full agent loop, checking not just final output but the intermediate decisions and tool calls along the way.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 57 -->
+      <article class="idea" id="idea-57" data-search="debug & refine">
+        <div class="idea-head">
+          <span class="idea-num">57</span>
+          <h3>Debug & Refine</h3>
+          <a class="bookmark-link util" href="#idea-57">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            When something goes wrong, dig into exactly where — a bad prompt, a missing tool, a memory issue — and fix it.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Debugging relies on trace inspection (full log of reasoning steps, tool calls, and intermediate state) to isolate failure points, followed by targeted prompt, tool, or logic revisions.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 58 -->
+      <article class="idea" id="idea-58" data-search="validate outputs">
+        <div class="idea-head">
+          <span class="idea-num">58</span>
+          <h3>Validate Outputs</h3>
+          <a class="bookmark-link util" href="#idea-58">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Check that what the agent produces is actually correct and usable, not just plausible-sounding.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Output validation combines automated checks (schema/format validation, factual consistency checks) with human or LLM-as-judge review against defined quality criteria.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 59 -->
+      <article class="idea" id="idea-59" data-search="simulate scenarios">
+        <div class="idea-head">
+          <span class="idea-num">59</span>
+          <h3>Simulate Scenarios</h3>
+          <a class="bookmark-link util" href="#idea-59">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Test the agent against edge cases and unusual situations, not just the easy happy path.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Scenario simulation stress-tests the agent against adversarial inputs, ambiguous requests, and tool-failure conditions to surface brittleness before production exposure.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 60 -->
+      <article class="idea" id="idea-60" data-search="evaluate performance">
+        <div class="idea-head">
+          <span class="idea-num">60</span>
+          <h3>Evaluate Performance</h3>
+          <a class="bookmark-link util" href="#idea-60">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Measure how well the agent is actually doing — speed, accuracy, cost — with real numbers, not just gut feel.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Evaluation tracks quantitative metrics (task success rate, accuracy, latency, cost per task, hallucination rate) against a held-out test set, forming the baseline for future optimization.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 07 ===================== -->
+    <section class="stage" id="stage-7">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 07 / 10</span>
+        <h2>Deploy</h2>
+      </div>
+      <div class="goal">Goal: Deploy to production without surprises.</div>
+
+      <!-- Item 61 -->
+      <article class="idea" id="idea-61" data-search="choose platform">
+        <div class="idea-head">
+          <span class="idea-num">61</span>
+          <h3>Choose Platform</h3>
+          <a class="bookmark-link util" href="#idea-61">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide where the agent will actually live and run once it's live — which hosting service fits your needs and budget.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Platform choice weighs factors like scaling requirements, compliance needs, and operational overhead — lightweight platforms (Vercel, Railway, Render, Fly.io) suit smaller workloads, while AWS/Google Cloud suit enterprise scale.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 62 -->
+      <article class="idea" id="idea-62" data-search="containerize">
+        <div class="idea-head">
+          <span class="idea-num">62</span>
+          <h3>Containerize</h3>
+          <a class="bookmark-link util" href="#idea-62">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Package the agent and everything it needs into a self-contained unit so it runs the same way everywhere.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Containerization (typically via Docker) bundles the application, dependencies, and runtime configuration into a portable image, ensuring consistency across development, staging, and production environments.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 63 -->
+      <article class="idea" id="idea-63" data-search="api deployment">
+        <div class="idea-head">
+          <span class="idea-num">63</span>
+          <h3>API Deployment</h3>
+          <a class="bookmark-link util" href="#idea-63">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Expose the agent as an API endpoint so other applications or users can actually call it.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            API deployment wraps the agent behind an HTTP interface (REST or similar), handling request/response formatting, authentication, and concurrency for external callers.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 64 -->
+      <article class="idea" id="idea-64" data-search="auth & security">
+        <div class="idea-head">
+          <span class="idea-num">64</span>
+          <h3>Auth & Security</h3>
+          <a class="bookmark-link util" href="#idea-64">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Make sure only the right people and systems can trigger the agent, and that it can't be tricked into doing something harmful.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            This covers authentication (API keys, OAuth), authorization (scoped permissions per caller), and defenses against prompt injection and excessive tool permissions.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 65 -->
+      <article class="idea" id="idea-65" data-search="data integration">
+        <div class="idea-head">
+          <span class="idea-num">65</span>
+          <h3>Data Integration</h3>
+          <a class="bookmark-link util" href="#idea-65">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Connect the agent to the real data sources it needs — your database, your CRM, your internal documents.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Data integration establishes authenticated, scoped connections to production data sources, often with read-only access by default and write access gated behind explicit approval.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 66 -->
+      <article class="idea" id="idea-66" data-search="set triggers">
+        <div class="idea-head">
+          <span class="idea-num">66</span>
+          <h3>Set Triggers</h3>
+          <a class="bookmark-link util" href="#idea-66">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Configure what actually kicks off the agent in production — an API call, a schedule, an incoming event.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Production triggers are configured as webhook listeners, scheduled jobs, or event-stream subscriptions that invoke the agent under defined conditions.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 67 -->
+      <article class="idea" id="idea-67" data-search="webhooks">
+        <div class="idea-head">
+          <span class="idea-num">67</span>
+          <h3>Webhooks</h3>
+          <a class="bookmark-link util" href="#idea-67">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Set up webhooks so the agent can notify other systems — or be notified by them — the moment something happens.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Webhooks provide event-driven, real-time integration between the agent and external systems, avoiding the latency and inefficiency of polling.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 68 -->
+      <article class="idea" id="idea-68" data-search="cron / schedule">
+        <div class="idea-head">
+          <span class="idea-num">68</span>
+          <h3>Cron / Schedule</h3>
+          <a class="bookmark-link util" href="#idea-68">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Set up recurring runs for the agent — daily reports, hourly checks — without anyone having to trigger it manually.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Scheduled execution uses cron-style jobs or managed schedulers to invoke the agent at fixed intervals, useful for recurring reporting, monitoring, or batch-processing tasks.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 69 -->
+      <article class="idea" id="idea-69" data-search="rollout strategy">
+        <div class="idea-head">
+          <span class="idea-num">69</span>
+          <h3>Rollout Strategy</h3>
+          <a class="bookmark-link util" href="#idea-69">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Decide how to introduce the agent to real users gradually, so you catch problems before they affect everyone.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Rollout strategies include canary releases, feature flags, and staged rollouts to a subset of traffic, allowing controlled exposure and quick rollback if issues surface.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 70 -->
+      <article class="idea" id="idea-70" data-search="go live">
+        <div class="idea-head">
+          <span class="idea-num">70</span>
+          <h3>Go Live</h3>
+          <a class="bookmark-link util" href="#idea-70">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Flip the switch — the agent is now handling real tasks for real users.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Going live involves final pre-launch checks (monitoring in place, rollback plan ready, on-call ownership defined) before removing traffic restrictions to reach full production load.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 08 ===================== -->
+    <section class="stage" id="stage-8">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 08 / 10</span>
+        <h2>Monitor</h2>
+      </div>
+      <div class="goal">Goal: Ensure agent health once it's live.</div>
+
+      <!-- Item 71 -->
+      <article class="idea" id="idea-71" data-search="track logs">
+        <div class="idea-head">
+          <span class="idea-num">71</span>
+          <h3>Track Logs</h3>
+          <a class="bookmark-link util" href="#idea-71">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Keep a record of everything the agent does so you can look back and see exactly what happened.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Logging captures structured records of every reasoning step, tool call, and output, typically retained with enough detail to reconstruct a full execution trace after the fact.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 72 -->
+      <article class="idea" id="idea-72" data-search="monitor performance">
+        <div class="idea-head">
+          <span class="idea-num">72</span>
+          <h3>Monitor Performance</h3>
+          <a class="bookmark-link util" href="#idea-72">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Keep an eye on how fast and how well the agent is running, day to day.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Performance monitoring tracks latency, throughput, and success-rate metrics over time, often visualized on dashboards with alerting on threshold breaches.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 73 -->
+      <article class="idea" id="idea-73" data-search="usage analytics">
+        <div class="idea-head">
+          <span class="idea-num">73</span>
+          <h3>Usage Analytics</h3>
+          <a class="bookmark-link util" href="#idea-73">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Track how often the agent is used, by whom, and for what — useful for understanding real-world demand.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Usage analytics aggregates invocation counts, user segments, and task-type distributions, informing prioritization for future feature or capacity work.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 74 -->
+      <article class="idea" id="idea-74" data-search="error tracking">
+        <div class="idea-head">
+          <span class="idea-num">74</span>
+          <h3>Error Tracking</h3>
+          <a class="bookmark-link util" href="#idea-74">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Catch and log every time the agent fails or produces something wrong, so patterns become visible.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Error tracking captures exceptions, failed tool calls, and validation failures with enough context (stack trace, input, agent state) to diagnose root cause and identify recurring failure modes.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 75 -->
+      <article class="idea" id="idea-75" data-search="user feedback">
+        <div class="idea-head">
+          <span class="idea-num">75</span>
+          <h3>User Feedback</h3>
+          <a class="bookmark-link util" href="#idea-75">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Give users a way to flag when the agent got something wrong, and actually look at that feedback.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Feedback collection (thumbs up/down, structured ratings, free-text reports) feeds into both immediate triage and longer-term evaluation-dataset curation for retraining or prompt refinement.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 76 -->
+      <article class="idea" id="idea-76" data-search="cost monitoring">
+        <div class="idea-head">
+          <span class="idea-num">76</span>
+          <h3>Cost Monitoring</h3>
+          <a class="bookmark-link util" href="#idea-76">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Track how much the agent is actually costing to run — token usage adds up fast at scale.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Cost monitoring tracks token consumption, tool-call costs, and infrastructure spend per task or per user, often with budget alerts to catch runaway loops or unexpectedly expensive workflows.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 77 -->
+      <article class="idea" id="idea-77" data-search="alert systems">
+        <div class="idea-head">
+          <span class="idea-num">77</span>
+          <h3>Alert Systems</h3>
+          <a class="bookmark-link util" href="#idea-77">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Set up automatic alerts so a human gets notified the moment something looks seriously wrong.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Alerting systems apply threshold or anomaly-based rules to monitoring data, routing notifications (Slack, email, pager) to the responsible team when defined conditions are breached.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 78 -->
+      <article class="idea" id="idea-78" data-search="audit logs">
+        <div class="idea-head">
+          <span class="idea-num">78</span>
+          <h3>Audit Logs</h3>
+          <a class="bookmark-link util" href="#idea-78">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Keep a tamper-evident record of every action the agent took, especially for anything sensitive or regulated.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Audit logs provide an immutable, timestamped record of agent actions and decisions, supporting compliance requirements and post-incident investigation.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 79 -->
+      <article class="idea" id="idea-79" data-search="reporting">
+        <div class="idea-head">
+          <span class="idea-num">79</span>
+          <h3>Reporting</h3>
+          <a class="bookmark-link util" href="#idea-79">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Produce regular summaries of how the agent is doing — for your own tracking or to show stakeholders.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Operational reporting aggregates monitoring data into periodic dashboards or documents summarizing performance, cost, and reliability trends over a defined interval.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 80 -->
+      <article class="idea" id="idea-80" data-search="reliability reviews">
+        <div class="idea-head">
+          <span class="idea-num">80</span>
+          <h3>Reliability Reviews</h3>
+          <a class="bookmark-link util" href="#idea-80">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Periodically step back and review whether the agent is still meeting the bar — not just day-to-day, but overall.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Reliability reviews are scheduled retrospectives that assess trend data (success rate, cost, incident history) against SLAs or internal quality bars, informing decisions to iterate, retrain, or deprecate.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 09 ===================== -->
+    <section class="stage" id="stage-9">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 09 / 10</span>
+        <h2>Optimize</h2>
+      </div>
+      <div class="goal">Goal: Make agents smarter and more efficient.</div>
+
+      <!-- Item 81 -->
+      <article class="idea" id="idea-81" data-search="prompt tuning">
+        <div class="idea-head">
+          <span class="idea-num">81</span>
+          <h3>Prompt Tuning</h3>
+          <a class="bookmark-link util" href="#idea-81">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Refine the instructions the agent is given, based on where it's actually going wrong in practice.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Prompt tuning iterates on system and task prompts using observed failure patterns, often validated against a regression test set to confirm improvements don't break existing behavior.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 82 -->
+      <article class="idea" id="idea-82" data-search="improve memory">
+        <div class="idea-head">
+          <span class="idea-num">82</span>
+          <h3>Improve Memory</h3>
+          <a class="bookmark-link util" href="#idea-82">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Adjust what the agent remembers and how it retrieves it, so it has the right context without getting overwhelmed.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Memory optimization tunes retrieval parameters (similarity thresholds, chunk size, recency weighting) and storage structure to improve relevance while controlling context-window usage.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 83 -->
+      <article class="idea" id="idea-83" data-search="refine tools">
+        <div class="idea-head">
+          <span class="idea-num">83</span>
+          <h3>Refine Tools</h3>
+          <a class="bookmark-link util" href="#idea-83">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Adjust or add tools based on what the agent actually struggles to do well.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Tool refinement involves revising tool schemas, descriptions, or granularity based on observed misuse or failure patterns, improving the LLM's ability to select and invoke them correctly.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 84 -->
+      <article class="idea" id="idea-84" data-search="reduce latency">
+        <div class="idea-head">
+          <span class="idea-num">84</span>
+          <h3>Reduce Latency</h3>
+          <a class="bookmark-link util" href="#idea-84">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Make the agent respond faster — nobody wants to wait a long time for a task to finish.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Latency reduction techniques include parallelizing independent tool calls, caching repeated retrievals, streaming partial outputs, and selecting faster models for lower-stakes sub-tasks.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 85 -->
+      <article class="idea" id="idea-85" data-search="cost optimization">
+        <div class="idea-head">
+          <span class="idea-num">85</span>
+          <h3>Cost Optimization</h3>
+          <a class="bookmark-link util" href="#idea-85">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Find ways to get the same results for less money — smaller models where they suffice, fewer wasted steps.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Cost optimization involves model-tiering (routing simple tasks to cheaper/faster models), reducing redundant tool calls, and caching to lower token consumption per task.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 86 -->
+      <article class="idea" id="idea-86" data-search="a/b testing">
+        <div class="idea-head">
+          <span class="idea-num">86</span>
+          <h3>A/B Testing</h3>
+          <a class="bookmark-link util" href="#idea-86">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Try two versions of the agent side by side to see which one actually performs better.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            A/B testing runs controlled comparisons between agent variants (different prompts, models, or workflows) against a consistent metric, using statistical significance to decide which version to ship.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 87 -->
+      <article class="idea" id="idea-87" data-search="human-in-the-loop">
+        <div class="idea-head">
+          <span class="idea-num">87</span>
+          <h3>Human-in-the-loop</h3>
+          <a class="bookmark-link util" href="#idea-87">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Keep a person checking or approving the agent's higher-stakes decisions, especially early on.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Human-in-the-loop design inserts approval checkpoints for high-risk or low-confidence actions, gradually reducing oversight as trust in the agent's reliability is established through data.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 88 -->
+      <article class="idea" id="idea-88" data-search="continuous learning">
+        <div class="idea-head">
+          <span class="idea-num">88</span>
+          <h3>Continuous Learning</h3>
+          <a class="bookmark-link util" href="#idea-88">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Let the agent's performance improve over time as it sees more real examples of what works and what doesn't.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Continuous learning captures production interactions and feedback into a curated dataset, used to refine prompts, few-shot examples, or fine-tune underlying models over time.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 89 -->
+      <article class="idea" id="idea-89" data-search="versioning">
+        <div class="idea-head">
+          <span class="idea-num">89</span>
+          <h3>Versioning</h3>
+          <a class="bookmark-link util" href="#idea-89">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Keep track of different versions of the agent so you can compare, roll back, or audit changes over time.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Versioning tracks prompt, tool, and model configuration changes with reproducible identifiers, enabling rollback and clear attribution of performance changes to specific updates.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 90 -->
+      <article class="idea" id="idea-90" data-search="refactor flows">
+        <div class="idea-head">
+          <span class="idea-num">90</span>
+          <h3>Refactor Flows</h3>
+          <a class="bookmark-link util" href="#idea-90">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Periodically simplify or restructure the agent's workflow as you learn what actually matters.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Workflow refactoring restructures the control flow or task decomposition based on accumulated operational insight, often reducing unnecessary steps or consolidating redundant tool calls.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- ===================== STAGE 10 ===================== -->
+    <section class="stage" id="stage-10">
+      <div class="stage-head">
+        <span class="util stage-num">STAGE 10 / 10</span>
+        <h2>Scale</h2>
+      </div>
+      <div class="goal">Goal: Scale with confidence.</div>
+
+      <!-- Item 91 -->
+      <article class="idea" id="idea-91" data-search="multi-agent systems">
+        <div class="idea-head">
+          <span class="idea-num">91</span>
+          <h3>Multi-Agent Systems</h3>
+          <a class="bookmark-link util" href="#idea-91">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Instead of one agent doing everything, split the work across several specialized agents that collaborate.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Multi-agent systems decompose complex tasks across specialized agents (planner, executor, reviewer) that communicate via defined protocols, improving modularity and enabling parallel execution.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 92 -->
+      <article class="idea" id="idea-92" data-search="agent swarms">
+        <div class="idea-head">
+          <span class="idea-num">92</span>
+          <h3>Agent Swarms</h3>
+          <a class="bookmark-link util" href="#idea-92">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Run many copies of an agent in parallel to handle a large volume of similar tasks at once.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Agent swarms scale horizontally by running many concurrent agent instances against a shared task queue, requiring careful resource and rate-limit management across the fleet.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 93 -->
+      <article class="idea" id="idea-93" data-search="load balancing">
+        <div class="idea-head">
+          <span class="idea-num">93</span>
+          <h3>Load Balancing</h3>
+          <a class="bookmark-link util" href="#idea-93">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Spread incoming requests across multiple agent instances so no single one gets overwhelmed.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Load balancing distributes requests across agent instances or model endpoints based on capacity and latency, preventing bottlenecks and improving overall throughput.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 94 -->
+      <article class="idea" id="idea-94" data-search="distributed memory">
+        <div class="idea-head">
+          <span class="idea-num">94</span>
+          <h3>Distributed Memory</h3>
+          <a class="bookmark-link util" href="#idea-94">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            As you scale, memory needs to be shared and consistent across many agent instances, not stuck on just one machine.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Distributed memory architectures use shared, network-accessible stores (vector databases, distributed caches) so all agent instances read and write consistent state regardless of which instance handles a request.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 95 -->
+      <article class="idea" id="idea-95" data-search="scaling storage">
+        <div class="idea-head">
+          <span class="idea-num">95</span>
+          <h3>Scaling Storage</h3>
+          <a class="bookmark-link util" href="#idea-95">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Make sure your data storage can keep growing as the agent handles more tasks and accumulates more memory over time.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Storage scaling involves partitioning, indexing, and capacity planning for growing datasets (logs, embeddings, memory records), often requiring a move to horizontally scalable storage systems.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 96 -->
+      <article class="idea" id="idea-96" data-search="multi-region">
+        <div class="idea-head">
+          <span class="idea-num">96</span>
+          <h3>Multi-Region</h3>
+          <a class="bookmark-link util" href="#idea-96">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Run the agent in multiple geographic regions so it stays fast and available for users everywhere.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Multi-region deployment replicates agent infrastructure across geographic zones to reduce latency and improve availability, requiring data-residency and consistency strategies across regions.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 97 -->
+      <article class="idea" id="idea-97" data-search="security at scale">
+        <div class="idea-head">
+          <span class="idea-num">97</span>
+          <h3>Security at Scale</h3>
+          <a class="bookmark-link util" href="#idea-97">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            As more people and systems depend on the agent, security has to be systematic, not ad hoc.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Security at scale requires centralized identity and access management, consistent permission scoping across all agent instances, and continuous monitoring for anomalous or adversarial behavior.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 98 -->
+      <article class="idea" id="idea-98" data-search="governance">
+        <div class="idea-head">
+          <span class="idea-num">98</span>
+          <h3>Governance</h3>
+          <a class="bookmark-link util" href="#idea-98">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Put clear organizational rules in place for what agents are allowed to do, who owns them, and how decisions get reviewed.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Governance frameworks define ownership, approval workflows, and policy enforcement mechanisms for agent behavior across an organization, often formalized through an agent control plane.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 99 -->
+      <article class="idea" id="idea-99" data-search="compliance">
+        <div class="idea-head">
+          <span class="idea-num">99</span>
+          <h3>Compliance</h3>
+          <a class="bookmark-link util" href="#idea-99">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Make sure the agent's actions meet legal and regulatory requirements relevant to your industry.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Compliance requires mapping agent actions and data handling to relevant regulatory frameworks (data privacy, industry-specific rules), with audit trails to demonstrate adherence.
+          </div>
+        </div>
+      </article>
+
+      <!-- Item 100 -->
+      <article class="idea" id="idea-100" data-search="future scaling">
+        <div class="idea-head">
+          <span class="idea-num">100</span>
+          <h3>Future Scaling</h3>
+          <a class="bookmark-link util" href="#idea-100">🔖 bookmark</a>
+        </div>
+        <div class="panes">
+          <div class="pane layman">
+            <div class="pane-label util">In Plain Words</div>
+            Plan ahead for how the agent ecosystem will keep growing — more agents, more integrations, more autonomy over time.
+          </div>
+          <div class="pane technical">
+            <div class="pane-label util">Technical View</div>
+            Forward-looking scaling considerations include maturing multi-agent orchestration standards, increasing tool/integration surface area, and evolving governance as autonomous-action scope expands.
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+    <!-- footer -->
+    <footer id="siteFooter">
+      <div class="cred"><span class="star">★</span>Curated and Compiled by <b>Sujit Kulkarni</b></div>
+      <div class="note util">Sections 1–10 · All 100 items · 100% offline, self-contained reference · No external calls, fonts, or scripts</div>
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  function toggleSidebar(){
+    var sb = document.getElementById('sidebar');
+    var btn = document.getElementById('navToggleBtn');
+    sb.classList.toggle('collapsed');
+    btn.textContent = sb.classList.contains('collapsed') ? '☰ Show Navigation' : '☰ Hide Navigation';
+  }
+
+  // Highlight active TOC entry based on scroll position
+  var stageLinks = document.querySelectorAll('.toc-stage:not(.disabled)');
+  var stages = document.querySelectorAll('section.stage');
+  window.addEventListener('scroll', function(){
+    var pos = window.scrollY + 100;
+    stages.forEach(function(s){
+      var link = document.querySelector('.toc-stage[href="#' + s.id + '"]');
+      if(!link) return;
+      if(pos >= s.offsetTop && pos < s.offsetTop + s.offsetHeight){
+        stageLinks.forEach(function(l){ l.classList.remove('active'); });
+        link.classList.add('active');
+      }
+    });
+  });
+
+  // ===== Ask Sujit: static, fully offline keyword retrieval (no network, no generation) =====
+  function handleAskSujit(query){
+    var box = document.getElementById('askSujitAnswer');
+    var q = query.trim().toLowerCase();
+    if(q.length < 2){ box.style.display = 'none'; return; }
+
+    var ideas = document.querySelectorAll('.idea');
+    var matches = [];
+    ideas.forEach(function(idea){
+      var haystack = (idea.getAttribute('data-search') + ' ' + idea.querySelector('h3').textContent).toLowerCase();
+      if(haystack.indexOf(q) !== -1){
+        matches.push({
+          id: idea.id,
+          title: idea.querySelector('h3').textContent,
+          num: idea.querySelector('.idea-num').textContent
+        });
+      }
+    });
+
+    if(matches.length === 0){
+      box.style.display = 'block';
+      box.innerHTML = 'No match yet in the sections built so far. Try a different word, or check back once more sections are added.';
+      return;
+    }
+
+    var html = matches.slice(0,5).map(function(m){
+      return '→ <a href="#' + m.id + '">Item ' + m.num + ' — ' + m.title + '</a>';
+    }).join('<br>');
+
+    box.style.display = 'block';
+    box.innerHTML = html;
+  }
+
+  // ===== Floating Remote Control logic =====
+  var stageOrder = Array.from(document.querySelectorAll('section.stage')).map(function(s){ return s.id; });
+  var stageTitles = {};
+  document.querySelectorAll('section.stage').forEach(function(s){
+    var numEl = s.querySelector('.stage-num');
+    var titleEl = s.querySelector('h2');
+    stageTitles[s.id] = (numEl ? numEl.textContent.replace('STAGE ','').replace(' / 10','') : '') + '<br>' + (titleEl ? titleEl.textContent : '');
+  });
+
+  function currentStageIndex(){
+    var pos = window.scrollY + 120;
+    var idx = 0;
+    stageOrder.forEach(function(id, i){
+      var el = document.getElementById(id);
+      if(el && pos >= el.offsetTop) idx = i;
+    });
+    return idx;
+  }
+
+  function updateRemoteLabel(){
+    var idx = currentStageIndex();
+    var id = stageOrder[idx];
+    var label = document.getElementById('remoteStageLabel');
+    if(label) label.innerHTML = stageTitles[id];
+  }
+  window.addEventListener('scroll', updateRemoteLabel);
+  updateRemoteLabel();
+
+  function remoteGoStage(direction){
+    var idx = currentStageIndex() + direction;
+    if(idx < 0) idx = 0;
+    if(idx >= stageOrder.length) idx = stageOrder.length - 1;
+    document.getElementById(stageOrder[idx]).scrollIntoView({behavior:'smooth', block:'start'});
+  }
+
+  function remoteGoTop(){
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function toggleRemote(){
+    document.getElementById('remote').classList.toggle('collapsed');
+  }
+</script>
+
+<!-- ===== Floating Remote Control ===== -->
+<div id="remote">
+  <button id="remotePower" title="Power: show/hide the remote controls" onclick="toggleRemote()">⏻</button>
+  <div class="remote-body">
+    <div class="remote-label">Remote</div>
+    <button title="Jump to top" onclick="remoteGoTop()">⤒</button>
+    <button title="Previous section" onclick="remoteGoStage(-1)">▲</button>
+    <div id="remoteStageLabel">01<br>What Is<br>Agentic AI</div>
+    <button title="Next section" onclick="remoteGoStage(1)">▼</button>
+    <div class="remote-divider"></div>
+    <button title="Show/hide sidebar index" onclick="toggleSidebar()">☰</button>
+  </div>
+</div>
+
+</body>
+</html>
