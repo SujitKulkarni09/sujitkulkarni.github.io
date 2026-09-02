@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI, Explained — from Zero to No-Panic</title>
+<style>
+  :root{
+    --void:#040311;
+    --void2:#0a0818;
+    --glass-bg:rgba(12,11,28,0.72);
+    --glass-bg-strong:rgba(12,11,28,0.88);
+    --glass-border:rgba(255,255,255,0.09);
+    --glass-hi:rgba(255,255,255,0.07);
+    --blue:#3E7BFA;
+    --teal:#14F1D9;
+    --gold:#FFB84D;
+    --orange:#FF6B35;
+    --red:#FF3864;
+    --violet:#A855F7;
+    --text:#F3F6FF;
+    --text-dim:#C3CEEA;
+    --text-dimmer:#98A4C7;
+    --radius:20px;
+    --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    --mono: 'Consolas', 'SFMono-Regular', Menlo, Monaco, 'Courier New', monospace;
+    --serif: 'Georgia', 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Palatino, serif;
+  }
+  html[data-theme="light"]{
+    --void:#eef1fa;
+    --void2:#ffffff;
+    --glass-bg:rgba(255,255,255,0.72);
+    --glass-bg-strong:rgba(255,255,255,0.9);
+    --glass-border:rgba(20,20,50,0.08);
+    --glass-hi:rgba(255,255,255,0.7);
+    --blue:#1656d1;
+    --teal:#008c7a;
+    --gold:#a86a00;
+    --orange:#c1450f;
+    --red:#c81e3a;
+    --violet:#7226c9;
+    --text:#0c1526;
+    --text-dim:#2b3652;
+    --text-dimmer:#4e5975;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0; background:var(--void); color:var(--text); font-family:var(--sans);
+    line-height:1.65; overflow-x:hidden; transition:background .3s, color .3s;
+    padding-bottom:54px; /* space for sticky footer bar */
+  }
+  ::selection{background:var(--violet);color:#fff;}
+
+  /* ---------- ambient layers ---------- */
+  #bgcanvas{ position:fixed; inset:0; z-index:0; opacity:.5; }
+  html[data-theme="light"] #bgcanvas{ opacity:.15; }
+  .grid-overlay{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    background-image:
+      linear-gradient(rgba(62,123,250,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(62,123,250,0.05) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse 85% 60% at 50% 0%, #000 40%, transparent 100%);
+  }
+  .aurora{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden;}
+  .aurora i{
+    position:absolute; border-radius:50%; filter:blur(90px); opacity:.28; mix-blend-mode:screen;
+    animation:drift 26s ease-in-out infinite alternate;
+  }
+  html[data-theme="light"] .aurora i{ opacity:.16; mix-blend-mode:multiply; }
+  .aurora i:nth-child(1){width:520px;height:520px; background:var(--blue); top:-10%; left:-8%; animation-duration:24s;}
+  .aurora i:nth-child(2){width:460px;height:460px; background:var(--violet); top:10%; right:-10%; animation-duration:30s;}
+  .aurora i:nth-child(3){width:480px;height:480px; background:var(--teal); bottom:-15%; left:15%; animation-duration:22s;}
+  .aurora i:nth-child(4){width:380px;height:380px; background:var(--orange); bottom:5%; right:8%; animation-duration:28s;}
+  .aurora i:nth-child(5){width:340px;height:340px; background:var(--red); top:45%; left:45%; animation-duration:34s;}
+  @keyframes drift{ 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(40px,-30px) scale(1.15);} }
+
+  /* floating background NN motifs (decorative, behind content) */
+  .nn-motif{ position:absolute; z-index:0; pointer-events:none; opacity:.16; filter:blur(.3px); }
+  html[data-theme="light"] .nn-motif{ opacity:.10; }
+  .nn-motif.spin{ animation:motifSpin 60s linear infinite; }
+  .nn-motif.float{ animation:motifFloat 9s ease-in-out infinite; }
+  @keyframes motifSpin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes motifFloat{ 0%,100%{transform:translateY(0px);} 50%{transform:translateY(-22px);} }
+
+  .wrap{position:relative; z-index:2; max-width:920px; margin:0 auto; padding:0 24px;}
+  section{padding:90px 0; position:relative;}
+  h1,h2,h3,h4{font-family:var(--sans); font-weight:800; letter-spacing:-0.01em; margin:0 0 .5em;}
+  p{color:var(--text-dim); max-width:68ch;}
+  a{color:var(--teal);}
+
+  /* ---------- glass primitive ---------- */
+  .glass{
+    background:linear-gradient(135deg, var(--glass-hi), var(--glass-bg));
+    backdrop-filter:blur(18px) saturate(160%);
+    -webkit-backdrop-filter:blur(18px) saturate(160%);
+    border:1px solid var(--glass-border);
+    box-shadow:0 10px 40px -12px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  html[data-theme="light"] .glass{ box-shadow:0 10px 40px -18px rgba(20,30,70,0.25), inset 0 1px 0 rgba(255,255,255,0.6); }
+  .tilt{ transition:transform .12s ease-out; will-change:transform; transform-style:preserve-3d; }
+
+  /* ---------- top nav (sticky glass) ---------- */
+  nav{
+    position:fixed; top:0; left:0; right:0; z-index:50;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:13px 26px;
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-bottom:1px solid var(--glass-border);
+  }
+  .brand{font-weight:800; font-size:16px; letter-spacing:.02em; display:flex; align-items:center; gap:10px;}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--teal);box-shadow:0 0 12px 3px var(--teal);}
+  .navlinks{display:flex; align-items:center; gap:19px; font-size:13.5px; color:var(--text-dim);}
+  .navlinks a{color:var(--text-dim); text-decoration:none; transition:color .2s;}
+  .navlinks a:hover{color:var(--teal);}
+  @media (max-width:860px){ .navlinks a.hideSmall{display:none;} }
+
+  .theme-toggle{
+    width:36px; height:36px; border-radius:50%; border:1px solid var(--glass-border);
+    background:var(--glass-bg); color:var(--text); cursor:pointer; font-size:16px;
+    display:flex; align-items:center; justify-content:center; transition:border-color .2s, transform .2s;
+  }
+  .theme-toggle:hover{border-color:var(--teal); transform:scale(1.08);}
+
+  .topbar-progress{position:fixed; top:0; left:0; height:2px; background:linear-gradient(90deg,var(--blue),var(--teal),var(--gold),var(--orange),var(--red)); z-index:60; transition:width .4s ease; width:0%;}
+
+  /* ---------- sticky glass footer bar ---------- */
+  .footer-bar{
+    position:fixed; bottom:0; left:0; right:0; z-index:55; height:46px;
+    display:flex; align-items:center; justify-content:center; gap:9px; overflow:hidden;
+    background:var(--glass-bg-strong);
+    backdrop-filter:blur(20px) saturate(160%);
+    -webkit-backdrop-filter:blur(20px) saturate(160%);
+    border-top:1px solid var(--glass-border);
+    font-family:var(--sans); font-size:13.5px; font-weight:500; letter-spacing:.01em; color:var(--text-dimmer);
+  }
+  .footer-bar::before{
+    content:''; position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background:linear-gradient(100deg, transparent 35%, rgba(20,241,217,0.25) 48%, rgba(168,85,247,0.25) 55%, transparent 68%);
+    background-size:250% 100%; animation:sheenSweep 6s linear infinite;
+    mix-blend-mode:screen;
+  }
+  .footer-bar b{
+    font-family:var(--serif); font-style:italic; font-weight:700; font-size:14.5px; letter-spacing:.01em;
+    background:linear-gradient(100deg, var(--text), var(--teal));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .footer-bar .fdot{
+    width:20px; height:20px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(135deg, var(--blue), var(--teal)); font-family:var(--serif); font-weight:700; font-size:9px; color:#04030f;
+  }
+  .footer-bar .sep{color:var(--text-dimmer); opacity:.5;}
+
+  /* ---------- hero ---------- */
+  .hero{min-height:100vh; display:flex; flex-direction:column; justify-content:center; padding-top:74px; position:relative;}
+  .kicker{
+    display:inline-flex; align-items:center; gap:8px;
+    font-size:13px; color:var(--teal); font-family:var(--mono);
+    border:1px solid rgba(20,241,217,0.35); padding:6px 12px; border-radius:100px;
+    background:rgba(20,241,217,0.07); width:fit-content; margin-bottom:22px;
+  }
+  .hero-grid{display:grid; grid-template-columns:1.1fr 0.9fr; gap:20px; align-items:center;}
+  @media (max-width:840px){ .hero-grid{grid-template-columns:1fr;} }
+  .hero h1{
+    font-size:clamp(34px, 5.6vw, 62px);
+    line-height:1.05;
+    background:linear-gradient(100deg, var(--text) 6%, var(--blue) 32%, var(--teal) 55%, var(--gold) 78%, var(--orange) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .hero p.lead{font-size:17px; max-width:54ch; margin-top:16px; color:var(--text-dim);}
+  .hero-cta{display:flex; gap:14px; margin-top:30px; flex-wrap:wrap;}
+  .btn{
+    font-family:var(--sans); font-weight:700; font-size:15.5px; cursor:pointer;
+    padding:13px 24px; border-radius:100px; border:1px solid transparent;
+    text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s ease, box-shadow .2s ease;
+  }
+  .btn:active{transform:scale(.96);}
+  .btn-primary{background:linear-gradient(100deg, var(--blue), var(--teal)); color:#04030f;}
+  .btn-primary:hover{box-shadow:0 8px 30px rgba(20,241,217,0.35);}
+  .btn-ghost{border-color:var(--glass-border); color:var(--text); background:var(--glass-bg);}
+  .btn-ghost:hover{border-color:var(--teal); color:var(--teal);}
+  .btn-small{padding:8px 16px; font-size:13.5px;}
+
+  .hero-chips{display:flex; gap:10px; margin-top:40px; flex-wrap:wrap;}
+  .hero-chip{
+    padding:12px 16px; border-radius:14px; display:flex; flex-direction:column; gap:2px; min-width:110px;
+  }
+  .hero-chip b{font-size:20px; color:var(--text);}
+  .hero-chip span{font-size:12px; color:var(--text-dimmer); font-family:var(--mono);}
+
+  /* ---------- 3D hero orb ---------- */
+  .orb-stage{ perspective:1100px; width:100%; height:340px; display:flex; align-items:center; justify-content:center; position:relative; }
+  .orb-scene{ width:230px; height:230px; position:relative; transform-style:preserve-3d; transition:transform .1s ease-out; touch-action:none; }
+  .orb-core{
+    position:absolute; top:50%; left:50%; width:70px; height:70px; margin:-35px;
+    border-radius:50%; background:radial-gradient(circle at 35% 35%, #fff, var(--teal) 40%, var(--blue) 100%);
+    box-shadow:0 0 60px 10px rgba(20,241,217,0.55), 0 0 120px 30px rgba(62,123,250,0.3);
+    animation:corePulse 3.2s ease-in-out infinite;
+  }
+  @keyframes corePulse{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.12);} }
+  .orb{ position:absolute; inset:0; transform-style:preserve-3d; animation:orbSpin 22s linear infinite; }
+  @keyframes orbSpin{ from{transform:rotateY(0deg);} to{transform:rotateY(360deg);} }
+  .orb-node{
+    position:absolute; top:50%; left:50%; width:9px; height:9px; margin:-4.5px;
+    border-radius:50%; box-shadow:0 0 10px 3px currentColor;
+  }
+  .orb-float-card{
+    position:absolute; padding:8px 13px; border-radius:12px; font-family:var(--mono); font-size:12px;
+    color:var(--text); animation:motifFloat 7s ease-in-out infinite;
+  }
+
+  /* orbiting labeled satellites (AI / ML / DL / NN) */
+  .sat-ring{ position:absolute; inset:0; transform-style:preserve-3d; animation:satSpin 18s linear infinite; }
+  @keyframes satSpin{ from{transform:rotateY(0deg);} to{transform:rotateY(360deg);} }
+  .sat{ position:absolute; top:50%; left:50%; width:0; height:0; transform-style:preserve-3d; }
+  .sat-badge{
+    position:absolute; transform:translate(-50%,-50%) rotateY(0deg);
+    padding:7px 14px; border-radius:100px; font-family:var(--mono); font-weight:700; font-size:12.5px;
+    white-space:nowrap; animation:satUnspin 18s linear infinite;
+    border:1px solid var(--sat-color); color:var(--sat-color); background:rgba(255,255,255,0.05);
+    backdrop-filter:blur(6px); box-shadow:0 0 16px -2px var(--sat-color);
+  }
+  @keyframes satUnspin{ from{transform:translate(-50%,-50%) rotateY(0deg);} to{transform:translate(-50%,-50%) rotateY(-360deg);} }
+
+  /* holographic floor + reflection under the orb */
+  .orb-floor{
+    position:absolute; bottom:6%; left:50%; width:360px; height:150px; margin-left:-180px;
+    background-image:linear-gradient(rgba(20,241,217,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(20,241,217,0.4) 1px, transparent 1px);
+    background-size:22px 22px;
+    transform:perspective(280px) rotateX(72deg);
+    -webkit-mask-image:radial-gradient(ellipse 62% 100% at 50% 0%, #000 25%, transparent 78%);
+    mask-image:radial-gradient(ellipse 62% 100% at 50% 0%, #000 25%, transparent 78%);
+    opacity:.55; pointer-events:none;
+  }
+  .orb-reflect{
+    position:absolute; top:100%; left:50%; width:230px; height:230px; margin-left:-115px; margin-top:-14px;
+    transform:scaleY(-1); transform-style:preserve-3d; opacity:.22; filter:blur(1.5px);
+    -webkit-mask-image:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 65%);
+    mask-image:linear-gradient(to bottom, rgba(0,0,0,0.55), transparent 65%);
+    pointer-events:none;
+  }
+
+  /* ---------- section headers ---------- */
+  .eyebrow{
+    font-family:var(--mono); font-size:13px; color:var(--sec-accent, var(--gold));
+    display:flex; align-items:center; gap:10px; margin-bottom:14px;
+  }
+  .eyebrow .line{width:28px; height:1px; background:var(--sec-accent, var(--gold)); opacity:.7;}
+  .sec-title{font-size:clamp(24px,3.6vw,36px); max-width:22ch;}
+  .sec-sub{font-size:16.5px; margin-top:10px;}
+  .sec-extra{font-size:15.5px; margin-top:12px; color:var(--text-dimmer);}
+  .sec-hooks{display:flex; flex-wrap:wrap; gap:8px; margin-top:16px;}
+  .hook{font-family:var(--mono); font-size:12.5px; color:var(--text-dim); border:1px solid var(--glass-border); background:var(--glass-bg); padding:5px 11px; border-radius:100px;}
+
+  /* ---------- concept cards ---------- */
+  .concept-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:38px;}
+  @media (max-width:680px){ .concept-grid{grid-template-columns:1fr;} }
+  .concept-card{border-radius:var(--radius); padding:24px; position:relative; overflow:hidden;}
+  .concept-card::before{
+    content:''; position:absolute; top:-40%; right:-30%; width:220px; height:220px;
+    background:radial-gradient(circle, var(--accent,var(--teal)) 0%, transparent 70%);
+    opacity:.22; pointer-events:none;
+  }
+  .concept-card h3{font-size:18px; margin-bottom:8px; color:var(--text);}
+  .concept-card .tag{font-family:var(--mono); font-size:11.5px; color:var(--accent,var(--teal)); margin-bottom:10px; display:block;}
+  .concept-card p{font-size:15px; margin:0;}
+  .concept-card .analogy{
+    margin-top:14px; padding-top:14px; border-top:1px dashed var(--glass-border);
+    font-size:14px; color:var(--text-dimmer); font-style:italic; min-height:52px;
+  }
+  .analogy-switch{
+    margin-top:12px; font-family:var(--mono); font-size:12px; color:var(--text-dimmer);
+    background:none; border:1px solid var(--glass-border); border-radius:100px; padding:6px 12px;
+    cursor:pointer; transition:border-color .2s, color .2s;
+  }
+  .analogy-switch:hover{border-color:var(--accent,var(--teal)); color:var(--accent,var(--teal));}
+
+  /* ---------- demo panels ---------- */
+  .panel{border-radius:26px; padding:30px; margin-top:34px; position:relative;}
+  .panel-label{
+    font-family:var(--mono); font-size:12px; color:var(--text-dimmer);
+    display:flex; justify-content:space-between; margin-bottom:18px; flex-wrap:wrap; gap:8px;
+  }
+  .live-dot{display:inline-flex; align-items:center; gap:6px; color:var(--teal);}
+  .live-dot i{width:7px;height:7px;border-radius:50%;background:var(--teal); box-shadow:0 0 8px 2px var(--teal); animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  input[type="text"]{
+    width:100%; background:var(--glass-bg); border:1px solid var(--glass-border); color:var(--text);
+    font-family:var(--sans); font-size:16px; padding:14px 16px; border-radius:12px;
+    outline:none; transition:border-color .2s, box-shadow .2s;
+  }
+  input[type="text"]:focus{border-color:var(--teal); box-shadow:0 0 0 3px rgba(20,241,217,0.15);}
+
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px; min-height:40px;}
+  .chip{
+    font-family:var(--mono); font-size:14px; padding:8px 12px; border-radius:10px;
+    display:flex; flex-direction:column; gap:2px; animation:pop .25s ease; cursor:default;
+    border:1px solid; background:rgba(255,255,255,0.04);
+  }
+  .chip small{color:var(--text-dimmer); font-size:11px;}
+  @keyframes pop{from{transform:scale(.7); opacity:0;} to{transform:scale(1); opacity:1;}}
+
+  .note{
+    font-size:14px; color:var(--text-dimmer); margin-top:16px; padding:12px 14px;
+    border-left:2px solid var(--sec-accent, var(--gold)); background:rgba(255,255,255,0.03); border-radius:0 10px 10px 0;
+  }
+  details.deepdive{ margin-top:14px; }
+  details.deepdive summary{
+    cursor:pointer; font-family:var(--mono); font-size:13px; color:var(--sec-accent,var(--teal));
+    list-style:none; display:inline-flex; align-items:center; gap:6px;
+  }
+  details.deepdive summary::-webkit-details-marker{ display:none; }
+  details.deepdive summary::before{ content:'▸'; transition:transform .2s; }
+  details.deepdive[open] summary::before{ transform:rotate(90deg); }
+  details.deepdive p{ margin-top:10px; font-size:14.5px; }
+
+  #embedCanvas{width:100%; height:250px; display:block; border-radius:16px; background:var(--void2); border:1px solid var(--glass-border); margin-top:20px;}
+  .vec-row{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;}
+  .vec-chip{font-family:var(--mono); font-size:13px; background:var(--void2); border:1px solid var(--glass-border); border-radius:8px; padding:6px 10px; color:var(--text-dim);}
+  .vec-chip b{color:var(--violet);}
+
+  .nn-wrap{display:grid; grid-template-columns:1fr 1.3fr; gap:26px; margin-top:22px;}
+  @media (max-width:760px){ .nn-wrap{grid-template-columns:1fr;} }
+  .slider-block{margin-bottom:20px;}
+  .slider-block label{display:flex; justify-content:space-between; font-size:14px; color:var(--text-dim); margin-bottom:8px;}
+  .slider-block b{color:var(--teal); font-family:var(--mono);}
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:4px; border-radius:4px;
+    background:linear-gradient(90deg, var(--blue), var(--teal), var(--gold)); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:#fff; box-shadow:0 0 10px 2px var(--teal); cursor:pointer; border:2px solid var(--teal);
+  }
+  #nnsvg{width:100%; height:auto; display:block;}
+  .nn-node{transition:opacity .25s, r .25s;}
+  .nn-output-label{font-family:var(--mono); font-size:12px; fill:var(--text-dim);}
+  .result-banner{
+    margin-top:16px; padding:15px; border-radius:14px; text-align:center; font-size:15.5px;
+    background:linear-gradient(100deg, rgba(62,123,250,0.12), rgba(20,241,217,0.12));
+    border:1px solid var(--glass-border);
+  }
+  .result-banner b{color:var(--gold); font-size:16px;}
+
+  .predict-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:20px;}
+  .predict-card{
+    flex:1; min-width:150px; background:var(--void2); border:1px solid var(--glass-border);
+    border-radius:12px; padding:14px; cursor:pointer; transition:border-color .2s, transform .15s;
+  }
+  .predict-card:hover{border-color:var(--gold); transform:translateY(-2px);}
+  .predict-card .w{font-size:16px; font-weight:700; color:var(--text);}
+  .predict-bar{height:6px; border-radius:6px; background:rgba(140,150,180,0.18); margin-top:10px; overflow:hidden;}
+  .predict-bar i{display:block; height:100%; background:linear-gradient(90deg, var(--blue), var(--gold));}
+  .predict-pct{font-family:var(--mono); font-size:12px; color:var(--text-dimmer); margin-top:6px; display:block;}
+
+  .demo-canvas-wrap canvas{width:100%; height:250px; display:block; border-radius:16px; background:var(--void2); border:1px solid var(--glass-border);}
+  .demo-controls{display:flex; gap:12px; align-items:center; margin-top:18px; flex-wrap:wrap;}
+  .stat-row{display:flex; gap:22px; margin-top:14px; flex-wrap:wrap;}
+  .stat-row div{font-family:var(--mono); font-size:13.5px; color:var(--text-dim);}
+  .stat-row div b{display:block; font-size:19px; color:var(--text); font-family:var(--sans);}
+
+  .sentence-row{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px;}
+  .att-word{
+    font-family:var(--mono); font-size:15px; padding:8px 12px; border-radius:8px;
+    background:var(--void2); border:1px solid var(--glass-border); color:var(--text); cursor:pointer;
+    transition:transform .15s;
+  }
+  .att-word:hover{transform:translateY(-2px);}
+  .att-word.query{border-color:var(--orange); color:var(--orange); background:rgba(255,107,53,0.12);}
+
+  .toggle-pair{display:flex; gap:10px; margin-top:20px;}
+  .toggle-btn{
+    flex:1; padding:12px; border-radius:12px; border:1px solid var(--glass-border); background:var(--void2);
+    color:var(--text-dim); cursor:pointer; font-size:14.5px; text-align:center; transition:all .2s;
+  }
+  .toggle-btn.active{border-color:var(--teal); color:var(--teal); background:rgba(20,241,217,0.09);}
+  .bias-result{margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:600px){ .bias-result{grid-template-columns:1fr;} }
+  .bias-card{background:var(--void2); border:1px solid var(--glass-border); border-radius:14px; padding:16px;}
+  .bias-card .region{font-family:var(--mono); font-size:12.5px; color:var(--text-dimmer);}
+  .bias-card .pct{font-size:28px; font-weight:800; margin-top:6px;}
+  .bias-card .pct.good{color:var(--teal);}
+  .bias-card .pct.bad{color:var(--red);}
+
+  .example-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:38px;}
+  @media (max-width:820px){ .example-grid{grid-template-columns:repeat(2,1fr);} }
+  @media (max-width:560px){ .example-grid{grid-template-columns:1fr;} }
+  .example-card{border-radius:18px; padding:20px;}
+  .example-card .emoji{font-size:26px; margin-bottom:10px; display:block;}
+  .example-card h4{font-size:16px; margin:0 0 6px;}
+  .example-card p{font-size:14px; margin:0;}
+
+  .myth-row{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:18px;}
+  @media (max-width:640px){ .myth-row{grid-template-columns:1fr;} }
+  .myth-card, .reality-card{border-radius:16px; padding:18px; border:1px solid;}
+  .myth-card{background:rgba(255,56,100,0.07); border-color:rgba(255,56,100,0.3);}
+  .reality-card{background:rgba(20,241,217,0.07); border-color:rgba(20,241,217,0.3);}
+  .myth-card .lbl{font-family:var(--mono); font-size:11.5px; color:var(--red); display:block; margin-bottom:8px;}
+  .reality-card .lbl{font-family:var(--mono); font-size:11.5px; color:var(--teal); display:block; margin-bottom:8px;}
+  .myth-card p, .reality-card p{font-size:14.5px; margin:0; color:var(--text);}
+  .myth-pair{margin-bottom:14px;}
+
+  .glossary-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:38px;}
+  @media (max-width:640px){ .glossary-grid{grid-template-columns:1fr;} }
+  .gloss-item{border-bottom:1px solid var(--glass-border); padding:14px 0;}
+  .gloss-item dt{font-weight:700; font-size:15.5px; color:var(--text); font-family:var(--mono);}
+  .gloss-item dd{margin:6px 0 0; font-size:14.5px; color:var(--text-dim);}
+
+  .quiz{margin-top:30px; padding:22px; border-radius:18px; border:1px dashed var(--glass-border);}
+  .quiz .q-label{font-family:var(--mono); font-size:12px; color:var(--violet); margin-bottom:10px; display:flex; align-items:center; gap:8px;}
+  .quiz .q-text{font-size:16px; color:var(--text); margin-bottom:14px; font-weight:600;}
+  .q-options{display:flex; flex-direction:column; gap:8px;}
+  .q-opt{
+    text-align:left; padding:12px 14px; border-radius:12px; border:1px solid var(--glass-border);
+    background:var(--void2); color:var(--text); cursor:pointer; font-size:14.5px; transition:all .2s;
+  }
+  .q-opt:hover{border-color:var(--teal);}
+  .q-opt.correct{border-color:var(--teal); background:rgba(20,241,217,0.1); color:var(--teal);}
+  .q-opt.wrong{border-color:var(--red); background:rgba(255,56,100,0.1); color:var(--red);}
+  .q-feedback{margin-top:12px; font-size:14px; color:var(--text-dimmer);}
+
+  /* ---------- progress dashboard (app-like) ---------- */
+  .dash{border-radius:24px; padding:26px; margin-top:44px; display:grid; grid-template-columns:auto 1fr; gap:24px; align-items:center;}
+  @media (max-width:600px){ .dash{grid-template-columns:1fr; text-align:center;} }
+  .ring-wrap{position:relative; width:96px; height:96px; margin:0 auto;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:16px; font-weight:700; color:var(--text);}
+  .badge-row{display:flex; flex-wrap:wrap; gap:10px;}
+  .badge{
+    width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:16px; background:var(--void2); border:1px solid var(--glass-border); opacity:.3; transition:all .3s;
+  }
+  .badge.earned{opacity:1; box-shadow:0 0 14px 2px var(--sec-accent, var(--teal)); border-color:var(--sec-accent, var(--teal));}
+  .dash-title{font-size:14px; color:var(--text-dim); margin-bottom:10px; font-family:var(--mono);}
+
+  /* ---------- roadmap ---------- */
+  .roadmap{margin-top:38px; display:flex; flex-direction:column; gap:0;}
+  .rstep{display:flex; gap:20px; padding:20px 0; border-bottom:1px solid var(--glass-border);}
+  .rstep:last-child{border-bottom:none;}
+  .rstep .num{
+    font-family:var(--mono); font-size:14px; color:#04030f; background:var(--teal);
+    width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; font-weight:700; box-shadow:0 0 16px rgba(20,241,217,0.4);
+  }
+  .rstep h4{margin:0 0 6px; font-size:16.5px; color:var(--text);}
+  .rstep p{margin:0; font-size:15px;}
+
+  footer{
+    position:relative; z-index:2; text-align:center; padding:44px 24px 30px;
+    border-top:1px solid var(--glass-border); margin-top:30px;
+  }
+  footer .reset-link{font-family:var(--mono); font-size:12px; color:var(--text-dimmer); background:none; border:none; text-decoration:underline; cursor:pointer; margin-top:18px; display:inline-block;}
+
+  /* ---------- holographic ID-card credit ---------- */
+  .id-card{
+    --mx:50%; --my:50%;
+    position:relative; overflow:hidden; max-width:480px; margin:0 auto;
+    display:flex; align-items:center; gap:20px; padding:26px 30px; border-radius:22px;
+    background:linear-gradient(135deg, var(--glass-hi), var(--glass-bg));
+    backdrop-filter:blur(18px) saturate(160%); -webkit-backdrop-filter:blur(18px) saturate(160%);
+    border:1px solid var(--glass-border);
+    box-shadow:0 12px 40px -14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  .id-card::before{
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background:radial-gradient(320px circle at var(--mx) var(--my), rgba(255,255,255,0.3), transparent 45%);
+    mix-blend-mode:overlay;
+  }
+  .id-card::after{
+    content:''; position:absolute; inset:-2px; pointer-events:none; opacity:.45;
+    background:linear-gradient(120deg, transparent 30%, rgba(20,241,217,0.3) 45%, rgba(168,85,247,0.3) 55%, transparent 70%);
+    background-size:200% 200%; animation:sheenSweep 5s linear infinite;
+    mix-blend-mode:screen;
+  }
+  @keyframes sheenSweep{ 0%{background-position:0% 0%;} 100%{background-position:200% 200%;} }
+  .id-card-chip{
+    position:relative; z-index:1; flex-shrink:0; width:52px; height:52px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-family:var(--serif); font-weight:700; font-size:18px;
+    letter-spacing:.02em;
+    background:linear-gradient(135deg, var(--blue), var(--teal)); color:#04030f;
+    box-shadow:0 0 20px rgba(20,241,217,0.5), inset 0 0 0 2px rgba(255,255,255,0.25);
+  }
+  .id-card-info{ position:relative; z-index:1; display:flex; flex-direction:column; gap:5px; text-align:left; }
+  .id-card-label{ font-family:var(--sans); font-size:11.5px; font-weight:600; letter-spacing:.14em; color:var(--text-dimmer); text-transform:uppercase; }
+  .id-card-name{
+    font-family:var(--serif); font-style:italic; font-size:24px; font-weight:700; letter-spacing:.01em; min-height:1.25em;
+    background:linear-gradient(100deg, var(--text) 20%, var(--teal) 55%, var(--violet) 90%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .id-card-sub{ font-family:var(--sans); font-size:13.5px; color:var(--text-dimmer); letter-spacing:.01em; }
+  .id-card-code{
+    position:relative; z-index:1; margin-left:auto; flex-shrink:0; width:14px; height:14px; border-radius:50%;
+    background:var(--gold); box-shadow:0 0 12px 3px var(--gold); animation:pulse 2s ease-in-out infinite;
+  }
+
+  /* ---------- hero credit plate: supercharged version ---------- */
+  .hero-plate-wrap{ display:flex; justify-content:flex-start; margin-bottom:28px; perspective:1200px; }
+  .hero-id-card{
+    max-width:520px; padding:30px 38px; border-radius:26px; cursor:pointer;
+    box-shadow:
+      0 24px 70px -20px rgba(0,0,0,0.7),
+      inset 0 1px 0 rgba(255,255,255,0.12),
+      0 0 0 1px rgba(255,255,255,0.04),
+      0 0 46px -8px var(--teal);
+    animation:plateGlow 4.5s ease-in-out infinite;
+  }
+  @keyframes plateGlow{
+    0%,100%{ box-shadow:0 24px 70px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 1px rgba(255,255,255,.04), 0 0 46px -8px var(--teal); }
+    33%{ box-shadow:0 24px 70px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 1px rgba(255,255,255,.04), 0 0 60px -6px var(--violet); }
+    66%{ box-shadow:0 24px 70px -20px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.12), 0 0 0 1px rgba(255,255,255,.04), 0 0 60px -6px var(--gold); }
+  }
+  .hero-id-card .id-card-chip{
+    width:64px; height:64px; font-size:21px;
+    box-shadow:0 0 26px rgba(20,241,217,0.6), inset 0 0 0 2px rgba(255,255,255,0.3), inset 0 -6px 10px rgba(0,0,0,0.25);
+  }
+  .hero-id-card .id-card-label{ font-size:11.5px; }
+  .hero-id-card .id-card-name{ font-size:30px; }
+  .hero-id-card .id-card-sub{ font-size:13.5px; }
+  .hero-id-card .id-card-code{ width:16px; height:16px; }
+  .plate-corner{ position:absolute; width:18px; height:18px; z-index:2; opacity:.85; pointer-events:none; }
+  .plate-corner.tl{ top:10px; left:10px; border-top:2px solid var(--teal); border-left:2px solid var(--teal); border-top-left-radius:8px; }
+  .plate-corner.tr{ top:10px; right:10px; border-top:2px solid var(--violet); border-right:2px solid var(--violet); border-top-right-radius:8px; }
+  .plate-corner.bl{ bottom:10px; left:10px; border-bottom:2px solid var(--gold); border-left:2px solid var(--gold); border-bottom-left-radius:8px; }
+  .plate-corner.br{ bottom:10px; right:10px; border-bottom:2px solid var(--orange); border-right:2px solid var(--orange); border-bottom-right-radius:8px; }
+  .plate-scanline{
+    position:absolute; left:6%; right:6%; height:2px; top:0; z-index:2; pointer-events:none;
+    background:linear-gradient(90deg, transparent, var(--teal), transparent);
+    box-shadow:0 0 12px 2px var(--teal);
+    animation:scanMove 3.2s linear infinite;
+  }
+  @keyframes scanMove{ 0%{ top:4%; opacity:0;} 10%{opacity:1;} 90%{opacity:1;} 100%{ top:94%; opacity:0;} }
+  @media (max-width:600px){
+    .hero-id-card{ padding:24px 22px; }
+    .hero-id-card .id-card-name{ font-size:23px; }
+    .hero-id-card .id-card-chip{ width:52px; height:52px; font-size:18px; }
+  }
+
+  .progress-rail{
+    position:fixed; right:20px; top:50%; transform:translateY(-50%); z-index:40;
+    display:flex; flex-direction:column; gap:11px;
+  }
+  .progress-rail a{ width:9px; height:9px; border-radius:50%; background:rgba(140,150,180,0.25); display:block; transition:all .25s; }
+  .progress-rail a.active{background:var(--teal); box-shadow:0 0 10px 2px var(--teal); transform:scale(1.3);}
+  .progress-rail a.done{background:var(--gold);}
+  @media (max-width:1000px){ .progress-rail{display:none;} }
+
+  /* ---------- toast + FAB (app-like chrome) ---------- */
+  #toastHost{ position:fixed; bottom:60px; right:18px; z-index:70; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+  .toast{
+    padding:12px 18px; border-radius:14px; font-size:14px; color:var(--text);
+    display:flex; align-items:center; gap:10px; animation:toastIn .35s ease, toastOut .4s ease 2.6s forwards;
+    max-width:260px;
+  }
+  @keyframes toastIn{ from{transform:translateX(30px); opacity:0;} to{transform:translateX(0); opacity:1;} }
+  @keyframes toastOut{ to{transform:translateX(30px); opacity:0;} }
+
+  #fab{
+    position:fixed; bottom:60px; left:18px; z-index:60; width:46px; height:46px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--text); font-size:17px;
+    opacity:0; pointer-events:none; transition:opacity .3s, transform .2s;
+  }
+  #fab.show{opacity:1; pointer-events:auto;}
+  #fab:active{transform:scale(.9);}
+</style>
+</head>
+<body>
+
+<canvas id="bgcanvas"></canvas>
+<div class="grid-overlay"></div>
+<div class="aurora"><i></i><i></i><i></i><i></i><i></i></div>
+<div class="topbar-progress" id="topProgress"></div>
+
+<nav>
+  <div class="brand"><span class="dot"></span> AI, Explained</div>
+  <div class="navlinks">
+    <a href="#concepts" class="hideSmall">Basics</a>
+    <a href="#tokenize" class="hideSmall">Demos</a>
+    <a href="#myths" class="hideSmall">Myths</a>
+    <a href="#glossary" class="hideSmall">Glossary</a>
+    <a href="#roadmap" class="hideSmall">Start Here</a>
+    <button class="theme-toggle" id="themeBtn" title="Toggle light / dark">🌙</button>
+  </div>
+</nav>
+
+<div class="progress-rail" id="rail">
+  <a href="#hero" title="Top"></a>
+  <a href="#concepts" title="Basics"></a>
+  <a href="#examples" title="Real-world examples"></a>
+  <a href="#tokenize" title="Tokens"></a>
+  <a href="#embed" title="Embeddings"></a>
+  <a href="#neural" title="Neural Net"></a>
+  <a href="#training" title="Training"></a>
+  <a href="#overfit" title="Overfitting"></a>
+  <a href="#attention" title="Attention"></a>
+  <a href="#predict" title="Prediction"></a>
+  <a href="#bias" title="Bias"></a>
+  <a href="#myths" title="Myths"></a>
+  <a href="#glossary" title="Glossary"></a>
+  <a href="#roadmap" title="Roadmap"></a>
+</div>
+
+<div id="toastHost"></div>
+<div id="fab" class="glass" title="Back to top">↑</div>
+
+<div class="wrap">
+
+  <section class="hero" id="hero" style="--sec-accent:var(--teal)">
+    <svg class="nn-motif spin" style="top:-60px; right:-100px; width:420px; height:420px;" viewBox="0 0 200 200"><g fill="none" stroke="var(--blue)" stroke-width="0.6"><circle cx="100" cy="100" r="90"/><circle cx="100" cy="100" r="60"/><circle cx="100" cy="100" r="30"/><line x1="10" y1="100" x2="190" y2="100"/><line x1="100" y1="10" x2="100" y2="190"/><line x1="35" y1="35" x2="165" y2="165"/><line x1="165" y1="35" x2="35" y2="165"/></g></svg>
+    <div class="hero-grid">
+      <div>
+        <div class="kicker">● Zero jargon · Zero panic · Made for first-timers</div>
+        <div class="hero-plate-wrap">
+          <div class="id-card hero-id-card tilt" id="heroIdCard">
+            <span class="plate-corner tl"></span><span class="plate-corner tr"></span>
+            <span class="plate-corner bl"></span><span class="plate-corner br"></span>
+            <div class="plate-scanline"></div>
+            <div class="id-card-chip">SK</div>
+            <div class="id-card-info">
+              <span class="id-card-label">Built &amp; designed by</span>
+              <span class="id-card-name" id="creditNameHero">Sujit Kulkarni</span>
+              <span class="id-card-sub">Crafted end-to-end · zero external dependencies</span>
+            </div>
+            <div class="id-card-code"></div>
+          </div>
+        </div>
+        <h1>AI won't bite. Let's actually look inside it.</h1>
+        <p class="lead">
+          You've heard AI, ML, DL, Neural Networks thrown around like everyone else already understands them.
+          Nobody does, fully — including most people using those words. This is a slow, honest, hands-on walk
+          through what's actually happening under the hood, explained the way a good teacher would explain it
+          over chai, not a textbook.
+        </p>
+        <div class="hero-cta">
+          <a href="#concepts" class="btn btn-primary">Start from zero →</a>
+          <a href="#tokenize" class="btn btn-ghost">Jump to a live demo</a>
+        </div>
+        <div class="hero-chips">
+          <div class="hero-chip glass tilt"><b>8</b><span>touchable demos</span></div>
+          <div class="hero-chip glass tilt"><b>9</b><span>quick checks</span></div>
+          <div class="hero-chip glass tilt"><b>0</b><span>internet needed</span></div>
+        </div>
+      </div>
+      <div class="orb-stage" id="orbStage">
+        <div class="orb-floor"></div>
+        <div class="orb-scene" id="orbScene">
+          <div class="orb-core"></div>
+          <div class="orb" id="orbNodes"></div>
+          <div class="sat-ring" id="satRing">
+            <div class="sat" style="transform:rotateY(0deg) translateZ(150px);"><div class="sat-badge" style="--sat-color:var(--blue);">AI</div></div>
+            <div class="sat" style="transform:rotateY(90deg) translateZ(150px);"><div class="sat-badge" style="--sat-color:var(--teal);">ML</div></div>
+            <div class="sat" style="transform:rotateY(180deg) translateZ(150px);"><div class="sat-badge" style="--sat-color:var(--violet);">DL</div></div>
+            <div class="sat" style="transform:rotateY(270deg) translateZ(150px);"><div class="sat-badge" style="--sat-color:var(--orange);">NN</div></div>
+          </div>
+          <div class="orb-reflect" id="orbReflect"></div>
+        </div>
+        <div class="orb-float-card glass" style="top:6%; left:2%; color:var(--teal);">tokens</div>
+        <div class="orb-float-card glass" style="bottom:12%; right:0%; color:var(--gold);">weights</div>
+        <div class="orb-float-card glass" style="bottom:2%; left:14%; color:var(--orange);">layers</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="concepts" style="--sec-accent:var(--blue)">
+    <svg class="nn-motif float" style="top:0; left:-140px; width:300px; height:300px;" viewBox="0 0 200 200"><g fill="none" stroke="var(--violet)" stroke-width="0.6"><circle cx="100" cy="60" r="6"/><circle cx="50" cy="140" r="6"/><circle cx="150" cy="140" r="6"/><circle cx="100" cy="140" r="6"/><line x1="100" y1="60" x2="50" y2="140"/><line x1="100" y1="60" x2="150" y2="140"/><line x1="100" y1="60" x2="100" y2="140"/></g></svg>
+    <div class="eyebrow"><span class="line"></span>THE FOUR WORDS EVERYONE MIXES UP</div>
+    <h2 class="sec-title">AI, ML, DL, NN — they're not four different things</h2>
+    <p class="sec-sub">They're one thing, nested inside each other, like a Russian doll. Once this clicks, half your confusion disappears.</p>
+    <p class="sec-extra">Most people give up on AI early not because it's hard, but because these four words get used interchangeably in meetings and articles, so nothing ever quite clicks. Fix the nesting once, and everything else you read online will suddenly make more sense — because you'll instantly know which "layer" a new term belongs to.</p>
+    <div class="sec-hooks">
+      <span class="hook">AI = the goal</span>
+      <span class="hook">ML = the approach</span>
+      <span class="hook">DL = a method inside ML</span>
+      <span class="hook">NN = what DL is built from</span>
+    </div>
+
+    <div class="concept-grid" id="conceptGrid"></div>
+    <div class="note">In one line: <b style="color:var(--text)">AI is the goal, ML is the approach, Deep Learning is a method inside ML, and Neural Networks are what Deep Learning is built out of.</b></div>
+
+    <div class="quiz glass" id="quiz-concepts">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">Which of these is the "biggest umbrella" term?</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="false">Neural Network</button>
+        <button class="q-opt" data-correct="true">Artificial Intelligence</button>
+        <button class="q-opt" data-correct="false">Deep Learning</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="dashboard-section" style="--sec-accent:var(--gold)">
+    <div class="dash glass">
+      <div class="ring-wrap">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="42" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="8"/>
+          <circle id="ringProgress" cx="48" cy="48" r="42" fill="none" stroke="var(--gold)" stroke-width="8" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"/>
+        </svg>
+        <div class="ring-pct" id="ringPct">0%</div>
+      </div>
+      <div>
+        <div class="dash-title">YOUR PROGRESS · badges unlock as you pass quick checks below</div>
+        <div class="badge-row" id="badgeRow"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="examples" style="--sec-accent:var(--gold)">
+    <div class="eyebrow"><span class="line"></span>YOU ALREADY USE THIS DAILY</div>
+    <h2 class="sec-title">AI you're touching every day without noticing</h2>
+    <p class="sec-sub">This isn't futuristic sci-fi. It's already inside apps you open before your morning chai.</p>
+    <p class="sec-extra">Every example below runs on the same nested idea from the last section — a model trained on huge amounts of past behaviour, quietly making a prediction every time you tap something. Recognising it in daily life is the fastest way to stop treating AI as an abstract, scary concept.</p>
+    <div class="example-grid">
+      <div class="example-card glass tilt"><span class="emoji">🍔</span><h4>Swiggy / Zomato</h4><p>Suggests dishes and restaurants by learning patterns from millions of past orders like yours — the more you order, the sharper the guess gets.</p></div>
+      <div class="example-card glass tilt"><span class="emoji">🌐</span><h4>Google Translate</h4><p>Converts between languages by having learned patterns across huge amounts of translated text, not by looking up a dictionary.</p></div>
+      <div class="example-card glass tilt"><span class="emoji">🏦</span><h4>UPI / bank fraud checks</h4><p>Flags unusual transactions by comparing them to your normal spending pattern in real time, within milliseconds of you paying.</p></div>
+      <div class="example-card glass tilt"><span class="emoji">📸</span><h4>Google Photos</h4><p>Groups photos of the same person together by recognising facial patterns — no manual tagging, and it improves as you add corrections.</p></div>
+      <div class="example-card glass tilt"><span class="emoji">📺</span><h4>YouTube / Netflix</h4><p>Recommends your next watch by learning from what people with similar taste watched next, updated after every click.</p></div>
+      <div class="example-card glass tilt"><span class="emoji">📩</span><h4>Spam filters</h4><p>Learned what spam "looks like" from millions of labelled emails, and keeps adapting as spammers change their tricks.</p></div>
+    </div>
+  </section>
+
+  <section id="tokenize" style="--sec-accent:var(--teal)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">Watch your sentence get chopped into "tokens"</h2>
+    <p class="sec-sub">Before a machine can read your sentence, it has to break it into small pieces called tokens — sometimes whole words, sometimes just word-fragments. Type anything below.</p>
+    <p class="sec-extra">This is the very first step in every single AI text system, including the one that might have generated this app's copy. Nothing downstream — embeddings, attention, prediction — can happen until text has been chopped into these small, id-numbered pieces first.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>INPUT → TOKENIZER</span><span class="live-dot"><i></i>runs instantly, on this device</span></div>
+      <input type="text" id="tokIn" placeholder="Try: Namaste, how does tokenization actually work?" value="Namaste, how does tokenization actually work?">
+      <div class="chip-row" id="tokOut"></div>
+      <div class="note">This is a simplified, illustrative splitter — real tokenizers (like the ones in ChatGPT or Claude) are trained on huge text datasets to find the most efficient chunks. But the core idea is exactly this: <b style="color:var(--text)">break text into small reusable pieces before doing any "thinking."</b></div>
+      <details class="deepdive"><summary>Go deeper: why not just split by word?</summary><p>Splitting purely by whitespace would create a separate "word" for every spelling variant, typo, and Hindi-English mix — the vocabulary would explode into millions of entries. Breaking words into smaller reusable fragments (like "token" + "##ization") lets a model reuse the same building blocks across thousands of different words, keeping the vocabulary small and manageable.</p></details>
+    </div>
+    <div class="quiz glass" id="quiz-tokenize">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">Why does a model break text into tokens first?</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="false">To make the text look nicer</button>
+        <button class="q-opt" data-correct="true">Because it can't do math directly on raw words/letters</button>
+        <button class="q-opt" data-correct="false">To translate it into Hindi</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="embed" style="--sec-accent:var(--violet)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">Turning those tokens into numbers</h2>
+    <p class="sec-sub">Machines can't do math on the word "chai" — so every token gets converted into a list of numbers, called a vector. Similar-meaning tokens end up positioned near each other.</p>
+    <p class="sec-extra">This numeric map is what lets a model reason about meaning at all — "close in this number-space" is the machine's version of "similar in meaning." It's also how a model can complete "hot ___" with "chai" or "coffee" and rarely with "bicycle."</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>TOKENS → EMBEDDING SPACE</span><span class="live-dot"><i></i>plotted live below</span></div>
+      <canvas id="embedCanvas"></canvas>
+      <div class="vec-row" id="vecOut"></div>
+      <div class="note">Real embeddings have hundreds of dimensions learned from training on billions of words — a word's position is learned, not calculated from its spelling. Here we're generating a simplified, deterministic 2D position just so you can <i>see</i> the concept of "meaning as a location in space."</div>
+      <details class="deepdive"><summary>Go deeper: what are the numbers actually for?</summary><p>Each number in a real embedding roughly corresponds to some learned dimension of meaning — though not one a human would neatly label, like "formality" or "emotion." A model uses simple arithmetic on these vectors (like distance and direction) to judge relatedness, which is why famous demonstrations like "king − man + woman ≈ queen" work in real embedding spaces.</p></details>
+    </div>
+    <div class="quiz glass" id="quiz-embed">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">Words with similar meaning tend to end up...</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="true">Close together in embedding space</button>
+        <button class="q-opt" data-correct="false">Always given the exact same vector</button>
+        <button class="q-opt" data-correct="false">Alphabetically sorted</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="neural" style="--sec-accent:var(--orange)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">A tiny neural network, deciding your drink</h2>
+    <p class="sec-sub">Move the sliders. Watch how signals flow from input → hidden layer → output, exactly like a real network — just small enough to actually see.</p>
+    <p class="sec-extra">Every "neuron" here does one very simple thing: multiply its inputs by some importance numbers, add them up, and pass the result on. Nothing magical happens at any single neuron — the intelligence emerges only once thousands or billions of these simple steps are chained together.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>INPUT SLIDERS → HIDDEN LAYER → OUTPUT</span><span class="live-dot"><i></i>recalculates on every move</span></div>
+      <div class="nn-wrap">
+        <div>
+          <div class="slider-block">
+            <label>Sweetness <b id="sweetVal">5</b>/10</label>
+            <input type="range" id="sweet" min="0" max="10" value="5">
+          </div>
+          <div class="slider-block">
+            <label>Strength / bitterness <b id="strongVal">5</b>/10</label>
+            <input type="range" id="strong" min="0" max="10" value="5">
+          </div>
+          <div class="slider-block">
+            <label>Milk quantity <b id="milkVal">5</b>/10</label>
+            <input type="range" id="milk" min="0" max="10" value="5">
+          </div>
+          <div class="result-banner" id="nnResult">Your neural network recommends: <b>—</b></div>
+        </div>
+        <svg id="nnsvg" viewBox="0 0 380 260"></svg>
+      </div>
+      <div class="note">This toy network has fixed, hand-set weights just to demonstrate the flow of signals. A real network's weights are not set by a person — they're learned automatically, which is exactly what the next demo shows.</div>
+    </div>
+    <div class="quiz glass" id="quiz-neural">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">In a neural network, the "hidden layer" is...</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="false">Hidden from the machine itself</button>
+        <button class="q-opt" data-correct="true">A layer of units between input and output that combines signals</button>
+        <button class="q-opt" data-correct="false">A layer that only activates at night</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="training" style="--sec-accent:var(--blue)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">What "training" a model actually means</h2>
+    <p class="sec-sub">Below are some (hours studied, score) data points. Click "train step" repeatedly and watch the line adjust itself to fit the points better — that repeated adjusting <i>is</i> training.</p>
+    <p class="sec-extra">This is a real, tiny version of the exact loop used to train every neural network on earth, from a spam filter to the largest language model: guess, measure how wrong the guess was, nudge the numbers slightly, repeat. Scale that loop up to billions of numbers and trillions of examples, and you get a modern AI model.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>GRADIENT DESCENT, ONE STEP AT A TIME</span><span class="live-dot"><i></i>real, tiny linear regression</span></div>
+      <div class="demo-canvas-wrap"><canvas id="trainCanvas"></canvas></div>
+      <div class="demo-controls">
+        <button class="btn btn-primary btn-small" id="trainStepBtn">Train one step ▶</button>
+        <button class="btn btn-ghost btn-small" id="trainAutoBtn">Auto-train ⏵⏵</button>
+        <button class="btn btn-ghost btn-small" id="trainResetBtn">Reset ↺</button>
+      </div>
+      <div class="stat-row">
+        <div>Steps taken<b id="stepCount">0</b></div>
+        <div>Current error<b id="errVal">—</b></div>
+        <div>Line: score = <b id="lineEq">—</b></div>
+      </div>
+      <div class="note">This one is a genuine (very small) gradient descent running in your browser — not staged numbers. A real model does the same core loop but repeats it millions of times across millions of examples and parameters.</div>
+      <details class="deepdive"><summary>Go deeper: what is "error" actually measuring?</summary><p>At every step, the line predicts a score for each "hours studied" point, compares it to the real score, and squares the difference (so being very wrong is punished more than being slightly wrong). Training nudges the line's slope and starting point in whichever direction reduces that total squared difference the fastest — that direction is the "gradient" in gradient descent.</p></details>
+    </div>
+    <div class="quiz glass" id="quiz-training">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">"Training" a model mainly means...</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="false">Downloading data onto a hard disk</button>
+        <button class="q-opt" data-correct="true">Repeatedly adjusting numbers to reduce error</button>
+        <button class="q-opt" data-correct="false">Writing rules by hand for every case</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="overfit" style="--sec-accent:var(--red)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">Overfitting vs underfitting</h2>
+    <p class="sec-sub">Drag the complexity slider. Too simple, and the model misses the pattern (underfitting). Too complex, and it memorises the training points instead of learning the actual trend (overfitting) — and fails on new points.</p>
+    <p class="sec-extra">This single idea explains most "AI worked in testing but failed in production" stories: a model that looked perfect on the data the team trained it on, but had actually just memorised that specific data instead of learning something generalisable.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>MODEL COMPLEXITY → FIT</span><span class="live-dot"><i></i>filled dots = training data · hollow = new/test data</span></div>
+      <div class="demo-canvas-wrap"><canvas id="overfitCanvas"></canvas></div>
+      <div class="slider-block" style="margin-top:18px;">
+        <label>Model complexity <b id="complexVal">3</b>/8</label>
+        <input type="range" id="complexity" min="1" max="8" value="3">
+      </div>
+      <div class="stat-row">
+        <div>Error on training data<b id="trainErr" style="color:var(--teal)">—</b></div>
+        <div>Error on new/test data<b id="testErr" style="color:var(--gold)">—</b></div>
+        <div>Verdict<b id="fitVerdict">—</b></div>
+      </div>
+      <div class="note">The curve here is a stylised, illustrative visualization (not a real polynomial regression solver) built to make the pattern visible — but the pattern itself is real and well known: training error keeps falling with complexity, while test error forms a "U" — that gap is literally what overfitting is.</div>
+    </div>
+    <div class="quiz glass" id="quiz-overfit">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">A model that does great on training data but poorly on new data is...</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="false">Underfitting</button>
+        <button class="q-opt" data-correct="true">Overfitting</button>
+        <button class="q-opt" data-correct="false">Perfectly trained</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="attention" style="--sec-accent:var(--teal)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">"Attention" — how a model decides what matters</h2>
+    <p class="sec-sub">Click any word below. Watch the other words light up based on how much "attention" they'd get while the model is processing your chosen word.</p>
+    <p class="sec-extra">Attention is the mechanism that let AI move beyond reading text strictly left-to-right. It lets a model connect "it" at the end of a long sentence back to the right noun at the beginning — the single biggest idea behind why modern LLMs handle long, complex sentences so well.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>CLICK A WORD → SEE ATTENTION WEIGHTS</span><span class="live-dot"><i></i>illustrative heuristic, on device</span></div>
+      <div class="sentence-row" id="attSentence"></div>
+      <div class="note">Real attention weights are learned from data across many layers, not calculated from a fixed rulebook. This demo uses a simple hand-built heuristic (closeness + a small association list) so you can <i>see</i> the shape of the idea: models weigh some words more heavily than others when interpreting a sentence.</div>
+    </div>
+    <div class="quiz glass" id="quiz-attention">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">"Attention" in a language model helps it...</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="true">Weigh which other words matter most for understanding a word in context</button>
+        <button class="q-opt" data-correct="false">Delete unimportant words from the sentence</button>
+        <button class="q-opt" data-correct="false">Translate the sentence to English</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="predict" style="--sec-accent:var(--gold)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">How "autocomplete on steroids" works</h2>
+    <p class="sec-sub">Large Language Models like ChatGPT or Claude are, at their core, very sophisticated next-word predictors. Type a phrase and see candidate next words with their confidence.</p>
+    <p class="sec-extra">This is the step that repeats, one token at a time, to produce every full AI-written paragraph you've ever read — including this one. Predict the most likely next token, add it to the text, then predict again using the slightly longer text — over and over.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>YOUR PHRASE → NEXT-WORD GUESSES</span><span class="live-dot"><i></i>tiny built-in table, on device</span></div>
+      <input type="text" id="predIn" placeholder="Try: I am learning artificial" value="I am learning artificial">
+      <div class="predict-row" id="predOut"></div>
+      <div class="note">Real LLMs are trained on enormous amounts of text and consider the entire conversation, not just the last word. This demo uses a small, fixed lookup table of common phrases just to make the <i>mechanism</i> — predict, pick, repeat — visible and honest, not to imitate an actual model's intelligence.</div>
+    </div>
+    <div class="quiz glass" id="quiz-predict">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">At their core, LLMs like ChatGPT/Claude are fundamentally doing...</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="true">Predicting the most likely next token, repeatedly</button>
+        <button class="q-opt" data-correct="false">Searching a database of pre-written answers</button>
+        <button class="q-opt" data-correct="false">Asking a human behind the scenes</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="bias" style="--sec-accent:var(--red)">
+    <div class="eyebrow"><span class="line"></span>LIVE DEMO</div>
+    <h2 class="sec-title">Bias in AI — garbage in, garbage out</h2>
+    <p class="sec-sub">A toy loan-approval model, tested on the exact same applicant. Toggle the training data below and see how the outcome changes — even though the applicant didn't.</p>
+    <p class="sec-extra">This is arguably the most important section on this whole page for anyone deploying AI in the real world: a model is not neutral just because it's "just maths." It reflects and often amplifies whatever pattern already existed in the data it learned from.</p>
+
+    <div class="panel glass">
+      <div class="panel-label"><span>SAME APPLICANT, DIFFERENT TRAINING DATA</span><span class="live-dot"><i></i>scripted illustration of a documented effect</span></div>
+      <div class="toggle-pair">
+        <button class="toggle-btn active" id="balancedBtn">Balanced training data</button>
+        <button class="toggle-btn" id="skewedBtn">Skewed training data</button>
+      </div>
+      <div class="bias-result">
+        <div class="bias-card"><div class="region">Applicant from Region A</div><div class="pct good" id="regionAPct">78%</div><div style="font-size:13px;color:var(--text-dimmer);">approval likelihood</div></div>
+        <div class="bias-card"><div class="region">Applicant from Region B</div><div class="pct good" id="regionBPct">75%</div><div style="font-size:13px;color:var(--text-dimmer);">approval likelihood</div></div>
+      </div>
+      <div class="note">These numbers are fixed, scripted illustrations (not a live-trained model) of a well-documented real phenomenon: if past approvals in the training data were skewed toward one group, the model learns and repeats that skew — even without ever being told "region" is what matters.</div>
+    </div>
+    <div class="quiz glass" id="quiz-bias">
+      <div class="q-label">✅ QUICK CHECK</div>
+      <div class="q-text">Where does bias in an AI model most often come from?</div>
+      <div class="q-options">
+        <button class="q-opt" data-correct="false">The AI intentionally being unfair</button>
+        <button class="q-opt" data-correct="true">Patterns already present in the training data</button>
+        <button class="q-opt" data-correct="false">The computer's hardware</button>
+      </div>
+      <div class="q-feedback"></div>
+    </div>
+  </section>
+
+  <section id="myths" style="--sec-accent:var(--orange)">
+    <div class="eyebrow"><span class="line"></span>MYTHS VS REALITY</div>
+    <h2 class="sec-title">Let's defuse the fear, honestly</h2>
+    <p class="sec-sub">Some worry is reasonable. Some is just noise. Here's an honest split.</p>
+
+    <div class="myth-pair"><div class="myth-row">
+      <div class="myth-card"><span class="lbl">MYTH</span><p>"AI will take everyone's job overnight."</p></div>
+      <div class="reality-card"><span class="lbl">REALITY</span><p>AI changes specific tasks within jobs, gradually. New roles keep emerging — but the transition is real and needs active reskilling, not denial.</p></div>
+    </div></div>
+    <div class="myth-pair"><div class="myth-row">
+      <div class="myth-card"><span class="lbl">MYTH</span><p>"AI understands and thinks like a human."</p></div>
+      <div class="reality-card"><span class="lbl">REALITY</span><p>It's pattern-matching learned from data — extremely powerful, but with no awareness, intention, or understanding behind it.</p></div>
+    </div></div>
+    <div class="myth-pair"><div class="myth-row">
+      <div class="myth-card"><span class="lbl">MYTH</span><p>"You must learn to code to use AI."</p></div>
+      <div class="reality-card"><span class="lbl">REALITY</span><p>Most people will use AI through simple apps and chat interfaces, never writing a line of code — same as most people drive cars without knowing engine mechanics.</p></div>
+    </div></div>
+    <div class="myth-pair"><div class="myth-row">
+      <div class="myth-card"><span class="lbl">MYTH</span><p>"AI answers are always accurate and neutral."</p></div>
+      <div class="reality-card"><span class="lbl">REALITY</span><p>AI can be confidently wrong ("hallucinate") and can reflect biases from its training data — always verify anything important.</p></div>
+    </div></div>
+    <div class="myth-pair"><div class="myth-row">
+      <div class="myth-card"><span class="lbl">MYTH</span><p>"Bigger, newer AI models are always smarter and safer."</p></div>
+      <div class="reality-card"><span class="lbl">REALITY</span><p>Bigger models are often more capable but not automatically more accurate or safe — capability and reliability are measured separately.</p></div>
+    </div></div>
+    <div class="myth-pair"><div class="myth-row">
+      <div class="myth-card"><span class="lbl">MYTH</span><p>"AI has to be complicated and expensive to be useful."</p></div>
+      <div class="reality-card"><span class="lbl">REALITY</span><p>Many of the most useful AI habits are free chat tools plus a clear, specific request — the value is in how you use it, not the price tag.</p></div>
+    </div></div>
+  </section>
+
+  <section id="glossary" style="--sec-accent:var(--blue)">
+    <div class="eyebrow"><span class="line"></span>JARGON, DECODED</div>
+    <h2 class="sec-title">The glossary you can actually finish reading</h2>
+    <p class="sec-sub">The terms you'll hear the most, in plain language.</p>
+    <dl class="glossary-grid">
+      <div class="gloss-item"><dt>Model</dt><dd>The trained system that takes an input and produces an output — the "brain" itself.</dd></div>
+      <div class="gloss-item"><dt>Parameters</dt><dd>The internal numbers (like the weights in our neural net demo) a model adjusts while learning.</dd></div>
+      <div class="gloss-item"><dt>Dataset</dt><dd>The collection of examples a model learns from.</dd></div>
+      <div class="gloss-item"><dt>Training</dt><dd>The process of adjusting parameters repeatedly to reduce error — shown live above.</dd></div>
+      <div class="gloss-item"><dt>Inference</dt><dd>Using an already-trained model to make a prediction on new input — this is what happens when you chat with an AI.</dd></div>
+      <div class="gloss-item"><dt>Fine-tuning</dt><dd>Taking an already-trained model and training it a little further on a smaller, specific dataset.</dd></div>
+      <div class="gloss-item"><dt>Prompt</dt><dd>The instruction or question you type to an AI system.</dd></div>
+      <div class="gloss-item"><dt>Token</dt><dd>A small chunk of text (word or word-piece) — see the tokenizer demo above.</dd></div>
+      <div class="gloss-item"><dt>Hallucination</dt><dd>When an AI states something false or made-up with full confidence.</dd></div>
+      <div class="gloss-item"><dt>Transformer</dt><dd>The neural network design (using "attention") behind most modern LLMs, including ChatGPT and Claude.</dd></div>
+      <div class="gloss-item"><dt>Epoch</dt><dd>One full pass of a model through the entire training dataset.</dd></div>
+      <div class="gloss-item"><dt>LLM</dt><dd>Large Language Model — a model trained on huge amounts of text to understand and generate language.</dd></div>
+      <div class="gloss-item"><dt>Weights</dt><dd>Another name for a model's learned parameters — the numbers that decide how much each input matters.</dd></div>
+      <div class="gloss-item"><dt>Overfitting</dt><dd>When a model memorises training data instead of learning a generalisable pattern — see the demo above.</dd></div>
+      <div class="gloss-item"><dt>Context window</dt><dd>How much recent conversation or text a model can "see" and consider at once.</dd></div>
+      <div class="gloss-item"><dt>API</dt><dd>A way for one piece of software to send requests to an AI model and get responses back automatically.</dd></div>
+      <div class="gloss-item"><dt>Open-source model</dt><dd>A model whose internal weights are published for anyone to download and run themselves.</dd></div>
+      <div class="gloss-item"><dt>GPU</dt><dd>Specialised computer hardware that performs the huge number of parallel calculations training and running AI models needs.</dd></div>
+    </dl>
+  </section>
+
+  <section id="roadmap" style="--sec-accent:var(--teal)">
+    <div class="eyebrow"><span class="line"></span>DON'T PANIC</div>
+    <h2 class="sec-title">How to actually start learning this, without drowning</h2>
+    <p class="sec-sub">You do not need a maths degree, a US masters, or to "quit and learn to code" to get functionally strong in AI. Here's the honest order to do it in.</p>
+
+    <div class="roadmap">
+      <div class="rstep"><div class="num">1</div><div><h4>Get comfortable using AI before studying it</h4><p>Spend two weeks just using tools like ChatGPT or Claude daily for real tasks — emails, planning, learning something else. Familiarity kills fear faster than theory does.</p></div></div>
+      <div class="rstep"><div class="num">2</div><div><h4>Learn the four words on this page, properly</h4><p>AI → ML → DL → NN. Nothing else. Most people quit early because they try to learn transformers before they understand what a neuron even is.</p></div></div>
+      <div class="rstep"><div class="num">3</div><div><h4>Understand tokens, embeddings, training, and attention — conceptually</h4><p>You don't need to build these from scratch. You need to understand what you saw in the demos above well enough to explain it to a colleague over chai.</p></div></div>
+      <div class="rstep"><div class="num">4</div><div><h4>Learn to spot overfitting and bias before trusting a result</h4><p>These two ideas alone separate people who can responsibly use AI at work from people who quietly ship broken or unfair systems.</p></div></div>
+      <div class="rstep"><div class="num">5</div><div><h4>Only then, touch Python — if you even need to</h4><p>If your goal is to use and apply AI (not build models from scratch), you may never need to write a line of code. If you do want to build, Python is the natural next step, not the first one.</p></div></div>
+      <div class="rstep"><div class="num">6</div><div><h4>Pick one small, real problem and automate it</h4><p>A WhatsApp reply drafter, a personal expense summariser, a study planner. Nothing teaches faster than one real, finished, small project.</p></div></div>
+    </div>
+  </section>
+
+</div>
+
+<footer>
+  <div class="id-card" id="idCard">
+    <div class="id-card-chip">SK</div>
+    <div class="id-card-info">
+      <span class="id-card-label">Built &amp; designed by</span>
+      <span class="id-card-name" id="creditName">Sujit Kulkarni</span>
+      <span class="id-card-sub">Offline · single-file · no data leaves this device</span>
+    </div>
+    <div class="id-card-code"></div>
+  </div>
+  <button class="reset-link" id="resetProgress">Reset my progress</button>
+</footer>
+
+<div class="footer-bar">
+  <span class="fdot">SK</span> Crafted by <b>Sujit Kulkarni</b> <span class="sep">·</span> AI, Explained
+</div>
+
+<script>
+/* ============ ambient particle background ============ */
+(function(){
+  const canvas = document.getElementById('bgcanvas');
+  const ctx = canvas.getContext('2d');
+  let w,h,particles;
+  const cols=['#3E7BFA','#14F1D9','#FFB84D','#FF6B35','#A855F7'];
+  function resize(){ w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; }
+  function init(){
+    resize();
+    const count = Math.min(70, Math.floor((w*h)/22000));
+    particles = Array.from({length:count}, ()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:Math.random()*1.6+0.6,c:cols[Math.floor(Math.random()*cols.length)]}));
+  }
+  function step(){
+    ctx.clearRect(0,0,w,h);
+    for(const p of particles){ p.x+=p.vx; p.y+=p.vy; if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1; }
+    for(let i=0;i<particles.length;i++) for(let j=i+1;j<particles.length;j++){
+      const a=particles[i],b=particles[j],dx=a.x-b.x,dy=a.y-b.y,dist=Math.sqrt(dx*dx+dy*dy);
+      if(dist<140){ ctx.strokeStyle='rgba(62,123,250,'+(0.12*(1-dist/140))+')'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); }
+    }
+    for(const p of particles){ ctx.beginPath(); ctx.fillStyle=p.c; ctx.globalAlpha=0.65; ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); ctx.globalAlpha=1; }
+    requestAnimationFrame(step);
+  }
+  window.addEventListener('resize', init);
+  init(); step();
+})();
+
+/* ============ 3D hero orb ============ */
+(function(){
+  const container = document.getElementById('orbNodes');
+  const reflect = document.getElementById('orbReflect');
+  const colors=['#3E7BFA','#14F1D9','#FFB84D','#FF6B35','#A855F7'];
+  const N=34, R=110;
+  const offset=2/N, increment=Math.PI*(3-Math.sqrt(5));
+  for(let i=0;i<N;i++){
+    const y=((i*offset)-1)+(offset/2);
+    const r=Math.sqrt(Math.max(0,1-y*y));
+    const phi=i*increment;
+    const x=Math.cos(phi)*r, z=Math.sin(phi)*r;
+    const thetaY = Math.atan2(x,z)*180/Math.PI;
+    const thetaX = -Math.asin(y)*180/Math.PI;
+    const node=document.createElement('div');
+    node.className='orb-node';
+    node.style.color = colors[i%colors.length];
+    node.style.background = colors[i%colors.length];
+    node.style.transform = `rotateY(${thetaY}deg) rotateX(${thetaX}deg) translateZ(${R}px)`;
+    container.appendChild(node);
+    const rnode = node.cloneNode(true);
+    reflect.appendChild(rnode);
+  }
+  const scene = document.getElementById('orbScene');
+  const stage = document.getElementById('orbStage');
+  function tilt(clientX, clientY){
+    const rect = stage.getBoundingClientRect();
+    const px = (clientX-rect.left)/rect.width - 0.5;
+    const py = (clientY-rect.top)/rect.height - 0.5;
+    scene.style.transform = `rotateY(${px*40}deg) rotateX(${-py*40}deg)`;
+  }
+  stage.addEventListener('mousemove', e=>tilt(e.clientX,e.clientY));
+  stage.addEventListener('mouseleave', ()=>{ scene.style.transform='rotateY(0deg) rotateX(0deg)'; });
+  stage.addEventListener('touchmove', e=>{ if(e.touches[0]){ tilt(e.touches[0].clientX,e.touches[0].clientY); } }, {passive:true});
+})();
+
+/* ============ 3D tilt for glass cards ============ */
+function tiltify(selector){
+  document.querySelectorAll(selector).forEach(card=>{
+    card.addEventListener('mousemove', e=>{
+      const r = card.getBoundingClientRect();
+      const x = e.clientX - r.left, y=e.clientY-r.top;
+      const cx=r.width/2, cy=r.height/2;
+      const rotY=((x-cx)/cx)*6, rotX=-((y-cy)/cy)*6;
+      card.style.transform = `perspective(900px) rotateX(${rotX}deg) rotateY(${rotY}deg) translateZ(4px)`;
+    });
+    card.addEventListener('mouseleave', ()=>{ card.style.transform='perspective(900px) rotateX(0) rotateY(0) translateZ(0)'; });
+    card.addEventListener('touchstart', ()=>{ card.style.transform='perspective(900px) scale(0.97)'; }, {passive:true});
+    card.addEventListener('touchend', ()=>{ card.style.transform='perspective(900px) scale(1)'; });
+  });
+}
+
+/* ============ theme toggle ============ */
+(function(){
+  const btn=document.getElementById('themeBtn');
+  const saved=localStorage.getItem('aiapp_theme');
+  if(saved==='light'){ document.documentElement.setAttribute('data-theme','light'); btn.textContent='☀️'; }
+  btn.addEventListener('click', ()=>{
+    const isLight = document.documentElement.getAttribute('data-theme')==='light';
+    if(isLight){ document.documentElement.removeAttribute('data-theme'); btn.textContent='🌙'; localStorage.setItem('aiapp_theme','dark'); }
+    else{ document.documentElement.setAttribute('data-theme','light'); btn.textContent='☀️'; localStorage.setItem('aiapp_theme','light'); }
+    renderEmbeddings();
+  });
+})();
+
+/* ============ scroll spy + top progress + FAB ============ */
+(function(){
+  const links = document.querySelectorAll('#rail a');
+  const sections = Array.from(links).map(l=>document.querySelector(l.getAttribute('href')));
+  const fab = document.getElementById('fab');
+  function onScroll(){
+    let idx=0;
+    const y = window.scrollY + window.innerHeight*0.4;
+    sections.forEach((s,i)=>{ if(s && s.offsetTop<=y) idx=i; });
+    links.forEach((l,i)=>l.classList.toggle('active', i===idx));
+    const doc = document.documentElement;
+    const pct = (window.scrollY / (doc.scrollHeight - window.innerHeight)) * 100;
+    document.getElementById('topProgress').style.width = Math.min(100,Math.max(0,pct))+'%';
+    fab.classList.toggle('show', window.scrollY > 700);
+  }
+  window.addEventListener('scroll', onScroll);
+  fab.addEventListener('click', ()=>window.scrollTo({top:0,behavior:'smooth'}));
+  onScroll();
+})();
+
+/* ============ toast ============ */
+function showToast(msg){
+  const host = document.getElementById('toastHost');
+  const t = document.createElement('div');
+  t.className='toast glass';
+  t.textContent = msg;
+  host.appendChild(t);
+  setTimeout(()=>t.remove(), 3100);
+}
+
+/* ============ progress tracking + badges ============ */
+const QUIZ_IDS = ['quiz-concepts','quiz-tokenize','quiz-embed','quiz-neural','quiz-training','quiz-overfit','quiz-attention','quiz-predict','quiz-bias'];
+const BADGE_META = [
+  {id:'quiz-concepts', icon:'🧩', accent:'var(--blue)'},
+  {id:'quiz-tokenize', icon:'✂️', accent:'var(--teal)'},
+  {id:'quiz-embed', icon:'🧭', accent:'var(--violet)'},
+  {id:'quiz-neural', icon:'🕸️', accent:'var(--orange)'},
+  {id:'quiz-training', icon:'📈', accent:'var(--blue)'},
+  {id:'quiz-overfit', icon:'🎯', accent:'var(--red)'},
+  {id:'quiz-attention', icon:'👁️', accent:'var(--teal)'},
+  {id:'quiz-predict', icon:'🔮', accent:'var(--gold)'},
+  {id:'quiz-bias', icon:'⚖️', accent:'var(--red)'}
+];
+function getProgress(){ try{ return JSON.parse(localStorage.getItem('aiapp_progress')||'[]'); }catch(e){ return []; } }
+function markDone(id, announce){
+  const prog = getProgress();
+  const wasNew = !prog.includes(id);
+  if(wasNew){ prog.push(id); localStorage.setItem('aiapp_progress', JSON.stringify(prog)); }
+  markRailDone(); renderDashboard();
+  if(wasNew && announce){ showToast('🏅 Badge unlocked!'); }
+}
+function markRailDone(){
+  const prog = getProgress();
+  QUIZ_IDS.forEach(id=>{
+    const secId = id.replace('quiz-','');
+    const link = document.querySelector('#rail a[href="#'+secId+'"]');
+    if(link) link.classList.toggle('done', prog.includes(id));
+  });
+}
+function renderDashboard(){
+  const prog = getProgress();
+  const row = document.getElementById('badgeRow');
+  row.innerHTML='';
+  BADGE_META.forEach(b=>{
+    const el=document.createElement('div');
+    el.className='badge'+(prog.includes(b.id)?' earned':'');
+    el.style.setProperty('--sec-accent', b.accent);
+    el.textContent=b.icon;
+    row.appendChild(el);
+  });
+  const pct = Math.round((prog.length/QUIZ_IDS.length)*100);
+  document.getElementById('ringPct').textContent = pct+'%';
+  const circ = 2*Math.PI*42;
+  document.getElementById('ringProgress').setAttribute('stroke-dashoffset', circ - (pct/100)*circ);
+}
+document.getElementById('resetProgress').addEventListener('click', ()=>{
+  localStorage.removeItem('aiapp_progress');
+  document.querySelectorAll('.q-opt').forEach(b=>{ b.classList.remove('correct','wrong'); b.disabled=false; });
+  document.querySelectorAll('.q-feedback').forEach(f=>f.textContent='');
+  markRailDone(); renderDashboard();
+});
+
+function setupQuizzes(){
+  const prog = getProgress();
+  document.querySelectorAll('.quiz').forEach(quiz=>{
+    const opts = quiz.querySelectorAll('.q-opt');
+    const feedback = quiz.querySelector('.q-feedback');
+    const done = prog.includes(quiz.id);
+    if(done){ feedback.textContent = '✔ Already completed — nice work.'; }
+    opts.forEach(opt=>{
+      opt.addEventListener('click', ()=>{
+        const correct = opt.dataset.correct === 'true';
+        opts.forEach(o=>o.disabled=true);
+        if(correct){
+          opt.classList.add('correct');
+          feedback.textContent = "✔ Correct — you've got it.";
+          markDone(quiz.id, true);
+        } else {
+          opt.classList.add('wrong');
+          quiz.querySelector('.q-opt[data-correct="true"]').classList.add('correct');
+          feedback.textContent = 'Not quite — correct answer highlighted above.';
+          markDone(quiz.id, true);
+        }
+      });
+    });
+  });
+  markRailDone(); renderDashboard();
+}
+
+/* ============ shared deterministic hash ============ */
+function hashStr(str){ let h=0; for(let i=0;i<str.length;i++){ h=(h<<5)-h+str.charCodeAt(i); h|=0; } return Math.abs(h); }
+const palette = ['#3E7BFA','#14F1D9','#FFB84D','#FF6B35','#A855F7'];
+
+/* ============ concept cards + analogy switcher ============ */
+const conceptData = [
+  { tag:'THE BIG UMBRELLA', title:'Artificial Intelligence (AI)', accent:'#3E7BFA', desc:"Any machine doing something that normally needs human thinking — playing chess, recognising your voice, suggesting the next Reel. It's the goal, not one specific method.",
+    analogies:[
+      'Like saying "vehicle" — could be a bicycle, a Maruti 800, or a rocket. All vehicles, very different insides.',
+      'Like saying "a good cook" — could be your dadi, a five-star chef, or a dhaba wala. Different methods, same goal: good food.',
+      'Like saying "getting to office" — auto, metro, bike, walk. Many routes, one destination.'
+    ]},
+  { tag:'A WAY TO REACH THAT GOAL', title:'Machine Learning (ML)', accent:'#14F1D9', desc:"Instead of writing rules ourselves (\"if X then Y\"), we show the machine thousands of examples and let it work out the pattern on its own.",
+    analogies:[
+      'Like teaching a kid cricket by having them watch 500 matches, instead of handing them a rulebook first.',
+      'Like learning to cook by tasting 500 dishes made by others, instead of memorising a recipe book.',
+      'Like a new driver learning traffic patterns by observing junctions for weeks, not by reading the motor vehicle act.'
+    ]},
+  { tag:'A SPECIFIC ML TECHNIQUE', title:'Deep Learning (DL)', accent:'#A855F7', desc:"An ML method that stacks many layers of simple math units on top of each other, so the machine can learn very complex patterns — like faces, language, speech.",
+    analogies:[
+      'Like learning a dish not from one masterchef, but by passing it through many home cooks, each improving it a little.',
+      'Like a cricket shot refined by passing through many coaches — each one fixing a slightly different flaw.',
+      'Like a message passed through many people in a relay, with each one clarifying it slightly before passing it on.'
+    ]},
+  { tag:'THE BUILDING BLOCK OF DL', title:'Neural Network (NN)', accent:'#FF6B35', desc:"The actual structure Deep Learning is built from — small math units (\"neurons\") loosely inspired by brain cells, connected in layers.",
+    analogies:[
+      'Like a very large, very fast chain of people passing a message — each person tweaks it slightly before passing it on.',
+      'Like a kitchen with many chefs, each adding one ingredient in sequence, until the final dish comes out.',
+      'Like a traffic signal network — each signal reacts to its own inputs and passes the effect on to the next junction.'
+    ]}
+];
+const analogyIdx = {};
+function renderConcepts(){
+  const grid = document.getElementById('conceptGrid');
+  grid.innerHTML='';
+  conceptData.forEach((c,i)=>{
+    analogyIdx[i]=0;
+    const card=document.createElement('div');
+    card.className='concept-card glass tilt';
+    card.style.setProperty('--accent', c.accent);
+    card.innerHTML = `
+      <span class="tag">${c.tag}</span>
+      <h3>${c.title}</h3>
+      <p>${c.desc}</p>
+      <div class="analogy" id="analogy-${i}">${c.analogies[0]}</div>
+      <button class="analogy-switch" data-i="${i}">🔄 Explain differently</button>
+    `;
+    grid.appendChild(card);
+  });
+  grid.querySelectorAll('.analogy-switch').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = btn.dataset.i;
+      analogyIdx[i] = (analogyIdx[i]+1) % conceptData[i].analogies.length;
+      document.getElementById('analogy-'+i).textContent = conceptData[i].analogies[analogyIdx[i]];
+    });
+  });
+  tiltify('.concept-card');
+}
+
+/* ============ DEMO: tokenizer ============ */
+const tokIn = document.getElementById('tokIn');
+const tokOut = document.getElementById('tokOut');
+function tokenize(text){
+  const rough = text.match(/[A-Za-z]+|[0-9]+|[^\sA-Za-z0-9]/g) || [];
+  const tokens = [];
+  rough.forEach(word=>{
+    if(/^[A-Za-z]+$/.test(word) && word.length>6){
+      const cut = Math.ceil(word.length*0.55);
+      tokens.push(word.slice(0,cut)); tokens.push('##'+word.slice(cut));
+    } else tokens.push(word);
+  });
+  return tokens;
+}
+function renderTokens(){
+  const tokens = tokenize(tokIn.value);
+  tokOut.innerHTML = '';
+  tokens.forEach((t,i)=>{
+    const id = hashStr(t) % 50000;
+    const c = palette[i%palette.length];
+    const chip = document.createElement('div');
+    chip.className='chip';
+    chip.style.borderColor = c+'66';
+    chip.style.color = c;
+    chip.style.background = c+'1a';
+    chip.innerHTML = `${t}<small>id · ${id}</small>`;
+    tokOut.appendChild(chip);
+  });
+  return tokens;
+}
+tokIn.addEventListener('input', ()=>{ renderTokens(); renderEmbeddings(); });
+
+/* ============ DEMO: embeddings ============ */
+const embedCanvas = document.getElementById('embedCanvas');
+const vecOut = document.getElementById('vecOut');
+function fitCanvas(c){ c.width=c.clientWidth*devicePixelRatio; c.height=c.clientHeight*devicePixelRatio; const ctx=c.getContext('2d'); ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0); return ctx; }
+function renderEmbeddings(){
+  const ectx = fitCanvas(embedCanvas);
+  const cw=embedCanvas.clientWidth, ch=embedCanvas.clientHeight;
+  ectx.clearRect(0,0,cw,ch);
+  ectx.strokeStyle='rgba(140,150,180,0.12)';
+  for(let x=0;x<cw;x+=30){ ectx.beginPath(); ectx.moveTo(x,0); ectx.lineTo(x,ch); ectx.stroke(); }
+  for(let y=0;y<ch;y+=30){ ectx.beginPath(); ectx.moveTo(0,y); ectx.lineTo(cw,y); ectx.stroke(); }
+  const tokens = tokenize(tokIn.value).filter(t=>/[A-Za-z]/.test(t));
+  vecOut.innerHTML='';
+  const textColor = getComputedStyle(document.body).getPropertyValue('--text').trim() || '#F3F6FF';
+  tokens.forEach((t,i)=>{
+    const h1=hashStr(t), h2=hashStr(t.split('').reverse().join(''));
+    const x=40+(h1%1000)/1000*(cw-80), y=40+(h2%1000)/1000*(ch-80);
+    const color=palette[i%palette.length];
+    ectx.beginPath(); ectx.fillStyle=color; ectx.shadowColor=color; ectx.shadowBlur=12; ectx.arc(x,y,6,0,7); ectx.fill(); ectx.shadowBlur=0;
+    ectx.fillStyle=textColor; ectx.font='12px monospace'; ectx.fillText(t, x+9, y+4);
+    const v=[0,1,2,3].map(k=>(((hashStr(t+k)%200)-100)/100).toFixed(2));
+    const chip=document.createElement('div'); chip.className='vec-chip'; chip.innerHTML=`<b>${t}</b> → [${v.join(', ')}, …]`;
+    vecOut.appendChild(chip);
+  });
+}
+window.addEventListener('resize', renderEmbeddings);
+
+/* ============ DEMO: neural network ============ */
+const sweet=document.getElementById('sweet'), strong=document.getElementById('strong'), milk=document.getElementById('milk');
+const sweetVal=document.getElementById('sweetVal'), strongVal=document.getElementById('strongVal'), milkVal=document.getElementById('milkVal');
+const nnsvg=document.getElementById('nnsvg'); const nnResult=document.getElementById('nnResult');
+const inputPos=[[20,50],[20,130],[20,210]], hiddenPos=[[190,35],[190,95],[190,165],[190,225]], outputPos=[[350,60],[350,130],[350,200]];
+const outputLabels=['Masala Chai','Filter Coffee','Cold Coffee'];
+const w1=[[0.8,-0.3,0.5],[0.2,0.9,-0.4],[-0.6,0.4,0.7],[0.5,0.5,0.2]];
+const w2=[[0.7,-0.2,0.3,0.4],[-0.3,0.6,0.5,-0.1],[0.2,0.3,-0.5,0.8]];
+function sigmoid(x){ return 1/(1+Math.exp(-x)); }
+function buildSVG(){
+  let s='';
+  inputPos.forEach((ip,i)=>hiddenPos.forEach((hp,j)=>{ s+=`<line class="conn" data-i="${i}" data-j="${j}" x1="${ip[0]+8}" y1="${ip[1]}" x2="${hp[0]-8}" y2="${hp[1]}" stroke="rgba(62,123,250,0.15)" stroke-width="1"/>`; }));
+  hiddenPos.forEach((hp,j)=>outputPos.forEach((op,k)=>{ s+=`<line class="conn2" data-j="${j}" data-k="${k}" x1="${hp[0]+8}" y1="${hp[1]}" x2="${op[0]-8}" y2="${op[1]}" stroke="rgba(255,107,53,0.13)" stroke-width="1"/>`; }));
+  inputPos.forEach((p,i)=>{ s+=`<circle class="nn-node" id="in${i}" cx="${p[0]}" cy="${p[1]}" r="8" fill="#3E7BFA"/>`; });
+  hiddenPos.forEach((p,j)=>{ s+=`<circle class="nn-node" id="hid${j}" cx="${p[0]}" cy="${p[1]}" r="7" fill="#A855F7"/>`; });
+  outputPos.forEach((p,k)=>{ s+=`<circle class="nn-node" id="out${k}" cx="${p[0]}" cy="${p[1]}" r="9" fill="#FFB84D"/><text class="nn-output-label" x="${p[0]+16}" y="${p[1]+4}">${outputLabels[k]}</text>`; });
+  nnsvg.innerHTML=s;
+}
+buildSVG();
+function computeNN(){
+  const inputs=[sweet.value/10, strong.value/10, milk.value/10];
+  sweetVal.textContent=sweet.value; strongVal.textContent=strong.value; milkVal.textContent=milk.value;
+  const hiddenAct = w1.map(row=>sigmoid(row.reduce((s,wt,i)=>s+wt*inputs[i],0)));
+  const outputAct = w2.map(row=>sigmoid(row.reduce((s,wt,j)=>s+wt*hiddenAct[j],0)));
+  inputs.forEach((v,i)=>{ const el=document.getElementById('in'+i); el.setAttribute('r',6+v*8); el.setAttribute('opacity',0.4+v*0.6); });
+  hiddenAct.forEach((v,j)=>{ const el=document.getElementById('hid'+j); el.setAttribute('r',5+v*7); el.setAttribute('opacity',0.35+v*0.65); });
+  let maxK=0; outputAct.forEach((v,k)=>{ if(v>outputAct[maxK]) maxK=k; });
+  outputAct.forEach((v,k)=>{ const el=document.getElementById('out'+k); el.setAttribute('r', k===maxK?13:7+v*4); el.setAttribute('opacity', k===maxK?1:0.4+v*0.4); el.setAttribute('fill', k===maxK?'#14F1D9':'#FFB84D'); });
+  document.querySelectorAll('.conn').forEach(l=>{ const i=+l.dataset.i; l.setAttribute('stroke',`rgba(62,123,250,${0.08+inputs[i]*0.35})`); });
+  document.querySelectorAll('.conn2').forEach(l=>{ const j=+l.dataset.j; l.setAttribute('stroke',`rgba(255,107,53,${0.06+hiddenAct[j]*0.3})`); });
+  nnResult.innerHTML = `Your neural network recommends: <b>${outputLabels[maxK]}</b>`;
+}
+[sweet,strong,milk].forEach(el=>el.addEventListener('input', computeNN));
+
+/* ============ DEMO: training (real gradient descent) ============ */
+const trainCanvas=document.getElementById('trainCanvas');
+const trainPts = [[1,2.2],[2,3.4],[3,4.9],[4,5.6],[5,7.3],[6,8.1],[7,9.0],[8,10.6]];
+let tw=0.3, tb=1, tSteps=0, autoTimer=null;
+function trainStep(){
+  const lr=0.01; let gw=0, gb=0;
+  trainPts.forEach(([x,y])=>{ const pred=tw*x+tb; const err=pred-y; gw+=err*x; gb+=err; });
+  gw/=trainPts.length; gb/=trainPts.length;
+  tw -= lr*gw; tb -= lr*gb; tSteps++;
+  drawTrain();
+}
+function currentError(){ let e=0; trainPts.forEach(([x,y])=>{ const pred=tw*x+tb; e+=(pred-y)*(pred-y); }); return e/trainPts.length; }
+function drawTrain(){
+  const ctx = fitCanvas(trainCanvas);
+  const cw=trainCanvas.clientWidth, ch=trainCanvas.clientHeight;
+  ctx.clearRect(0,0,cw,ch);
+  const pad=30, maxX=9, maxY=12;
+  function toPx(x,y){ return [pad+(x/maxX)*(cw-2*pad), ch-pad-(y/maxY)*(ch-2*pad)]; }
+  ctx.strokeStyle='rgba(140,150,180,0.15)';
+  for(let i=0;i<=maxX;i+=2){ const [px]=toPx(i,0); ctx.beginPath(); ctx.moveTo(px,0); ctx.lineTo(px,ch); ctx.stroke(); }
+  trainPts.forEach(([x,y])=>{ const [px,py]=toPx(x,y); ctx.beginPath(); ctx.fillStyle='#3E7BFA'; ctx.shadowColor='#3E7BFA'; ctx.shadowBlur=8; ctx.arc(px,py,5,0,7); ctx.fill(); ctx.shadowBlur=0; });
+  const [x1,y1]=toPx(0, tb), [x2,y2]=toPx(maxX, tw*maxX+tb);
+  ctx.strokeStyle='#FF6B35'; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+  document.getElementById('stepCount').textContent = tSteps;
+  document.getElementById('errVal').textContent = currentError().toFixed(3);
+  document.getElementById('lineEq').textContent = `${tw.toFixed(2)}×hours + ${tb.toFixed(2)}`;
+}
+document.getElementById('trainStepBtn').addEventListener('click', trainStep);
+document.getElementById('trainAutoBtn').addEventListener('click', function(){
+  if(autoTimer){ clearInterval(autoTimer); autoTimer=null; this.textContent='Auto-train ⏵⏵'; }
+  else{ autoTimer=setInterval(trainStep,120); this.textContent='Stop ⏸'; }
+});
+document.getElementById('trainResetBtn').addEventListener('click', ()=>{
+  tw=0.3; tb=1; tSteps=0; if(autoTimer){clearInterval(autoTimer); autoTimer=null; document.getElementById('trainAutoBtn').textContent='Auto-train ⏵⏵';} drawTrain();
+});
+window.addEventListener('resize', drawTrain);
+
+/* ============ DEMO: overfitting vs underfitting ============ */
+const overfitCanvas=document.getElementById('overfitCanvas');
+const complexitySlider=document.getElementById('complexity');
+const trainSet=[[1,3],[2,4.2],[3,4.6],[4,5.8],[5,6.1],[6,7.4],[7,7.6]];
+const testSet=[[1.5,3.5],[3.5,5.0],[5.5,6.6],[7.5,8.0]];
+function drawOverfit(){
+  const complexity = +complexitySlider.value;
+  document.getElementById('complexVal').textContent = complexity;
+  const ctx=fitCanvas(overfitCanvas);
+  const cw=overfitCanvas.clientWidth, ch=overfitCanvas.clientHeight;
+  ctx.clearRect(0,0,cw,ch);
+  const pad=30, maxX=9, maxY=10;
+  function toPx(x,y){ return [pad+(x/maxX)*(cw-2*pad), ch-pad-(y/maxY)*(ch-2*pad)]; }
+  ctx.strokeStyle='rgba(140,150,180,0.12)';
+  for(let i=0;i<=maxX;i+=2){ const [px]=toPx(i,0); ctx.beginPath(); ctx.moveTo(px,0); ctx.lineTo(px,ch); ctx.stroke(); }
+  ctx.strokeStyle='#A855F7'; ctx.lineWidth=2.5; ctx.beginPath();
+  for(let px=0; px<=cw-2*pad; px+=3){
+    const x = (px/(cw-2*pad))*maxX;
+    const base = 2.5 + x*0.75;
+    const wiggle = Math.sin(x*complexity*0.9)* (complexity*0.11);
+    const y = base + wiggle;
+    const [ax,ay] = toPx(x, Math.max(0.3,Math.min(maxY-0.3,y)));
+    if(px===0) ctx.moveTo(ax,ay); else ctx.lineTo(ax,ay);
+  }
+  ctx.stroke();
+  trainSet.forEach(([x,y])=>{ const [px,py]=toPx(x,y); ctx.beginPath(); ctx.fillStyle='#3E7BFA'; ctx.arc(px,py,5,0,7); ctx.fill(); });
+  testSet.forEach(([x,y])=>{ const [px,py]=toPx(x,y); ctx.beginPath(); ctx.strokeStyle='#FFB84D'; ctx.lineWidth=2; ctx.arc(px,py,6,0,7); ctx.stroke(); });
+  const trainErr = Math.max(0.4, 7.5 - complexity*0.85);
+  const testErr = 2.2 + 0.16*Math.pow(complexity-4,2);
+  document.getElementById('trainErr').textContent = trainErr.toFixed(2);
+  document.getElementById('testErr').textContent = testErr.toFixed(2);
+  const verdict = document.getElementById('fitVerdict');
+  if(complexity<=2){ verdict.textContent='Underfitting'; verdict.style.color='var(--gold)'; }
+  else if(complexity>=6){ verdict.textContent='Overfitting'; verdict.style.color='var(--red)'; }
+  else{ verdict.textContent='Good fit'; verdict.style.color='var(--teal)'; }
+}
+complexitySlider.addEventListener('input', drawOverfit);
+window.addEventListener('resize', drawOverfit);
+
+/* ============ DEMO: attention ============ */
+const attSentenceEl = document.getElementById('attSentence');
+const attSentenceWords = "AI learns patterns from data the way you learn cricket from watching matches".split(' ');
+const assoc = { ai:['learns','patterns','data'], learns:['ai','patterns','watching'], patterns:['learns','data','matches'], data:['patterns','ai'], cricket:['matches','watching'], matches:['cricket','watching'], watching:['matches','cricket','learns'] };
+function renderAttention(queryIdx){
+  attSentenceEl.innerHTML='';
+  const queryWord = attSentenceWords[queryIdx].toLowerCase().replace(/[^a-z]/g,'');
+  attSentenceWords.forEach((word,i)=>{
+    const w = document.createElement('span');
+    w.className='att-word'+(i===queryIdx?' query':'');
+    w.dataset.i=i;
+    const clean = word.toLowerCase().replace(/[^a-z]/g,'');
+    let weight = 1/(1+Math.abs(i-queryIdx));
+    if(assoc[queryWord] && assoc[queryWord].includes(clean)) weight += 0.6;
+    if(i===queryIdx) weight = 1;
+    weight = Math.min(1, weight);
+    if(i!==queryIdx){
+      w.style.opacity = (0.35 + weight*0.65).toFixed(2);
+      w.style.boxShadow = weight>0.55 ? `0 0 ${10*weight}px rgba(255,107,53,${weight*0.6})` : 'none';
+      w.style.borderColor = weight>0.55 ? 'rgba(255,107,53,0.5)' : 'var(--glass-border)';
+    }
+    w.textContent = word;
+    w.addEventListener('click', ()=>renderAttention(i));
+    attSentenceEl.appendChild(w);
+  });
+}
+
+/* ============ DEMO: bias ============ */
+const balancedBtn=document.getElementById('balancedBtn'), skewedBtn=document.getElementById('skewedBtn');
+const regionAPct=document.getElementById('regionAPct'), regionBPct=document.getElementById('regionBPct');
+function setBias(mode){
+  balancedBtn.classList.toggle('active', mode==='balanced');
+  skewedBtn.classList.toggle('active', mode==='skewed');
+  if(mode==='balanced'){
+    regionAPct.textContent='78%'; regionAPct.className='pct good';
+    regionBPct.textContent='75%'; regionBPct.className='pct good';
+  } else {
+    regionAPct.textContent='91%'; regionAPct.className='pct good';
+    regionBPct.textContent='38%'; regionBPct.className='pct bad';
+  }
+}
+balancedBtn.addEventListener('click', ()=>setBias('balanced'));
+skewedBtn.addEventListener('click', ()=>setBias('skewed'));
+
+/* ============ DEMO: next-word prediction ============ */
+const predIn=document.getElementById('predIn'); const predOut=document.getElementById('predOut');
+const bigrams = {
+  'i':[['am',0.42],['think',0.2],['love',0.18],['want',0.12],['need',0.08]],
+  'am':[['learning',0.5],['excited',0.2],['not',0.18],['trying',0.12]],
+  'learning':[['artificial',0.38],['python',0.3],['about',0.2],['to',0.12]],
+  'artificial':[['intelligence',0.86],['general',0.09],['systems',0.05]],
+  'machine':[['learning',0.78],['translation',0.12],['vision',0.1]],
+  'neural':[['network',0.7],['networks',0.22],['pathways',0.08]],
+  'deep':[['learning',0.72],['dive',0.16],['neural',0.12]],
+  'the':[['model',0.28],['data',0.24],['network',0.22],['token',0.14],['system',0.12]],
+  'this':[['model',0.3],['app',0.26],['is',0.24],['demo',0.2]],
+  'how':[['does',0.4],['to',0.34],['much',0.26]],
+  'does':[['ai',0.32],['this',0.3],['tokenization',0.22],['it',0.16]],
+  'chai':[['helps',0.5],['is',0.3],['break',0.2]],
+  'india':[['is',0.4],['has',0.34],['leads',0.26]]
+};
+const fallback = [['learn',0.3],['work',0.26],['understand',0.24],['build',0.2]];
+function predict(){
+  const words = predIn.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const last = words[words.length-1] || '';
+  const options = bigrams[last] || fallback;
+  predOut.innerHTML='';
+  options.forEach(([w,p])=>{
+    const card=document.createElement('div'); card.className='predict-card';
+    card.innerHTML = `<div class="w">${w}</div><div class="predict-bar"><i style="width:${p*100}%"></i></div><span class="predict-pct">${Math.round(p*100)}% likely next</span>`;
+    card.addEventListener('click', ()=>{ predIn.value=(predIn.value.trim()+' '+w).trim(); predict(); predIn.focus(); });
+    predOut.appendChild(card);
+  });
+}
+predIn.addEventListener('input', predict);
+
+/* ============ decode / scramble-in text effect ============ */
+function decodeText(el, finalText, duration){
+  duration = duration || 1100;
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ01#$%&*<>/\\+=';
+  const len = finalText.length;
+  let start = null;
+  function frame(ts){
+    if(!start) start = ts;
+    const progress = Math.min(1, (ts-start)/duration);
+    const lockedCount = Math.floor(progress*len);
+    let out = '';
+    for(let i=0;i<len;i++){
+      const ch = finalText[i];
+      if(i < lockedCount || ch === ' ') out += ch;
+      else out += chars[Math.floor(Math.random()*chars.length)];
+    }
+    el.textContent = out;
+    if(progress < 1) requestAnimationFrame(frame); else el.textContent = finalText;
+  }
+  requestAnimationFrame(frame);
+}
+(function(){
+  const h1 = document.querySelector('.hero h1');
+  if(h1){ const finalText = h1.textContent; decodeText(h1, finalText, 1400); }
+})();
+(function(){
+  const heroNameEl = document.getElementById('creditNameHero');
+  if(heroNameEl){
+    const finalText = heroNameEl.textContent;
+    setTimeout(()=>decodeText(heroNameEl, finalText, 1100), 1700);
+  }
+})();
+(function(){
+  const nameEl = document.getElementById('creditName');
+  if(!nameEl) return;
+  const finalText = nameEl.textContent;
+  let played = false;
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting && !played){ played = true; decodeText(nameEl, finalText, 900); }
+    });
+  }, {threshold:0.5});
+  io.observe(nameEl);
+})();
+
+/* ============ holographic sheen tracking for ID card plates ============ */
+(function(){
+  document.querySelectorAll('.id-card').forEach(card=>{
+    card.addEventListener('mousemove', e=>{
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+    });
+    card.addEventListener('touchmove', e=>{
+      if(!e.touches[0]) return;
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', (e.touches[0].clientX - r.left) + 'px');
+      card.style.setProperty('--my', (e.touches[0].clientY - r.top) + 'px');
+    }, {passive:true});
+  });
+})();
+
+/* ============ init ============ */
+renderConcepts();
+renderTokens();
+renderEmbeddings();
+computeNN();
+drawTrain();
+drawOverfit();
+renderAttention(0);
+setBias('balanced');
+predict();
+setupQuizzes();
+tiltify('.example-card, .panel, .quiz, .hero-chip, .bias-card, .hero-id-card');
+</script>
+</body>
+</html>
