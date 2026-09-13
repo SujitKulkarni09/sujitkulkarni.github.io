@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coding Basics — Glossary</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<style>
+  :root{
+    --bg-app:#1e1f22; --bg-panel:#26272b; --bg-editor:#1b1c1e; --bg-console:#101113;
+    --border:#38393e; --text-main:#e3e3e6; --text-dim:#9a9ba1;
+    --accent:#5aa9e6;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg-app);color:var(--text-main);}
+  button, input{font-family:inherit;}
+
+  .hero{
+    text-align:center; padding:24px 16px 18px 16px;
+    background: radial-gradient(ellipse at top, #2a3550 0%, #1e1f22 65%);
+    border-bottom:1px solid var(--border);
+  }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:10px;
+    background: linear-gradient(120deg,#3a6fa8,#5aa9e6 50%,#c586c0);
+    padding:8px 20px; border-radius:999px;
+    box-shadow:0 8px 26px -8px rgba(90,169,230,0.6); margin-bottom:12px;
+  }
+  .hero-badge .name{ font-weight:800; font-size:14px; color:#0d1720; }
+  .hero-badge .tag{ font-size:10px; color:#0d1720cc; font-weight:600; }
+  .hero h1{ margin:0; font-size:20px; }
+  .hero p{ margin:6px 0 0 0; font-size:12.5px; color:var(--text-dim); }
+
+  .wrap{ max-width:920px; margin:0 auto; padding:24px 16px 70px 16px; }
+
+  section{ margin-bottom:36px; }
+  .section-kicker{ font-size:11.5px; font-weight:700; color:var(--accent); margin-bottom:6px; letter-spacing:0.3px; }
+  section h2{ margin:0 0 8px 0; font-size:18px; }
+  section > p.lead{ font-size:13.5px; color:var(--text-dim); line-height:1.55; margin:0 0 16px 0; }
+
+  /* ---------- Annotated code examples ---------- */
+  .example-block{ margin-bottom:20px; }
+  .example-title{ font-size:12.5px; color:var(--text-dim); margin-bottom:6px; font-weight:600; }
+  .editor-panel{ background:var(--bg-editor); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .panel-header{ display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg-panel); border-bottom:1px solid var(--border); }
+  .file-tab{ font-size:11px; color:var(--text-dim); font-family:"SFMono-Regular",Consolas,monospace; }
+  .code-body{ font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; font-size:13.5px; line-height:2.05; padding:14px 16px; overflow-x:auto; white-space:pre; }
+  .plain-tok{ color:var(--text-main); }
+  .tag-tok{
+    cursor:pointer; border-bottom:2px dotted currentColor; border-radius:3px; padding:0 2px; position:relative;
+  }
+  .tag-chip{
+    font-size:8.5px; font-weight:800; vertical-align:super; margin-left:2px; padding:1px 4px; border-radius:4px;
+    background:currentColor; color:#0d1720;
+  }
+
+  /* ---------- Detail panel ---------- */
+  .detail-panel{
+    background:var(--bg-panel); border:1.5px solid var(--accent); border-radius:10px; padding:16px 18px;
+    margin-top:14px; scroll-margin-top:20px;
+  }
+  .detail-panel.placeholder{ border-color:var(--border); color:var(--text-dim); font-size:13px; font-style:italic; }
+  .detail-panel .dp-term{ font-size:16px; font-weight:800; margin-bottom:8px; }
+  .detail-panel .dp-row{ margin-bottom:8px; font-size:13.5px; line-height:1.55; }
+  .detail-panel .dp-label{ font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; color:var(--text-dim); display:block; margin-bottom:2px; }
+
+  /* ---------- Search ---------- */
+  .search-box{
+    width:100%; padding:12px 14px; border-radius:8px; border:1px solid var(--border);
+    background:var(--bg-editor); color:var(--text-main); font-size:14px; margin-bottom:16px;
+  }
+  .search-box:focus{ outline:none; border-color:var(--accent); }
+
+  /* ---------- Glossary list ---------- */
+  .cat-group{ margin-bottom:22px; }
+  .cat-header{ display:flex; align-items:center; gap:8px; font-size:12.5px; font-weight:700; color:var(--text-dim); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.3px; }
+  .cat-dot{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .term-card{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px;
+    scroll-margin-top:20px; transition: box-shadow 0.3s ease, border-color 0.3s ease;
+  }
+  .term-card.flash{ border-color:var(--accent); box-shadow:0 0 0 3px rgba(90,169,230,0.25); }
+  .term-card .tc-term{ font-size:15px; font-weight:800; margin-bottom:8px; }
+  .term-card .tc-row{ font-size:13px; line-height:1.55; margin-bottom:6px; }
+  .term-card .tc-label{ font-size:10px; font-weight:700; text-transform:uppercase; color:var(--text-dim); margin-right:4px; }
+
+  footer{ text-align:center; font-size:11.5px; color:var(--text-dim); margin-top:20px; }
+
+  @media (max-width:480px){
+    .hero h1{ font-size:17px; }
+    .code-body{ font-size:12.5px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-badge">
+    <span class="name">SUJIT KULKARNI</span>
+    <span class="tag">CREATOR &amp; INSTRUCTOR</span>
+  </div>
+  <h1>Coding Basics — Glossary</h1>
+  <p>Click any underlined word in the code below to see what it means.</p>
+</div>
+
+<div class="wrap">
+
+  <section id="partA">
+    <div class="section-kicker">PART A · SEE IT IN CODE</div>
+    <h2>Tap Any Tagged Word</h2>
+    <p class="lead">Every colored, underlined word below is clickable. Tap it to see its technical definition, a plain-English explanation, and a quick note — and jump to it in the full glossary below.</p>
+
+    <div id="examplesHost"></div>
+
+    <div class="detail-panel placeholder" id="detailPanel">
+      Click any highlighted word above to see its definition here.
+    </div>
+  </section>
+
+  <section id="partB">
+    <div class="section-kicker">PART B · FULL GLOSSARY</div>
+    <h2>Every Term, In One Place</h2>
+    <p class="lead">Search or scroll — every term is listed with both its technical definition and a plain-English explanation.</p>
+    <input type="text" class="search-box" id="searchBox" placeholder="Search a term, e.g. 'loop' or 'variable'...">
+    <div id="glossaryHost"></div>
+  </section>
+
+  <footer>Offline reference file — no internet connection required.</footer>
+</div>
+
+<script>
+/* ============================================================
+   GLOSSARY DATA — single source of truth
+============================================================ */
+const glossary = [
+  {id:"program", term:"Program", short:"PROG", category:"ipo",
+   technical:"A set of instructions written in a programming language that a computer executes in order to perform a task.",
+   layman:"A recipe the computer follows step by step — nothing more mysterious than that.",
+   note:"Every program, however advanced, breaks down into Input → Process → Output, repeated and combined."},
+  {id:"input", term:"Input", short:"IN", category:"ipo",
+   technical:"The data or values a program starts with, before any processing happens.",
+   layman:"The ingredients you gather before you start cooking.",
+   note:"Input can come from a user typing, a file, a sensor — but it's always 'what you start with.'"},
+  {id:"process", term:"Process", short:"PROC", category:"ipo",
+   technical:"The operations a program performs on its input to work toward a result.",
+   layman:"The cooking steps — boiling, mixing, waiting.",
+   note:"Most of a program's logic (Selection, Iteration) happens during this stage."},
+  {id:"output", term:"Output", short:"OUT", category:"ipo",
+   technical:"The result a program produces after processing its input.",
+   layman:"The finished dish you get to eat.",
+   note:"In Python, output is most commonly shown using print()."},
+
+  {id:"variable", term:"Variable", short:"VAR", category:"variables",
+   technical:"A named storage location that holds a value, which can change while the program runs.",
+   layman:"A labeled jar — the label stays the same, but what's inside can change.",
+   note:"Give variables descriptive names — age is clearer than a single letter like a."},
+
+  {id:"datatype", term:"Data Type", short:"TYPE", category:"datatypes",
+   technical:"A classification that specifies what kind of value a variable holds, determining what operations are valid on it.",
+   layman:"Knowing whether a jar holds marbles, water, or a light switch — so you know what you can do with it.",
+   note:"Mixing incompatible types (like text + number) is one of the most common beginner errors."},
+  {id:"integer", term:"Integer", short:"INT", category:"datatypes",
+   technical:"A whole number data type, with no decimal point (e.g., 3, -12, 100).",
+   layman:"A whole count — like '3 apples.'",
+   note:"Written in Python without a decimal point: age = 25."},
+  {id:"decimal", term:"Decimal (Float)", short:"DEC", category:"datatypes",
+   technical:"A numeric data type that can represent fractional values using a decimal point.",
+   layman:"A measurement — like '1.5 cups of flour.'",
+   note:"Called a 'float' in most programming languages, short for floating-point number."},
+  {id:"string", term:"String", short:"STR", category:"datatypes",
+   technical:"A data type representing a sequence of characters, such as words or sentences, usually written inside quotes.",
+   layman:"A word or sentence — like a name tag.",
+   note:"Always wrapped in quotes in code: \"hello\" or 'hello'."},
+  {id:"boolean", term:"Boolean", short:"BOOL", category:"datatypes",
+   technical:"A data type with only two possible values: True or False.",
+   layman:"A yes/no light switch.",
+   note:"Named after mathematician George Boole; used constantly in Selection."},
+
+  {id:"operator", term:"Operator", short:"OP", category:"operators",
+   technical:"A symbol that performs an operation on one or more values, such as arithmetic or comparison.",
+   layman:"A tool that does something to or with values — like a calculator button.",
+   note:"Common ones: + - * / for math, == > < for comparisons."},
+  {id:"comparison", term:"Comparison Operator", short:"CMP", category:"operators",
+   technical:"An operator that compares two values and returns a Boolean result (True or False).",
+   layman:"Asking a yes/no question, like 'is this bigger than that?'",
+   note:"Don't confuse == (asking 'are these equal?') with = (which assigns a value)."},
+
+  {id:"selection", term:"Selection", short:"SEL", category:"selection",
+   technical:"A control structure that lets a program choose between different paths of execution based on a condition.",
+   layman:"The everyday idea of 'if this, then that.'",
+   note:"Implemented in Python using if, elif, and else."},
+  {id:"ifelse", term:"if / else", short:"IF", category:"selection",
+   technical:"Keywords used to implement Selection — if runs a block when a condition is True, else runs when it's False.",
+   layman:"If it's raining, take an umbrella. Otherwise, leave it at home.",
+   note:"elif lets you check additional conditions when the first if is False."},
+  {id:"condition", term:"Condition", short:"COND", category:"selection",
+   technical:"An expression that evaluates to True or False, used to control Selection or Iteration.",
+   layman:"The question being asked — 'is it raining?'",
+   note:"Conditions are usually built using comparison operators."},
+
+  {id:"iteration", term:"Iteration", short:"ITER", category:"iteration",
+   technical:"A control structure that repeats a block of code multiple times, often until a condition is met.",
+   layman:"Repeating an action until you're done — like washing dishes until the sink is empty.",
+   note:"Also called 'looping.'"},
+  {id:"loop", term:"Loop (while / for)", short:"LOOP", category:"iteration",
+   technical:"A construct used to perform Iteration — while repeats based on a condition, for repeats over a sequence of items.",
+   layman:"while is 'keep going until...', for is 'do this for each one.'",
+   note:"A while loop whose condition never becomes False runs forever — this bug is called an infinite loop."},
+
+  {id:"function", term:"Function", short:"FN", category:"functions",
+   technical:"A named, reusable block of code that performs a specific task, which can be 'called' whenever needed.",
+   layman:"A labeled kitchen tool you can reach for anytime you need that specific job done.",
+   note:"Python has many built-in functions, like print() and len()."},
+  {id:"printfn", term:"print()", short:"FN", category:"functions",
+   technical:"A built-in Python function that displays text or values on the screen.",
+   layman:"The way the program actually shows you the output.",
+   note:"You can pass multiple things to print(), separated by commas."},
+
+  {id:"algorithm", term:"Algorithm", short:"ALG", category:"other",
+   technical:"A step-by-step, ordered set of instructions for solving a problem, independent of any specific programming language.",
+   layman:"A recipe written out in plain steps, before you worry about the exact wording.",
+   note:"Every algorithm is built from combinations of Sequence, Selection, and Iteration."},
+  {id:"syntax", term:"Syntax", short:"SYN", category:"other",
+   technical:"The precise rules that define how code must be written in a given language to be considered valid.",
+   layman:"The 'grammar' of a language — the exact spelling and punctuation it expects.",
+   note:"Different languages have different syntax for the exact same idea."}
+];
+
+const categoryMeta = {
+  ipo:        {name:"Input / Process / Output", color:"#5aa9e6"},
+  variables:  {name:"Variables",                color:"#4fb3a9"},
+  datatypes:  {name:"Data Types",               color:"#e6a95a"},
+  operators:  {name:"Operators",                color:"#d67ab0"},
+  selection:  {name:"Selection",                color:"#c586c0"},
+  iteration:  {name:"Iteration",                color:"#d9c96e"},
+  functions:  {name:"Functions",                color:"#58c896"},
+  other:      {name:"Other Key Terms",          color:"#9a9ba1"}
+};
+
+function findTerm(id){ return glossary.find(g => g.id === id); }
+
+/* ============================================================
+   ANNOTATED CODE EXAMPLES
+   Each line is an array of segments: {t: text, tag: glossaryId|null}
+============================================================ */
+const examples = [
+  {
+    title: "Example 1 — Input / Process / Output, Variables, Strings, Functions",
+    lines: [
+      [{t:"tea_bag", tag:"variable"}, {t:" = "}, {t:'"Tea Bag"', tag:"string"}],
+      [{t:"water", tag:"variable"}, {t:" = "}, {t:'"Hot Water"', tag:"string"}],
+      [{t:"mug", tag:"variable"}, {t:" = "}, {t:'"Mug"', tag:"string"}],
+      [{t:""}],
+      [{t:"print", tag:"printfn"}, {t:"("}, {t:'"Making tea..."', tag:"string"}, {t:")"}],
+      [{t:"print", tag:"printfn"}, {t:"("}, {t:'"INPUT:"', tag:"string"}, {t:", "}, {t:"tea_bag", tag:"variable"}, {t:", "}, {t:"water", tag:"variable"}, {t:", "}, {t:"mug", tag:"variable"}, {t:")"}],
+      [{t:"print", tag:"printfn"}, {t:"("}, {t:'"OUTPUT: A cup of tea!"', tag:"string"}, {t:")"}]
+    ]
+  },
+  {
+    title: "Example 2 — Data Types",
+    lines: [
+      [{t:"age", tag:"variable"}, {t:" = "}, {t:"25", tag:"integer"}],
+      [{t:"price", tag:"variable"}, {t:" = "}, {t:"3.14", tag:"decimal"}],
+      [{t:"is_open", tag:"variable"}, {t:" = "}, {t:"True", tag:"boolean"}]
+    ]
+  },
+  {
+    title: "Example 3 — Selection",
+    lines: [
+      [{t:"is_raining", tag:"variable"}, {t:" = "}, {t:"True", tag:"boolean"}],
+      [{t:""}],
+      [{t:"if", tag:"ifelse"}, {t:" "}, {t:"is_raining", tag:"condition"}, {t:":"}],
+      [{t:"    "}, {t:"print", tag:"printfn"}, {t:"("}, {t:'"Take an umbrella"', tag:"string"}, {t:")"}],
+      [{t:"else", tag:"ifelse"}, {t:":"}],
+      [{t:"    "}, {t:"print", tag:"printfn"}, {t:"("}, {t:'"Leave it at home"', tag:"string"}, {t:")"}]
+    ]
+  },
+  {
+    title: "Example 4 — Iteration, Comparison, Operators",
+    lines: [
+      [{t:"dishes", tag:"variable"}, {t:" = 3"}],
+      [{t:""}],
+      [{t:"while", tag:"loop"}, {t:" "}, {t:"dishes > 0", tag:"condition"}, {t:":"}],
+      [{t:"    "}, {t:"print", tag:"printfn"}, {t:"("}, {t:'"Washing one dish"', tag:"string"}, {t:")"}],
+      [{t:"    "}, {t:"dishes", tag:"variable"}, {t:" "}, {t:"-=", tag:"operator"}, {t:" 1"}]
+    ]
+  }
+];
+
+/* ============================================================
+   RENDER: annotated examples
+============================================================ */
+function renderExamples(){
+  const host = document.getElementById("examplesHost");
+  host.innerHTML = "";
+  examples.forEach(ex => {
+    const block = document.createElement("div");
+    block.className = "example-block";
+    let codeHtml = "";
+    ex.lines.forEach(line => {
+      line.forEach(seg => {
+        if(!seg.t){ return; }
+        if(seg.tag){
+          const meta = findTerm(seg.tag);
+          const color = categoryMeta[meta.category].color;
+          codeHtml += `<span class="tag-tok" style="color:${color}" data-term="${seg.tag}">${escapeHtml(seg.t)}<span class="tag-chip" style="color:${color}">${meta.short}</span></span>`;
+        } else {
+          codeHtml += `<span class="plain-tok">${escapeHtml(seg.t)}</span>`;
+        }
+      });
+      codeHtml += "\n";
+    });
+    block.innerHTML = `
+      <div class="example-title">${ex.title}</div>
+      <div class="editor-panel">
+        <div class="panel-header"><div class="file-tab">example.py</div></div>
+        <div class="code-body">${codeHtml}</div>
+      </div>
+    `;
+    host.appendChild(block);
+  });
+
+  document.querySelectorAll(".tag-tok").forEach(el => {
+    el.addEventListener("click", () => {
+      const termId = el.getAttribute("data-term");
+      showDetail(termId);
+      flashGlossaryEntry(termId);
+    });
+  });
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+function showDetail(termId){
+  const meta = findTerm(termId);
+  const catColor = categoryMeta[meta.category].color;
+  const panel = document.getElementById("detailPanel");
+  panel.className = "detail-panel";
+  panel.style.borderColor = catColor;
+  panel.innerHTML = `
+    <div class="dp-term" style="color:${catColor}">${meta.term}</div>
+    <div class="dp-row"><span class="dp-label">Technical definition</span>${meta.technical}</div>
+    <div class="dp-row"><span class="dp-label">In plain English</span>${meta.layman}</div>
+    <div class="dp-row"><span class="dp-label">Note</span>${meta.note}</div>
+  `;
+  panel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+function flashGlossaryEntry(termId){
+  const el = document.getElementById("glossary-" + termId);
+  if(!el) return;
+  document.querySelectorAll(".term-card.flash").forEach(c => c.classList.remove("flash"));
+  el.classList.add("flash");
+  setTimeout(() => {
+    el.scrollIntoView({behavior:"smooth", block:"center"});
+  }, 250);
+  setTimeout(() => el.classList.remove("flash"), 2400);
+}
+
+/* ============================================================
+   RENDER: full glossary (grouped, searchable)
+============================================================ */
+function renderGlossary(filterText){
+  const host = document.getElementById("glossaryHost");
+  host.innerHTML = "";
+  const q = (filterText || "").trim().toLowerCase();
+
+  Object.keys(categoryMeta).forEach(catKey => {
+    const items = glossary.filter(g => g.category === catKey && (
+      !q || g.term.toLowerCase().includes(q) || g.technical.toLowerCase().includes(q) || g.layman.toLowerCase().includes(q)
+    ));
+    if(items.length === 0) return;
+
+    const group = document.createElement("div");
+    group.className = "cat-group";
+    const meta = categoryMeta[catKey];
+    group.innerHTML = `<div class="cat-header"><span class="cat-dot" style="background:${meta.color}"></span>${meta.name}</div>`;
+
+    items.forEach(g => {
+      const card = document.createElement("div");
+      card.className = "term-card";
+      card.id = "glossary-" + g.id;
+      card.innerHTML = `
+        <div class="tc-term" style="color:${meta.color}">${g.term}</div>
+        <div class="tc-row"><span class="tc-label">Technical</span>${g.technical}</div>
+        <div class="tc-row"><span class="tc-label">Plain English</span>${g.layman}</div>
+        <div class="tc-row"><span class="tc-label">Note</span>${g.note}</div>
+      `;
+      group.appendChild(card);
+    });
+    host.appendChild(group);
+  });
+
+  if(host.innerHTML === ""){
+    host.innerHTML = `<p style="color:var(--text-dim);font-size:13px;">No terms match "${escapeHtml(filterText)}".</p>`;
+  }
+}
+
+document.getElementById("searchBox").addEventListener("input", (e) => {
+  renderGlossary(e.target.value);
+});
+
+/* ============================================================
+   INIT
+============================================================ */
+renderExamples();
+renderGlossary("");
+</script>
+</body>
+</html>
