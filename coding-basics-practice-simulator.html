@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Coding Basics — Practice Simulator</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<style>
+  :root{
+    --bg-app:#1e1f22; --bg-panel:#26272b; --bg-editor:#1b1c1e; --bg-console:#101113;
+    --border:#38393e; --text-main:#e3e3e6; --text-dim:#9a9ba1;
+    --accent:#5aa9e6; --success:#58c896; --danger:#e6685a; --warn:#e6b95a;
+    --kw:#c586c0; --str:#d69d6b; --com:#7a7e85; --fn:#d9c96e; --num:#6fb3d2;
+    font-family:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg-app);color:var(--text-main);}
+  button{font-family:inherit; -webkit-appearance:none;}
+
+  /* ---------- Hero credit ---------- */
+  .hero{
+    text-align:center;
+    padding:26px 16px 20px 16px;
+    background: radial-gradient(ellipse at top, #2a3550 0%, #1e1f22 65%);
+    border-bottom:1px solid var(--border);
+  }
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:10px;
+    background: linear-gradient(120deg,#3a6fa8,#5aa9e6 50%,#c586c0);
+    padding:9px 22px;
+    border-radius:999px;
+    box-shadow:0 8px 26px -8px rgba(90,169,230,0.6);
+    margin-bottom:14px;
+  }
+  .hero-badge .crown{ font-size:18px; }
+  .hero-badge span.name{
+    font-weight:800; font-size:15px; color:#0d1720; letter-spacing:0.3px;
+  }
+  .hero-badge span.tag{ font-size:10.5px; color:#0d1720cc; font-weight:600; }
+  .hero h1{ margin:0; font-size:21px; font-weight:700; }
+  .hero p{ margin:6px 0 0 0; font-size:12.5px; color:var(--text-dim); }
+
+  .layout{ display:flex; max-width:1100px; margin:0 auto; padding:18px 14px 60px 14px; gap:18px; align-items:flex-start; }
+
+  /* ---------- Skill map ---------- */
+  .skillmap{
+    width:220px; flex-shrink:0;
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px;
+    padding:14px; position:sticky; top:14px;
+  }
+  .skillmap h3{ margin:0 0 10px 0; font-size:12px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.5px; }
+  .concept-row{ margin-bottom:10px; }
+  .concept-row .cname{ font-size:12px; margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+  .cdot{ width:8px; height:8px; border-radius:50%; display:inline-block; flex-shrink:0; }
+  .pill-row{ display:flex; gap:6px; }
+  .pill{
+    font-size:9.5px; padding:3px 8px; border-radius:20px;
+    border:1px solid var(--border); color:var(--text-dim);
+  }
+  .pill.done{ background:var(--success); color:#0d1f16; border-color:var(--success); font-weight:700; }
+  .pill.current{ border-color:var(--accent); color:var(--accent); font-weight:700; }
+
+  /* ---------- Main exercise area ---------- */
+  .main{ flex:1; min-width:0; display:flex; flex-direction:column; gap:14px; }
+
+  .concept-badge-row{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:2px; }
+  .concept-badge{
+    font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px; color:#0d1720;
+  }
+  .tier-badge{
+    font-size:11px; font-weight:700; padding:5px 12px; border-radius:20px;
+    background:var(--bg-panel); border:1px solid var(--border); color:var(--text-main);
+  }
+
+  .exercise-card{
+    background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:18px;
+  }
+  .exercise-card .prompt{ font-size:14.5px; line-height:1.55; margin:6px 0 14px 0; }
+
+  .editor-panel{ background:var(--bg-editor); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:14px; }
+  .panel-header{ display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:var(--bg-panel); border-bottom:1px solid var(--border); }
+  .file-tab{ font-size:11.5px; color:var(--text-dim); font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; }
+  .code-body{ display:flex; font-family:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace; font-size:13px; line-height:1.65; padding:12px 0; overflow-x:auto; }
+  .line-numbers{ text-align:right; padding:0 10px 0 14px; color:#52545a; user-select:none; }
+  .code-content{ white-space:pre; padding-right:16px; }
+  .code-line{ display:block; padding:1px 4px; border-radius:3px; }
+  .code-line.hl{ background:rgba(90,169,230,0.18); box-shadow: inset 3px 0 0 var(--accent); }
+  .code-line.clickable{ cursor:pointer; }
+  .code-line.clickable:hover{ background:rgba(255,255,255,0.05); }
+  .code-line.buggy{ background:rgba(230,104,90,0.22); box-shadow: inset 3px 0 0 var(--danger); }
+  .tok-kw{color:var(--kw);} .tok-str{color:var(--str);} .tok-com{color:var(--com);} .tok-fn{color:var(--fn);} .tok-num{color:var(--num);}
+
+  .options{ display:flex; flex-direction:column; gap:8px; }
+  .opt-btn{
+    text-align:left; background:var(--bg-editor); border:1.5px solid var(--border); color:var(--text-main);
+    padding:11px 14px; border-radius:8px; font-size:13.5px; cursor:pointer; min-height:44px;
+  }
+  .opt-btn.selected{ border-color:var(--accent); background:rgba(90,169,230,0.12); }
+  .opt-btn.correct-flag{ border-color:var(--success); background:rgba(88,200,150,0.15); }
+  .opt-btn.wrong-flag{ border-color:var(--danger); background:rgba(230,104,90,0.15); }
+  .opt-btn:disabled{ cursor:default; }
+
+  .reorder-list{ display:flex; flex-direction:column; gap:8px; }
+  .reorder-item{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    background:var(--bg-editor); border:1.5px solid var(--border); border-radius:8px;
+    padding:10px 14px; font-size:13.5px;
+  }
+  .reorder-item .txt{ flex:1; }
+  .reorder-btns{ display:flex; gap:6px; }
+  .arrow-btn{
+    width:36px; height:36px; border-radius:6px; border:1px solid var(--border);
+    background:var(--bg-panel); color:var(--text-main); font-size:14px; cursor:pointer;
+  }
+  .arrow-btn:disabled{ opacity:0.3; cursor:not-allowed; }
+
+  .action-row{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+  .btn{
+    padding:11px 20px; border-radius:8px; font-size:13.5px; font-weight:700; cursor:pointer; border:none; min-height:44px;
+  }
+  .btn.primary{ background:var(--accent); color:#0d1720; }
+  .btn.primary:disabled{ opacity:0.35; cursor:not-allowed; }
+  .btn.ghost{ background:transparent; border:1px solid var(--border); color:var(--text-main); }
+  .btn.success{ background:var(--success); color:#0d1f16; }
+
+  .feedback{ margin-top:14px; padding:14px 16px; border-radius:10px; font-size:13.5px; line-height:1.55; display:none; }
+  .feedback.right{ background:rgba(88,200,150,0.12); border:1px solid var(--success); display:block; }
+  .feedback.wrong{ background:rgba(230,104,90,0.12); border:1px solid var(--danger); display:block; }
+  .feedback .fb-title{ font-weight:800; margin-bottom:4px; }
+  .feedback.right .fb-title{ color:var(--success); }
+  .feedback.wrong .fb-title{ color:var(--danger); }
+  .feedback .correct-answer{ margin-top:8px; font-weight:700; color:var(--text-main); }
+
+  /* ---------- Trace player ---------- */
+  .trace-wrap{ margin-top:14px; border:1px solid var(--border); border-radius:10px; overflow:hidden; display:none; }
+  .trace-wrap.open{ display:block; }
+  .trace-grid{ display:grid; grid-template-columns: 1fr; gap:0; }
+  .vars-panel{ background:var(--bg-console); border-top:1px solid var(--border); padding:12px 14px; font-family:"SFMono-Regular",Consolas,monospace; font-size:12.5px; }
+  .vars-panel .vp-title{ color:var(--text-dim); font-size:10.5px; text-transform:uppercase; margin-bottom:6px; }
+  .var-chip{ display:inline-block; background:var(--bg-panel); border:1px solid var(--border); border-radius:6px; padding:4px 9px; margin:0 6px 6px 0; }
+  .var-chip b{ color:var(--num); }
+  .console-panel{ background:var(--bg-console); border-top:1px solid var(--border); padding:12px 14px; font-family:"SFMono-Regular",Consolas,monospace; font-size:12.5px; min-height:24px; color:#cfead9; white-space:pre-wrap; }
+  .trace-controls{ display:flex; gap:8px; padding:10px 14px; background:var(--bg-panel); flex-wrap:wrap; }
+
+  /* ---------- Skill map mobile ---------- */
+  @media (max-width: 820px){
+    .layout{ flex-direction:column; }
+    .skillmap{ width:100%; position:static; }
+    .skillmap .concepts-scroll{ display:flex; overflow-x:auto; gap:10px; padding-bottom:4px; }
+    .skillmap h3{ margin-bottom:8px; }
+    .concept-row{ margin-bottom:0; flex-shrink:0; min-width:150px; background:var(--bg-editor); border:1px solid var(--border); border-radius:8px; padding:8px 10px; }
+  }
+  @media (max-width: 480px){
+    .hero h1{ font-size:17px; }
+    .exercise-card{ padding:14px; }
+    .btn{ flex:1; }
+  }
+
+  /* ---------- Summary / timed challenge ---------- */
+  .summary-card{ background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:26px 20px; text-align:center; }
+  .summary-card h2{ margin:0 0 10px 0; font-size:19px; }
+  .summary-card p{ font-size:13.5px; color:var(--text-dim); line-height:1.6; }
+  .challenge-banner{
+    background:rgba(230,185,90,0.12); border:1px solid var(--warn); border-radius:10px;
+    padding:12px 16px; font-size:12.5px; color:var(--text-main); margin:16px 0;
+  }
+  .timer-chip{
+    display:inline-block; background:var(--bg-editor); border:1px solid var(--border);
+    border-radius:20px; padding:6px 16px; font-family:"SFMono-Regular",Consolas,monospace; font-size:13px; margin-bottom:10px;
+  }
+  .tc-score{ font-size:13px; color:var(--text-dim); }
+</style>
+</head>
+<body>
+
+  <div class="hero">
+    <div class="hero-badge">
+      <span class="crown">🏆</span>
+      <span class="name">SUJIT KULKARNI</span>
+      <span class="tag">CREATOR &amp; INSTRUCTOR</span>
+    </div>
+    <h1>Coding Basics — Practice Simulator</h1>
+    <p>Try it yourself. Get it wrong, learn why, see it done right — no pressure, everyone starts here.</p>
+  </div>
+
+  <div class="layout">
+    <aside class="skillmap">
+      <h3>Your Progress</h3>
+      <div class="concepts-scroll" id="skillMap"></div>
+    </aside>
+
+    <main class="main" id="mainArea"></main>
+  </div>
+
+<script>
+/* ============================================================
+   CONCEPT + EXERCISE DATA
+   Every exercise: type: 'mcq' | 'reorder'
+   codeLines (optional) + trace (optional, only if codeLines present)
+   trace step: { lineIndex, vars:{...}|null, output: "text"|null }
+============================================================ */
+
+function T(lineIndex, vars, output){ return {lineIndex, vars: vars || null, output: output || null}; }
+
+const concepts = [
+// ---------------- 1. INPUT / PROCESS / OUTPUT ----------------
+{
+  key:"ipo", name:"Input → Process → Output", color:"#5aa9e6",
+  tryIt:{
+    type:"mcq",
+    prompt:"Read the program below. What will it print?",
+    codeLines:[
+      'tea_bag = "Tea Bag"        # ◀ INPUT',
+      'water = "Hot Water"        # ◀ INPUT',
+      'print("Boiling and pouring...")   # ◀ PROCESS',
+      'print("Output:", tea_bag, "+", water)  # ◀ OUTPUT'
+    ],
+    options:[
+      "Output: Tea Bag + Hot Water",
+      "Boiling and pouring...\nOutput: Tea Bag + Hot Water",
+      "Tea Bag Hot Water",
+      "Error — nothing prints"
+    ],
+    correctIndex:1,
+    trace:[
+      T(0,{tea_bag:'"Tea Bag"'}, null),
+      T(1,{tea_bag:'"Tea Bag"', water:'"Hot Water"'}, null),
+      T(2,{tea_bag:'"Tea Bag"', water:'"Hot Water"'}, "Boiling and pouring..."),
+      T(3,{tea_bag:'"Tea Bag"', water:'"Hot Water"'}, "Output: Tea Bag + Hot Water")
+    ],
+    explanationWrong:"Every print() line runs in order (Sequence). Line 3 prints first — it's the PROCESS step — then line 4 prints last, using the INPUT values already stored, as the OUTPUT.",
+    explanationRight:"Exactly — the INPUT values get used during the PROCESS and finally shown as OUTPUT, one line at a time."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"In the tea example, which part counts as the OUTPUT?",
+    options:[
+      "tea_bag and water",
+      "\"Boiling and pouring...\"",
+      "The final line that shows the finished result",
+      "None of these"
+    ],
+    correctIndex:2,
+    explanationWrong:"OUTPUT is always the final result you actually see — not the ingredients (that's Input) and not the steps taken to get there (that's Process).",
+    explanationRight:"Right — OUTPUT is the final result the program shows."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"This program is missing one word. Pick what completes it so it correctly displays the two values on screen:",
+    codeLines:[
+      'sugar = "Sugar"',
+      'milk = "Milk"',
+      '____("Ingredients ready:", sugar, milk)'
+    ],
+    options:["print","input","output","show"],
+    correctIndex:0,
+    trace:[
+      T(0,{sugar:'"Sugar"'}, null),
+      T(1,{sugar:'"Sugar"', milk:'"Milk"'}, null),
+      T(2,{sugar:'"Sugar"', milk:'"Milk"'}, "Ingredients ready: Sugar Milk")
+    ],
+    explanationWrong:"In Python, the command that displays something on screen is always print(...) — that's how the PROCESS step produces an OUTPUT.",
+    explanationRight:"Yes — print() is how Python performs the OUTPUT step."
+  }
+},
+
+// ---------------- 2. VARIABLES ----------------
+{
+  key:"variables", name:"Variables", color:"#4fb3a9",
+  tryIt:{
+    type:"mcq",
+    prompt:"What will this program print?",
+    codeLines:[
+      "age = 25",
+      "age = age + 1",
+      "print(age)"
+    ],
+    options:["24","25","26","Error"],
+    correctIndex:2,
+    trace:[
+      T(0,{age:25}, null),
+      T(1,{age:26}, null),
+      T(2,{age:26}, "26")
+    ],
+    explanationWrong:"The jar labeled 'age' starts at 25. Line 2 takes what's currently inside (25), adds 1, and puts the new value (26) right back into the same jar.",
+    explanationRight:"Correct — the label stays 'age', but the value inside the jar changed to 26."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"If a jar labeled name holds \"Asha\", and you later write name = \"Meera\", what happens to the label?",
+    options:[
+      "The label itself changes to 'Meera'",
+      "The label stays 'name' — only the contents change",
+      "A brand new jar is created",
+      "Nothing happens at all"
+    ],
+    correctIndex:1,
+    explanationWrong:"The label (the variable's name) never changes — only what's stored inside that labeled jar does.",
+    explanationRight:"Exactly — same jar, new contents."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"Fill in the blank so this program prints 30:",
+    codeLines:[
+      "price = 10",
+      "price = price * ____",
+      "print(price)"
+    ],
+    options:["2","3","10","30"],
+    correctIndex:1,
+    trace:[
+      T(0,{price:10}, null),
+      T(1,{price:30}, null),
+      T(2,{price:30}, "30")
+    ],
+    explanationWrong:"price starts at 10 and needs to become 30. Since price × blank = 30, the blank must be 3, because 10 × 3 = 30.",
+    explanationRight:"Right — 10 × 3 = 30."
+  }
+},
+
+// ---------------- 3. DATA TYPES ----------------
+{
+  key:"datatypes", name:"Data Types", color:"#e6a95a",
+  tryIt:{
+    type:"mcq",
+    prompt:"What data type is the value 3.14?",
+    options:["Integer","Decimal","String","Boolean"],
+    correctIndex:1,
+    explanationWrong:"3.14 has a decimal point — that makes it a Decimal (like a measurement, e.g. 1.5 cups of flour), not a whole-number Integer.",
+    explanationRight:"Correct — any number with a decimal point is a Decimal type."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"Is a True/False value a Number, a Word, or its own special type?",
+    options:["A Number","A Word","Its own type: Boolean"],
+    correctIndex:2,
+    explanationWrong:"True and False belong to their own type called Boolean — a yes/no light switch, not a number or a word.",
+    explanationRight:"Yes — Boolean is its own type for yes/no values."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"One line below will cause an error because of a data-type mismatch. Which line?",
+    codeLines:[
+      'age = 25',
+      'name = "Alex"',
+      'message = "Age is: " + age',
+      'print(message)'
+    ],
+    options:["Line 1","Line 2","Line 3","Line 4"],
+    correctIndex:2,
+    explanationWrong:'Line 3 tries to join text ("Age is: ") directly with a number (age) using +. Python needs both sides of + to be the same type — text can only be joined with more text.',
+    explanationRight:"Exactly — you can't add a String and an Integer with + directly; that's a data-type mismatch."
+  }
+},
+
+// ---------------- 4. OPERATORS ----------------
+{
+  key:"operators", name:"Operators", color:"#d67ab0",
+  tryIt:{
+    type:"mcq",
+    prompt:"What will this program print?",
+    codeLines:[
+      "a = 8",
+      "b = 5",
+      "print(a > b)"
+    ],
+    options:["True","False","8","Error"],
+    correctIndex:0,
+    trace:[
+      T(0,{a:8}, null),
+      T(1,{a:8,b:5}, null),
+      T(2,{a:8,b:5}, "True")
+    ],
+    explanationWrong:"> asks a question: 'is a bigger than b?'. Since 8 is bigger than 5, the answer — True — is what gets printed, not the numbers themselves.",
+    explanationRight:"Right — comparison operators like > always produce True or False, never the numbers."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"What does the == operator actually do?",
+    options:[
+      "Adds two values together",
+      "Checks whether two values are equal",
+      "Sets a new value into a variable",
+      "Divides two values"
+    ],
+    correctIndex:1,
+    explanationWrong:"== is a question, not an instruction that changes anything — it asks 'are these the same?' and answers True or False.",
+    explanationRight:"Correct — == always asks a yes/no question."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"Fill in the blank so this prints False:",
+    codeLines:[
+      "x = 4",
+      "y = 9",
+      "print(x ____ y)"
+    ],
+    options:[">","<","==","+"],
+    correctIndex:0,
+    trace:[
+      T(0,{x:4}, null),
+      T(1,{x:4,y:9}, null),
+      T(2,{x:4,y:9}, "False")
+    ],
+    explanationWrong:"4 is NOT greater than 9, so x > y evaluates to False — exactly the output we're looking for.",
+    explanationRight:"Right — 4 > 9 is False."
+  }
+},
+
+// ---------------- 5. SEQUENCE ----------------
+{
+  key:"sequence", name:"Sequence", color:"#58c896",
+  tryIt:{
+    type:"mcq",
+    prompt:"What order will these lines print in?",
+    codeLines:[
+      'print("Wake up")',
+      'print("Brush teeth")',
+      'print("Make coffee")'
+    ],
+    options:[
+      "Wake up → Brush teeth → Make coffee",
+      "Make coffee → Brush teeth → Wake up",
+      "All three print at the same time",
+      "Only the last line prints"
+    ],
+    correctIndex:0,
+    trace:[
+      T(0,null,"Wake up"),
+      T(1,null,"Brush teeth"),
+      T(2,null,"Make coffee")
+    ],
+    explanationWrong:"Sequence means lines run top to bottom, exactly as written — no line jumps ahead and none get skipped.",
+    explanationRight:"Right — each line runs in the exact order it's written, one after another."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"Which everyday example below is Sequence (not Selection or Iteration)?",
+    options:[
+      "Deciding what to wear based on the weather",
+      "Washing dishes until the sink is empty",
+      "Brushing your teeth, then washing your face, then getting dressed"
+    ],
+    correctIndex:2,
+    explanationWrong:"Sequence is simply steps that always happen in the same fixed order — no decision, no repeating.",
+    explanationRight:"Exactly — a fixed order of steps, one after another."
+  },
+  goFurther:{
+    type:"reorder",
+    prompt:"Put these bedtime steps into the order that actually makes sense:",
+    shuffled:["Turn off the lights","Get into bed","Brush your teeth","Change into pajamas"],
+    correctOrder:["Brush your teeth","Change into pajamas","Turn off the lights","Get into bed"],
+    explanationWrong:"Think about it like a real bedtime routine — some steps only make sense before others (you can't turn off the lights after you're already in bed and expect to see the switch!). Rearrange until each step logically leads to the next.",
+    explanationRight:"Nicely sequenced — each step logically leads into the next one."
+  }
+},
+
+// ---------------- 6. SELECTION ----------------
+{
+  key:"selection", name:"Selection", color:"#c586c0",
+  tryIt:{
+    type:"mcq",
+    prompt:"What will this program print?",
+    codeLines:[
+      "is_raining = False",
+      "",
+      "if is_raining:",
+      '    print("Take an umbrella")',
+      "else:",
+      '    print("Leave it at home")'
+    ],
+    options:["Take an umbrella","Leave it at home","Both lines print","Nothing prints"],
+    correctIndex:1,
+    trace:[
+      T(0,{is_raining:false}, null),
+      T(2,{is_raining:false}, null),
+      T(4,{is_raining:false}, null),
+      T(5,{is_raining:false}, "Leave it at home")
+    ],
+    explanationWrong:"is_raining is False, so the condition in the if is not true — the program skips straight past it to the else branch.",
+    explanationRight:"Right — when the condition is False, the else branch is the one that runs."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"If a condition is False, which branch of an if/else actually runs?",
+    options:["The if branch","The else branch","Both branches","Neither branch"],
+    correctIndex:1,
+    explanationWrong:"When the condition is False, the program skips the if branch entirely and runs whatever is in else instead.",
+    explanationRight:"Correct — False sends the program to the else branch."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"This code should take an umbrella ONLY when it's raining, but the logic is backwards. Which line has the bug?",
+    codeLines:[
+      "is_raining = True",
+      "",
+      "if is_raining:",
+      '    print("Leave it at home")',
+      "else:",
+      '    print("Take an umbrella")'
+    ],
+    options:["Line 1","Line 3 & 5 messages are swapped","Line 4 only","There is no bug"],
+    correctIndex:1,
+    explanationWrong:'Look closely — when is_raining is True, the program should say "Take an umbrella," but line 4 says "Leave it at home" instead. The messages under if and else got swapped.',
+    explanationRight:"Exactly — the if and else messages were reversed."
+  }
+},
+
+// ---------------- 7. ITERATION ----------------
+{
+  key:"iteration", name:"Iteration", color:"#d9c96e",
+  tryIt:{
+    type:"mcq",
+    prompt:"What will this program print?",
+    codeLines:[
+      "dishes = 2",
+      "while dishes > 0:",
+      '    print("Washing one dish")',
+      "    dishes -= 1",
+      'print("Done")'
+    ],
+    options:[
+      '"Washing one dish" once, then "Done"',
+      '"Washing one dish" twice, then "Done"',
+      "It repeats forever",
+      "It prints nothing"
+    ],
+    correctIndex:1,
+    trace:[
+      T(0,{dishes:2}, null),
+      T(1,{dishes:2}, null),
+      T(2,{dishes:2}, "Washing one dish"),
+      T(3,{dishes:1}, null),
+      T(1,{dishes:1}, null),
+      T(2,{dishes:1}, "Washing one dish"),
+      T(3,{dishes:0}, null),
+      T(1,{dishes:0}, null),
+      T(4,{dishes:0}, "Done")
+    ],
+    explanationWrong:"The loop keeps repeating as long as dishes > 0. It starts at 2, runs once (dishes becomes 1), runs again (dishes becomes 0), then stops because 0 is not greater than 0.",
+    explanationRight:"Right — the loop runs exactly twice, once per dish, then stops."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"A while loop keeps repeating until...",
+    options:[
+      "it has run exactly 10 times, always",
+      "its condition becomes False",
+      "the program crashes",
+      "it always runs exactly once"
+    ],
+    correctIndex:1,
+    explanationWrong:"A while loop has no fixed count — it keeps going as long as its condition stays True, and stops the moment that condition becomes False.",
+    explanationRight:"Correct — the loop stops the moment its condition becomes False."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"This loop never stops. Which part is the problem?",
+    codeLines:[
+      "dishes = 3",
+      "while dishes > 0:",
+      '    print("Washing one dish")',
+      'print("Done")'
+    ],
+    options:["Line 1","Line 2","Line 3 — nothing here reduces dishes","Line 4"],
+    correctIndex:2,
+    explanationWrong:"Look inside the loop body (line 3) — nothing there ever changes the value of dishes. Since dishes stays at 3 forever, the condition dishes > 0 never becomes False, so it repeats endlessly.",
+    explanationRight:"Exactly — a while loop needs something inside it that eventually makes the condition False, or it never stops."
+  }
+},
+
+// ---------------- 8. COMBINED ALGORITHM ----------------
+{
+  key:"algorithm", name:"Combined Algorithm", color:"#e6836a",
+  tryIt:{
+    type:"mcq",
+    prompt:"What will this program print?",
+    codeLines:[
+      'mail_stack = ["Bill - Electric", "Letter - Me"]',
+      "my_mail = []",
+      "bills = []",
+      "",
+      "for mail in mail_stack:",
+      '    if "Me" in mail:',
+      "        my_mail.append(mail)",
+      '    elif "Bill" in mail:',
+      "        bills.append(mail)",
+      "",
+      'print("My Mail:", my_mail)',
+      'print("Bills:", bills)'
+    ],
+    options:[
+      "My Mail: ['Letter - Me']   Bills: ['Bill - Electric']",
+      "My Mail: []   Bills: []",
+      "Error",
+      "My Mail: ['Bill - Electric']   Bills: ['Letter - Me']"
+    ],
+    correctIndex:0,
+    trace:[
+      T(0,{mail_stack:"[...]"}, null),
+      T(4,{mail:'"Bill - Electric"'}, null),
+      T(7,{mail:'"Bill - Electric"'}, null),
+      T(8,{bills:"['Bill - Electric']"}, null),
+      T(4,{mail:'"Letter - Me"'}, null),
+      T(5,{mail:'"Letter - Me"'}, null),
+      T(6,{my_mail:"['Letter - Me']"}, null),
+      T(10,{}, "My Mail: ['Letter - Me']"),
+      T(11,{}, "Bills: ['Bill - Electric']")
+    ],
+    explanationWrong:"The loop checks each piece of mail one at a time (Iteration). 'Bill - Electric' doesn't contain 'Me', so it falls to Bills (Selection). 'Letter - Me' does contain 'Me', so it goes to My Mail.",
+    explanationRight:"Right — Sequence (steps in order), Selection (if/elif), and Iteration (the for-loop) all worked together here."
+  },
+  reinforcement:{
+    type:"mcq",
+    prompt:"Which building block lets the program check many mail items one at a time, without writing separate code for each item?",
+    options:["Sequence","Selection","Iteration","Data Type"],
+    correctIndex:2,
+    explanationWrong:"Checking each item in a list, one after another, is exactly what Iteration (a loop) is for.",
+    explanationRight:"Correct — Iteration lets one small piece of code handle any number of items."
+  },
+  goFurther:{
+    type:"mcq",
+    prompt:"Fill in the blank so any leftover mail (not 'Me' and not a 'Bill') gets caught as junk:",
+    codeLines:[
+      "for mail in mail_stack:",
+      '    if "Me" in mail:',
+      "        my_mail.append(mail)",
+      '    elif "Bill" in mail:',
+      "        bills.append(mail)",
+      "    ____:",
+      "        junk.append(mail)"
+    ],
+    options:["else","elif","if","while"],
+    correctIndex:0,
+    explanationWrong:"After checking every specific condition (Me, Bill), else is the catch-all for anything that didn't match either one — the leftover junk mail.",
+    explanationRight:"Right — else is the catch-all for anything that didn't match an earlier condition."
+  }
+}
+];
+
+/* ============================================================
+   TIMED CHALLENGE (optional, just for fun) — quick, no gating
+============================================================ */
+const challengeQuestions = [
+  {prompt:'print("Hello " + "World") →', options:["Hello World","HelloWorld","Error","Hello + World"], correctIndex:0},
+  {prompt:"x = 5; x = x * 2; print(x) →", options:["5","7","10","Error"], correctIndex:2},
+  {prompt:'The value "5" (in quotes) is a...', options:["Integer","String","Boolean","Decimal"], correctIndex:1},
+  {prompt:"7 == 7 →", options:["7","True","False","Error"], correctIndex:1},
+  {prompt:"if 3 > 5: print('yes') else: print('no') →", options:["yes","no","Both","Neither"], correctIndex:1},
+  {prompt:"A while loop with a condition that's already False on line 1...", options:["runs once","runs forever","never runs its body","causes an error"], correctIndex:2},
+  {prompt:"Which comes first in Input → Process → Output?", options:["Output","Process","Input"], correctIndex:2},
+  {prompt:"Which building block repeats an action?", options:["Selection","Sequence","Iteration"], correctIndex:2}
+];
+
+/* ============================================================
+   STATE + QUEUE
+============================================================ */
+let queue = [];
+concepts.forEach(c => queue.push({conceptKey:c.key, stage:"tryIt"}));
+// goFurther gets appended right after each concept's tryIt/reinforcement resolves dynamically
+let qIndex = 0;
+let progress = {}; // conceptKey -> {tryIt:'locked'|'current'|'done', goFurther:'locked'|'current'|'done'}
+concepts.forEach(c => progress[c.key] = {tryIt:"current", goFurther:"locked"});
+progress[concepts[0].key].tryIt = "current";
+
+let selectedOption = null;
+let reorderState = null;
+let answered = false;
+let wasCorrect = false;
+let traceOpen = false;
+let traceStep = 0;
+let tracePlaying = false;
+let traceTimer = null;
+
+function getConcept(key){ return concepts.find(c => c.key === key); }
+
+/* ============================================================
+   SYNTAX HIGHLIGHT (lightweight, python-ish)
+============================================================ */
+function highlightLine(line){
+  const keywords = ["if","elif","else","while","for","in","print","True","False","None","append"];
+  let escaped = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  const commentIdx = escaped.indexOf("#");
+  let codePart = escaped, commentPart = "";
+  if(commentIdx !== -1){
+    codePart = escaped.slice(0, commentIdx);
+    commentPart = '<span class="tok-com">' + escaped.slice(commentIdx) + '</span>';
+  }
+  codePart = codePart.replace(/"([^"]*)"/g, m => '<span class="tok-str">' + m + '</span>');
+  codePart = codePart.replace(/'([^']*)'/g, m => '<span class="tok-str">' + m + '</span>');
+  codePart = codePart.replace(/\b(\d+\.?\d*)\b/g, '<span class="tok-num">$1</span>');
+  keywords.forEach(kw => {
+    const re = new RegExp('\\b(' + kw + ')\\b(?![^<]*>)', 'g');
+    const cls = (kw === "print" || kw === "append") ? "tok-fn" : "tok-kw";
+    codePart = codePart.replace(re, '<span class="' + cls + '">$1</span>');
+  });
+  return codePart + commentPart;
+}
+
+/* ============================================================
+   SKILL MAP RENDER
+============================================================ */
+function renderSkillMap(){
+  const el = document.getElementById("skillMap");
+  el.innerHTML = "";
+  concepts.forEach(c => {
+    const p = progress[c.key];
+    const row = document.createElement("div");
+    row.className = "concept-row";
+    row.innerHTML = `
+      <div class="cname"><span class="cdot" style="background:${c.color}"></span>${c.name}</div>
+      <div class="pill-row">
+        <span class="pill ${p.tryIt}">Try It</span>
+        <span class="pill ${p.goFurther}">Go Further</span>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+}
+
+/* ============================================================
+   TRACE PLAYER
+============================================================ */
+function stopTraceTimer(){ if(traceTimer){ clearInterval(traceTimer); traceTimer = null; } tracePlaying = false; }
+
+function renderTrace(exercise, codeLines){
+  if(!exercise.trace || !codeLines) return "";
+  return `
+    <div class="trace-wrap" id="traceWrap">
+      <div class="editor-panel" style="border-radius:0;border:none;">
+        <div class="panel-header"><div class="file-tab">Watch it run</div></div>
+        <div class="code-body" id="traceCodeBody"></div>
+      </div>
+      <div class="vars-panel">
+        <div class="vp-title">Variables</div>
+        <div id="varsBody">—</div>
+      </div>
+      <div class="console-panel" id="traceConsole"><span style="color:var(--text-dim);font-style:italic;">Press Play or Step to begin.</span></div>
+      <div class="trace-controls">
+        <button class="btn ghost" id="traceReset">↺ Reset</button>
+        <button class="btn ghost" id="traceStep">Step ▶</button>
+        <button class="btn primary" id="tracePlay">▶ Play</button>
+      </div>
+    </div>
+  `;
+}
+
+function drawTraceStep(exercise, codeLines){
+  const codeBody = document.getElementById("traceCodeBody");
+  if(!codeBody) return;
+  let lineNums = "", content = "";
+  const step = exercise.trace[traceStep] || exercise.trace[exercise.trace.length-1];
+  codeLines.forEach((line, i) => {
+    lineNums += (i+1) + "\n";
+    const cls = (step && step.lineIndex === i) ? "code-line hl" : "code-line";
+    content += `<span class="${cls}">${highlightLine(line) || " "}</span>\n`;
+  });
+  codeBody.innerHTML = `<div class="line-numbers">${lineNums}</div><div class="code-content">${content}</div>`;
+
+  const varsBody = document.getElementById("varsBody");
+  if(varsBody){
+    let vars = {};
+    for(let i=0;i<=traceStep;i++){
+      const s = exercise.trace[i];
+      if(s && s.vars) Object.assign(vars, s.vars);
+    }
+    const keys = Object.keys(vars);
+    varsBody.innerHTML = keys.length ? keys.map(k => `<span class="var-chip">${k}: <b>${vars[k]}</b></span>`).join("") : "—";
+  }
+
+  const consoleEl = document.getElementById("traceConsole");
+  if(consoleEl){
+    let lines = [];
+    for(let i=0;i<=traceStep;i++){
+      const s = exercise.trace[i];
+      if(s && s.output) lines.push(s.output);
+    }
+    consoleEl.textContent = lines.length ? lines.join("\n") : "";
+  }
+}
+
+function initTraceControls(exercise, codeLines){
+  traceStep = 0;
+  drawTraceStep(exercise, codeLines);
+  document.getElementById("traceStep").addEventListener("click", () => {
+    stopTraceTimer();
+    if(traceStep < exercise.trace.length - 1){ traceStep++; drawTraceStep(exercise, codeLines); }
+  });
+  document.getElementById("traceReset").addEventListener("click", () => {
+    stopTraceTimer();
+    traceStep = 0;
+    drawTraceStep(exercise, codeLines);
+  });
+  document.getElementById("tracePlay").addEventListener("click", (e) => {
+    if(tracePlaying){ stopTraceTimer(); e.target.textContent = "▶ Play"; return; }
+    tracePlaying = true;
+    e.target.textContent = "⏸ Pause";
+    traceTimer = setInterval(() => {
+      if(traceStep < exercise.trace.length - 1){
+        traceStep++;
+        drawTraceStep(exercise, codeLines);
+      } else {
+        stopTraceTimer();
+        document.getElementById("tracePlay").textContent = "▶ Play";
+      }
+    }, 1000);
+  });
+}
+
+/* ============================================================
+   MAIN EXERCISE RENDER
+============================================================ */
+function currentItem(){ return queue[qIndex]; }
+
+function renderExercise(){
+  stopTraceTimer();
+  traceOpen = false;
+  selectedOption = null;
+  reorderState = null;
+  answered = false;
+  wasCorrect = false;
+
+  const item = currentItem();
+  const concept = getConcept(item.conceptKey);
+  const exercise = concept[item.stage];
+  const tierLabel = item.stage === "tryIt" ? "Try It" : item.stage === "reinforcement" ? "Quick Check" : "Go Further";
+
+  const main = document.getElementById("mainArea");
+  let html = `
+    <div class="concept-badge-row">
+      <span class="concept-badge" style="background:${concept.color}">${concept.name}</span>
+      <span class="tier-badge">${tierLabel}</span>
+    </div>
+    <div class="exercise-card" id="exerciseCard">
+      <p class="prompt">${exercise.prompt}</p>
+  `;
+
+  if(exercise.codeLines && exercise.type === "mcq"){
+    let lineNums = "", content = "";
+    exercise.codeLines.forEach((line,i) => {
+      lineNums += (i+1) + "\n";
+      content += `<span class="code-line">${highlightLine(line) || " "}</span>\n`;
+    });
+    html += `
+      <div class="editor-panel">
+        <div class="panel-header"><div class="file-tab">example.py</div></div>
+        <div class="code-body"><div class="line-numbers">${lineNums}</div><div class="code-content">${content}</div></div>
+      </div>
+    `;
+  }
+
+  if(exercise.type === "mcq"){
+    html += `<div class="options" id="optionsWrap">`;
+    exercise.options.forEach((opt,i) => {
+      html += `<button class="opt-btn" data-idx="${i}">${opt.replace(/\n/g,"<br>")}</button>`;
+    });
+    html += `</div>`;
+  } else if(exercise.type === "reorder"){
+    reorderState = exercise.shuffled.slice();
+    html += `<div class="reorder-list" id="reorderList"></div>`;
+  }
+
+  html += `
+      <div class="action-row" id="actionRow">
+        <button class="btn primary" id="checkBtn" disabled>Check Answer</button>
+        <button class="btn ghost" id="nextBtn" style="display:none;">Next →</button>
+      </div>
+      <div class="feedback" id="feedback"></div>
+      <div id="traceHost"></div>
+    </div>
+  `;
+
+  main.innerHTML = html;
+
+  if(exercise.type === "mcq"){
+    document.querySelectorAll(".opt-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if(answered) return;
+        document.querySelectorAll(".opt-btn").forEach(b => b.classList.remove("selected"));
+        btn.classList.add("selected");
+        selectedOption = parseInt(btn.getAttribute("data-idx"));
+        document.getElementById("checkBtn").disabled = false;
+      });
+    });
+  } else if(exercise.type === "reorder"){
+    renderReorderList();
+    document.getElementById("checkBtn").disabled = false;
+  }
+
+  document.getElementById("checkBtn").addEventListener("click", () => checkAnswer(exercise));
+  renderSkillMap();
+}
+
+function renderReorderList(){
+  const el = document.getElementById("reorderList");
+  el.innerHTML = "";
+  reorderState.forEach((txt, i) => {
+    const row = document.createElement("div");
+    row.className = "reorder-item";
+    row.innerHTML = `
+      <span class="txt">${i+1}. ${txt}</span>
+      <div class="reorder-btns">
+        <button class="arrow-btn" data-dir="up" data-i="${i}" ${i===0?"disabled":""}>▲</button>
+        <button class="arrow-btn" data-dir="down" data-i="${i}" ${i===reorderState.length-1?"disabled":""}>▼</button>
+      </div>
+    `;
+    el.appendChild(row);
+  });
+  el.querySelectorAll(".arrow-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if(answered) return;
+      const i = parseInt(btn.getAttribute("data-i"));
+      const dir = btn.getAttribute("data-dir");
+      const swapWith = dir === "up" ? i-1 : i+1;
+      [reorderState[i], reorderState[swapWith]] = [reorderState[swapWith], reorderState[i]];
+      renderReorderList();
+    });
+  });
+}
+
+function checkAnswer(exercise){
+  if(answered) return;
+  answered = true;
+
+  if(exercise.type === "mcq"){
+    if(selectedOption === null) { answered = false; return; }
+    wasCorrect = selectedOption === exercise.correctIndex;
+    document.querySelectorAll(".opt-btn").forEach((b,i) => {
+      b.disabled = true;
+      if(i === exercise.correctIndex) b.classList.add("correct-flag");
+      else if(i === selectedOption && !wasCorrect) b.classList.add("wrong-flag");
+    });
+  } else if(exercise.type === "reorder"){
+    wasCorrect = JSON.stringify(reorderState) === JSON.stringify(exercise.correctOrder);
+    document.querySelectorAll(".arrow-btn").forEach(b => b.disabled = true);
+  }
+
+  const fb = document.getElementById("feedback");
+  if(wasCorrect){
+    fb.className = "feedback right";
+    fb.innerHTML = `<div class="fb-title">✓ Correct!</div>${exercise.explanationRight}`;
+  } else {
+    fb.className = "feedback wrong";
+    let correctText = "";
+    if(exercise.type === "mcq") correctText = exercise.options[exercise.correctIndex].replace(/\n/g," ");
+    if(exercise.type === "reorder") correctText = exercise.correctOrder.join(" → ");
+    fb.innerHTML = `<div class="fb-title">✗ Not quite</div>${exercise.explanationWrong}<div class="correct-answer">Correct answer: ${correctText}</div>`;
+  }
+
+  document.getElementById("checkBtn").style.display = "none";
+  document.getElementById("nextBtn").style.display = "inline-block";
+  document.getElementById("nextBtn").addEventListener("click", advanceQueue);
+
+  // trace host
+  const traceHost = document.getElementById("traceHost");
+  let codeLines = exercise.codeLines;
+  let traceData = exercise.trace;
+  if(exercise.type === "reorder" && wasCorrect){
+    codeLines = exercise.correctOrder.map(s => `print("${s}")`);
+    traceData = codeLines.map((l,i) => T(i, null, exercise.correctOrder[i]));
+    exercise = Object.assign({}, exercise, {trace: traceData});
+  }
+  if(traceData && codeLines){
+    traceHost.innerHTML = `<button class="btn ghost" id="watchRunBtn" style="margin-top:10px;">▶ Watch it run</button>` + renderTrace(exercise, codeLines);
+    document.getElementById("watchRunBtn").addEventListener("click", () => {
+      const w = document.getElementById("traceWrap");
+      w.classList.toggle("open");
+      if(w.classList.contains("open")) initTraceControls(exercise, codeLines);
+    });
+  }
+
+  // adaptive: if tryIt wrong, insert reinforcement right after current position
+  const item = currentItem();
+  if(item.stage === "tryIt" && !wasCorrect){
+    const alreadyQueued = queue[qIndex+1] && queue[qIndex+1].stage === "reinforcement" && queue[qIndex+1].conceptKey === item.conceptKey;
+    if(!alreadyQueued){
+      queue.splice(qIndex+1, 0, {conceptKey:item.conceptKey, stage:"reinforcement"});
+    }
+  }
+}
+
+function advanceQueue(){
+  const item = currentItem();
+  const p = progress[item.conceptKey];
+
+  if(item.stage === "tryIt" && wasCorrect){ p.tryIt = "done"; }
+  if(item.stage === "reinforcement"){ p.tryIt = "done"; }
+  if(item.stage === "goFurther"){ p.goFurther = "done"; }
+
+  // if we just finished tryIt/reinforcement (concept's tryIt now done) and goFurther not queued yet, queue it
+  if(p.tryIt === "done" && p.goFurther === "locked"){
+    p.goFurther = "current";
+    queue.splice(qIndex+1, 0, {conceptKey:item.conceptKey, stage:"goFurther"});
+  }
+
+  qIndex++;
+
+  if(qIndex >= queue.length){
+    renderSummary();
+    return;
+  }
+
+  // mark next concept's tryIt as current if starting a new concept
+  const next = queue[qIndex];
+  if(next.stage === "tryIt") progress[next.conceptKey].tryIt = "current";
+  renderExercise();
+}
+
+/* ============================================================
+   SUMMARY + TIMED CHALLENGE
+============================================================ */
+function renderSummary(){
+  renderSkillMap();
+  const main = document.getElementById("mainArea");
+  main.innerHTML = `
+    <div class="summary-card">
+      <h2>🎉 All 8 concepts complete!</h2>
+      <p>You've practiced Input/Process/Output, Variables, Data Types, Operators, Sequence, Selection, Iteration, and a Combined Algorithm — getting things wrong along the way is exactly how this is supposed to work.</p>
+      <div class="challenge-banner">
+        Want a quick, just-for-fun rapid-fire round? Totally optional — no pressure, and you can skip anytime.
+      </div>
+      <button class="btn primary" id="startChallenge">Try the Timed Challenge (just for fun)</button>
+      <br><br>
+      <button class="btn ghost" id="skipChallenge">Skip — I'm done for today</button>
+    </div>
+  `;
+  document.getElementById("startChallenge").addEventListener("click", startChallenge);
+  document.getElementById("skipChallenge").addEventListener("click", () => {
+    main.innerHTML = `<div class="summary-card"><h2>Nice work today 👏</h2><p>See you at the next session.</p></div>`;
+  });
+}
+
+let challengeIndex = 0;
+let challengeScore = 0;
+let challengeSeconds = 60;
+let challengeTimerId = null;
+
+function startChallenge(){
+  challengeIndex = 0; challengeScore = 0; challengeSeconds = 60;
+  challengeTimerId = setInterval(() => {
+    challengeSeconds--;
+    const chip = document.getElementById("tcTimer");
+    if(chip) chip.textContent = challengeSeconds + "s";
+    if(challengeSeconds <= 0){ endChallenge(); }
+  }, 1000);
+  renderChallengeQuestion();
+}
+
+function endChallenge(){
+  if(challengeTimerId){ clearInterval(challengeTimerId); challengeTimerId = null; }
+  const main = document.getElementById("mainArea");
+  main.innerHTML = `
+    <div class="summary-card">
+      <h2>Just for fun — nice going!</h2>
+      <p class="tc-score">You got ${challengeScore} out of ${challengeQuestions.length} in the rapid round. No pressure — this is just extra practice.</p>
+      <button class="btn ghost" id="doneBtn">Finish</button>
+    </div>
+  `;
+  document.getElementById("doneBtn").addEventListener("click", () => {
+    main.innerHTML = `<div class="summary-card"><h2>Nice work today 👏</h2><p>See you at the next session.</p></div>`;
+  });
+}
+
+function renderChallengeQuestion(){
+  if(challengeIndex >= challengeQuestions.length){ endChallenge(); return; }
+  const q = challengeQuestions[challengeIndex];
+  const main = document.getElementById("mainArea");
+  main.innerHTML = `
+    <div class="exercise-card">
+      <div class="concept-badge-row">
+        <span class="tier-badge">⚡ Timed Challenge — just for fun</span>
+        <span class="timer-chip" id="tcTimer">${challengeSeconds}s</span>
+      </div>
+      <p class="prompt">${q.prompt}</p>
+      <div class="options" id="tcOptions">
+        ${q.options.map((opt,i) => `<button class="opt-btn" data-idx="${i}">${opt}</button>`).join("")}
+      </div>
+      <div class="action-row">
+        <button class="btn ghost" id="tcSkip">Skip round</button>
+      </div>
+    </div>
+  `;
+  document.querySelectorAll("#tcOptions .opt-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll("#tcOptions .opt-btn").forEach(b => b.disabled = true);
+      const idx = parseInt(btn.getAttribute("data-idx"));
+      if(idx === q.correctIndex){ btn.classList.add("correct-flag"); challengeScore++; }
+      else { btn.classList.add("wrong-flag"); }
+      setTimeout(() => { challengeIndex++; renderChallengeQuestion(); }, 700);
+    });
+  });
+  document.getElementById("tcSkip").addEventListener("click", endChallenge);
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+renderExercise();
+</script>
+</body>
+</html>
