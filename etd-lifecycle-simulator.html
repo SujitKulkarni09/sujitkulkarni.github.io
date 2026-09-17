@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ETD Trade Lifecycle Simulator</title>
+<style>
+:root{
+  --void:#080B14;
+  --deep:#0D1428;
+  --panel:#121C38;
+  --panel-2:#0F182E;
+  --line:#223055;
+  --cyan:#3FE0D0;
+  --amber:#FFB84D;
+  --coral:#FF6B7A;
+  --violet:#9C7DFF;
+  --ink:#E7ECFB;
+  --ink-dim:#B0BBDD;
+  --ink-faint:#8892B8;
+  --fut:#3FE0D0;
+  --opt:#FFB84D;
+  --font-display: 'Space Grotesk', 'Segoe UI', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-body: 'Inter', 'Segoe UI', sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse 1200px 800px at 15% -10%, rgba(63,224,208,0.08), transparent 60%),
+    radial-gradient(ellipse 1000px 700px at 100% 10%, rgba(255,184,77,0.07), transparent 55%),
+    var(--void);
+  color:var(--ink);
+  font-family:var(--font-body);
+  min-height:100vh;
+  line-height:1.5;
+}
+@font-face{font-family:'Space Grotesk';src:local('Space Grotesk');}
+
+/* ===== HERO / HEADER ===== */
+.hero{
+  padding:56px 24px 40px;
+  text-align:center;
+  border-bottom:1px solid var(--line);
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';
+  position:absolute; inset:0;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(63,224,208,0.5) 50%, transparent 100%);
+  height:1px; top:auto; bottom:0;
+}
+.hero h1{
+  font-family:var(--font-display);
+  font-size:clamp(28px,5vw,46px);
+  font-weight:700;
+  margin:0 0 6px;
+  letter-spacing:-0.02em;
+  background:linear-gradient(120deg, var(--ink) 30%, var(--cyan) 60%, var(--amber) 90%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.hero .subtitle{
+  color:var(--ink-dim);
+  font-size:15px;
+  margin:0 0 22px;
+}
+.hero .desc{
+  max-width:640px; margin:0 auto;
+  color:var(--ink-dim);
+  font-size:15px;
+}
+.badge-row{
+  display:flex; gap:10px; justify-content:center; margin-top:22px; flex-wrap:wrap;
+}
+.badge{
+  font-family:var(--font-mono);
+  font-size:11px;
+  padding:6px 12px;
+  border-radius:20px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,0.02);
+  color:var(--ink-faint);
+}
+
+/* ===== STAGE RAIL ===== */
+.rail-wrap{
+  position:sticky; top:0; z-index:50;
+  background:rgba(8,11,20,0.92);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+  padding:14px 16px;
+}
+.rail{
+  display:flex;
+  max-width:1180px; margin:0 auto;
+  overflow-x:auto;
+  gap:4px;
+  scrollbar-width:thin;
+}
+.rail-step{
+  flex:0 0 auto;
+  display:flex; align-items:center; gap:8px;
+  padding:9px 14px;
+  border-radius:10px;
+  cursor:pointer;
+  border:1px solid transparent;
+  transition:background 0.2s, border-color 0.2s;
+  white-space:nowrap;
+}
+.rail-step:hover{background:rgba(255,255,255,0.03);}
+.rail-step.active{
+  background:linear-gradient(135deg, rgba(63,224,208,0.14), rgba(156,125,255,0.10));
+  border-color:var(--cyan);
+}
+.rail-step.done .num{background:var(--cyan); color:var(--void);}
+.rail-step .num{
+  font-family:var(--font-mono);
+  font-size:11px; font-weight:600;
+  width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  background:var(--panel-2); color:var(--ink-faint);
+  border:1px solid var(--line);
+  flex-shrink:0;
+}
+.rail-step.active .num{background:var(--cyan); color:var(--void); border-color:var(--cyan);}
+.rail-step .label{font-size:12.5px; color:var(--ink-dim); font-weight:500;}
+.rail-step.active .label{color:var(--ink);}
+
+/* ===== MAIN ===== */
+.main{max-width:1180px; margin:0 auto; padding:34px 20px 100px;}
+.setup-screen{
+  text-align:center; padding:40px 20px;
+}
+.setup-screen h2{font-family:var(--font-display); font-size:24px; margin-bottom:8px;}
+.setup-screen p{color:var(--ink-dim); max-width:520px; margin:0 auto 30px;}
+.start-btn{
+  font-family:var(--font-display);
+  background:linear-gradient(135deg, var(--cyan), var(--violet));
+  color:var(--void);
+  border:none; padding:15px 34px; border-radius:12px;
+  font-size:15px; font-weight:700; cursor:pointer;
+  box-shadow:0 8px 24px rgba(63,224,208,0.25);
+  transition:transform 0.15s;
+}
+.start-btn:hover{transform:translateY(-2px);}
+
+.stage-header{margin-bottom:22px;}
+.stage-eyebrow{
+  font-family:var(--font-mono); font-size:11.5px; color:var(--cyan); letter-spacing:0.04em;
+}
+.stage-title{font-family:var(--font-display); font-size:26px; font-weight:700; margin:4px 0 8px;}
+.stage-intro{color:var(--ink-dim); font-size:14.5px; max-width:760px;}
+
+.columns{
+  display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:22px;
+}
+@media(max-width:860px){.columns{grid-template-columns:1fr;}}
+
+.card{
+  background:linear-gradient(160deg, var(--panel), var(--panel-2));
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:22px;
+  position:relative;
+  box-shadow:0 14px 34px -14px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.03);
+  transform-style:preserve-3d;
+}
+.card.futures{border-top:3px solid var(--fut);}
+.card.options{border-top:3px solid var(--opt);}
+.card-tag{
+  display:inline-flex; align-items:center; gap:7px;
+  font-family:var(--font-mono); font-size:11px; font-weight:600;
+  padding:5px 10px; border-radius:7px; margin-bottom:14px;
+}
+.card.futures .card-tag{background:rgba(63,224,208,0.12); color:var(--cyan);}
+.card.options .card-tag{background:rgba(255,184,77,0.12); color:var(--amber);}
+.dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+
+.field-row{
+  display:flex; justify-content:space-between; align-items:baseline;
+  padding:9px 0; border-bottom:1px dashed var(--line); font-size:13.5px;
+}
+.field-row:last-child{border-bottom:none;}
+.field-label{color:var(--ink-faint);}
+.field-val{font-family:var(--font-mono); color:var(--ink); font-weight:600;}
+.field-val.pos{color:var(--cyan);}
+.field-val.neg{color:var(--coral);}
+.field-val.warn{color:var(--amber);}
+
+.trade-id{
+  font-family:var(--font-mono); font-size:11px; color:var(--ink-faint);
+  margin-top:14px; padding-top:12px; border-top:1px solid var(--line);
+}
+
+.break-flag{
+  margin-top:14px; padding:12px 14px; border-radius:10px;
+  background:rgba(255,107,122,0.09); border:1px solid rgba(255,107,122,0.3);
+  font-size:13px; color:#FFB3BB;
+}
+.break-flag.resolved{
+  background:rgba(63,224,208,0.08); border-color:rgba(63,224,208,0.28); color:#B7F5EE;
+}
+.break-flag .flag-title{font-weight:700; font-family:var(--font-mono); font-size:11.5px; margin-bottom:4px; text-transform:none;}
+
+.next-hop{
+  margin-top:16px; display:flex; align-items:center; gap:8px;
+  font-size:12px; color:var(--ink-faint); font-family:var(--font-mono);
+}
+.next-hop .arrow{color:var(--violet); font-size:14px;}
+
+/* commentary */
+.commentary{
+  margin-top:26px;
+  background:linear-gradient(135deg, rgba(156,125,255,0.06), rgba(63,224,208,0.04));
+  border:1px solid rgba(156,125,255,0.25);
+  border-radius:16px;
+  padding:20px 22px;
+}
+.commentary-head{
+  display:flex; align-items:center; gap:8px;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--violet);
+  margin-bottom:10px; font-weight:700;
+}
+.commentary p{margin:0 0 10px; font-size:14px; color:var(--ink); line-height:1.6;}
+.commentary p:last-child{margin-bottom:0;}
+.commentary .compare{
+  display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px;
+}
+@media(max-width:860px){.commentary .compare{grid-template-columns:1fr;}}
+.compare-item{
+  font-size:13px; padding:10px 12px; border-radius:9px; background:rgba(255,255,255,0.025);
+}
+.compare-item .ci-tag{font-family:var(--font-mono); font-size:10.5px; font-weight:700; margin-bottom:4px;}
+.compare-item.fut .ci-tag{color:var(--cyan);}
+.compare-item.opt .ci-tag{color:var(--amber);}
+
+/* mtm timeline */
+.mtm-timeline{display:flex; gap:10px; margin-top:14px;}
+.mtm-day{
+  flex:1; padding:12px; border-radius:10px; background:rgba(255,255,255,0.02);
+  border:1px solid var(--line); text-align:center;
+}
+.mtm-day .d-label{font-family:var(--font-mono); font-size:10.5px; color:var(--ink-faint); margin-bottom:6px;}
+.mtm-day .d-price{font-family:var(--font-mono); font-size:15px; font-weight:700;}
+
+/* nav buttons */
+.nav-row{display:flex; justify-content:space-between; margin-top:34px;}
+.nav-btn{
+  font-family:var(--font-display); font-weight:600; font-size:13.5px;
+  padding:12px 22px; border-radius:10px; cursor:pointer;
+  border:1px solid var(--line); background:var(--panel); color:var(--ink);
+  transition:border-color 0.15s;
+}
+.nav-btn:hover{border-color:var(--cyan);}
+.nav-btn.primary{
+  background:linear-gradient(135deg, var(--cyan), var(--violet)); color:var(--void); border:none;
+}
+.nav-btn:disabled{opacity:0.3; cursor:not-allowed;}
+
+/* summary */
+.summary-list{margin-top:18px;}
+.summary-row{
+  display:grid; grid-template-columns:28px 1fr 1fr; gap:16px;
+  padding:14px 0; border-bottom:1px solid var(--line); align-items:start;
+}
+.summary-row .snum{
+  font-family:var(--font-mono); font-size:11px; color:var(--void);
+  background:var(--cyan); width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+}
+.summary-row .stitle{font-family:var(--font-display); font-weight:600; font-size:14.5px; margin-bottom:2px;}
+.summary-col{font-size:12.5px; color:var(--ink-dim);}
+.summary-col b{color:var(--ink);}
+
+.disclaimer{
+  margin-top:50px; padding:18px 20px; border-radius:12px;
+  background:rgba(255,255,255,0.02); border:1px solid var(--line);
+  font-size:12px; color:var(--ink-faint); line-height:1.6;
+}
+.disclaimer b{color:var(--ink-dim);}
+
+.restart-btn{margin-top:20px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>ETD Trade Lifecycle Simulator</h1>
+  <p class="subtitle">Curated by Sujit Kulkarni</p>
+  <p class="desc">Follow one Futures trade and one Options trade side by side through all eight stages of the exchange-traded derivatives trade lifecycle — from order creation to post-trade reporting.</p>
+  <div class="badge-row">
+    <span class="badge">8 LIFECYCLE STAGES</span>
+    <span class="badge">FUTURES vs OPTIONS</span>
+    <span class="badge">ILLUSTRATIVE MARGIN MODEL</span>
+    <span class="badge">OFFLINE · SELF-CONTAINED</span>
+  </div>
+</div>
+
+<div class="rail-wrap" id="railWrap" style="display:none;">
+  <div class="rail" id="rail"></div>
+</div>
+
+<div class="main" id="main"></div>
+
+<script>
+// ============ DATA ============
+const STAGES = [
+  {key:'pretrade', label:'Pre-Trade & Order'},
+  {key:'execution', label:'Execution & Capture'},
+  {key:'enrichment', label:'Trade Enrichment'},
+  {key:'confirmation', label:'Confirmation & Affirmation'},
+  {key:'clearing', label:'Clearing'},
+  {key:'settlement', label:'Settlement & MTM'},
+  {key:'recon', label:'Reconciliation'},
+  {key:'reporting', label:'Post-Trade Reporting'},
+];
+
+const FUT_LOT = 75;      // contract multiplier, illustrative
+const OPT_LOT = 75;
+
+const trade = {
+  futures:{
+    underlying:'XYZ INDEX',
+    expiry:'OCT 2026',
+    side:'BUY',
+    qty:10,
+    orderType:'LIMIT',
+    limitPrice:24500,
+    fillPrice:24512,
+    contractSize:FUT_LOT,
+    tradeId:null,
+    settleAcct:null,
+    exchCode:null,
+    confirmedQty:10,
+    imPct:0.12,
+    day1Price:24512,
+    day2Price:24610,
+  },
+  options:{
+    underlying:'XYZ INDEX',
+    optionType:'CALL',
+    strike:24800,
+    expiry:'OCT 2026 WKLY',
+    side:'BUY',
+    qty:10,
+    premium:152,
+    fillPremium:152,
+    contractSize:OPT_LOT,
+    tradeId:null,
+    settleAcct:null,
+    exchCode:null,
+    confirmedQty:8,   // pre-scripted break: broker confirms 8 vs client's 10
+    clientQty:10,
+    imPctSeller:0.15,
+    day1Price:24512,
+    day2Price:24610,
+  }
+};
+
+let currentStage = -1; // -1 = setup screen
+let disputeResolved = false;
+
+// ============ RENDER HELPERS ============
+function fmt(n){ return n.toLocaleString('en-IN'); }
+function inr(n){ return '₹' + fmt(n); }
+
+function renderRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = STAGES.map((s,i)=>{
+    let cls = 'rail-step';
+    if(i===currentStage) cls+=' active';
+    if(i<currentStage) cls+=' done';
+    return `<div class="${cls}" onclick="goTo(${i})">
+      <span class="num">${i<currentStage?'✓':i+1}</span>
+      <span class="label">${s.label}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('railWrap').style.display = currentStage>=0 ? 'block':'none';
+}
+
+function goTo(i){
+  if(i<=currentStage || i===currentStage+0){ currentStage=i; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function navRow(nextLabel, canNext){
+  return `<div class="nav-row">
+    <button class="nav-btn" onclick="prevStage()" ${currentStage===0?'disabled':''}>← Back</button>
+    <button class="nav-btn primary" onclick="nextStage()" ${canNext===false?'disabled':''}>${nextLabel||'Continue →'}</button>
+  </div>`;
+}
+function prevStage(){ if(currentStage>0){currentStage--; render(); window.scrollTo({top:0,behavior:'smooth'});} }
+function nextStage(){
+  if(currentStage < STAGES.length-1){ currentStage++; render(); }
+  else { currentStage = STAGES.length; render(); } // summary screen
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function startSim(){ currentStage=0; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function restart(){ currentStage=-1; disputeResolved=false; render(); window.scrollTo({top:0,behavior:'smooth'}); }
+function resolveDispute(){ disputeResolved=true; render(); }
+
+// ============ STAGE RENDERERS ============
+function stageHeader(eyebrow,title,intro){
+  return `<div class="stage-header">
+    <div class="stage-eyebrow">STAGE ${currentStage+1} OF 8 · ${eyebrow}</div>
+    <div class="stage-title">${title}</div>
+    <div class="stage-intro">${intro}</div>
+  </div>`;
+}
+
+function commentary(headText, paras, compareF, compareO){
+  return `<div class="commentary">
+    <div class="commentary-head">💬 ${headText}</div>
+    ${paras.map(p=>`<p>${p}</p>`).join('')}
+    ${compareF && compareO ? `<div class="compare">
+      <div class="compare-item fut"><div class="ci-tag">FUTURES</div>${compareF}</div>
+      <div class="compare-item opt"><div class="ci-tag">OPTIONS</div>${compareO}</div>
+    </div>` : ''}
+  </div>`;
+}
+
+function render(){
+  renderRail();
+  const main = document.getElementById('main');
+
+  if(currentStage===-1){
+    main.innerHTML = `<div class="setup-screen">
+      <h2>Two trades. One lifecycle. Watch where they diverge.</h2>
+      <p>You'll run an XYZ Index Futures trade and an XYZ Index Call Option side by side through all eight real stages of the exchange-traded derivatives lifecycle — pre-trade, execution, enrichment, confirmation, clearing, settlement, reconciliation, and reporting. Pre-scripted outcomes, including a couple of deliberate breaks, so you can see exactly how and where things go wrong — and get caught.</p>
+      <button class="start-btn" onclick="startSim()">Start the simulation →</button>
+    </div>`;
+    return;
+  }
+
+  if(currentStage >= STAGES.length){ renderSummary(main); return; }
+
+  const s = STAGES[currentStage];
+  let html = '';
+  switch(s.key){
+    case 'pretrade': html = renderPretrade(); break;
+    case 'execution': html = renderExecution(); break;
+    case 'enrichment': html = renderEnrichment(); break;
+    case 'confirmation': html = renderConfirmation(); break;
+    case 'clearing': html = renderClearing(); break;
+    case 'settlement': html = renderSettlement(); break;
+    case 'recon': html = renderRecon(); break;
+    case 'reporting': html = renderReporting(); break;
+  }
+  main.innerHTML = html;
+}
+
+function renderPretrade(){
+  const f = trade.futures, o = trade.options;
+  return stageHeader('FRONT OFFICE','Pre-Trade & Order Creation',
+    'The front office receives an order, checks it against pre-trade limits, and prepares it for execution. Nothing has traded yet — these are instructions, not confirmed trades.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES ORDER</div>
+      <div class="field-row"><span class="field-label">Underlying</span><span class="field-val">${f.underlying}</span></div>
+      <div class="field-row"><span class="field-label">Expiry</span><span class="field-val">${f.expiry}</span></div>
+      <div class="field-row"><span class="field-label">Side</span><span class="field-val pos">${f.side}</span></div>
+      <div class="field-row"><span class="field-label">Quantity</span><span class="field-val">${f.qty} lots × ${f.contractSize}</span></div>
+      <div class="field-row"><span class="field-label">Order Type</span><span class="field-val warn">${f.orderType}</span></div>
+      <div class="field-row"><span class="field-label">Limit Price</span><span class="field-val">${inr(f.limitPrice)}</span></div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS ORDER</div>
+      <div class="field-row"><span class="field-label">Underlying</span><span class="field-val">${o.underlying}</span></div>
+      <div class="field-row"><span class="field-label">Type</span><span class="field-val">${o.optionType}</span></div>
+      <div class="field-row"><span class="field-label">Strike</span><span class="field-val">${inr(o.strike)}</span></div>
+      <div class="field-row"><span class="field-label">Expiry</span><span class="field-val">${o.expiry}</span></div>
+      <div class="field-row"><span class="field-label">Side</span><span class="field-val pos">${o.side}</span></div>
+      <div class="field-row"><span class="field-label">Quantity</span><span class="field-val">${o.qty} lots × ${o.contractSize}</span></div>
+      <div class="field-row"><span class="field-label">Quoted Premium</span><span class="field-val">${inr(o.premium)} / unit</span></div>
+    </div>
+  </div>`
+  + commentary('WHY THIS MATTERS',
+    ['Both orders pass a pre-trade limit check before they\'re allowed anywhere near the exchange — this is the front office\'s job. Neither trade is booked yet.'],
+    'Limit order: this trade only executes if the market reaches ₹24,500 or better. It could go completely unfilled.',
+    'No limit set on the option — quoted premium reflects current market pricing for this strike and expiry.')
+  + navRow('Send to exchange →');
+}
+
+function renderExecution(){
+  const f = trade.futures, o = trade.options;
+  f.tradeId = 'FUT-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  o.tradeId = 'OPT-' + Math.random().toString(36).slice(2,8).toUpperCase();
+  return stageHeader('FRONT OFFICE','Execution & Trade Capture',
+    'The order reaches the exchange matching engine. A counterparty is found, a fill price is set, and the trade is captured into the internal blotter.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — FILLED</div>
+      <div class="field-row"><span class="field-label">Limit Price</span><span class="field-val">${inr(f.limitPrice)}</span></div>
+      <div class="field-row"><span class="field-label">Fill Price</span><span class="field-val pos">${inr(f.fillPrice)}</span></div>
+      <div class="field-row"><span class="field-label">Fill Qty</span><span class="field-val">${f.qty} / ${f.qty} lots (full fill)</span></div>
+      <div class="field-row"><span class="field-label">Notional</span><span class="field-val">${inr(f.fillPrice*f.qty*f.contractSize)}</span></div>
+      <div class="trade-id">TRADE ID: ${f.tradeId}</div>
+      <div class="next-hop"><span class="arrow">→</span> Booked. Moving to Trade Enrichment (Middle Office).</div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — FILLED</div>
+      <div class="field-row"><span class="field-label">Quoted Premium</span><span class="field-val">${inr(o.premium)}</span></div>
+      <div class="field-row"><span class="field-label">Fill Premium</span><span class="field-val pos">${inr(o.fillPremium)}</span></div>
+      <div class="field-row"><span class="field-label">Fill Qty</span><span class="field-val">${o.qty} / ${o.qty} lots (full fill)</span></div>
+      <div class="field-row"><span class="field-label">Premium Paid</span><span class="field-val">${inr(o.fillPremium*o.qty*o.contractSize)}</span></div>
+      <div class="trade-id">TRADE ID: ${o.tradeId}</div>
+      <div class="next-hop"><span class="arrow">→</span> Booked. Moving to Trade Enrichment (Middle Office).</div>
+    </div>
+  </div>`
+  + commentary('WHY THIS MATTERS',
+    ['Both orders got a full fill at their exchange-quoted price. Notice what the buyer actually paid at this exact moment — that difference between the two instruments never resets for the rest of the trade.'],
+    'No cash changes hands yet. The Futures buyer\'s only obligation right now is the position itself — margin comes later, at Clearing.',
+    'The Options buyer pays the full premium upfront, today. This is already the buyer\'s maximum possible loss on the trade — locked in at execution.')
+  + navRow('Send to Middle Office →');
+}
+
+function renderEnrichment(){
+  const f = trade.futures, o = trade.options;
+  f.settleAcct = 'SETTL-ACC-IB-7741';
+  o.exchCode = 'XCH-FO';
+  return stageHeader('MIDDLE OFFICE','Trade Enrichment',
+    'The middle office adds the static data every downstream process depends on — settlement accounts, exchange codes, counterparty details — and checks it\'s complete before the trade proceeds. This is where bad static data gets caught, or missed.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — BREAK FOUND</div>
+      <div class="field-row"><span class="field-label">Settlement Account</span><span class="field-val neg">MISSING</span></div>
+      <div class="break-flag">
+        <div class="flag-title">⚠ ENRICHMENT BREAK</div>
+        Settlement account code was not populated on capture. Corrected manually before the trade can move forward.
+      </div>
+      <div class="field-row" style="margin-top:10px;"><span class="field-label">Corrected Value</span><span class="field-val pos">${f.settleAcct}</span></div>
+      <div class="next-hop"><span class="arrow">→</span> Corrected. Moving to Confirmation & Affirmation.</div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — CLEAN</div>
+      <div class="field-row"><span class="field-label">Exchange Code</span><span class="field-val pos">${o.exchCode}</span></div>
+      <div class="field-row"><span class="field-label">Settlement Account</span><span class="field-val pos">SETTL-ACC-IB-7741</span></div>
+      <div class="field-row"><span class="field-label">Status</span><span class="field-val pos">No break — passed enrichment clean</span></div>
+      <div class="next-hop"><span class="arrow">→</span> Moving to Confirmation & Affirmation.</div>
+    </div>
+  </div>`
+  + commentary('WHY THIS MATTERS',
+    ['A missing settlement account sounds minor, but if it isn\'t caught here, it surfaces much later — usually at Settlement or Reconciliation, when it\'s far more expensive to fix. Enrichment exists precisely to catch this early.'],
+    null, null)
+  + navRow('Send to Confirmation →');
+}
+
+function renderConfirmation(){
+  const f = trade.futures, o = trade.options;
+  return stageHeader('MIDDLE OFFICE','Confirmation & Affirmation',
+    'Both sides of the trade — the executing broker and the client — independently confirm the trade details. Where they disagree, it\'s flagged as a break.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — MATCHED</div>
+      <div class="field-row"><span class="field-label">Client-side Qty</span><span class="field-val">${f.qty} lots</span></div>
+      <div class="field-row"><span class="field-label">Broker-side Qty</span><span class="field-val">${f.qty} lots</span></div>
+      <div class="break-flag resolved">
+        <div class="flag-title">✓ AFFIRMED</div>
+        Both sides match exactly. No dispute.
+      </div>
+      <div class="next-hop"><span class="arrow">→</span> Affirmed. Moving to Clearing.</div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — MISMATCH</div>
+      <div class="field-row"><span class="field-label">Client-side Qty</span><span class="field-val">${o.clientQty} lots</span></div>
+      <div class="field-row"><span class="field-label">Broker-side Qty</span><span class="field-val neg">${o.confirmedQty} lots</span></div>
+      <div class="break-flag">
+        <div class="flag-title">⚠ CONFIRMATION BREAK</div>
+        Client says ${o.clientQty} lots, broker confirms only ${o.confirmedQty}. Quantity mismatch.
+      </div>
+      ${!disputeResolved ? `<button class="nav-btn" style="margin-top:12px; width:100%;" onclick="resolveDispute()">Flag as disputed, proceed anyway →</button>`
+      : `<div class="break-flag" style="margin-top:10px;"><div class="flag-title">FLAGGED — UNRESOLVED</div>Dispute logged. Trade proceeds at broker-confirmed qty (${o.confirmedQty}) while the break stays open — this is realistic: trades often move forward provisionally while a break is investigated.</div>`}
+      <div class="next-hop"><span class="arrow">→</span> ${disputeResolved?'Proceeding to Clearing (break carried forward).':'Awaiting your decision above.'}</div>
+    </div>
+  </div>`
+  + commentary('WHY THIS MATTERS',
+    ['Watch this Options break carefully — it doesn\'t get magically fixed here. In the real lifecycle, a flagged-but-unresolved break like this keeps moving downstream with the trade until someone reconciles it. You\'ll see it resurface later.'],
+    null, null)
+  + navRow('Send to Clearing →', disputeResolved || true);
+}
+
+function renderClearing(){
+  const f = trade.futures, o = trade.options;
+  const fNotional = f.fillPrice * f.qty * f.contractSize;
+  const fIM = Math.round(fNotional * f.imPct);
+  const oNotionalAtRisk = o.strike * o.confirmedQty * o.contractSize;
+  const oIM = Math.round(oNotionalAtRisk * o.imPctSeller);
+  const oPremiumTotal = o.fillPremium * o.qty * o.contractSize;
+  return stageHeader('CLEARING HOUSE (CCP)','Clearing & Initial Margin',
+    'The original bilateral trade is novated — replaced by two new trades, each party now facing the CCP directly instead of each other. The CCP calculates Initial Margin to cover the risk it\'s now taking on.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — NOVATED</div>
+      <div class="field-row"><span class="field-label">Original counterparty</span><span class="field-val">Replaced by CCP</span></div>
+      <div class="field-row"><span class="field-label">Notional</span><span class="field-val">${inr(fNotional)}</span></div>
+      <div class="field-row"><span class="field-label">Illustrative IM % *</span><span class="field-val warn">${(f.imPct*100).toFixed(0)}%</span></div>
+      <div class="field-row"><span class="field-label">Initial Margin (posted)</span><span class="field-val pos">${inr(fIM)}</span></div>
+      <div style="font-size:11.5px; color:var(--ink-faint); margin-top:8px;">Both buyer and seller post margin — Futures risk is symmetric.</div>
+      <div class="next-hop"><span class="arrow">→</span> Cleared. Moving to Settlement.</div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — NOVATED</div>
+      <div class="field-row"><span class="field-label">Premium already paid</span><span class="field-val">${inr(oPremiumTotal)}</span></div>
+      <div class="field-row"><span class="field-label">Buyer's max loss</span><span class="field-val pos">${inr(oPremiumTotal)} (premium only)</span></div>
+      <div class="field-row"><span class="field-label">Buyer posts margin?</span><span class="field-val pos">NO</span></div>
+      <div class="field-row"><span class="field-label">Seller Illustrative IM % *</span><span class="field-val warn">${(o.imPctSeller*100).toFixed(0)}%</span></div>
+      <div class="field-row"><span class="field-label">Seller Initial Margin</span><span class="field-val neg">${inr(oIM)}</span></div>
+      <div class="next-hop"><span class="arrow">→</span> Cleared. Moving to Settlement.</div>
+    </div>
+  </div>`
+  + commentary('WHY THIS MATTERS — MARGIN IS NOT SYMMETRIC',
+    ['This is the single biggest structural difference between the two instruments. In Futures, both sides post margin because both sides carry open-ended risk. In Options, the buyer\'s downside is capped at the premium already paid — so only the seller (who carries the open-ended risk of the option being exercised) posts Initial Margin.',
+     '<span style="color:var(--ink-faint); font-size:12px;">* Illustrative percentages only — this is a simplified teaching model, not any real exchange\'s official margining methodology.</span>'],
+    null, null)
+  + navRow('Send to Settlement →');
+}
+
+function renderSettlement(){
+  const f = trade.futures, o = trade.options;
+  const fMove = f.day2Price - f.day1Price;
+  const fVM = fMove * f.qty * f.contractSize;
+  const oMove = o.day2Price - o.day1Price;
+  const oInTheMoney = o.day2Price > o.strike;
+  return stageHeader('BACK OFFICE','Settlement & Mark-to-Market',
+    'Settlement is not a single moment — positions are marked to market daily, and cash (Variation Margin) moves accordingly until the position closes or expires.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — DAILY MTM</div>
+      <div class="mtm-timeline">
+        <div class="mtm-day"><div class="d-label">DAY 1 CLOSE</div><div class="d-price">${inr(f.day1Price)}</div></div>
+        <div class="mtm-day"><div class="d-label">DAY 2 CLOSE</div><div class="d-price" style="color:var(--cyan)">${inr(f.day2Price)}</div></div>
+      </div>
+      <div class="field-row" style="margin-top:12px;"><span class="field-label">Price move</span><span class="field-val pos">+${inr(fMove)}</span></div>
+      <div class="field-row"><span class="field-label">Variation Margin (credited)</span><span class="field-val pos">+${inr(fVM)}</span></div>
+      <div style="font-size:11.5px; color:var(--ink-faint); margin-top:8px;">Gain flows straight into the buyer's margin account — same would happen in reverse on a down day.</div>
+      <div class="next-hop"><span class="arrow">→</span> Settled for Day 2. Moving to Reconciliation.</div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — VALUE CHANGE</div>
+      <div class="mtm-timeline">
+        <div class="mtm-day"><div class="d-label">DAY 1 UNDERLYING</div><div class="d-price">${inr(o.day1Price)}</div></div>
+        <div class="mtm-day"><div class="d-label">DAY 2 UNDERLYING</div><div class="d-price" style="color:var(--amber)">${inr(o.day2Price)}</div></div>
+      </div>
+      <div class="field-row" style="margin-top:12px;"><span class="field-label">Strike</span><span class="field-val">${inr(o.strike)}</span></div>
+      <div class="field-row"><span class="field-label">Moneyness</span><span class="field-val ${oInTheMoney?'pos':'warn'}">${oInTheMoney?'IN THE MONEY':'OUT OF THE MONEY'}</span></div>
+      <div class="field-row"><span class="field-label">Buyer cash movement today</span><span class="field-val">₹0 (none — premium already sunk)</span></div>
+      <div style="font-size:11.5px; color:var(--ink-faint); margin-top:8px;">${oInTheMoney? 'Because this expires in the money, it moves toward exercise/assignment rather than a simple margin credit.' : 'If this stayed out of the money to expiry, it would simply expire worthless.'}</div>
+      <div class="next-hop"><span class="arrow">→</span> Moving to Reconciliation.</div>
+    </div>
+  </div>`
+  + commentary('WHY THIS MATTERS',
+    ['This is the clearest daily-life difference between the two. Futures settle cash every single day, win or lose, for as long as the position is open. Options settle once at exercise/expiry — day-to-day, only the seller\'s margin requirement moves; the buyer\'s position just sits until expiry.'],
+    'Daily cash settlement (Variation Margin) — this is what "marking to market" means in practice for a Futures position.',
+    'No daily cash flow for the buyer. Value changes on paper, but nothing settles until exercise, assignment, or expiry.')
+  + navRow('Send to Reconciliation →');
+}
+
+function renderRecon(){
+  const f = trade.futures, o = trade.options;
+  return stageHeader('BACK OFFICE','Reconciliation',
+    'Internal books are compared against the clearing broker\'s statement. Anything that doesn\'t match — including breaks carried forward from earlier stages — is classified and investigated here.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — CLEAN MATCH</div>
+      <div class="field-row"><span class="field-label">Internal book qty</span><span class="field-val">${f.qty} lots</span></div>
+      <div class="field-row"><span class="field-label">Clearing broker qty</span><span class="field-val">${f.qty} lots</span></div>
+      <div class="break-flag resolved">
+        <div class="flag-title">✓ RECONCILED</div>
+        No break. Internal book matches the clearing broker statement exactly.
+      </div>
+      <div class="next-hop"><span class="arrow">→</span> Clean. Moving to Reporting.</div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — BREAK RESURFACES</div>
+      <div class="field-row"><span class="field-label">Internal book qty</span><span class="field-val">${o.clientQty} lots</span></div>
+      <div class="field-row"><span class="field-label">Clearing broker qty</span><span class="field-val neg">${o.confirmedQty} lots</span></div>
+      <div class="break-flag">
+        <div class="flag-title">⚠ RECON BREAK — TRACED TO CONFIRMATION</div>
+        This is the same ${o.clientQty}-vs-${o.confirmedQty} quantity mismatch flagged (and left unresolved) at Confirmation & Affirmation. It was never fixed — only carried forward. Classified now as: <b>Quantity Break — Confirmation Stage Origin</b>.
+      </div>
+      <div class="next-hop"><span class="arrow">→</span> Escalated for investigation. Moving to Reporting (with open item).</div>
+    </div>
+  </div>`
+  + commentary('THE PAYOFF MOMENT',
+    ['This is exactly why the earlier break mattered. A disputed confirmation that gets provisionally waved through doesn\'t disappear — it resurfaces here as a reconciliation break, now with a paper trail pointing straight back to where it started. In a real operation, this is the moment someone opens an investigation ticket.'],
+    null, null)
+  + navRow('Send to Reporting →');
+}
+
+function renderReporting(){
+  const f = trade.futures, o = trade.options;
+  const fNotional = f.fillPrice * f.qty * f.contractSize;
+  const oPremiumTotal = o.fillPremium * o.qty * o.contractSize;
+  return stageHeader('COMPLIANCE / REGULATORY','Post-Trade Reporting & Analytics',
+    'The trade\'s final state — built entirely from what happened in every stage before this one — is compiled into regulatory-style reporting fields. This is the end of the lifecycle: the trade is now fully processed.')
+  + `<div class="columns">
+    <div class="card futures">
+      <div class="card-tag"><span class="dot"></span>FUTURES — FINAL REPORT</div>
+      <div class="field-row"><span class="field-label">Trade ID</span><span class="field-val">${f.tradeId}</span></div>
+      <div class="field-row"><span class="field-label">Instrument</span><span class="field-val">${f.underlying} FUT</span></div>
+      <div class="field-row"><span class="field-label">Notional</span><span class="field-val">${inr(fNotional)}</span></div>
+      <div class="field-row"><span class="field-label">Clearing status</span><span class="field-val pos">Cleared</span></div>
+      <div class="field-row"><span class="field-label">Reconciliation status</span><span class="field-val pos">Matched</span></div>
+      <div class="field-row"><span class="field-label">Open items</span><span class="field-val pos">None</span></div>
+      <div class="field-row"><span class="field-label">Lifecycle status</span><span class="field-val pos">COMPLETE</span></div>
+    </div>
+    <div class="card options">
+      <div class="card-tag"><span class="dot"></span>OPTIONS — FINAL REPORT</div>
+      <div class="field-row"><span class="field-label">Trade ID</span><span class="field-val">${o.tradeId}</span></div>
+      <div class="field-row"><span class="field-label">Instrument</span><span class="field-val">${o.underlying} ${o.optionType} ${inr(o.strike)}</span></div>
+      <div class="field-row"><span class="field-label">Premium paid</span><span class="field-val">${inr(oPremiumTotal)}</span></div>
+      <div class="field-row"><span class="field-label">Clearing status</span><span class="field-val pos">Cleared</span></div>
+      <div class="field-row"><span class="field-label">Reconciliation status</span><span class="field-val neg">Unmatched — open break</span></div>
+      <div class="field-row"><span class="field-label">Open items</span><span class="field-val neg">1 (qty break, Confirmation origin)</span></div>
+      <div class="field-row"><span class="field-label">Lifecycle status</span><span class="field-val warn">COMPLETE — WITH OPEN ITEM</span></div>
+    </div>
+  </div>`
+  + commentary('END OF LIFECYCLE',
+    ['Both trades have now moved through the full lifecycle. The Futures trade closed clean. The Options trade closed too — regulatory reporting still happens on schedule regardless of open breaks — but it carries an unresolved item into whatever comes next, exactly as it would in a real operation.'],
+    null, null)
+  + navRow('See full run summary →');
+}
+
+function renderSummary(main){
+  document.getElementById('railWrap').style.display='none';
+  const f = trade.futures, o = trade.options;
+  main.innerHTML = `
+  <div class="stage-header">
+    <div class="stage-eyebrow">RUN COMPLETE</div>
+    <div class="stage-title">Trade Journey Summary</div>
+    <div class="stage-intro">One line per stage — what happened, and how it differed between the two instruments.</div>
+  </div>
+  <div class="summary-list">
+    <div class="summary-row"><div class="snum">1</div><div><div class="stitle">Pre-Trade & Order Creation</div></div>
+      <div class="summary-col"><b>Futures:</b> Limit order at ₹24,500</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> ${o.optionType} ₹${fmt(o.strike)} strike, quoted premium ₹${o.premium}</div></div>
+
+    <div class="summary-row"><div class="snum">2</div><div><div class="stitle">Execution & Capture</div></div>
+      <div class="summary-col"><b>Futures:</b> Full fill at ₹${fmt(f.fillPrice)}, no cash paid yet</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> Full fill, ₹${fmt(o.fillPremium*o.qty*o.contractSize)} premium paid immediately</div></div>
+
+    <div class="summary-row"><div class="snum">3</div><div><div class="stitle">Trade Enrichment</div></div>
+      <div class="summary-col"><b>Futures:</b> Missing settlement account — caught and corrected</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> Clean — no break</div></div>
+
+    <div class="summary-row"><div class="snum">4</div><div><div class="stitle">Confirmation & Affirmation</div></div>
+      <div class="summary-col"><b>Futures:</b> Matched, affirmed cleanly</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> Quantity mismatch (10 vs 8) — flagged, left unresolved</div></div>
+
+    <div class="summary-row"><div class="snum">5</div><div><div class="stitle">Clearing & Initial Margin</div></div>
+      <div class="summary-col"><b>Futures:</b> Both sides post IM — symmetric risk</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> Only seller posts IM; buyer's risk capped at premium already paid</div></div>
+
+    <div class="summary-row"><div class="snum">6</div><div><div class="stitle">Settlement & Mark-to-Market</div></div>
+      <div class="summary-col"><b>Futures:</b> Daily VM settled — position gained on Day 2</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> No daily cash flow for buyer; moved in-the-money toward expiry</div></div>
+
+    <div class="summary-row"><div class="snum">7</div><div><div class="stitle">Reconciliation</div></div>
+      <div class="summary-col"><b>Futures:</b> Clean match, no break</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> Stage-4 break resurfaced here, traced back to its origin</div></div>
+
+    <div class="summary-row"><div class="snum">8</div><div><div class="stitle">Post-Trade Reporting</div></div>
+      <div class="summary-col"><b>Futures:</b> Reported clean, lifecycle complete</div></div>
+    <div class="summary-row"><div class="snum"></div><div></div>
+      <div class="summary-col"><b>Options:</b> Reported with 1 open item carried forward</div></div>
+  </div>
+
+  <div class="disclaimer">
+    <b>Disclaimer:</b> This is an unofficial, self-built educational simulation. It is not affiliated with, endorsed by, or representative of any exchange, clearing house, bank, or financial institution. All prices, strikes, premiums, margin percentages, trade IDs, and break scenarios are illustrative and pre-scripted for teaching purposes only — they do not reflect real market data or any actual institution's proprietary margining methodology. The description of trade lifecycle stages (Pre-Trade, Execution, Enrichment, Confirmation, Clearing, Settlement, Reconciliation, Reporting) reflects publicly available, generally accepted industry structure as described by public capital markets education sources. Nothing here constitutes financial, legal, or investment advice.
+  </div>
+
+  <button class="nav-btn primary restart-btn" onclick="restart()">↻ Run again</button>
+  `;
+}
+
+// init
+render();
+</script>
+</body>
+</html>
