@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Home purchase planner</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --paper:#F1F5F1; --sheet:#FFFFFF; --ink:#13231D; --muted:#55645D; --rule:#C6D1CA;
+  --green:#0B6A4C; --green-soft:#DFEDE5; --on-green:#FFFFFF;
+  --pen:#2337A6; --on-pen:#FFFFFF;
+  --amber:#8A5800; --amber-soft:#FAEFD6;
+  --red:#A3241B; --red-soft:#F8E2DF;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua","Noto Serif",Georgia,serif;
+  --sans:"Avenir Next","Segoe UI",Roboto,"Noto Sans","Helvetica Neue",Arial,sans-serif;
+  padding-top:env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1714; --sheet:#17221D; --ink:#E6EEE9; --muted:#9BAEA5; --rule:#2D3C35;
+    --green:#58C89E; --green-soft:#17332A; --on-green:#0F1714;
+    --pen:#A3B4FF; --on-pen:#0F1714;
+    --amber:#E5B55C; --amber-soft:#382C12;
+    --red:#F09088; --red-soft:#3A1B18;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1714; --sheet:#17221D; --ink:#E6EEE9; --muted:#9BAEA5; --rule:#2D3C35;
+  --green:#58C89E; --green-soft:#17332A; --on-green:#0F1714;
+  --pen:#A3B4FF; --on-pen:#0F1714;
+  --amber:#E5B55C; --amber-soft:#382C12;
+  --red:#F09088; --red-soft:#3A1B18;
+}
+html{-webkit-text-size-adjust:100%;scroll-padding-top:130px}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px 110px}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:8;background:var(--paper);border-bottom:3px double var(--ink);padding:env(safe-area-inset-top,0px) 16px 0}
+.topbar div{max-width:720px;margin:0 auto;height:64px;display:flex;flex-direction:column;justify-content:center;overflow:hidden}
+h1{font-family:var(--serif);font-size:1.4rem;line-height:1.15;margin:0;font-weight:600;letter-spacing:-0.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.byline{font-family:var(--serif);font-style:italic;color:var(--muted);margin:2px 0 0;font-size:1rem;line-height:1.2;white-space:nowrap}
+.mast{padding:84px 0 14px}
+.lede{margin:0;max-width:60ch}
+.steps{position:sticky;top:calc(67px + env(safe-area-inset-top,0px));z-index:5;background:var(--paper);border-bottom:1px solid var(--rule);margin:0 -16px;padding:8px 16px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.steps::-webkit-scrollbar{display:none}
+.steps button{flex:0 0 auto;font:inherit;font-size:.9rem;border:1px solid var(--rule);background:transparent;color:var(--ink);padding:6px 11px;border-radius:999px;white-space:nowrap;cursor:pointer}
+.steps button[aria-current="true"]{background:var(--green);color:var(--on-green);border-color:var(--green);font-weight:600}
+.steps .n{font-variant-numeric:tabular-nums;opacity:.75;margin-right:5px}
+.step{display:none;padding-top:22px}
+.step.on{display:block}
+h2{font-family:var(--serif);font-size:1.6rem;line-height:1.2;margin:0 0 6px;font-weight:600}
+h3{font-family:var(--serif);font-size:1.18rem;margin:28px 0 10px;font-weight:600}
+.intro{color:var(--muted);margin:0 0 18px;max-width:62ch}
+.fields{display:grid;gap:14px}
+@media(min-width:560px){.fields{grid-template-columns:1fr 1fr}.fields .wide{grid-column:1/-1}}
+.f label,.f .lab{display:block;font-size:.92rem;font-weight:600;margin-bottom:4px}
+.help{font-size:.82rem;color:var(--muted);margin-top:3px}
+.inp{display:flex;align-items:baseline;gap:6px;border-bottom:2px solid var(--ink);background:var(--sheet);padding:7px 9px}
+.inp:focus-within{border-bottom-color:var(--pen);outline:2px solid var(--pen);outline-offset:2px}
+.inp span{color:var(--muted)}
+.inp input{flex:1;min-width:0;width:100%;border:0;background:transparent;font:inherit;font-size:1.06rem;color:var(--pen);font-variant-numeric:tabular-nums;padding:1px 0;outline:0;-moz-appearance:textfield}
+.inp input::-webkit-outer-spin-button,.inp input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg label{margin:0;font-weight:500;position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:inline-block;border:1px solid var(--ink);padding:7px 12px;border-radius:4px;font-size:.92rem;background:var(--sheet)}
+.seg input:checked+span{background:var(--pen);color:var(--on-pen);border-color:var(--pen);font-weight:600}
+.seg input:focus-visible+span{outline:2px solid var(--pen);outline-offset:2px}
+.chk{display:flex;gap:11px;align-items:flex-start;padding:9px 0;border-bottom:1px dotted var(--rule);cursor:pointer}
+.chk input{width:21px;height:21px;margin:2px 0 0;accent-color:var(--green);flex:0 0 auto}
+.chk small{display:block;color:var(--muted)}
+.ledger{margin:20px 0 0;border-top:2px solid var(--ink)}
+.row{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:8px 0;border-bottom:1px dotted var(--rule)}
+.row>span small{display:block;color:var(--muted)}
+.row b{font-variant-numeric:tabular-nums;font-weight:600;text-align:right;white-space:nowrap}
+.row.total{border-bottom:3px double var(--ink);font-weight:700}
+.row.total b{font-size:1.18rem;font-weight:700}
+.note{border-left:4px solid var(--rule);padding:9px 12px;margin:14px 0;background:var(--sheet);font-size:.95rem}
+.note.green{border-color:var(--green);background:var(--green-soft)}
+.note.amber{border-color:var(--amber);background:var(--amber-soft)}
+.note.red{border-color:var(--red);background:var(--red-soft)}
+.note strong{display:block}
+.note p{margin:4px 0 0}
+.btn{font:inherit;font-weight:600;padding:10px 16px;border:2px solid var(--ink);background:var(--sheet);color:var(--ink);border-radius:4px;cursor:pointer}
+.btn.primary{background:var(--ink);color:var(--paper)}
+.btn.small{padding:6px 11px;font-size:.9rem;border-width:1px}
+.btn:focus-visible,.steps button:focus-visible,summary:focus-visible,a:focus-visible{outline:2px solid var(--pen);outline-offset:2px}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.pager{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-top:1px solid var(--rule);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));z-index:6}
+.pager div{max-width:720px;margin:0 auto;display:flex;justify-content:space-between;gap:10px}
+.pager .btn{flex:1}
+.pager .btn[disabled]{opacity:.35}
+.scroll{overflow-x:auto;margin:14px 0}
+table{border-collapse:collapse;width:100%;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:right;padding:6px 8px;border-bottom:1px dotted var(--rule);white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+thead th{border-bottom:2px solid var(--ink);font-weight:600}
+td.best{font-weight:700;color:var(--green)}
+.bar{display:flex;height:12px;min-width:90px;background:var(--rule)}
+.bar i{display:block;height:100%}
+.split{display:flex;height:22px;margin:10px 0 6px;border:1px solid var(--ink)}
+.split i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:baseline}
+.c1{background:var(--ink)}.c2{background:var(--pen)}.c3{background:var(--amber)}.c4{background:var(--green)}
+details{border-bottom:1px solid var(--rule);padding:10px 0}
+summary{font-weight:600;cursor:pointer;font-family:var(--serif);font-size:1.08rem}
+details>div,details>ul,details>ol,details>p{margin-top:10px}
+ul,ol{padding-left:22px;margin:8px 0}
+li{margin:5px 0;max-width:64ch}
+.stampbox{text-align:center;padding:26px 0 18px}
+.stamp{display:inline-block;transform:rotate(-5deg);border:5px double currentColor;border-radius:8px;padding:9px 20px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:1.45rem}
+.stamp.green{color:var(--green)}.stamp.amber{color:var(--amber)}.stamp.red{color:var(--red)}
+.stampbox p{margin:16px auto 0;max-width:46ch;color:var(--muted)}
+.link{padding:10px 0;border-bottom:1px dotted var(--rule)}
+.link a{color:var(--pen);font-weight:600;word-break:break-all}
+.link p{margin:3px 0 0;font-size:.93rem}
+textarea{width:100%;min-height:110px;font:inherit;font-size:.85rem;background:var(--sheet);color:var(--ink);border:1px solid var(--ink);padding:8px}
+svg text{fill:var(--muted);font-family:var(--sans);font-size:20px}
+.hide{display:none!important}
+.fine{font-size:.85rem;color:var(--muted);margin-top:22px;max-width:64ch}
+@media (prefers-reduced-motion: no-preference){.stamp{animation:thud .35s ease-out}}
+@keyframes thud{from{transform:rotate(-5deg) scale(1.5);opacity:0}to{transform:rotate(-5deg) scale(1);opacity:1}}
+@media print{
+  .steps,.pager,.noprint{display:none!important}
+  .topbar{position:static;padding:0}
+  .mast{padding-top:12px}
+  .step{display:block!important;page-break-before:always}
+  .step:first-of-type{page-break-before:auto}
+  body{background:#fff}
+  .wrap{padding-bottom:0}
+  details>*{display:block}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar"><div>
+  <h1>Home purchase planner</h1>
+  <p class="byline">Curated by Sujit Kulkarni</p>
+</div></header>
+<div class="mast">
+  <p class="lede">Work out what you can safely afford, what a flat really costs, and whether to buy, rent or wait. It works without internet, and your numbers stay on this device.</p>
+</div>
+<nav class="steps" id="steps" aria-label="Steps"></nav>
+
+<section class="step" id="you">
+  <h2>About you</h2>
+  <p class="intro">These answers change the limits, checks and links in every later step.</p>
+  <div class="fields" data-form="you"></div>
+  <div id="youAdvice"></div>
+  <div class="note noprint">
+    <strong>Example numbers are filled in.</strong>
+    <p>Replace them with your own in each step. Everything recalculates as you type.</p>
+    <div class="btnrow"><button class="btn small" id="btnClear" type="button">Clear the example numbers</button><button class="btn small" id="btnExample" type="button">Load the example again</button></div>
+  </div>
+</section>
+
+<section class="step" id="salary">
+  <h2>Your salary plan</h2>
+  <p class="intro">Use take-home pay, after tax and PF. Be honest about spending. Rounding it down is the most common planning mistake.</p>
+  <h3>Money coming in each month</h3>
+  <div class="fields" data-form="salIn"></div>
+  <h3>Money going out each month</h3>
+  <div class="fields" data-form="salOut"></div>
+  <h3>What you already have</h3>
+  <div class="fields" data-form="salHave"></div>
+  <div class="ledger">
+    <div class="row"><span>Total take-home pay</span><b data-o="income"></b></div>
+    <div class="row"><span>Total spending</span><b data-o="expenses"></b></div>
+    <div class="row"><span>Existing EMIs</span><b data-o="emiOther"></b></div>
+    <div class="row total"><span>Left over each month</span><b data-o="surplus"></b></div>
+    <div class="row"><span>Share of pay left over</span><b data-o="saveRate"></b></div>
+    <div class="row"><span>Emergency fund covers<small data-o="efTargetTxt"></small></span><b data-o="efMonths"></b></div>
+  </div>
+  <h3>How your pay is split</h3>
+  <div class="split" id="paySplit" role="img" aria-label="Pay split"></div>
+  <div class="legend"><span><i class="c1"></i>Needs <b data-o="pNeeds"></b></span><span><i class="c2"></i>Wants <b data-o="pWants"></b></span><span><i class="c3"></i>EMIs <b data-o="pEmi"></b></span><span><i class="c4"></i>Left over <b data-o="pLeft"></b></span></div>
+  <p class="help">A common rule of thumb is 50% needs, 30% wants, 20% saved. Before a home loan, aim to have 25–30% left over.</p>
+  <div id="salNotes"></div>
+</section>
+
+<section class="step" id="budget">
+  <h2>What you can safely afford</h2>
+  <p class="intro">A bank will often lend more than is comfortable. This step works backwards from your pay to a safe flat price.</p>
+  <div class="fields" data-form="aff"></div>
+  <div class="ledger">
+    <div class="row"><span>Safe EMI<small>after your existing EMIs</small></span><b data-o="safeEmi"></b></div>
+    <div class="row"><span>Loan that EMI supports</span><b data-o="maxLoan"></b></div>
+    <div class="row"><span>Your cash for the purchase</span><b data-o="cash"></b></div>
+    <div class="row total"><span>Highest safe flat price</span><b data-o="maxPrice"></b></div>
+    <div class="row"><span>What limits it</span><b data-o="maxBind" style="white-space:normal"></b></div>
+    <div class="row"><span>Price compared with yearly take-home</span><b data-o="incomeMult"></b></div>
+  </div>
+  <h3>Stress tests on that loan</h3>
+  <div class="ledger">
+    <div class="row"><span>EMI if rates rise by 1%</span><b data-o="stress1"></b></div>
+    <div class="row"><span>EMI if rates rise by 2%</span><b data-o="stress2"></b></div>
+    <div class="row" id="rowOneInc"><span>EMI as a share of the larger income alone</span><b data-o="oneInc"></b></div>
+    <div class="row"><span>Six months without pay needs<small>spending plus EMIs</small></span><b data-o="sixMonths"></b></div>
+  </div>
+  <div id="affNotes"></div>
+</section>
+
+<section class="step" id="flat">
+  <h2>The flat and its true cost</h2>
+  <p class="intro">Enter the flat you are considering. The price on the brochure is never the full bill.</p>
+  <div class="fields" data-form="flat"></div>
+  <h3>Costs on top of the price</h3>
+  <div class="btnrow noprint"><button class="btn small" id="btnKA" type="button">Use Karnataka rates for this price</button></div>
+  <div class="fields" data-form="costs"></div>
+  <h3>Monthly running costs</h3>
+  <div class="fields" data-form="run"></div>
+  <div class="ledger">
+    <div class="row"><span>Flat price</span><b data-o="price"></b></div>
+    <div class="row"><span>Stamp duty, cess and surcharge</span><b data-o="stampAll"></b></div>
+    <div class="row"><span>Registration fee</span><b data-o="reg"></b></div>
+    <div class="row" id="rowGst"><span>GST</span><b data-o="gst"></b></div>
+    <div class="row"><span>Brokerage and legal fees</span><b data-o="brokLegal"></b></div>
+    <div class="row"><span>Loan fees, interiors, deposits, other</span><b data-o="softCosts"></b></div>
+    <div class="row total"><span>All-in cost</span><b data-o="allIn"></b></div>
+    <div class="row"><span>Extra over the price</span><b data-o="extraPct"></b></div>
+  </div>
+  <h3>Cash you need on day one</h3>
+  <div class="ledger">
+    <div class="row"><span>Down payment</span><b data-o="downAmt"></b></div>
+    <div class="row"><span>Costs paid from your pocket</span><b data-o="extras"></b></div>
+    <div class="row total"><span>Cash needed up front</span><b data-o="cashNeeded"></b></div>
+    <div class="row"><span>Cash you have</span><b data-o="cash"></b></div>
+    <div class="row"><span data-o="gapLabel"></span><b data-o="cashGap"></b></div>
+  </div>
+  <h3>What you are really paying for</h3>
+  <div class="ledger">
+    <div class="row"><span>Price per super built-up sq ft</span><b data-o="perSba"></b></div>
+    <div class="row"><span>Price per carpet sq ft</span><b data-o="perCarpet"></b></div>
+    <div class="row"><span>Carpet as a share of super built-up</span><b data-o="eff"></b></div>
+    <div class="row"><span>Running cost per month<small>maintenance, tax, insurance</small></span><b data-o="ownMonthly"></b></div>
+  </div>
+  <div id="flatNotes"></div>
+</section>
+
+<section class="step" id="loan">
+  <h2>Loan and EMI</h2>
+  <p class="intro">The loan amount comes from the flat price and down payment in the previous step.</p>
+  <div class="fields" data-form="loan"></div>
+  <div class="ledger">
+    <div class="row"><span>Loan amount</span><b data-o="loan"></b></div>
+    <div class="row total"><span>EMI</span><b data-o="emi"></b></div>
+    <div class="row"><span>EMI as a share of take-home pay</span><b data-o="emiPctIncome"></b></div>
+    <div class="row"><span>Total interest over the loan</span><b data-o="totalInt"></b></div>
+    <div class="row"><span>Total you repay</span><b data-o="totalPaid"></b></div>
+    <div class="row"><span>EMI if rates rise by 1%</span><b data-o="emi1"></b></div>
+    <div class="row"><span>EMI if rates rise by 2%</span><b data-o="emi2"></b></div>
+  </div>
+  <h3>If you prepay</h3>
+  <div class="ledger">
+    <div class="row"><span>Loan closes in</span><b data-o="ppTime"></b></div>
+    <div class="row"><span>Interest saved</span><b data-o="ppSaved"></b></div>
+  </div>
+  <div id="loanNotes"></div>
+  <details><summary>Year-by-year table</summary>
+    <div class="scroll"><table id="amTable"></table></div>
+    <div class="legend"><span><i class="c4"></i>Principal</span><span><i class="c3"></i>Interest</span></div>
+  </details>
+</section>
+
+<section class="step" id="rvb">
+  <h2>Rent or buy</h2>
+  <p class="intro">This compares buying this flat with renting a similar home and investing the money you would otherwise put into the purchase.</p>
+  <div class="fields" data-form="rvb"></div>
+  <div class="ledger">
+    <div class="row"><span>Buying: monthly outgo in year 1<small>EMI plus running costs</small></span><b data-o="buyM"></b></div>
+    <div class="row"><span>Renting: monthly outgo in year 1</span><b data-o="rentM"></b></div>
+    <div class="row"><span data-o="rvbBuyLbl"></span><b data-o="rvbBuyer"></b></div>
+    <div class="row"><span data-o="rvbRentLbl"></span><b data-o="rvbRenter"></b></div>
+    <div class="row total"><span data-o="rvbWinLbl"></span><b data-o="rvbDiff"></b></div>
+    <div class="row"><span>Buying overtakes renting</span><b data-o="rvbBreak"></b></div>
+  </div>
+  <div class="scroll"><svg id="rvbChart" viewBox="0 0 640 340" width="100%" role="img" aria-label="Net worth of buyer and renter by year"></svg></div>
+  <div class="legend"><span><i class="c4"></i>Buyer's net worth</span><span><i class="c2"></i>Renter's net worth</span></div>
+  <div id="rvbNotes"></div>
+  <p class="help">How it works: the renter invests the up-front cash and, each month, whatever buying would have cost above the rent. The buyer's net worth is the flat's sale value after selling costs and tax, minus the loan still owed. Enter an investment return you believe is realistic after tax. It is not guaranteed.</p>
+</section>
+
+<section class="step" id="invest">
+  <h2>Investment check</h2>
+  <p class="intro">Use this if you would rent the flat out. It treats the flat like any other investment.</p>
+  <div class="fields" data-form="inv"></div>
+  <div class="ledger">
+    <div class="row"><span>Gross rent return<small>yearly rent ÷ price</small></span><b data-o="grossYield"></b></div>
+    <div class="row"><span>Net rent return<small>after vacancy and costs, on all-in cost</small></span><b data-o="netYield"></b></div>
+    <div class="row"><span>Price equals this many years of rent</span><b data-o="p2r"></b></div>
+    <div class="row"><span>Monthly cash flow after EMI</span><b data-o="cashflowM"></b></div>
+    <div class="row total"><span data-o="irrLbl"></span><b data-o="irr"></b></div>
+    <div class="row"><span>Return you could earn elsewhere</span><b data-o="altRet"></b></div>
+    <div class="row"><span>Price growth needed to match that</span><b data-o="beGrowth"></b></div>
+  </div>
+  <div id="invNotes"></div>
+  <p class="help">The yearly return counts rent, EMIs, running costs, selling costs and tax on the gain. It ignores income tax on rent, which depends on your slab.</p>
+</section>
+
+<section class="step" id="saveup">
+  <h2>Saving for the down payment</h2>
+  <p class="intro">If you are short today, this shows how much to set aside each month and how long it takes.</p>
+  <div class="fields" data-form="save"></div>
+  <div class="ledger">
+    <div class="row"><span>Cash needed if you bought today</span><b data-o="cashNeeded"></b></div>
+    <div class="row"><span data-o="svTargetLbl"></span><b data-o="svTarget"></b></div>
+    <div class="row"><span>Your current cash grows to</span><b data-o="svHave"></b></div>
+    <div class="row total"><span>Save each month to get there</span><b data-o="svMonthly"></b></div>
+    <div class="row"><span data-o="svTimeLbl"></span><b data-o="svTime"></b></div>
+  </div>
+  <div id="saveNotes"></div>
+</section>
+
+<section class="step" id="tax">
+  <h2>Tax effect</h2>
+  <p class="intro">A rough first-year estimate for India. Tax rules change every budget, so treat this as a guide and confirm with a tax professional.</p>
+  <div class="fields" data-form="tax"></div>
+  <div class="ledger">
+    <div class="row"><span>Interest paid in year 1</span><b data-o="int1"></b></div>
+    <div class="row"><span>Principal repaid in year 1</span><b data-o="prin1"></b></div>
+    <div class="row total"><span data-o="taxLbl"></span><b data-o="taxSaved"></b></div>
+    <div class="row"><span>EMI after the tax effect</span><b data-o="effEmi"></b></div>
+    <div class="row"><span>TDS you deduct from the seller's payment</span><b data-o="tds"></b></div>
+  </div>
+  <div id="taxNotes"></div>
+</section>
+
+<section class="step" id="compare">
+  <h2>Compare flats</h2>
+  <p class="intro">Score up to three flats side by side. The weights change with your purpose from step 1. Ratings run from 1 (poor) to 5 (excellent).</p>
+  <div id="cmpForms"></div>
+  <div class="scroll"><table id="cmpTable"></table></div>
+  <div id="cmpNotes"></div>
+</section>
+
+<section class="step" id="checks">
+  <h2>Checklists</h2>
+  <p class="intro">Tick items as you finish them. The list adapts to your answers in step 1.</p>
+  <div id="checkLists"></div>
+  <h3>Red flags</h3>
+  <ul>
+    <li>You are pushed to pay a token amount today.</li>
+    <li>The price is well below neighbouring flats with no clear reason.</li>
+    <li>"The occupancy certificate has been applied for and will come soon."</li>
+    <li>Part of the payment is asked for in cash.</li>
+    <li>The seller or builder says you don't need your own lawyer, or won't show original approvals.</li>
+    <li>The possession date in the advertisement differs from the date on the RERA site.</li>
+    <li>Guaranteed rent or assured return schemes.</li>
+    <li>A metro line or road that is "coming soon" is used to justify the price.</li>
+    <li>The carpet area in the brochure differs from the agreement.</li>
+    <li>Many flats in the same tower are on sale at or below your price.</li>
+  </ul>
+  <h3>Questions to ask residents</h3>
+  <ul>
+    <li>Where does the water come from, and how often do tankers come in summer?</li>
+    <li>How long are the power cuts, and what does backup cover?</li>
+    <li>What is the real monthly maintenance, and has it gone up recently?</li>
+    <li>Has the builder handed over to the owners' association? Any disputes?</li>
+    <li>How long does your commute take at 9 am and 6 pm?</li>
+    <li>What did flats here actually sell or rent for in the last six months?</li>
+    <li>What do you wish you had known before buying?</li>
+  </ul>
+</section>
+
+<section class="step" id="result">
+  <h2>Your result</h2>
+  <div class="stampbox"><div class="stamp" id="stamp"></div><p id="stampText"></p></div>
+  <h3>What the numbers say</h3>
+  <div id="findings"></div>
+  <h3>Your key figures</h3>
+  <div class="ledger">
+    <div class="row"><span>Highest safe flat price</span><b data-o="maxPrice"></b></div>
+    <div class="row"><span>The flat you entered</span><b data-o="price"></b></div>
+    <div class="row"><span>EMI and share of take-home</span><b data-o="emiBoth"></b></div>
+    <div class="row"><span>Cash needed up front</span><b data-o="cashNeeded"></b></div>
+    <div class="row"><span data-o="gapLabel"></span><b data-o="cashGap"></b></div>
+    <div class="row"><span>Left over each month after buying</span><b data-o="postSurplus"></b></div>
+  </div>
+  <h3>Where to check next</h3>
+  <p class="help">These links open only when you are online. The note under each one tells you what to do there, so you can plan offline.</p>
+  <div id="links"></div>
+  <h3 class="noprint">Share or keep</h3>
+  <div class="btnrow noprint"><button class="btn" id="btnCopy" type="button">Copy summary for WhatsApp</button><button class="btn" id="btnPrint" type="button">Print or save as PDF</button></div>
+  <textarea id="summaryBox" class="hide noprint" readonly aria-label="Summary text"></textarea>
+  <details class="noprint"><summary>Back up or move your numbers</summary>
+    <p>Your numbers are saved in this browser when it allows it. To keep a copy or move to another device, copy the text below and paste it back here later.</p>
+    <div class="btnrow"><button class="btn small" id="btnExport" type="button">Show my numbers as text</button><button class="btn small" id="btnImport" type="button">Load numbers from the text</button></div>
+    <textarea id="dataBox" aria-label="Your numbers as text"></textarea>
+    <p class="help" id="dataMsg"></p>
+  </details>
+  <p class="fine">This planner gives estimates for learning and planning. It is not financial, legal or tax advice. Rates, taxes and rules change, and every default can be edited. Before you commit money, confirm with a SEBI-registered investment adviser, a property lawyer and a tax professional.</p>
+</section>
+
+<section class="step" id="guide">
+  <h2>Guide</h2>
+  <p class="intro">Short notes on how to think about the decision. Read once, then come back when a term is unclear.</p>
+  <details open><summary>Ten rules before you buy</summary><ol>
+    <li>Buy a home to live in when you expect to stay seven years or more. Under five years, buying and selling costs usually eat the gain.</li>
+    <li>Fix your budget from your salary first, then look at flats. Never the other way round.</li>
+    <li>Keep the home EMI at or under 30–35% of take-home pay, and all EMIs together under 40%.</li>
+    <li>Keep the flat price within about four to five times your yearly take-home pay.</li>
+    <li>Hold an emergency fund of six months of expenses that the purchase does not touch. Make it nine to twelve months with one income or irregular income.</li>
+    <li>Bring 20–25% of the price yourself, plus roughly 8–10% more for stamp duty, registration and other costs.</li>
+    <li>Location beats amenities: a short commute, transport that already runs, water, schools and hospitals.</li>
+    <li>Pay for what exists today. A planned metro line or road is a bonus, not a reason.</li>
+    <li>Have the papers checked by your own lawyer, not the seller's or the builder's.</li>
+    <li>If the numbers only work when prices rise fast, the numbers don't work.</li>
+  </ol></details>
+  <details><summary>One income, two incomes, a family</summary><div>
+    <p><b>One income, no dependents.</b> You can take a little more risk, but you are your only safety net. EMI up to about 35% of take-home, six months of expenses aside, and health cover of your own, separate from your employer's.</p>
+    <p><b>One income with dependents.</b> This is the most fragile setup. Hold the EMI near 30%, keep nine months of expenses, and take term life cover at least equal to the loan before you sign.</p>
+    <p><b>Two incomes.</b> The bank will lend against both. Plan so that the larger income alone could carry the EMI for a year, because careers pause for children, health, layoffs or study. Decide ownership shares and who claims which tax benefit before registration.</p>
+    <p><b>Self-employed or variable pay.</b> Use your lowest reliable monthly income, not the average. Add three months to the emergency fund. Lenders usually ask for two to three years of tax returns.</p>
+    <p><b>Supporting parents or planning children.</b> Put those costs into the salary step now, even if they start later. A budget that only works for today's life will not survive the loan's twenty years.</p>
+  </div></details>
+  <details><summary>Buying to live in or to invest</summary><div>
+    <p><b>To live in.</b> Judge it by commute, comfort, stability and whether the EMI lets you sleep. A home you live in is partly an expense, like rent, and partly an asset.</p>
+    <p><b>To invest.</b> Judge it like any investment: net rent return, likely price growth, how easily you can sell, and what the same money earns elsewhere. Rent return on Indian city flats is often only 2–4% a year, usually below the loan interest rate, so most of the return has to come from price growth.</p>
+    <p><b>Leverage cuts both ways.</b> A loan magnifies gains when prices rise faster than the interest rate, and magnifies losses when they don't. You still owe the EMI when the flat is empty.</p>
+    <p><b>Selling is slow and costly.</b> A flat can take months to sell, and you cannot sell one bedroom when you need money. Count that before putting most of your savings into one flat.</p>
+  </div></details>
+  <details><summary>Ready or under construction, builder or resale</summary><div>
+    <p><b>Ready with an occupancy certificate.</b> You see exactly what you get, you stop paying rent as soon as you move, and there is no GST. The price is usually a little higher.</p>
+    <p><b>Under construction.</b> Lower entry price and staged payments, but there is delay risk, GST applies, and you may pay rent and EMI together for years. Check the completion date and quarterly progress on the RERA site, not in the brochure.</p>
+    <p><b>From a builder.</b> Check approvals, the builder's delivery record on earlier projects, and what the agreement says about delay.</p>
+    <p><b>Resale.</b> Check the seller's title, any loan on the flat, unpaid dues, and that original documents exist. Expect a broker fee. The advantage is that you can see the real building, the real neighbours and the real maintenance.</p>
+  </div></details>
+  <details><summary>Carpet, built-up and super built-up area</summary><div>
+    <p><b>Carpet area</b> is the usable floor inside the flat, including internal walls, and excluding outer walls, shafts, balconies and open terraces. This is the figure RERA requires builders to state.</p>
+    <p><b>Built-up area</b> adds the outer walls and balconies. <b>Super built-up area</b> adds your share of lobbies, lifts, stairs and the clubhouse.</p>
+    <p><b>Loading</b> is how much larger the super built-up area is than the carpet area. Flats are quoted per super built-up square foot, so compare options on price per carpet square foot. Carpet below about 65% of super built-up means you are paying heavily for common areas.</p>
+  </div></details>
+  <details><summary>How a home loan really works</summary><div>
+    <p><b>Floating rates.</b> Most bank home loans are linked to the RBI repo rate plus the bank's spread. When the repo rate moves, your rate follows at the next reset. The spread stays for the life of the loan, so negotiate it at the start.</p>
+    <p><b>Early years are mostly interest.</b> In the first years, most of each EMI goes to interest. A prepayment made early saves far more than the same amount later.</p>
+    <p><b>Tenure.</b> A longer tenure lowers the EMI but raises total interest. A sensible approach is to take a comfortable EMI and prepay every year from bonuses and increments.</p>
+    <p><b>Prepayment.</b> Banks cannot charge individuals a penalty for prepaying a floating-rate home loan.</p>
+    <p><b>How much they lend.</b> RBI limits loans to about 90% of the property value up to ₹30 lakh, 80% from ₹30 to ₹75 lakh, and 75% above ₹75 lakh. Stamp duty and registration are generally not financed.</p>
+    <p><b>Insurance.</b> Cover the loan with a plain term life policy. You are not required to buy the lender's own insurance product. If told otherwise, ask for it in writing.</p>
+    <p><b>Review yearly.</b> If new borrowers get a much lower rate than you, ask your lender to reprice, or move the loan.</p>
+  </div></details>
+  <details><summary>Where to keep the down payment while you save</summary><div>
+    <p>Money you need within about three years should not depend on the share market. A fall just before you buy can set you back years.</p>
+    <p>Keep it where the value is stable and you can withdraw on time, such as bank deposits or other low-risk, short-term options. Accept the lower return. The job of this money is to be there on the day.</p>
+    <p>Keep the emergency fund separate from the down payment, in a different account if that helps you leave it alone.</p>
+  </div></details>
+  <details><summary>Other ways to invest, in brief</summary><div>
+    <p>This is general education, not a recommendation. Each has its own risks.</p>
+    <ul>
+      <li><b>Bank deposits and government small savings.</b> Stable value, modest return, some have lock-ins.</li>
+      <li><b>Provident funds (EPF, PPF).</b> Long lock-ins, tax advantages, suited to retirement money.</li>
+      <li><b>Debt mutual funds.</b> Usually steadier than shares, but not guaranteed.</li>
+      <li><b>Equity index funds.</b> Higher long-run growth potential with sharp ups and downs. Suited to money you won't need for seven years or more.</li>
+      <li><b>REITs.</b> Listed units that hold rented commercial property. A small-ticket way to own property income, with prices that move daily.</li>
+      <li><b>Gold.</b> A diversifier, with no income.</li>
+    </ul>
+    <p>Against these, a second flat means a large single asset, a loan, low rent return and slow resale. It can still work, but only at the right price.</p>
+  </div></details>
+  <details><summary>Negotiating the price</summary><ul>
+    <li>Find out three recent deal prices in the same building from residents and from brokers on both sides. Portal prices are asking prices.</li>
+    <li>Count how many similar flats are on sale. Many sellers means you can bargain.</li>
+    <li>Negotiate the total: parking, club fees, maintenance advance and fittings, not only the rate per square foot.</li>
+    <li>A clean bank payment and a quick closing are worth a discount to most sellers.</li>
+    <li>Be ready to walk away. There is always another flat.</li>
+  </ul></details>
+  <details><summary>Glossary</summary><ul>
+    <li><b>EMI.</b> The fixed monthly loan payment, part interest and part principal.</li>
+    <li><b>LTV.</b> Loan to value: the loan as a share of the property value.</li>
+    <li><b>Repo rate.</b> The RBI's policy rate that most home loan rates follow.</li>
+    <li><b>Spread.</b> What the bank adds on top of the repo rate.</li>
+    <li><b>FOIR.</b> All your EMIs as a share of income. Lenders use it to decide how much to lend.</li>
+    <li><b>RERA.</b> The state real estate regulator where projects must be registered.</li>
+    <li><b>OC.</b> Occupancy certificate: the authority's confirmation that the building is fit to live in and matches the approved plan.</li>
+    <li><b>CC.</b> Commencement certificate: permission to start construction.</li>
+    <li><b>EC.</b> Encumbrance certificate: the record of registered sales and mortgages on the property.</li>
+    <li><b>Khata.</b> The municipal record of the property and its owner, used for property tax.</li>
+    <li><b>Mother deed.</b> The earliest document in the chain of ownership.</li>
+    <li><b>Sale agreement and sale deed.</b> The agreement sets the terms. The registered sale deed transfers ownership.</li>
+    <li><b>Guidance value.</b> The government's minimum value for registration. It is a floor, not the market price.</li>
+    <li><b>Pre-EMI.</b> Interest-only payments while a flat is under construction.</li>
+    <li><b>TDS on property.</b> Tax the buyer deducts from the seller's payment on higher-value purchases.</li>
+  </ul></details>
+  <p class="fine">Defaults were set in October 2026 for Bengaluru and Karnataka. Change any of them to match your city, lender and tax position.</p>
+</section>
+
+</div>
+<div class="pager noprint"><div><button class="btn" id="btnPrev" type="button">Back</button><button class="btn primary" id="btnNext" type="button">Next</button></div></div>
+<script>
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s);};
+var $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+var KEY='home_purchase_planner_v1';
+
+var DEF={
+  household:'single',employment:'salaried',purpose:'live',jobfix:'fixed',stage:'ready',seller:'resale',region:'ka',
+  hold:7,termins:false,healthins:true,emiTouched:false,
+  inc1:90000,inc2:0,incOther:0,
+  exRent:20000,exFood:12000,exUtil:5000,exTransport:5000,exKids:0,exInsure:3000,exParents:0,exLife:8000,exOther:0,
+  emiOther:0,efund:200000,cash:2000000,
+  emiPct:35,rate:8,tenure:20,affCostPct:9,
+  price:8000000,sba:795,carpet:560,downPct:20,
+  stampPct:5,cessPct:0.6,regPct:2,gstPct:5,brokPct:1,legal:25000,loanFee:15000,interiors:500000,deposits:75000,otherCost:0,
+  maintPsf:4,propTaxYr:6000,insYr:3000,
+  prepayM:0,prepayY:0,
+  rentNow:21000,rentGrow:6,priceGrow:6,invRet:8,costGrow:5,sellPct:2,cgPct:12.5,
+  invRent:21000,vacancy:1,tenantMaint:true,repairsPct:5,
+  goalYears:3,saveRet:6.5,saveMonthly:30000,
+  regime:'new',slab:31.2,taxUse:'self',coown:1,intCap:200000,prinRoom:50000,
+  cmp:{
+    A:{name:'Flat A',price:8000000,carpet:560,sba:795,rent:21000,commute:45,metro:7,ready:'ready',builder:4,legal:3,water:3,infra:3,liq:2},
+    B:{name:'Flat B',price:6500000,carpet:700,sba:1000,rent:22000,commute:30,metro:1,ready:'ready',builder:3,legal:4,water:4,infra:4,liq:4},
+    C:{name:'',price:'',carpet:'',sba:'',rent:'',commute:'',metro:'',ready:'ready',builder:'',legal:'',water:'',infra:'',liq:''}
+  },
+  chk:{}
+};
+var BLANK=['inc1','inc2','incOther','exRent','exFood','exUtil','exTransport','exKids','exInsure','exParents','exLife','exOther','emiOther','efund','cash','price','sba','carpet','legal','loanFee','interiors','deposits','otherCost','propTaxYr','insYr','prepayM','prepayY','rentNow','invRent','saveMonthly'];
+
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function merge(t,s){for(var k in s){if(!Object.prototype.hasOwnProperty.call(s,k))continue;if(s[k]&&typeof s[k]==='object'&&t[k]&&typeof t[k]==='object'){merge(t[k],s[k]);}else{t[k]=s[k];}}}
+function load(){var s=clone(DEF);try{var raw=window.localStorage.getItem(KEY);if(raw){merge(s,JSON.parse(raw));}}catch(e){}return s;}
+function save(){try{window.localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+var S=load();
+
+function get(p){var a=p.split('.'),o=S;for(var i=0;i<a.length;i++){if(o==null)return undefined;o=o[a[i]];}return o;}
+function set(p,v){var a=p.split('.'),o=S;for(var i=0;i<a.length-1;i++){if(o[a[i]]==null||typeof o[a[i]]!=='object')o[a[i]]={};o=o[a[i]];}o[a[a.length-1]]=v;}
+function num(p){var v=get(p);return (typeof v==='number'&&isFinite(v))?v:0;}
+
+/* ---------- formatting ---------- */
+function inr(n){if(!isFinite(n))return '–';var neg=n<0;n=Math.abs(Math.round(n));return (neg?'−':'')+'₹'+n.toLocaleString('en-IN');}
+function short(n){if(!isFinite(n))return '–';var a=Math.abs(n),sg=n<0?'−':'';if(a>=1e7)return sg+'₹'+(a/1e7).toFixed(2)+' Cr';if(a>=1e5)return sg+'₹'+(a/1e5).toFixed(1)+' L';return inr(n);}
+function pct(n,d){return isFinite(n)?n.toFixed(d==null?1:d)+'%':'–';}
+function yrs(m){var y=Math.floor(m/12),r=m%12;return (y?y+(y===1?' year':' years'):'')+(y&&r?' ':'')+(r?r+(r===1?' month':' months'):'')||'0 months';}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+
+/* ---------- finance maths ---------- */
+function emi(P,rate,years){var n=Math.round(years*12);if(P<=0||n<=0)return 0;var r=rate/1200;if(r===0)return P/n;var k=Math.pow(1+r,n);return P*r*k/(k-1);}
+function pv(e,rate,years){var n=Math.round(years*12);if(e<=0||n<=0)return 0;var r=rate/1200;if(r===0)return e*n;return e*(1-Math.pow(1+r,-n))/r;}
+function amort(P,rate,years,xm,xy){
+  var r=rate/1200,n=Math.round(years*12),e=emi(P,rate,years),b=P,ti=0,m=0,bal=[P],yr=[],yp=0,yi=0;
+  while(b>0.5&&m<n){
+    m++;var it=b*r,pr=e-it+(xm||0);if(xy&&m%12===0)pr+=xy;if(pr>b)pr=b;if(pr<0)pr=0;
+    b-=pr;ti+=it;yp+=pr;yi+=it;bal.push(b);
+    if(m%12===0||b<=0.5||m===n){yr.push({y:Math.ceil(m/12),prin:yp,int:yi,bal:Math.max(0,b)});yp=0;yi=0;}
+  }
+  return {emi:e,months:m,totalInt:ti,yearly:yr,bal:bal};
+}
+function balAt(am,m){return m<am.bal.length?am.bal[m]:0;}
+function irr(cf){
+  var f=function(r){var a=0;for(var t=0;t<cf.length;t++)a+=cf[t]/Math.pow(1+r,t);return a;};
+  var lo=-0.95,hi=1,flo=f(lo),fhi=f(hi);
+  if(!isFinite(flo)||!isFinite(fhi)||flo*fhi>0)return NaN;
+  for(var i=0;i<80;i++){var mid=(lo+hi)/2,fm=f(mid);if(flo*fm<=0){hi=mid;}else{lo=mid;flo=fm;}}
+  return (lo+hi)/2;
+}
+function suggestedPct(){return S.household==='family'?30:35;}
+function holdYears(){return Math.max(1,Math.min(30,Math.round(num('hold')||7)));}
+
+function saleNet(R,years,pg){
+  var hv=R.price*Math.pow(1+pg,years),net=hv*(1-num('sellPct')/100),gain=net-R.price-R.acq;
+  return net-Math.max(0,gain)*num('cgPct')/100;
+}
+function rentVsBuy(R){
+  var N=30,r=num('invRet')/1200,pg=num('priceGrow')/100,rg=num('rentGrow')/100,cg=num('costGrow')/100;
+  var bp=0,rp=R.cashNeeded,rent=num('rentNow'),own=R.ownMonthly,out=[];
+  for(var m=1;m<=N*12;m++){
+    var e=m<=R.am.months?R.emi:0,d=e+own-rent;
+    bp*=1+r;rp*=1+r;if(d>0)rp+=d;else bp-=d;
+    if(m%12===0){var y=m/12;out.push({y:y,buyer:saleNet(R,y,pg)-balAt(R.am,m)+bp,renter:rp});rent*=1+rg;own*=1+cg;}
+  }
+  return out;
+}
+function investCF(R,gPct){
+  var N=holdYears(),pg=gPct/100,rg=num('rentGrow')/100,cg=num('costGrow')/100;
+  var cf=[-R.cashNeeded],rent=num('invRent'),fixed=num('propTaxYr')+num('insYr'),maint=R.maint*12,vac=Math.min(12,num('vacancy'));
+  for(var y=1;y<=N;y++){
+    var ry=rent*(12-vac),costs=fixed+ry*num('repairsPct')/100+(S.tenantMaint?maint*vac/12:maint);
+    var m0=(y-1)*12,m1=y*12,em=Math.max(0,Math.min(R.am.months,m1)-m0),c=ry-costs-R.emi*em;
+    if(y===1){R.inv1={rent:ry,costs:costs};}
+    if(y===N)c+=saleNet(R,N,pg)-balAt(R.am,m1);
+    cf.push(c);rent*=1+rg;fixed*=1+cg;maint*=1+cg;
+  }
+  return cf;
+}
+function breakEvenGrowth(R){
+  var t=num('invRet')/100,f=function(g){var x=irr(investCF(R,g));return (isNaN(x)?-1:x)-t;};
+  if(f(40)<0)return Infinity;if(f(-20)>0)return -Infinity;
+  var lo=-20,hi=40;for(var i=0;i<50;i++){var mid=(lo+hi)/2;if(f(mid)>=0)hi=mid;else lo=mid;}
+  return hi;
+}
+
+/* ---------- the whole calculation ---------- */
+function compute(){
+  var R={},dual=S.household==='dual';
+  R.dual=dual;
+  R.income=num('inc1')+(dual?num('inc2'):0)+num('incOther');
+  R.needs=num('exRent')+num('exFood')+num('exUtil')+num('exTransport')+num('exKids')+num('exInsure')+num('exParents');
+  R.wants=num('exLife')+num('exOther');
+  R.expenses=R.needs+R.wants;
+  R.emiOther=num('emiOther');
+  R.surplus=R.income-R.expenses-R.emiOther;
+  R.saveRate=R.income>0?R.surplus/R.income*100:0;
+  R.monthlyNeed=R.expenses+R.emiOther;
+  R.efMonths=R.monthlyNeed>0?num('efund')/R.monthlyNeed:0;
+  R.efTarget=(S.household==='family'?9:6)+(S.employment==='self'?3:0);
+
+  var rate=num('rate'),ten=num('tenure')||20,cash=num('cash'),c=num('affCostPct')/100;
+  R.safeEmi=Math.max(0,R.income*num('emiPct')/100-R.emiOther);
+  R.maxLoan=pv(R.safeEmi,rate,ten);
+  var pe=(R.maxLoan+cash)/(1+c),tiers=[[3e6,0.9],[7.5e6,0.8],[Infinity,0.75]],best=0,prev=0,bind='emi',ltvU=0.9;
+  tiers.forEach(function(t){
+    var pc=cash/(1-t[1]+c),p=Math.min(pe,pc,t[0]);
+    if((prev===0||p>prev)&&p>best){best=p;ltvU=t[1];bind=(p===pe)?'emi':(p===pc?'cash':'cap');}
+    prev=t[0];
+  });
+  R.maxPrice=best;R.maxBind=bind;R.maxLtv=ltvU;
+  R.maxPriceLoan=Math.min(R.maxLoan,best*ltvU);
+  R.incomeMult=R.income>0?R.maxPrice/(R.income*12):0;
+  R.stress1=emi(R.maxPriceLoan,rate+1,ten);R.stress2=emi(R.maxPriceLoan,rate+2,ten);
+  R.bigInc=Math.max(num('inc1'),num('inc2'));
+
+  var price=num('price');R.price=price;
+  R.ltvRule=price<=3e6?90:(price<=7.5e6?80:75);
+  R.downAmt=price*num('downPct')/100;R.loan=Math.max(0,price-R.downAmt);
+  R.uc=S.stage==='uc';
+  R.stamp=price*num('stampPct')/100;R.cess=price*num('cessPct')/100;R.reg=price*num('regPct')/100;
+  R.gst=R.uc?price*num('gstPct')/100:0;
+  R.brok=price*num('brokPct')/100;
+  R.acq=R.stamp+R.cess+R.reg+R.gst+R.brok+num('legal');
+  R.soft=num('loanFee')+num('interiors')+num('deposits')+num('otherCost');
+  R.extras=R.acq+R.soft;R.allIn=price+R.extras;R.extraPct=price>0?R.extras/price*100:0;
+  R.cashNeeded=R.downAmt+R.extras;R.cashGap=R.cashNeeded-cash;
+  R.perSba=num('sba')>0?price/num('sba'):0;R.perCarpet=num('carpet')>0?price/num('carpet'):0;
+  R.eff=(num('sba')>0&&num('carpet')>0)?num('carpet')/num('sba')*100:0;
+  R.maint=num('sba')*num('maintPsf');R.ownMonthly=R.maint+(num('propTaxYr')+num('insYr'))/12;
+
+  R.am=amort(R.loan,rate,ten,0,0);R.emi=R.am.emi;
+  R.amP=amort(R.loan,rate,ten,num('prepayM'),num('prepayY'));
+  R.emiPctIncome=R.income>0?R.emi/R.income*100:0;
+  R.emi1=emi(R.loan,rate+1,ten);R.emi2=emi(R.loan,rate+2,ten);
+  R.allEmiPct=R.income>0?(R.emi+R.emiOther)/R.income*100:0;
+  R.priceMult=R.income>0?price/(R.income*12):0;
+
+  var H=holdYears();R.H=H;
+  R.rvb=rentVsBuy(R);R.rvbH=R.rvb[H-1];
+  R.breakeven=null;for(var i=0;i<R.rvb.length;i++){if(R.rvb[i].buyer>=R.rvb[i].renter){R.breakeven=R.rvb[i].y;break;}}
+
+  var rentY=num('invRent')*12;
+  R.grossYield=price>0?rentY/price*100:0;
+  var cf=investCF(R,num('priceGrow'));
+  R.netYield=R.allIn>0?(R.inv1.rent-R.inv1.costs)/R.allIn*100:0;
+  R.p2r=rentY>0?price/rentY:0;
+  R.cashflowM=(R.inv1.rent-R.inv1.costs)/12-R.emi;
+  R.irr=R.cashNeeded>0?irr(cf)*100:NaN;
+  R.beGrowth=R.cashNeeded>0?breakEvenGrowth(R):NaN;
+
+  var n=Math.max(0,num('goalYears')),sr=num('saveRet')/1200,pg=num('priceGrow')/100,mths=Math.round(n*12);
+  R.svTarget=R.cashNeeded*Math.pow(1+pg,n);
+  R.svHave=cash*Math.pow(1+sr,mths);
+  var need=R.svTarget-R.svHave;
+  R.svMonthly=need<=0?0:(mths<=0?NaN:(sr===0?need/mths:need*sr/(Math.pow(1+sr,mths)-1)));
+  var fund=cash,tm=null;
+  for(var m=0;m<=480;m++){if(fund>=R.cashNeeded*Math.pow(1+pg,m/12)){tm=m;break;}fund=fund*(1+sr)+num('saveMonthly');}
+  R.svTime=tm;
+
+  var y1=R.am.yearly[0]||{int:0,prin:0},co=Math.max(1,Math.round(num('coown'))||1),slab=num('slab')/100;
+  R.int1=y1.int;R.prin1=y1.prin;
+  var saved=0,old=S.regime==='old';
+  if(S.taxUse==='self'){
+    if(old)saved=(Math.min(y1.int/co,num('intCap'))+Math.min(y1.prin/co,num('prinRoom')))*co*slab;
+  }else{
+    var inc=(num('invRent')*(12-Math.min(12,num('vacancy')))-num('propTaxYr'))*0.7-y1.int;
+    if(inc>=0)saved=-inc*slab;else if(old)saved=Math.min(-inc,200000)*slab;
+    if(old)saved+=Math.min(y1.prin/co,num('prinRoom'))*co*slab;
+  }
+  R.taxSaved=saved;R.effEmi=R.emi-saved/12;
+  R.tds=price>=5e6?price*0.01:0;
+
+  if(S.purpose==='invest'){
+    R.postSurplus=R.surplus+R.cashflowM;
+  }else{
+    R.postSurplus=R.income-(R.expenses-num('exRent'))-R.emiOther-R.emi-R.ownMonthly;
+  }
+  return R;
+}
+
+/* ---------- form definitions ---------- */
+var FORMS={
+  you:[
+    {k:'household',t:'seg',l:'Your household',w:1,o:[['single','One income, no dependents'],['family','One income with dependents'],['dual','Two incomes']]},
+    {k:'employment',t:'seg',l:'Your work',o:[['salaried','Salaried'],['self','Self-employed or variable pay']]},
+    {k:'purpose',t:'seg',l:'Why you are buying',o:[['live','To live in'],['invest','To rent out'],['both','Live now, rent out later']]},
+    {k:'jobfix',t:'seg',l:'Will your work stay in the same part of the city?',w:1,o:[['fixed','Yes, for 5 years or more'],['maybe','Probably'],['open','Not sure, it may change']]},
+    {k:'stage',t:'seg',l:'The flat is',o:[['ready','Ready to move in'],['uc','Under construction']]},
+    {k:'seller',t:'seg',l:'You are buying from',o:[['resale','An owner (resale)'],['builder','The builder']]},
+    {k:'region',t:'seg',l:'Where',o:[['ka','Karnataka'],['other','Another state']]},
+    {k:'hold',t:'num',l:'Years you expect to keep the flat',u:'years'},
+    {k:'termins',t:'check',l:'I have term life insurance',h:'A plain policy that pays your family if you die. Needed when anyone depends on your income or you take a loan.',w:1},
+    {k:'healthins',t:'check',l:'I have health insurance of my own',h:'Separate from your employer\'s cover, so it continues if you change jobs.',w:1}
+  ],
+  salIn:[
+    {k:'inc1',t:'money',l:'Your monthly take-home pay'},
+    {k:'inc2',t:'money',l:'Second earner\'s take-home pay',show:function(){return S.household==='dual';}},
+    {k:'incOther',t:'money',l:'Other steady monthly income',h:'Only income you can rely on every month.'}
+  ],
+  salOut:[
+    {k:'exRent',t:'money',l:'Rent you pay now'},
+    {k:'exFood',t:'money',l:'Food and groceries'},
+    {k:'exUtil',t:'money',l:'Electricity, phone, internet, gas'},
+    {k:'exTransport',t:'money',l:'Travel and fuel'},
+    {k:'exKids',t:'money',l:'School, childcare, tuition'},
+    {k:'exInsure',t:'money',l:'Insurance premiums and medicines'},
+    {k:'exParents',t:'money',l:'Support to parents or family'},
+    {k:'exLife',t:'money',l:'Eating out, shopping, trips, subscriptions'},
+    {k:'exOther',t:'money',l:'Anything else'},
+    {k:'emiOther',t:'money',l:'Existing EMIs',h:'Car, personal, education loans and card dues.'}
+  ],
+  salHave:[
+    {k:'efund',t:'money',l:'Emergency fund',h:'Money you will not touch for the purchase.'},
+    {k:'cash',t:'money',l:'Cash available for the purchase',h:'Savings you can use for down payment and costs, not counting the emergency fund.'}
+  ],
+  aff:[
+    {k:'emiPct',t:'pct',l:'EMI limit as a share of take-home pay',h:'Suggested: 35%, or 30% with one income and dependents.'},
+    {k:'rate',t:'pct',l:'Home loan interest rate',h:'October 2026: about 7.1% to 8.5% for good credit. Planning at 8% leaves a cushion.'},
+    {k:'tenure',t:'num',l:'Loan length',u:'years'},
+    {k:'affCostPct',t:'pct',l:'Extra costs as a share of price',h:'Stamp duty, registration, brokerage, basic set-up. About 9% is typical.'}
+  ],
+  flat:[
+    {k:'price',t:'money',l:'Flat price',h:'The agreement value, before extra costs.'},
+    {k:'downPct',t:'pct',l:'Down payment'},
+    {k:'sba',t:'num',l:'Super built-up area',u:'sq ft'},
+    {k:'carpet',t:'num',l:'Carpet area',u:'sq ft',h:'Ask for the RERA carpet area.'},
+    {k:'stage',t:'seg',l:'The flat is',o:[['ready','Ready to move in'],['uc','Under construction']]},
+    {k:'seller',t:'seg',l:'You are buying from',o:[['resale','An owner (resale)'],['builder','The builder']]}
+  ],
+  costs:[
+    {k:'stampPct',t:'pct',l:'Stamp duty'},
+    {k:'cessPct',t:'pct',l:'Cess and surcharge',h:'As a share of the price. In urban Karnataka this is 12% of the stamp duty.'},
+    {k:'regPct',t:'pct',l:'Registration fee'},
+    {k:'gstPct',t:'pct',l:'GST on under-construction flats',h:'5% for most homes, 1% for affordable housing. None on ready flats with an occupancy certificate.',show:function(){return S.stage==='uc';}},
+    {k:'brokPct',t:'pct',l:'Brokerage',h:'Often 1–2% on resale. Zero if you buy direct.'},
+    {k:'legal',t:'money',l:'Lawyer and document fees'},
+    {k:'loanFee',t:'money',l:'Loan processing and valuation fees'},
+    {k:'interiors',t:'money',l:'Interiors, appliances and moving'},
+    {k:'deposits',t:'money',l:'Maintenance advance, club and other deposits'},
+    {k:'otherCost',t:'money',l:'Parking, floor-rise or other charges'}
+  ],
+  run:[
+    {k:'maintPsf',t:'num',l:'Maintenance per sq ft per month',u:'₹'},
+    {k:'propTaxYr',t:'money',l:'Property tax per year'},
+    {k:'insYr',t:'money',l:'Home insurance per year'}
+  ],
+  loan:[
+    {k:'rate',t:'pct',l:'Interest rate'},
+    {k:'tenure',t:'num',l:'Loan length',u:'years'},
+    {k:'prepayM',t:'money',l:'Extra paid every month'},
+    {k:'prepayY',t:'money',l:'Extra paid once a year',h:'From a bonus, for example.'}
+  ],
+  rvb:[
+    {k:'rentNow',t:'money',l:'Monthly rent for a similar home',h:'Include maintenance if the tenant pays it.'},
+    {k:'rentGrow',t:'pct',l:'Rent rises each year by'},
+    {k:'priceGrow',t:'pct',l:'Flat price rises each year by',h:'Be conservative. Try 3%, 6% and 9% to see how much the answer depends on it.'},
+    {k:'invRet',t:'pct',l:'Return on money invested elsewhere',h:'After tax. An assumption, not a promise.'},
+    {k:'costGrow',t:'pct',l:'Running costs rise each year by'},
+    {k:'hold',t:'num',l:'Years you expect to keep the flat',u:'years'},
+    {k:'sellPct',t:'pct',l:'Cost of selling',h:'Brokerage and paperwork.'},
+    {k:'cgPct',t:'pct',l:'Tax on the gain when you sell',h:'Long-term capital gains tax is 12.5% for most sales after two years. Confirm your case.'}
+  ],
+  inv:[
+    {k:'invRent',t:'money',l:'Monthly rent you expect to receive',h:'Use rents actually listed in that building, not the brochure.'},
+    {k:'vacancy',t:'num',l:'Empty months per year',u:'months'},
+    {k:'repairsPct',t:'pct',l:'Repairs and agent fees as a share of rent'},
+    {k:'priceGrow',t:'pct',l:'Flat price rises each year by'},
+    {k:'invRet',t:'pct',l:'Return you could earn elsewhere'},
+    {k:'hold',t:'num',l:'Years you expect to keep the flat',u:'years'},
+    {k:'tenantMaint',t:'check',l:'The tenant pays the monthly maintenance',w:1}
+  ],
+  save:[
+    {k:'goalYears',t:'num',l:'Buy in',u:'years'},
+    {k:'saveRet',t:'pct',l:'Return on these savings',h:'Use a low-risk rate. This money should not depend on the share market.'},
+    {k:'saveMonthly',t:'money',l:'What you can save each month'},
+    {k:'priceGrow',t:'pct',l:'Flat price rises each year by'}
+  ],
+  tax:[
+    {k:'regime',t:'seg',l:'Your tax regime',o:[['new','New regime'],['old','Old regime']]},
+    {k:'taxUse',t:'seg',l:'The flat will be',o:[['self','Lived in by you'],['let','Rented out']]},
+    {k:'slab',t:'pct',l:'Your top tax rate, including cess',h:'For example 31.2% in the 30% slab, 20.8% in the 20% slab.'},
+    {k:'coown',t:'num',l:'Co-owners who also repay the loan',u:'people',h:'Each can claim separately, in their ownership share.'},
+    {k:'intCap',t:'money',l:'Interest deduction limit, lived-in home',h:'₹2,00,000 per person per year under the old regime.'},
+    {k:'prinRoom',t:'money',l:'Room left in your ₹1.5 lakh deduction',h:'After PF, insurance and other items already claimed. Per person.'}
+  ]
+};
+var SHOW={};
+var segCount=0;
+function fieldHTML(f){
+  var id='f_'+f.k.replace(/\./g,'_')+'_'+(segCount++),cls='f'+(f.w?' wide':''),help=f.h?'<div class="help">'+f.h+'</div>':'';
+  if(f.show)SHOW[id]=f.show;
+  if(f.t==='seg'){
+    return '<div class="'+cls+'" data-fid="'+id+'"><div class="lab">'+f.l+'</div><div class="seg" role="radiogroup" aria-label="'+esc(f.l)+'">'+f.o.map(function(o){return '<label><input type="radio" name="'+id+'" data-k="'+f.k+'" value="'+o[0]+'"><span>'+o[1]+'</span></label>';}).join('')+'</div>'+help+'</div>';
+  }
+  if(f.t==='check'){
+    return '<label class="chk'+(f.w?' wide':'')+'" data-fid="'+id+'"><input type="checkbox" data-k="'+f.k+'"><span>'+f.l+(f.h?'<small>'+f.h+'</small>':'')+'</span></label>';
+  }
+  if(f.t==='text'){
+    return '<div class="'+cls+'" data-fid="'+id+'"><label for="'+id+'">'+f.l+'</label><div class="inp"><input id="'+id+'" type="text" data-k="'+f.k+'" autocomplete="off"></div>'+help+'</div>';
+  }
+  var pre=f.t==='money'?'<span>₹</span>':'',suf=f.t==='pct'?'<span>%</span>':(f.u?'<span>'+f.u+'</span>':'');
+  return '<div class="'+cls+'" data-fid="'+id+'"><label for="'+id+'">'+f.l+'</label><div class="inp">'+pre+'<input id="'+id+'" type="number" inputmode="decimal" step="any" min="0" data-k="'+f.k+'">'+suf+'</div>'+(f.t==='money'?'<div class="help" data-words="'+f.k+'"></div>':'')+help+'</div>';
+}
+function buildForms(){
+  $$('[data-form]').forEach(function(el){el.innerHTML=FORMS[el.getAttribute('data-form')].map(fieldHTML).join('');});
+  var CF=[['name','text','Name'],['price','money','Price'],['carpet','num','Carpet area','sq ft'],['sba','num','Super built-up area','sq ft'],['rent','money','Monthly rent it would fetch'],['commute','num','Commute one way at peak','min'],['metro','num','Distance to a running metro station','km'],['ready','seg','Status'],['builder','num','Builder and build quality','/ 5'],['legal','num','Papers and legal clarity','/ 5'],['water','num','Water and power','/ 5'],['infra','num','Schools, hospitals, shops nearby','/ 5'],['liq','num','Ease of resale and renting','/ 5']];
+  $('#cmpForms').innerHTML=['A','B','C'].map(function(x,i){
+    return '<details'+(i===0?' open':'')+'><summary><span data-o="cmpName'+x+'"></span></summary><div class="fields">'+CF.map(function(c){
+      var f={k:'cmp.'+x+'.'+c[0],t:c[1],l:c[2],u:c[3]};
+      if(c[1]==='seg')f.o=[['ready','Ready with OC'],['uc','Under construction']];
+      return fieldHTML(f);
+    }).join('')+'</div></details>';
+  }).join('');
+}
+function syncInputs(skip){
+  $$('[data-k]').forEach(function(el){
+    if(el===skip)return;
+    var v=get(el.getAttribute('data-k'));
+    if(el.type==='radio')el.checked=(String(v)===el.value);
+    else if(el.type==='checkbox')el.checked=!!v;
+    else el.value=(v===''||v==null)?'':v;
+  });
+}
+function onInput(e){
+  var el=e.target;if(!el||!el.getAttribute)return;var k=el.getAttribute('data-k');if(!k)return;
+  var v;
+  if(el.type==='radio'){if(!el.checked)return;v=el.value;}
+  else if(el.type==='checkbox'){v=el.checked;}
+  else if(el.type==='number'){v=el.value===''?'':parseFloat(el.value);if(typeof v==='number'&&!isFinite(v))v='';}
+  else{v=el.value;}
+  set(k,v);
+  if(k==='emiPct')S.emiTouched=true;
+  if(k==='household'&&!S.emiTouched)S.emiPct=suggestedPct();
+  syncInputs(el);render();save();
+}
+
+/* ---------- output helpers ---------- */
+function out(name,text){$$('[data-o="'+name+'"]').forEach(function(el){el.textContent=text;});}
+function note(level,title,body){return '<div class="note '+(level||'')+'"><strong>'+title+'</strong>'+(body?'<p>'+body+'</p>':'')+'</div>';}
+function toggle(el,on){if(el)el.classList.toggle('hide',!on);}
+
+/* ---------- checklists ---------- */
+var LISTS=[
+  {id:'money',t:'Money, before you shortlist',items:[
+    ['m1','Emergency fund covers the months shown in the salary step, separate from the down payment'],
+    ['m2','Term life cover in place if anyone depends on your income'],
+    ['m3','Health insurance of your own for the whole family'],
+    ['m4','Credit score checked and any errors disputed'],
+    ['m5','Credit card dues and personal loans cleared'],
+    ['m6','Down payment and all extra costs ready without a personal loan or borrowing from friends'],
+    ['m7','Loan eligibility confirmed in writing by at least two lenders'],
+    ['m8','EMI tested at an interest rate 2% higher'],
+    ['m9','Agreed who will own the flat and who will be co-borrower']
+  ]},
+  {id:'legal',t:'Papers, checked by your own lawyer',items:[
+    ['l1','RERA registration found on the state RERA site: promoter, approved plan, completion date, complaints',function(){return S.seller==='builder'||S.stage==='uc';}],
+    ['l2','Title deed and the chain of earlier deeds reviewed, ideally 30 years back'],
+    ['l3','Encumbrance certificate obtained for the full period, with no open mortgage or dispute'],
+    ['l4','Sanctioned building plan matches what is built: floors, flat number, area'],
+    ['l5','Occupancy certificate issued for your tower',function(){return S.stage==='ready';}],
+    ['l5b','Commencement certificate and all approvals in place; RERA completion date noted',function(){return S.stage==='uc';}],
+    ['l6','Khata and property tax records are in the seller\'s name, tax is paid up, and you understand the khata type'],
+    ['l7','Land use conversion and layout approval are in order'],
+    ['l8','Clearances seen: fire, lifts, pollution board, water, electricity, and airport height clearance where relevant'],
+    ['l9','Carpet area in the agreement matches the RERA carpet area, and you measured it'],
+    ['l10','Sale agreement read line by line: possession date, delay penalty, price changes, what is included, car park'],
+    ['l11','Seller\'s loan is closed, or the lender has given the outstanding amount and release process in writing',function(){return S.seller==='resale';}],
+    ['l12','Association no-dues letter received; electricity and water bills cleared',function(){return S.seller==='resale';}],
+    ['l13','CERSAI search shows no other lender holds the flat as security',function(){return S.seller==='resale';}],
+    ['l14','TDS understood: on a price of ₹50 lakh or more the buyer deducts 1% and pays it to the tax department'],
+    ['l15','Every payment goes by bank transfer, with no cash part']
+  ]},
+  {id:'visit',t:'Site visits',items:[
+    ['v1','Visited on a weekday at morning and evening peak, and timed the real commute'],
+    ['v2','Visited after dark; checked lighting and how safe it feels'],
+    ['v3','Asked where water comes from, how often tankers come in summer, and what they cost'],
+    ['v4','Checked power backup coverage and charges'],
+    ['v5','Sewage plant works, no smell, drains are clear'],
+    ['v6','Walls, ceilings and bathrooms checked for damp, cracks and seepage'],
+    ['v7','Sunlight, air and noise checked inside the actual flat, not the sample flat'],
+    ['v8','Lifts counted; your parking slot seen and marked'],
+    ['v9','Mobile signal and broadband options checked'],
+    ['v10','Counted how many flats are lived in and how many are for sale or rent'],
+    ['v11','Asked about monsoon flooding on approach roads and in the basement'],
+    ['v12','Walked to the grocery, pharmacy, school, hospital and bus or metro stop'],
+    ['v13','Spoke to at least three residents without the agent present'],
+    ['v14','Confirmed maintenance charges, pending dues and any special collections'],
+    ['v15','Confirmed whether the owners\' association is formed and running the building']
+  ]},
+  {id:'loan',t:'The loan',items:[
+    ['n1','Compared at least three lenders on rate, spread over the repo rate, and fees'],
+    ['n2','Loan is floating and linked to the repo rate; you know how often it resets'],
+    ['n3','Processing, legal and valuation fees given in writing'],
+    ['n4','Confirmed there is no charge for prepaying'],
+    ['n5','Not pushed into the lender\'s insurance; compared a separate term plan'],
+    ['n6','Sanction letter in hand before paying any booking amount'],
+    ['n7','EMI is within your safe limit, with a plan to prepay every year'],
+    ['n8','Understood interest-only payments during construction, and avoided schemes you cannot explain to a friend',function(){return S.stage==='uc';}]
+  ]},
+  {id:'after',t:'After you buy',items:[
+    ['a1','Sale deed registered and originals collected'],
+    ['a2','Khata and property tax records moved to your name'],
+    ['a3','Electricity and water connections moved to your name'],
+    ['a4','Home insured; loan covered by term insurance'],
+    ['a5','Nominee named and a simple will written'],
+    ['a6','Scans of every document stored in two places'],
+    ['a7','Yearly reminder set: prepay, review the interest rate, ask the lender to reprice']
+  ]}
+];
+function buildChecks(){
+  $('#checkLists').innerHTML=LISTS.map(function(L){
+    return '<details'+(L.id==='money'?' open':'')+' data-list="'+L.id+'"><summary>'+L.t+' <span class="help" data-o="prog_'+L.id+'"></span></summary><div>'+L.items.map(function(it){
+      return '<label class="chk" data-item="'+it[0]+'"><input type="checkbox" data-k="chk.'+it[0]+'"><span>'+it[1]+'</span></label>';
+    }).join('')+'</div></details>';
+  }).join('');
+}
+function checkProgress(){
+  var res={};
+  LISTS.forEach(function(L){
+    var tot=0,done=0;
+    L.items.forEach(function(it){
+      var on=!it[2]||it[2]();toggle($('[data-item="'+it[0]+'"]'),on);
+      if(on){tot++;if(get('chk.'+it[0]))done++;}
+    });
+    res[L.id]={tot:tot,done:done};out('prog_'+L.id,done+' of '+tot+' done');
+  });
+  return res;
+}
+
+/* ---------- links ---------- */
+var LINKS=[
+  {id:'krera',n:'Karnataka RERA',u:'https://rera.karnataka.gov.in',d:'Search the project by name or RERA number. Read the approved plan, completion date and quarterly updates, and look for complaints against the promoter.',on:function(){return S.region==='ka';}},
+  {id:'urera',n:'Unified RERA portal (all states)',u:'https://rera.mohua.gov.in',d:'Find your state\'s RERA authority and its list of registered projects and agents.',on:function(){return true;}},
+  {id:'kaveri',n:'Kaveri Online Services, Karnataka',u:'https://kaveri.karnataka.gov.in',d:'Get the encumbrance certificate, look up the guidance value, and work out stamp duty and registration fees.',on:function(){return S.region==='ka';}},
+  {id:'eaasthi',n:'e-Aasthi (e-khata), Bengaluru',u:'https://bbmpeaasthi.karnataka.gov.in',d:'Check the e-khata for flats inside Bengaluru city limits. Outside the limits, the local panchayat or municipality keeps the khata.',on:function(){return S.region==='ka';}},
+  {id:'cersai',n:'CERSAI',u:'https://www.cersai.org.in',d:'Search, for a small fee, whether any lender already holds the flat as security.',on:function(){return S.seller==='resale';}},
+  {id:'cibil',n:'TransUnion CIBIL',u:'https://www.cibil.com',d:'Check your credit score and report before applying for a loan. Fix errors first, since a better score gets a lower rate.',on:function(){return true;}},
+  {id:'rbi',n:'Reserve Bank of India',u:'https://www.rbi.org.in',d:'See the current repo rate and the rules that protect borrowers. File a complaint against a bank here if needed.',on:function(){return true;}},
+  {id:'itax',n:'Income Tax Department',u:'https://www.incometax.gov.in',d:'Compare the old and new regimes with the official calculator, and pay the TDS on a property purchase.',on:function(){return true;}},
+  {id:'epfo',n:'EPFO',u:'https://www.epfindia.gov.in',d:'Read the current rules for using provident fund money towards a home before you count on it.',on:function(){return S.employment==='salaried';}},
+  {id:'pmay',n:'PMAY-Urban',u:'https://pmay-urban.gov.in',d:'Check whether you qualify for the home loan interest subsidy for lower and middle income first-time buyers.',on:function(R){return R.price>0&&R.price<=3500000;}},
+  {id:'sebi',n:'SEBI investor site',u:'https://investor.sebi.gov.in',d:'Learn the basics of other investments, and confirm that any adviser you pay is registered with SEBI.',on:function(R,x){return S.purpose!=='live'||x.rentFirst;}},
+  {id:'amfi',n:'AMFI',u:'https://www.amfiindia.com',d:'Plain explanations of mutual funds, useful for where to keep money you are not putting into a flat.',on:function(R,x){return S.purpose!=='live'||x.rentFirst;}},
+  {id:'nch',n:'National Consumer Helpline',u:'https://consumerhelpline.gov.in',d:'Register a complaint if a builder, broker or lender does not honour what was agreed.',on:function(){return S.seller==='builder'||S.stage==='uc';}}
+];
+
+/* ---------- findings ---------- */
+function findings(R,prog){
+  var F=[],add=function(l,t,b){F.push({l:l,t:t,b:b});};
+  var lim=num('emiPct');
+  if(R.price<=0||R.income<=0){add('amber','Enter your pay and a flat price','Fill in the salary step and the flat step to get a result.');return F;}
+  if(R.emiPctIncome>lim+10)add('red','The EMI is too large for your pay','The EMI of '+inr(R.emi)+' is '+pct(R.emiPctIncome,0)+' of take-home pay, against your limit of '+pct(lim,0)+'. Look at flats near '+short(R.maxPrice)+', raise the down payment, or wait.');
+  else if(R.emiPctIncome>lim)add('amber','The EMI is above your limit','It is '+pct(R.emiPctIncome,0)+' of take-home pay against a limit of '+pct(lim,0)+'. A larger down payment of about '+short(Math.max(0,R.loan-pv(R.safeEmi,num('rate'),num('tenure')||20)))+' more would bring it back.');
+  else add('green','The EMI fits your pay','It is '+pct(R.emiPctIncome,0)+' of take-home pay, within your limit of '+pct(lim,0)+'.');
+  if(R.cashGap>0)add('red','You are short of cash for day one','You need '+short(R.cashNeeded)+' up front and have '+short(num('cash'))+'. The gap is '+short(R.cashGap)+'. Do not fill it with a personal loan. Use the saving step to plan it.');
+  else add('green','You have the up-front cash','You need '+short(R.cashNeeded)+' and have '+short(num('cash'))+'.');
+  if(R.efMonths<3)add('red','Your emergency fund is too thin','It covers '+R.efMonths.toFixed(1)+' months. Build it to '+R.efTarget+' months, about '+short(R.monthlyNeed*R.efTarget)+', before taking a long loan.');
+  else if(R.efMonths<R.efTarget)add('amber','Top up the emergency fund','It covers '+R.efMonths.toFixed(1)+' months against a target of '+R.efTarget+'.');
+  if(R.postSurplus<0)add('red','You would run short every month after buying','After the EMI and running costs you would be '+inr(-R.postSurplus)+' short each month.');
+  else if(R.postSurplus<R.income*0.1)add('amber','Very little is left each month after buying','Only '+inr(R.postSurplus)+' a month, under 10% of pay. One surprise expense would force borrowing.');
+  if(R.priceMult>7)add('red','The price is very high for your income','It is '+R.priceMult.toFixed(1)+' times your yearly take-home pay. Four to five times is comfortable.');
+  else if(R.priceMult>5)add('amber','The price is a stretch for your income','It is '+R.priceMult.toFixed(1)+' times your yearly take-home pay. Four to five times is comfortable.');
+  if(R.emiOther>0&&R.allEmiPct>45)add('red','Your total EMIs are too high','All EMIs together would be '+pct(R.allEmiPct,0)+' of pay. Clear the older loans first.');
+  else if(R.emiOther>R.income*0.15)add('amber','Clear costly loans first','Existing EMIs already take '+pct(R.emiOther/R.income*100,0)+' of your pay.');
+  if(S.purpose!=='invest'){
+    if(S.jobfix==='open')add('red','Your work location may change','Buying a home to live in before you know where you will work risks a long commute or a forced sale. Rent near work for now and keep saving.');
+    else if(S.jobfix==='maybe')add('amber','Be sure about the location','If work moves across the city, the flat becomes a rental or a long commute. Choose somewhere well connected and easy to rent out.');
+  }
+  if(R.H<3)add('red','You plan to sell too soon','Buying and selling costs are about '+pct(R.extraPct+num('sellPct'),0)+' of the price. Under three years, renting almost always costs less.');
+  else if(R.H<5)add('amber','A short holding period is risky','Under five years, buying and selling costs often cancel the price gain.');
+  if(!S.termins&&(S.household!=='single'||R.loan>0))add('amber','Take term life insurance before the loan','Cover at least the loan amount of '+short(R.loan)+' so your family keeps the home if something happens to you.');
+  if(!S.healthins)add('amber','Get your own health insurance','A hospital bill is the most common reason families miss EMIs.');
+  if(R.dual&&R.bigInc>0&&R.emi/R.bigInc>0.5)add('amber','The EMI depends on both incomes','On the larger income alone it would be '+pct(R.emi/R.bigInc*100,0)+' of pay. Plan for a year on one income.');
+  if(R.uc)add('amber','Under construction adds risk','You may pay rent and EMI together, GST applies, and delays are common. Check the RERA completion date and the builder\'s past delivery.');
+  if(S.employment==='self')add('amber','Plan on your lowest reliable income','With variable pay, use the weakest months for this plan, and expect lenders to ask for two to three years of tax returns.');
+  if(R.eff>0&&R.eff<65)add('amber','You pay a lot for common areas','Carpet area is only '+pct(R.eff,0)+' of the super built-up area. The real price is '+inr(R.perCarpet)+' per carpet sq ft.');
+  if(S.purpose!=='live'){
+    if(isFinite(R.irr)&&R.irr<num('invRet'))add('amber','As an investment it falls short','The expected return on your cash is '+pct(R.irr)+' a year against '+pct(num('invRet'))+' elsewhere. Prices would need to rise '+(isFinite(R.beGrowth)?pct(R.beGrowth)+' a year':'faster than is realistic')+' to match.');
+    else if(isFinite(R.irr))add('green','As an investment it clears your bar','The expected return on your cash is '+pct(R.irr)+' a year, at your assumed price growth of '+pct(num('priceGrow'))+'.');
+    if(R.cashflowM<0)add('amber','The rent does not cover the EMI','You would add '+inr(-R.cashflowM)+' from your pay every month.');
+  }
+  if(S.purpose!=='invest'&&R.rvbH&&R.rvbH.renter>R.rvbH.buyer)add('amber','Renting leaves you richer on these assumptions','After '+R.H+' years the renter is ahead by '+short(R.rvbH.renter-R.rvbH.buyer)+'. Buying can still be right for stability, but know what it costs.');
+  if(prog&&prog.legal&&prog.legal.done<prog.legal.tot)add('','Paper checks are not finished',prog.legal.done+' of '+prog.legal.tot+' items are ticked in the checklist. Finish them before paying anything beyond a refundable token.');
+  return F;
+}
+
+/* ---------- render ---------- */
+var R=null;
+function render(){
+  R=compute();
+  $$('[data-fid]').forEach(function(el){var f=SHOW[el.getAttribute('data-fid')];if(f)toggle(el,f());});
+  $$('[data-words]').forEach(function(el){var v=num(el.getAttribute('data-words'));el.textContent=v>=100000?short(v):'';});
+
+  // you
+  var adv=[];
+  adv.push(S.household==='single'?'One income, no dependents: you can take a little more risk, but you are your only safety net. Keep the EMI at or under 35% of take-home pay and six months of expenses aside.':S.household==='family'?'One income with dependents is the most fragile setup. Keep the EMI near 30%, hold nine months of expenses, and take term and health cover before the loan.':'Two incomes: the bank will lend on both, but plan so the larger income alone could carry the EMI for a year.');
+  if(S.employment==='self')adv.push('With variable pay, plan on your lowest reliable month and add three months to the emergency fund.');
+  adv.push(S.purpose==='live'?'Buying to live in: commute, comfort and an EMI you can carry matter more than resale value.':S.purpose==='invest'?'Buying to rent out: judge it like any investment. The investment step shows whether it beats what your money earns elsewhere.':'Living in it now and renting it out later: it has to pass both tests, a workable home today and a flat that rents and resells easily.');
+  if(S.purpose!=='invest'&&S.jobfix==='open')adv.push('Because your work location may change, renting near work is usually the safer choice for now.');
+  $('#youAdvice').innerHTML=note('green','What this means for you',adv.join('</p><p>'));
+
+  // salary
+  out('income',inr(R.income));out('expenses',inr(R.expenses));out('emiOther',inr(R.emiOther));out('surplus',inr(R.surplus));
+  out('saveRate',pct(R.saveRate,0));out('efMonths',R.efMonths.toFixed(1)+' months');out('efTargetTxt','Target for you: '+R.efTarget+' months, about '+short(R.monthlyNeed*R.efTarget));
+  var tot=Math.max(1,R.income),seg=function(v){return Math.max(0,Math.min(100,v/tot*100));};
+  var left=Math.max(0,R.surplus);
+  $('#paySplit').innerHTML='<i class="c1" style="width:'+seg(R.needs)+'%"></i><i class="c2" style="width:'+seg(R.wants)+'%"></i><i class="c3" style="width:'+seg(R.emiOther)+'%"></i><i class="c4" style="width:'+seg(left)+'%"></i>';
+  out('pNeeds',pct(seg(R.needs),0));out('pWants',pct(seg(R.wants),0));out('pEmi',pct(seg(R.emiOther),0));out('pLeft',pct(seg(left),0));
+  var sn='';
+  if(R.income<=0)sn+=note('amber','Enter your take-home pay to begin');
+  else if(R.surplus<0)sn+=note('red','You spend more than you earn','Fix this before thinking about a home loan. You are '+inr(-R.surplus)+' short each month.');
+  else if(R.saveRate<20)sn+=note('amber','Little is left over','Under 20% of pay is left each month. A home loan on top of this budget would be tight.');
+  else sn+=note('green','Healthy monthly surplus',pct(R.saveRate,0)+' of your pay is left each month.');
+  if(R.efMonths<R.efTarget)sn+=note('amber','Emergency fund is below target','You have '+R.efMonths.toFixed(1)+' months of cover. Add about '+short(Math.max(0,R.monthlyNeed*R.efTarget-num('efund')))+' before buying.');
+  $('#salNotes').innerHTML=sn;
+
+  // budget
+  out('safeEmi',inr(R.safeEmi));out('maxLoan',short(R.maxLoan));out('cash',short(num('cash')));out('maxPrice',short(R.maxPrice));
+  out('maxBind',R.maxBind==='emi'?'Your pay: the EMI limit':R.maxBind==='cash'?'Your cash: down payment and costs':'The lower loan share banks allow above this price');
+  out('incomeMult',R.incomeMult.toFixed(1)+' times');
+  out('stress1',inr(R.stress1));out('stress2',inr(R.stress2));
+  toggle($('#rowOneInc'),R.dual);
+  var sm=emi(R.maxPriceLoan,num('rate'),num('tenure')||20);
+  out('oneInc',R.bigInc>0?pct(sm/R.bigInc*100,0):'–');
+  out('sixMonths',short((R.monthlyNeed+sm)*6));
+  var an='';
+  if(R.maxBind==='cash')an+=note('amber','Cash is your limit, not salary','Your pay supports a bigger loan than your savings allow. Each extra ₹1 lakh saved raises the safe price by about '+short(100000/(1-R.maxLtv+num('affCostPct')/100))+'.');
+  if(R.maxBind==='emi')an+=note('','Salary is your limit','Your savings could support a higher price, but the EMI would cross your limit. Extra cash is better used as a larger down payment.');
+  if(R.incomeMult>5)an+=note('amber','High compared with income','A price above about five times yearly take-home pay leaves little room for anything else.');
+  an+=note('','Banks may offer more','Lenders often allow EMIs of 40–50% of income. That is their limit for getting repaid, not your limit for living well.');
+  $('#affNotes').innerHTML=an;
+
+  // flat
+  out('price',short(R.price));out('stampAll',inr(R.stamp+R.cess));out('reg',inr(R.reg));out('gst',inr(R.gst));toggle($('#rowGst'),R.uc);
+  out('brokLegal',inr(R.brok+num('legal')));out('softCosts',inr(R.soft));out('allIn',short(R.allIn));out('extraPct',pct(R.extraPct));
+  out('downAmt',short(R.downAmt));out('extras',short(R.extras));out('cashNeeded',short(R.cashNeeded));
+  out('gapLabel',R.cashGap>0?'You are short by':'Left after paying');out('cashGap',short(Math.abs(R.cashGap)));
+  out('perSba',inr(R.perSba));out('perCarpet',inr(R.perCarpet));out('eff',R.eff?pct(R.eff,0):'–');out('ownMonthly',inr(R.ownMonthly));
+  var fn='';
+  if(R.price>R.maxPrice*1.001&&R.maxPrice>0)fn+=note('red','Above your safe price','This flat is '+short(R.price)+'. Your safe limit from the previous step is '+short(R.maxPrice)+'.');
+  else if(R.price>0)fn+=note('green','Within your safe price','Your safe limit is '+short(R.maxPrice)+'.');
+  if(num('downPct')<100-R.ltvRule)fn+=note('amber','Down payment is below the usual minimum','For a flat at this price banks usually lend up to '+R.ltvRule+'%, so plan for at least '+(100-R.ltvRule)+'% down.');
+  if(R.eff>0&&R.eff<65)fn+=note('amber','High loading','Carpet area is only '+pct(R.eff,0)+' of super built-up. Compare flats on price per carpet sq ft.');
+  if(R.uc)fn+=note('amber','Under construction','Add the rent you will pay until possession to your costs, and check whether the quoted price includes GST.');
+  $('#flatNotes').innerHTML=fn;
+
+  // loan
+  out('loan',short(R.loan));out('emi',inr(R.emi));out('emiPctIncome',R.income>0?pct(R.emiPctIncome,0):'–');
+  out('totalInt',short(R.am.totalInt));out('totalPaid',short(R.loan+R.am.totalInt));out('emi1',inr(R.emi1));out('emi2',inr(R.emi2));
+  var pp=(num('prepayM')>0||num('prepayY')>0);
+  out('ppTime',pp?yrs(R.amP.months)+' instead of '+yrs(R.am.months):yrs(R.am.months));
+  out('ppSaved',pp?short(R.am.totalInt-R.amP.totalInt):'Enter a prepayment above');
+  var ln='';
+  if(R.loan>0)ln+=note('','Interest is the hidden price','Over the full term you pay '+short(R.am.totalInt)+' in interest on a loan of '+short(R.loan)+'. Paying one extra EMI a year typically cuts years off the loan.');
+  if(R.emiPctIncome>num('emiPct'))ln+=note('red','EMI is above your limit',pct(R.emiPctIncome,0)+' of take-home pay against a limit of '+pct(num('emiPct'),0)+'.');
+  $('#loanNotes').innerHTML=ln;
+  var A=pp?R.amP:R.am,mx=0;A.yearly.forEach(function(y){mx=Math.max(mx,y.prin+y.int);});
+  $('#amTable').innerHTML='<thead><tr><th>Year</th><th>Principal</th><th>Interest</th><th>Still owed</th><th></th></tr></thead><tbody>'+A.yearly.map(function(y){
+    return '<tr><td>'+y.y+'</td><td>'+short(y.prin)+'</td><td>'+short(y.int)+'</td><td>'+short(y.bal)+'</td><td><div class="bar"><i class="c4" style="width:'+(mx?y.prin/mx*100:0)+'%"></i><i class="c3" style="width:'+(mx?y.int/mx*100:0)+'%"></i></div></td></tr>';
+  }).join('')+'</tbody>';
+
+  // rent or buy
+  out('buyM',inr(R.emi+R.ownMonthly));out('rentM',inr(num('rentNow')));
+  out('rvbBuyLbl','Buyer\'s net worth after '+R.H+' years');out('rvbRentLbl','Renter\'s net worth after '+R.H+' years');
+  out('rvbBuyer',short(R.rvbH.buyer));out('rvbRenter',short(R.rvbH.renter));
+  var d=R.rvbH.buyer-R.rvbH.renter;
+  out('rvbWinLbl',d>=0?'Buying is ahead by':'Renting is ahead by');out('rvbDiff',short(Math.abs(d)));
+  out('rvbBreak',R.breakeven?'In year '+R.breakeven:'Not within 30 years');
+  $('#rvbNotes').innerHTML=(d>=0?note('green','Buying wins on these assumptions','It depends heavily on price growth of '+pct(num('priceGrow'))+' a year. Lower it by 2% and look again.'):note('amber','Renting wins on these assumptions','Buying needs '+(R.breakeven?'about '+R.breakeven+' years':'more than 30 years')+' to catch up. This only holds if the renter really invests the difference every month.'));
+  drawChart(R);
+
+  // investment
+  out('grossYield',pct(R.grossYield));out('netYield',pct(R.netYield));out('p2r',R.p2r?R.p2r.toFixed(0)+' years':'–');
+  out('cashflowM',inr(R.cashflowM));out('irrLbl','Yearly return on your cash over '+R.H+' years');out('irr',isFinite(R.irr)?pct(R.irr):'–');
+  out('altRet',pct(num('invRet')));
+  out('beGrowth',R.beGrowth===Infinity?'More than 40% a year':R.beGrowth===-Infinity?'None needed':isFinite(R.beGrowth)?pct(R.beGrowth)+' a year':'–');
+  var iv='';
+  if(isFinite(R.irr)){
+    iv+=R.irr>=num('invRet')?note('green','It beats your alternative','On your assumptions the flat returns '+pct(R.irr)+' a year on the cash you put in.'):note('amber','It falls short of your alternative','The flat returns '+pct(R.irr)+' a year on your cash, against '+pct(num('invRet'))+' elsewhere.');
+  }
+  if(R.p2r>30)iv+=note('amber','Expensive compared with rent','The price is '+R.p2r.toFixed(0)+' years of rent. Above about 30, renting is usually the better deal and the return relies on price growth.');
+  if(R.cashflowM<0)iv+=note('amber','You top it up every month','Rent falls short of the EMI and costs by '+inr(-R.cashflowM)+' a month.');
+  $('#invNotes').innerHTML=iv;
+
+  // save up
+  out('svTargetLbl','Cash needed in '+num('goalYears')+' years');out('svTarget',short(R.svTarget));out('svHave',short(R.svHave));
+  out('svMonthly',isFinite(R.svMonthly)?inr(R.svMonthly):'–');
+  out('svTimeLbl','At '+inr(num('saveMonthly'))+' a month you get there in');
+  out('svTime',R.svTime===null?'More than 40 years':R.svTime===0?'You already have it':yrs(R.svTime));
+  var sv='';
+  if(R.svMonthly===0)sv+=note('green','You already have enough','Keep the money somewhere stable until you buy.');
+  else if(isFinite(R.svMonthly)&&R.svMonthly>Math.max(0,R.surplus))sv+=note('amber','That is more than you have left each month','You have '+inr(Math.max(0,R.surplus))+' left over. Give it more time, or look at a lower price.');
+  if(R.svTime===null)sv+=note('red','Prices are rising faster than your savings','At this rate of saving the target moves away from you. Raise the monthly amount or lower the target price.');
+  $('#saveNotes').innerHTML=sv;
+
+  // tax
+  out('int1',short(R.int1));out('prin1',short(R.prin1));
+  out('taxLbl',R.taxSaved>=0?'Estimated tax saved in year 1':'Estimated extra tax in year 1');out('taxSaved',inr(Math.abs(R.taxSaved)));
+  out('effEmi',inr(R.effEmi));out('tds',R.tds?inr(R.tds):'None below ₹50 lakh');
+  var tn='';
+  if(S.taxUse==='self'&&S.regime==='new')tn+=note('amber','No deduction in the new regime','For a home you live in, the new regime gives no deduction for loan interest or principal. Compare both regimes on the tax department\'s calculator.');
+  if(S.taxUse==='self'&&S.regime==='old')tn+=note('','Old regime limits','Interest up to ₹2 lakh a year per person for a lived-in home, and principal within the shared ₹1.5 lakh limit. The saving shrinks every year as the interest part of the EMI falls.');
+  if(S.taxUse==='let')tn+=note('','Rented-out flat','Rent is taxed after a 30% standard deduction and the loan interest. A loss can be set off against salary only in the old regime, up to ₹2 lakh a year.');
+  tn+=note('','Check before you rely on this','India\'s new Income-tax Act applies from 1 April 2026 and renumbered the sections. The limits here were current in October 2026.');
+  $('#taxNotes').innerHTML=tn;
+
+  renderCompare(R);
+  var prog=checkProgress();
+
+  // result
+  var F=findings(R,prog),lvl='green';
+  F.forEach(function(f){if(f.l==='red')lvl='red';else if(f.l==='amber'&&lvl!=='red')lvl='amber';});
+  var st=$('#stamp');st.className='stamp '+lvl;
+  st.textContent=lvl==='green'?'Clear to proceed':lvl==='amber'?'Fix these first':'Hold off';
+  $('#stampText').textContent=lvl==='green'?'The numbers support this purchase. Finish the paper checks before you pay.':lvl==='amber'?'Workable, with points to sort out before you commit.':'On these numbers, buying this flat now would put your finances at risk.';
+  var order={red:0,amber:1,'':2,green:3};
+  F.sort(function(a,b){return order[a.l]-order[b.l];});
+  $('#findings').innerHTML=F.map(function(f){return note(f.l,f.t,f.b);}).join('');
+  out('emiBoth',inr(R.emi)+' ('+pct(R.emiPctIncome,0)+')');out('postSurplus',inr(R.postSurplus));
+  var x={rentFirst:lvl==='red'||(S.purpose!=='invest'&&S.jobfix==='open')};
+  $('#links').innerHTML=LINKS.filter(function(L){return L.on(R,x);}).map(function(L){
+    return '<div class="link"><div><b>'+L.n+'</b></div><a href="'+L.u+'" target="_blank" rel="noopener">'+L.u.replace('https://','')+'</a><p>'+L.d+'</p></div>';
+  }).join('');
+  R.level=lvl;R.findings=F;
+}
+
+function drawChart(R){
+  var W=640,Hh=340,pl=104,pr=14,pt=18,pb=44,n=Math.max(10,Math.min(30,R.H+8)),data=R.rvb.slice(0,n);
+  var mn=0,mx=1;data.forEach(function(p){mn=Math.min(mn,p.buyer,p.renter);mx=Math.max(mx,p.buyer,p.renter);});
+  var X=function(y){return pl+(y-1)/(n-1)*(W-pl-pr);},Y=function(v){return pt+(mx-v)/(mx-mn)*(Hh-pt-pb);};
+  var line=function(key){return data.map(function(p,i){return (i?'L':'M')+X(p.y).toFixed(1)+' '+Y(p[key]).toFixed(1);}).join(' ');};
+  var s='';
+  [0,0.5,1].forEach(function(t){var v=mn+(mx-mn)*t;s+='<line x1="'+pl+'" x2="'+(W-pr)+'" y1="'+Y(v)+'" y2="'+Y(v)+'" stroke="var(--rule)" stroke-width="1"/><text x="'+(pl-8)+'" y="'+(Y(v)+7)+'" text-anchor="end">'+short(v)+'</text>';});
+  [1,Math.round(n/2),n].forEach(function(y,i){s+='<text x="'+X(y)+'" y="'+(Hh-12)+'" text-anchor="'+(i===0?'start':i===2?'end':'middle')+'">Year '+y+'</text>';});
+  if(R.H<=n)s+='<line x1="'+X(R.H)+'" x2="'+X(R.H)+'" y1="'+pt+'" y2="'+(Hh-pb)+'" stroke="var(--ink)" stroke-width="1" stroke-dasharray="4 4"/><text x="'+X(R.H)+'" y="'+(pt+16)+'" text-anchor="'+(R.H>n/2?'end':'start')+'" dx="'+(R.H>n/2?-6:6)+'">You sell</text>';
+  s+='<path d="'+line('renter')+'" fill="none" stroke="var(--pen)" stroke-width="2.5"/><path d="'+line('buyer')+'" fill="none" stroke="var(--green)" stroke-width="2.5"/>';
+  $('#rvbChart').innerHTML=s;
+}
+
+function renderCompare(R){
+  var cl=function(v){return Math.max(0,Math.min(100,v));},rows=[];
+  ['A','B','C'].forEach(function(x){
+    var c=S.cmp[x]||{},g=function(k){var v=c[k];return (typeof v==='number'&&isFinite(v))?v:0;};
+    out('cmpName'+x,c.name?c.name:'Flat '+x);
+    if(g('price')<=0)return;
+    var yld=g('rent')*12/g('price')*100,sc={
+      commute:cl(100-(g('commute')-15)*2),metro:cl(100-(g('metro')-1)/7*100),ready:c.ready==='uc'?50:100,
+      builder:cl(g('builder')*20),legal:cl(g('legal')*20),water:cl(g('water')*20),infra:cl(g('infra')*20),liq:cl(g('liq')*20),
+      yld:cl(yld/5*100),afford:R.maxPrice>0?cl(100-(g('price')/R.maxPrice-1)*500):50
+    };
+    var wl={commute:20,metro:10,legal:15,builder:10,water:10,infra:10,ready:5,liq:5,afford:15,yld:0};
+    var wi={commute:0,metro:10,legal:15,builder:10,water:5,infra:5,ready:5,liq:15,afford:10,yld:25};
+    var w={};for(var k in wl){w[k]=S.purpose==='live'?wl[k]:S.purpose==='invest'?wi[k]:(wl[k]+wi[k])/2;}
+    var tot=0;for(var k2 in w)tot+=sc[k2]*w[k2]/100;
+    rows.push({x:x,name:c.name||('Flat '+x),price:g('price'),pc:g('carpet')>0?g('price')/g('carpet'):0,eff:(g('carpet')>0&&g('sba')>0)?g('carpet')/g('sba')*100:0,yld:yld,commute:g('commute'),metro:g('metro'),safe:g('price')<=R.maxPrice,score:tot});
+  });
+  if(!rows.length){$('#cmpTable').innerHTML='';$('#cmpNotes').innerHTML=note('','Enter at least one flat','Add a price to start comparing.');return;}
+  var bestS=Math.max.apply(null,rows.map(function(r){return r.score;}));
+  var line=function(lbl,fn,best){return '<tr><td>'+lbl+'</td>'+rows.map(function(r){return '<td'+(best&&best(r)?' class="best"':'')+'>'+fn(r)+'</td>';}).join('')+'</tr>';};
+  var minPc=Math.min.apply(null,rows.map(function(r){return r.pc||Infinity;})),maxY=Math.max.apply(null,rows.map(function(r){return r.yld;}));
+  $('#cmpTable').innerHTML='<thead><tr><th></th>'+rows.map(function(r){return '<th>'+esc(r.name)+'</th>';}).join('')+'</tr></thead><tbody>'+
+    line('Price',function(r){return short(r.price);})+
+    line('Per carpet sq ft',function(r){return r.pc?inr(r.pc):'–';},function(r){return rows.length>1&&r.pc===minPc;})+
+    line('Carpet share',function(r){return r.eff?pct(r.eff,0):'–';})+
+    line('Gross rent return',function(r){return pct(r.yld);},function(r){return rows.length>1&&r.yld===maxY;})+
+    line('Commute',function(r){return r.commute?r.commute+' min':'–';})+
+    line('Running metro',function(r){return r.metro+' km';})+
+    line('Within your safe price',function(r){return r.safe?'Yes':'No';})+
+    line('Score out of 100',function(r){return r.score.toFixed(0);},function(r){return rows.length>1&&r.score===bestS;})+'</tbody>';
+  var b=rows.filter(function(r){return r.score===bestS;})[0];
+  $('#cmpNotes').innerHTML=(rows.length>1?note('green',esc(b.name)+' scores highest','Weighted for '+(S.purpose==='live'?'living in it':S.purpose==='invest'?'renting it out':'living now and renting later')+'. A score is a way to organise your thinking, not a verdict. A flat with unclear papers is a no at any score.'):'')+(b&&!b.safe?note('amber','The top flat is above your safe price','Your limit is '+short(R.maxPrice)+'.'):'');
+}
+
+/* ---------- summary text ---------- */
+function summaryText(){
+  var L=[];
+  L.push('*Home purchase plan*');
+  L.push('Result: '+(R.level==='green'?'Clear to proceed':R.level==='amber'?'Fix a few things first':'Hold off for now'));
+  L.push('');
+  L.push('*Numbers*');
+  L.push('• Take-home pay: '+inr(R.income)+' a month');
+  L.push('• Safe flat price: '+short(R.maxPrice));
+  L.push('• Flat considered: '+short(R.price)+' (all-in '+short(R.allIn)+')');
+  L.push('• Loan: '+short(R.loan)+', EMI '+inr(R.emi)+' ('+pct(R.emiPctIncome,0)+' of pay)');
+  L.push('• Cash needed up front: '+short(R.cashNeeded)+(R.cashGap>0?', short by '+short(R.cashGap):''));
+  L.push('• Rent for a similar home: '+inr(num('rentNow'))+' a month');
+  L.push('• After '+R.H+' years: '+(R.rvbH.buyer>=R.rvbH.renter?'buying':'renting')+' is ahead by '+short(Math.abs(R.rvbH.buyer-R.rvbH.renter)));
+  if(S.purpose!=='live'&&isFinite(R.irr))L.push('• Return as an investment: '+pct(R.irr)+' a year vs '+pct(num('invRet'))+' elsewhere');
+  L.push('');
+  L.push('*Main points*');
+  R.findings.filter(function(f){return f.l==='red'||f.l==='amber';}).slice(0,6).forEach(function(f){L.push((f.l==='red'?'🔴 ':'🟠 ')+f.t);});
+  if(!R.findings.some(function(f){return f.l==='red'||f.l==='amber';}))L.push('🟢 No money concerns found. Finish the paper checks.');
+  L.push('');
+  L.push('Estimates only, not professional advice.');
+  return L.join('\n');
+}
+
+/* ---------- steps ---------- */
+var STEPS=[['you','You'],['salary','Salary'],['budget','Budget'],['flat','The flat'],['loan','Loan'],['rvb','Rent or buy'],['invest','Investment'],['saveup','Save up'],['tax','Tax'],['compare','Compare'],['checks','Checks'],['result','Result'],['guide','Guide']];
+var cur=0;
+function go(i,noscroll){
+  cur=Math.max(0,Math.min(STEPS.length-1,i));
+  STEPS.forEach(function(s,j){$('#'+s[0]).classList.toggle('on',j===cur);});
+  $$('#steps button').forEach(function(b,j){if(j===cur){b.setAttribute('aria-current','true');if(b.scrollIntoView)try{b.scrollIntoView({inline:'center',block:'nearest'});}catch(e){}}else b.removeAttribute('aria-current');});
+  $('#btnPrev').disabled=cur===0;$('#btnNext').disabled=cur===STEPS.length-1;
+  $('#btnNext').textContent=cur===STEPS.length-1?'Next':'Next: '+STEPS[cur+1][1];
+  if(!noscroll){try{window.scrollTo(0,0);}catch(e){}}
+}
+
+function init(){
+  buildForms();buildChecks();
+  $('#steps').innerHTML=STEPS.map(function(s,i){return '<button type="button" data-step="'+i+'"><span class="n">'+(i+1)+'</span>'+s[1]+'</button>';}).join('');
+  $('#steps').addEventListener('click',function(e){var b=e.target.closest?e.target.closest('button'):null;if(b)go(parseInt(b.getAttribute('data-step'),10));});
+  $('#btnPrev').addEventListener('click',function(){go(cur-1);});
+  $('#btnNext').addEventListener('click',function(){go(cur+1);});
+  document.addEventListener('input',onInput);document.addEventListener('change',onInput);
+  $('#btnClear').addEventListener('click',function(){BLANK.forEach(function(k){S[k]='';});['A','B','C'].forEach(function(x){S.cmp[x]=clone(DEF.cmp.C);});S.chk={};syncInputs();render();save();});
+  $('#btnExample').addEventListener('click',function(){S=clone(DEF);syncInputs();render();save();});
+  $('#btnKA').addEventListener('click',function(){var p=num('price');S.stampPct=p<2e6?2:(p<=4.5e6?3:5);S.cessPct=Math.round(S.stampPct*0.12*100)/100;S.regPct=2;syncInputs();render();save();});
+  $('#btnPrint').addEventListener('click',function(){window.print();});
+  $('#btnCopy').addEventListener('click',function(){
+    var t=summaryText(),box=$('#summaryBox'),btn=this;box.value=t;box.classList.remove('hide');
+    var done=function(){btn.textContent='Copied summary';setTimeout(function(){btn.textContent='Copy summary for WhatsApp';},2500);};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,function(){box.focus();box.select();});}
+    else{box.focus();box.select();try{if(document.execCommand('copy'))done();}catch(e){}}
+  });
+  $('#btnExport').addEventListener('click',function(){$('#dataBox').value=JSON.stringify(S);$('#dataMsg').textContent='Copy this text and keep it somewhere safe.';});
+  $('#btnImport').addEventListener('click',function(){
+    try{var o=JSON.parse($('#dataBox').value);if(!o||typeof o!=='object')throw 0;S=clone(DEF);merge(S,o);syncInputs();render();save();$('#dataMsg').textContent='Numbers loaded.';}
+    catch(e){$('#dataMsg').textContent='That text could not be read. Paste the full text exactly as it was copied.';}
+  });
+  syncInputs();render();go(0,true);
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+if(typeof window!=='undefined')window.__planner={compute:compute,state:function(){return S;},emi:emi,pv:pv,irr:irr};
+})();
+</script>
+</body>
+</html>
