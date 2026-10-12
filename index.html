@@ -52,6 +52,10 @@ nav{position:sticky;top:16px;z-index:20;margin-top:16px}
 .brand b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
 .nav-links{display:flex;gap:6px}
 .nav-links a{text-decoration:none;color:var(--soft);font-size:14px;padding:10px 14px;border-radius:12px;transition:background .2s,color .2s}
+.nav-links a.view-switch{display:inline-flex;align-items:center;gap:7px;color:#fff;border:1px solid rgba(205,170,255,.45);
+  background:linear-gradient(135deg,rgba(168,85,247,.32),rgba(56,189,248,.16));box-shadow:0 0 18px -6px rgba(168,85,247,.8)}
+.nav-links a.view-switch:hover{background:linear-gradient(135deg,rgba(168,85,247,.5),rgba(56,189,248,.26))}
+.view-switch i{font-style:normal;font-size:13px;opacity:.9}
 .nav-links a:hover{background:rgba(168,85,247,0.16);color:#fff}
 
 /* Hero */
@@ -100,6 +104,16 @@ html.intro .chips{opacity:0}
 .hero .cta{position:relative;overflow:hidden;transition:translate .3s cubic-bezier(.2,.7,.2,1), transform .2s, box-shadow .2s}
 .hero .cta::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:var(--bo,0);transition:opacity .3s;
   background:radial-gradient(140px circle at var(--bx,50%) var(--by,50%), rgba(255,255,255,.38), rgba(165,228,255,.12) 40%, transparent 65%)}
+#reticle{position:fixed;left:0;top:0;width:64px;height:64px;margin:-32px 0 0 -32px;pointer-events:none;z-index:3;opacity:0;mix-blend-mode:screen;
+  transition:opacity .3s, width .25s, height .25s, margin .25s;will-change:transform}
+#reticle.on{opacity:.9}
+#reticle.hot{width:86px;height:86px;margin:-43px 0 0 -43px}
+#reticle svg{width:100%;height:100%;overflow:visible;display:block}
+#reticle .r1{transform-origin:50% 50%;animation:retSpin 7s linear infinite}
+#reticle .r2{transform-origin:50% 50%;animation:retSpin 4s linear infinite reverse}
+#reticle.hot circle,#reticle.hot line{stroke:#f9a8d4}
+@keyframes retSpin{to{transform:rotate(360deg)}}
+@media (hover:none),(pointer:coarse){#reticle{display:none}}
 #sparks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 @media (max-width:1060px){ .holo{display:none} }
 @media (max-width:760px){ .chip3d{font-size:11px;padding:5px 10px} }
@@ -293,7 +307,7 @@ footer a:hover{text-decoration:underline}
   .spin{animation:none}
   #rain{display:none}
   .new{animation:none}
-  .aurora i,.holo,.holo img,.holo .scan,.typer .caret{animation:none}
+  .aurora i,.holo,.holo img,.holo .scan,.typer .caret,#reticle .r1,#reticle .r2{animation:none}
   .nameplate::before,.nameplate::after,.hero h1 .metal{animation:none}
   .reveal{opacity:1;translate:none}
   .tile,.cta,.pill{transition:none}
@@ -306,6 +320,12 @@ footer a:hover{text-decoration:underline}
 <canvas id="gl" aria-hidden="true"></canvas>
 <div id="spot" aria-hidden="true"></div>
 <canvas id="sparks" aria-hidden="true"></canvas>
+<div id="reticle" aria-hidden="true"><svg viewBox="0 0 64 64">
+  <g class="r1"><circle cx="32" cy="32" r="29" fill="none" stroke="#a5e4ff" stroke-width="1.2" stroke-dasharray="3 7" opacity=".9"/></g>
+  <g class="r2"><circle cx="32" cy="32" r="21" fill="none" stroke="#c084fc" stroke-width="1.4" stroke-dasharray="22 11" opacity=".95"/></g>
+  <line x1="32" y1="0" x2="32" y2="8" stroke="#a5e4ff" stroke-width="1.4"/><line x1="32" y1="56" x2="32" y2="64" stroke="#a5e4ff" stroke-width="1.4"/>
+  <line x1="0" y1="32" x2="8" y2="32" stroke="#a5e4ff" stroke-width="1.4"/><line x1="56" y1="32" x2="64" y2="32" stroke="#a5e4ff" stroke-width="1.4"/>
+  <circle cx="32" cy="32" r="2.2" fill="#fff"/></svg></div>
 <div class="bg-fade"></div>
 
 <div class="wrap">
@@ -319,6 +339,7 @@ footer a:hover{text-decoration:underline}
         <a href="#explore">Explore</a>
         <a href="#featured">Featured</a>
         <a href="#about">About</a>
+        <a class="view-switch" href="home-orb.html" title="Switch to the orb design"><i aria-hidden="true">◎</i>Orb view</a>
       </div>
     </div>
   </nav>
@@ -729,7 +750,7 @@ footer a:hover{text-decoration:underline}
   // Cursor sparkle trail + click burst (hero only) and 3D shockwave
   (function(){
     if(reduced) return;
-    var cv=$("sparks"), g=cv.getContext("2d"), hero=$("top"), P=[], sraf=null, last=0, lx=null, ly=null;
+    var cv=$("sparks"), g=cv.getContext("2d"), hero=$("top"), P=[], RINGS=[], sraf=null, last=0, lx=null, ly=null;
     var COLS=["192,132,252","56,189,248","244,114,182","235,240,255"];
     function size(){ var d=Math.min(window.devicePixelRatio||1,2); cv.width=innerWidth*d; cv.height=innerHeight*d; g.setTransform(d,0,0,d,0,0); }
     size(); addEventListener("resize",size);
@@ -743,19 +764,44 @@ footer a:hover{text-decoration:underline}
         var k=p.l/p.L, r=p.s*(0.4+k);
         var gr=g.createRadialGradient(p.x,p.y,0,p.x,p.y,r*3); gr.addColorStop(0,"rgba(255,255,255,"+k+")"); gr.addColorStop(0.3,"rgba("+p.c+","+(k*0.8)+")"); gr.addColorStop(1,"rgba("+p.c+",0)");
         g.fillStyle=gr; g.beginPath(); g.arc(p.x,p.y,r*3,0,7); g.fill(); }
+      var now=performance.now();
+      for(var j=RINGS.length-1;j>=0;j--){ var R=RINGS[j], k2=(now-R.t0)/950; if(k2>=1){RINGS.splice(j,1);continue;}
+        var e2=1-Math.pow(1-k2,3), rad=18+e2*250, al=1-k2;
+        g.lineWidth=2.4*(1-k2)+0.6;
+        g.strokeStyle="rgba(56,189,248,"+al+")"; g.beginPath(); g.arc(R.x+e2*5,R.y,rad,0,7); g.stroke();
+        g.strokeStyle="rgba(244,114,182,"+(al*0.85)+")"; g.beginPath(); g.arc(R.x-e2*5,R.y,rad*0.985,0,7); g.stroke();
+        g.strokeStyle="rgba(255,255,255,"+(al*0.7)+")"; g.lineWidth=1; g.beginPath(); g.arc(R.x,R.y,rad*0.55,0,7); g.stroke();
+        g.strokeStyle="rgba(192,132,252,"+al+")"; g.lineWidth=1.6;
+        for(var q2=0;q2<16;q2++){ var an=q2/16*6.283+e2*1.4, r1=rad*1.04, r2=rad*(q2%2?1.1:1.17);
+          g.beginPath(); g.moveTo(R.x+Math.cos(an)*r1,R.y+Math.sin(an)*r1); g.lineTo(R.x+Math.cos(an)*r2,R.y+Math.sin(an)*r2); g.stroke(); }
+        if(k2<0.35){ g.fillStyle="rgba(255,255,255,"+(0.35-k2)+")"; g.beginPath(); g.arc(R.x,R.y,30*(1-k2),0,7); g.fill(); }
+      }
       g.globalCompositeOperation="source-over";
-      sraf = P.length? requestAnimationFrame(loop) : null;
+      sraf = (P.length||RINGS.length)? requestAnimationFrame(loop) : null;
     }
     if(fineQ()) addEventListener("pointermove",function(e){
       if(!inHero(e.clientY)){ lx=null; return; }
       var n = lx===null?1:Math.min(3,1+(Math.hypot(e.clientX-lx,e.clientY-ly)/14|0)); lx=e.clientX; ly=e.clientY;
       for(var i=0;i<n;i++) add(e.clientX+(Math.random()-.5)*6, e.clientY+(Math.random()-.5)*6, (Math.random()-.5)*0.8, (Math.random()-.5)*0.8, 500+Math.random()*400, 1.2+Math.random()*1.8);
     },{passive:true});
-    hero.addEventListener("pointerdown",function(e){
-      if(e.target.closest("a,button,input")) return;
+    document.addEventListener("pointerdown",function(e){
+      if(e.target.closest("a,button,input,label,.tile,.featured,.path,.pills,.empty,nav")) return;
+      RINGS.push({x:e.clientX,y:e.clientY,t0:performance.now()}); if(!sraf){ last=0; sraf=requestAnimationFrame(loop);}
       for(var i=0;i<34;i++){ var a=Math.random()*6.283, sp=1.5+Math.random()*3.5; add(e.clientX,e.clientY,Math.cos(a)*sp,Math.sin(a)*sp,600+Math.random()*600,1.4+Math.random()*2.2); }
       if(window.__augShock) window.__augShock(e.clientX,e.clientY);
     });
+  })();
+
+  // Sci-fi targeting reticle that follows the mouse
+  (function(){
+    if(!fineQ()) return;
+    var el=$("reticle"), tx=-100, ty=-100, x=-100, y=-100, rr=null;
+    function step(){ x+=(tx-x)*(reduced?1:0.28); y+=(ty-y)*(reduced?1:0.28); el.style.transform="translate("+x.toFixed(1)+"px,"+y.toFixed(1)+"px)";
+      rr = (Math.abs(tx-x)+Math.abs(ty-y)>0.3) ? requestAnimationFrame(step) : null; }
+    addEventListener("pointermove",function(e){ tx=e.clientX; ty=e.clientY; el.classList.add("on");
+      el.classList.toggle("hot", !!(e.target.closest && e.target.closest("a,button,input,.tile,.pill,.step"))); if(!rr) rr=requestAnimationFrame(step); },{passive:true});
+    document.addEventListener("pointerleave",function(){ el.classList.remove("on"); });
+    addEventListener("pointerdown",function(){ if(!reduced && el.animate) el.animate([{scale:1},{scale:0.7},{scale:1.25},{scale:1}],{duration:450,easing:"cubic-bezier(.2,.7,.2,1)"}); });
   })();
 
   // Name rain: SUJIT KULKARNI falling like digital rain (two depth layers)
@@ -880,101 +926,173 @@ import * as THREE from "three";
   window.__augStop && window.__augStop();
   document.documentElement.classList.add("webgl");
 
-  const small = Math.min(innerWidth, innerHeight) < 700;
-  const N = small ? 11000 : 26000;
+  const small = Math.min(innerWidth, innerHeight) < 700 || (navigator.hardwareConcurrency||8) <= 4;
+  const N = small ? 14000 : 40000;
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.1, 100);
   camera.position.set(0, 0, 5);
   renderer.setClearColor(0x000000, 0);
   const TANH = Math.tan(THREE.MathUtils.degToRad(25)) * 5;   // half visible height at z=0
 
-  // ---------- particle swarm: brain sphere + inner neurons + orbit rings  ->  spiral galaxy ----------
-  const pos = new Float32Array(N*3), gal = new Float32Array(N*3), seed = new Float32Array(N*4);
-  const GA = Math.PI*(3-Math.sqrt(5));
-  for (let i=0;i<N;i++){
-    const r = Math.random(); let x,y,z,kind;
-    if (r < 0.6){ kind=0; const k=(i+0.5)/N; y=1-2*k; const rr=Math.sqrt(1-y*y), th=GA*i, n=1+(Math.random()-0.5)*0.07; x=Math.cos(th)*rr*n; z=Math.sin(th)*rr*n; y*=n; }
-    else if (r < 0.78){ kind=1; const u=Math.random()*2-1, ph=Math.random()*6.283, rad=Math.pow(Math.random(),0.55)*0.7, q=Math.sqrt(1-u*u); x=Math.cos(ph)*q*rad; y=u*rad; z=Math.sin(ph)*q*rad; }
-    else { kind=2; const ring=Math.random()<0.55?0:1, a=Math.random()*6.283, rad=1.34+Math.random()*0.2+ring*0.24, ry=(Math.random()-0.5)*0.035, rz=Math.sin(a)*rad, tilt=ring?1.15:-0.42;
-      x=Math.cos(a)*rad; y=ry*Math.cos(tilt)-rz*Math.sin(tilt); z=ry*Math.sin(tilt)+rz*Math.cos(tilt); }
-    pos.set([x,y,z], i*3);
-    const arms=3, gr=Math.pow(Math.random(),0.75)*4.4+0.12, ang=(i%arms)/arms*6.283 + gr*1.3 + (Math.random()-0.5)*0.6/(gr*0.45+0.3);
-    gal.set([gr, ang, (Math.random()-0.5)*0.28*Math.exp(-gr*0.35)], i*3);
-    seed.set([Math.random(), i%3, 0.55+Math.pow(Math.random(),3)*2.8, kind], i*4);
-  }
-  const geo = new THREE.BufferGeometry();
+  // ---------- humanoid head + shoulders as a signed-distance shape ----------
+  function sdE(x,y,z,cx,cy,cz,rx,ry,rz){ const ax=(x-cx)/rx, ay=(y-cy)/ry, az=(z-cz)/rz, k0=Math.sqrt(ax*ax+ay*ay+az*az),
+    bx=ax/rx, by=ay/ry, bz=az/rz, k1=Math.sqrt(bx*bx+by*by+bz*bz); return k1===0 ? -Math.min(rx,ry,rz) : k0*(k0-1)/k1; }
+  function sdCap(x,y,z,ax,ay,az,bx,by,bz,r){ const px=x-ax,py=y-ay,pz=z-az, ux=bx-ax,uy=by-ay,uz=bz-az;
+    const h=Math.max(0,Math.min(1,(px*ux+py*uy+pz*uz)/(ux*ux+uy*uy+uz*uz))); const dx=px-ux*h,dy=py-uy*h,dz=pz-uz*h; return Math.sqrt(dx*dx+dy*dy+dz*dz)-r; }
+  function smin(a,b,k){ const h=Math.max(k-Math.abs(a-b),0)/k; return Math.min(a,b)-h*h*k*0.25; }
+  function head(x,y,z){ const ax=Math.abs(x);
+    let d=sdE(x,y,z, 0,0.18,-0.05, 0.40,0.46,0.48);                    // cranium
+    d=smin(d,sdE(x,y,z, 0,-0.12,0.08, 0.33,0.38,0.36),0.12);           // face / jaw
+    d=smin(d,sdE(x,y,z, 0,-0.41,0.23, 0.15,0.11,0.12),0.08);           // chin
+    d=smin(d,sdE(x,y,z, 0,0.12,-0.36, 0.34,0.36,0.22),0.12);           // back of skull
+    d=smin(d,sdE(x,y,z, 0,-0.05,0.43, 0.07,0.14,0.12),0.05);           // nose
+    d=smin(d,sdE(x,y,z, 0,0.13,0.33, 0.30,0.075,0.11),0.06);           // brow
+    d=smin(d,sdE(ax,y,z, 0.21,-0.06,0.24, 0.12,0.09,0.10),0.06);       // cheekbones
+    d=smin(d,sdE(x,y,z, 0,-0.235,0.325, 0.12,0.04,0.06),0.04);         // lips
+    d=smin(d,sdE(ax,y,z, 0.395,0.0,-0.02, 0.05,0.12,0.08),0.04);       // ears
+    d=-smin(-d, sdE(ax,y,z, 0.14,0.045,0.375, 0.08,0.055,0.06), 0.04); // eye sockets (carved)
+    d=smin(d,sdCap(x,y,z, 0,-0.42,-0.05, 0,-0.86,-0.08, 0.16),0.08);   // neck
+    d=smin(d,sdE(x,y,z, 0,-1.02,-0.08, 0.82,0.20,0.30),0.15);          // shoulders
+    d=smin(d,sdE(x,y,z, 0,-1.22,-0.02, 0.62,0.28,0.30),0.12);          // upper chest
+    return d; }
+
+  // ---------- build all particle targets ----------
+  const pos=new Float32Array(N*3), seed=new Float32Array(N*4), helix=new Float32Array(N*3), gal=new Float32Array(N*3),
+        tun=new Float32Array(N*3), norm=new Float32Array(N*3), nameArr=new Float32Array(N*3), scat=new Float32Array(N*3);
+  const nSurf=Math.round(N*0.74), nIn=Math.round(N*0.15), nEye=Math.round(N*0.015);
+  let i=0, tries=0;
+  while(i<nSurf && tries<4e6){ tries++;
+    const x=(Math.random()*2-1)*0.9, y=-1.4+Math.random()*2.08, z=(Math.random()*2-1)*0.62, d=head(x,y,z);
+    if(d>0.06||d<-0.06) continue;
+    const e=0.004, gx=head(x+e,y,z)-head(x-e,y,z), gy=head(x,y+e,z)-head(x,y-e,z), gz=head(x,y,z+e)-head(x,y,z-e), gl=Math.sqrt(gx*gx+gy*gy+gz*gz)||1;
+    const px=x-gx/gl*d, py=y-gy/gl*d, pz=z-gz/gl*d;
+    if(Math.abs(head(px,py,pz))>0.012 || py<-1.36) continue;
+    if(i<nSurf*0.6){ const band=((py+2)/0.085)%1; if(band>0.12) continue; }        // holographic scan contours
+    if(pz<0.05 && Math.random()<0.6) continue; if(py<-0.9 && Math.random()<0.45) continue;                           // favour the face
+    pos.set([px,py,pz], i*3); norm.set([gx/gl,gy/gl,gz/gl], i*3); seed.set([Math.random(), i%3, 0.5+Math.pow(Math.random(),3)*2.2, 0], i*4); i++; }
+  for(let k=0;k<nIn;k++,i++){ let x,y,z; do{ x=Math.random()*2-1; y=Math.random()*2-1; z=Math.random()*2-1; }while(x*x+y*y+z*z>1);
+    pos.set([x*0.30, 0.2+y*0.33, -0.05+z*0.35], i*3); seed.set([Math.random(), i%3, 0.5+Math.random()*1.2, 1], i*4); }
+  for(let k=0;k<nEye;k++,i++){ const sx=k%2?1:-1, u=Math.random()*2-1, ph=Math.random()*6.283, q=Math.sqrt(1-u*u), r=0.028*Math.cbrt(Math.random());
+    pos.set([sx*0.14+Math.cos(ph)*q*r, 0.045+u*r, 0.355+Math.sin(ph)*q*r], i*3); seed.set([Math.random(), 1, 0.8+Math.random()*0.8, 3], i*4); }
+  for(;i<N;i++){ const ring=Math.random()<0.55?0:1, a=Math.random()*6.283, rad=1.0+Math.random()*0.16+ring*0.22, ry=(Math.random()-0.5)*0.03, rz=Math.sin(a)*rad, tilt=ring?1.2:-0.5;
+    pos.set([Math.cos(a)*rad, -0.25+ry*Math.cos(tilt)-rz*Math.sin(tilt), ry*Math.sin(tilt)+rz*Math.cos(tilt)], i*3); seed.set([Math.random(), i%3, 0.5+Math.pow(Math.random(),3)*2.2, 2], i*4); }
+  for(let k=0;k<N;k++){
+    const u=Math.random()*2-1, rung=Math.random()<0.22, strand=Math.random()<0.5?0:Math.PI;
+    if(rung){ const uq=Math.round(u*46)/46; helix.set([uq, uq*10.0, (Math.random()*2-1)*0.55], k*3); }
+    else helix.set([u, u*10.0+strand, 0.55+(Math.random()-0.5)*0.12], k*3);
+    const arms=3, gr=Math.pow(Math.random(),0.75)*4.6+0.12, ang=(k%arms)/arms*6.283+gr*1.3+(Math.random()-0.5)*0.6/(gr*0.45+0.3);
+    gal.set([gr, ang, (Math.random()-0.5)*0.28*Math.exp(-gr*0.35)], k*3);
+    const core=Math.random()<0.12; tun.set([Math.random()*6.283, Math.random(), core? Math.random()*0.18 : 1.0+Math.random()*0.4], k*3);
+    const uu=Math.random()*2-1, ph=Math.random()*6.283, qq=Math.sqrt(1-uu*uu), rr=4.5+Math.random()*5;
+    scat.set([Math.cos(ph)*qq*rr*1.4, uu*rr, Math.min(2.5, Math.sin(ph)*qq*rr)], k*3); }
+
+  const geo=new THREE.BufferGeometry();
   geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
-  geo.setAttribute("aGal", new THREE.BufferAttribute(gal,3));
   geo.setAttribute("aSeed", new THREE.BufferAttribute(seed,4));
-  const nameArr = new Float32Array(N*3), scat = new Float32Array(N*3);
-  for (let i=0;i<N;i++){ const u=Math.random()*2-1, ph=Math.random()*6.283, q=Math.sqrt(1-u*u), rr=4.5+Math.random()*5;
-    scat.set([Math.cos(ph)*q*rr*1.4, u*rr, Math.min(2.5, Math.sin(ph)*q*rr)], i*3); }
+  geo.setAttribute("aNorm", new THREE.BufferAttribute(norm,3));
+  geo.setAttribute("aHelix", new THREE.BufferAttribute(helix,3));
+  geo.setAttribute("aGal", new THREE.BufferAttribute(gal,3));
+  geo.setAttribute("aTun", new THREE.BufferAttribute(tun,3));
   geo.setAttribute("aName", new THREE.BufferAttribute(nameArr,3));
   geo.setAttribute("aScat", new THREE.BufferAttribute(scat,3));
+
   const U = {
-    uTime:{value:0}, uMorph:{value:0}, uSize:{value: small?24:30}, uPR:{value:1}, uScale:{value:1}, uLift:{value:0.7},
-    uMouse:{value:new THREE.Vector3(99,99,0)}, uName:{value:0}, uScat:{value:0}, uNameC:{value:new THREE.Vector2(0,0)}, uShock:{value:new THREE.Vector3(0,0,-100)},
+    uTime:{value:0}, uStage:{value:0}, uSize:{value: small?20:24}, uPR:{value:1}, uScale:{value:1}, uAspect:{value:1},
+    uName:{value:0}, uIntroName:{value:0}, uBuild:{value:-3}, uScat:{value:0}, uVel:{value:0}, uTravel:{value:0},
+    uYaw:{value:-0.75}, uPitch:{value:0}, uHeadS:{value:1.5}, uHeadA:{value:1}, uHeadP:{value:new THREE.Vector2(2,0.3)}, uNameC:{value:new THREE.Vector2(0,0)},
+    uMouse:{value:new THREE.Vector3(99,99,0)}, uShock:{value:new THREE.Vector3(0,0,-100)},
     uC0:{value:new THREE.Color("#c084fc")}, uC1:{value:new THREE.Color("#38bdf8")}, uC2:{value:new THREE.Color("#f472b6")}
   };
   const mat = new THREE.ShaderMaterial({
     uniforms:U, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
     vertexShader:`
-      uniform float uTime,uMorph,uSize,uPR,uScale,uLift,uName,uScat; uniform vec3 uMouse,uC0,uC1,uC2,uShock; uniform vec2 uNameC;
-      attribute vec3 aGal; attribute vec4 aSeed; attribute vec3 aName; attribute vec3 aScat; varying vec3 vCol; varying float vA;
+      uniform float uTime,uStage,uSize,uPR,uScale,uAspect,uName,uIntroName,uBuild,uScat,uVel,uTravel,uYaw,uPitch,uHeadS,uHeadA;
+      uniform vec2 uHeadP,uNameC; uniform vec3 uMouse,uShock,uC0,uC1,uC2;
+      attribute vec4 aSeed; attribute vec3 aHelix,aGal,aTun,aName,aScat,aNorm;
+      varying vec3 vCol; varying float vA;
       mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}
+      float stg(float f,float s){return smoothstep(0.0,1.0,clamp(f*1.35-s*0.35,0.0,1.0));}
       void main(){
-        float t=uTime, kind=aSeed.w; vec3 p=position;
-        if(kind<0.5) p*=1.0+0.05*sin(t*1.4+aSeed.x*6.283+p.y*5.0);
-        else if(kind<1.5) p+=0.06*vec3(sin(t*1.7+aSeed.x*20.0),cos(t*1.3+aSeed.x*17.0),sin(t*1.5+aSeed.x*13.0));
-        p.xz=rot(kind>1.5? t*0.32 : t*0.11)*p.xz;
-        p.yz=rot(0.28)*p.yz;
-        float limb=1.0-abs(normalize(p+1e-4).z);
-        p*=uScale; p.y+=uLift;
+        float t=uTime, kind=aSeed.w, sd=aSeed.x, hy=position.y;
+        // humanoid
+        vec3 h=position;
+        if(kind<0.5) h*=1.0+0.012*sin(t*1.6+h.y*6.0);
+        else if(kind<1.5) h+=0.03*vec3(sin(t*1.9+sd*20.0),cos(t*1.5+sd*17.0),sin(t*1.7+sd*13.0));
+        else if(kind<2.5){ h.y+=0.25; h.xz=rot(t*(sd>0.5?0.34:-0.26))*h.xz; h.y-=0.25; }
+        h.yz=rot(uPitch)*h.yz; h.xz=rot(uYaw)*h.xz;
+        h*=uHeadS; h.xy+=uHeadP;
+        // DNA-style data helix
+        float ha=aHelix.y+t*0.9;
+        vec3 hx=vec3(aHelix.x*4.6, cos(ha)*aHelix.z, sin(ha)*aHelix.z);
+        hx.xy=rot(-0.22)*hx.xy; hx*=0.75+0.3*min(uScale,1.0); hx.x*=max(1.0,uAspect*0.62);
+        // spiral galaxy
         float gr=aGal.x, ga=aGal.y+t*0.16/(0.35+gr*0.5);
-        vec3 g=vec3(cos(ga)*gr, aGal.z+0.07*sin(t*0.8+gr*3.0+aSeed.x*6.0), sin(ga)*gr);
-        g.yz=rot(1.08)*g.yz; g.xz=rot(0.35)*g.xz; g*=0.75+0.45*uScale;
-        float m=smoothstep(0.0,1.0,clamp(uMorph*1.2-aSeed.x*0.2,0.0,1.0));
-        vec3 q=mix(p,g,m);
-        q+=(0.025+0.07*m)*vec3(sin(t*0.9+q.y*2.7+aSeed.x*9.0),sin(t*0.7+q.z*2.3+aSeed.x*7.0),sin(t*0.8+q.x*2.9));
-        // particles form the name
-        float nm=smoothstep(0.0,1.0,clamp(uName*(1.0-m)*1.3-aSeed.x*0.3,0.0,1.0));
-        vec3 np=aName+vec3(uNameC,0.0)+0.008*vec3(sin(t*3.0+aSeed.x*50.0),cos(t*2.6+aSeed.x*40.0),0.0);
+        vec3 g=vec3(cos(ga)*gr, aGal.z+0.07*sin(t*0.8+gr*3.0+sd*6.0), sin(ga)*gr);
+        g.yz=rot(1.08)*g.yz; g.xz=rot(0.35)*g.xz; g*=0.6+0.28*min(uScale,1.1);
+        // wormhole tunnel
+        float lane=sd<0.5? floor(aTun.x/6.2832*14.0)/14.0*6.2832 : aTun.x;
+        float tz=4.3-fract(aTun.y+uTravel)*13.0, th=lane+tz*0.26+t*0.25;
+        vec3 tu=vec3(cos(th)*aTun.z*max(1.0,uAspect*0.72), sin(th)*aTun.z, tz);
+        // scroll journey
+        float s=uStage; vec3 q;
+        if(s<1.0) q=mix(h,hx,stg(s,sd)); else if(s<2.0) q=mix(hx,g,stg(s-1.0,sd)); else q=mix(g,tu,stg(s-2.0,sd));
+        float headAmt=1.0-stg(clamp(s,0.0,1.0),sd);
+        q+=(0.015+0.07*(1.0-headAmt))*vec3(sin(t*0.9+q.y*2.7+sd*9.0),sin(t*0.7+q.z*2.3+sd*7.0),sin(t*0.8+q.x*2.9));
+        // particles form the name (intro + hover); intro builds the head with a scan line
+        float inName=max(uName, uIntroName*(1.0-smoothstep(uBuild-0.12,uBuild+0.12,hy)));
+        float nm=stg(inName*headAmt,sd);
+        vec3 np=aName+vec3(uNameC,0.0)+0.008*vec3(sin(t*3.0+sd*50.0),cos(t*2.6+sd*40.0),0.0);
         q=mix(q,np,nm);
+        float scan=uIntroName*exp(-pow((hy-uBuild)*12.0,2.0))*(1.0-nm);
         // click shockwave
         float st=t-uShock.z, sg=0.0;
-        if(st>0.0&&st<3.0){ vec2 sd=q.xy-uShock.xy; float sl=length(sd); sg=exp(-pow((sl-st*2.6)*2.2,2.0))*exp(-st*1.3);
-          q.xy+=normalize(sd+1e-4)*sg*0.5; q.z+=sg*0.35; }
+        if(st>0.0&&st<3.0){ vec2 sdv=q.xy-uShock.xy; float sl=length(sdv); sg=exp(-pow((sl-st*3.0)*2.0,2.0))*exp(-st*1.2);
+          q.xy+=normalize(sdv+1e-4)*sg*0.6; q.z+=sg*0.45; }
+        // scroll speed streaks
+        q.y+=uVel*(0.3+sd*1.7);
         // intro: fly in from everywhere
-        float scv=smoothstep(0.0,1.0,clamp(uScat*1.3-(1.0-aSeed.x)*0.3,0.0,1.0));
+        float scv=smoothstep(0.0,1.0,clamp(uScat*1.3-(1.0-sd)*0.3,0.0,1.0));
         q=mix(q,aScat,scv);
-        vec2 d=q.xy-uMouse.xy; float dl=length(d);
-        q.xy+=normalize(d+1e-4)*0.5*(1.0-0.85*nm)*exp(-dl*dl*4.5);
+        // mouse: gravity vortex
+        vec2 d=q.xy-uMouse.xy; float dl=length(d)+1e-4, fall=exp(-dl*dl*3.2)*(1.0-0.85*nm);
+        q.xy+=d/dl*0.3*fall+vec2(-d.y,d.x)/dl*0.5*fall;
+        float mglow=exp(-dl*dl*5.0);
         vec4 mv=modelViewMatrix*vec4(q,1.0); gl_Position=projectionMatrix*mv;
-        float sz=aSeed.z*(kind>0.5&&kind<1.5?1.35:1.0)*mix(1.0,0.72,nm);
-        gl_PointSize=sz*uSize*uPR/(-mv.z);
-        vec3 c=aSeed.y<0.5?uC0:(aSeed.y<1.5?uC1:uC2);
-        if(kind>0.5&&kind<1.5) c=mix(c,vec3(1.0,0.78,0.96),0.4);
-        float tw=0.775+0.225*sin(t*2.0+aSeed.x*40.0);
-        float shell=kind<0.5? mix(0.35+1.1*limb*limb, 1.0, m) : 1.0;
-        c=mix(c,vec3(1.0),0.3*nm);
-        vCol=c; vA=(1.0+sg*2.2)*mix(1.0,1.25,nm)*clamp(1.35-(-mv.z-3.2)*0.2,0.22,1.0)*tw*shell*(0.62+1.1*m)*(kind>0.5&&kind<1.5?0.6:1.0);
+        float sz=aSeed.z*(kind<0.5?mix(1.0,0.72,headAmt):1.0)*(kind>0.5&&kind<1.5?1.25:1.0)*(kind>2.5?1.4:1.0)*mix(1.0,0.72,nm);
+        gl_PointSize=sz*uSize*uPR*(1.0+0.45*clamp(s-1.0,0.0,1.0))/(-mv.z);
+        vec3 c=aSeed.y<0.5?uC0:(aSeed.y<1.5?uC1:uC2); float br=1.0;
+        if(kind>0.5&&kind<1.5){ float pl=pow(0.5+0.5*sin(dot(position,vec3(9.0,13.0,6.0))-t*4.5),10.0); c=mix(c,vec3(1.0,0.85,1.0),0.25+0.6*pl); br=0.45+1.8*pl; }
+        if(kind>2.5){ c=vec3(0.62,0.95,1.0); br=(1.8+0.6*sin(t*3.0))*step(0.035,fract(t*0.21+0.5)); }
+        if(kind<0.5){ vec3 n=aNorm; n.yz=rot(uPitch)*n.yz; n.xz=rot(uYaw)*n.xz;
+          float rim=1.0-abs(n.z), lam=max(dot(n,normalize(vec3(-0.55,0.55,0.65))),0.0);
+          float facing=smoothstep(-0.35,0.45,n.z);
+          float shade=(0.3+3.2*pow(rim,2.6)+1.6*lam)*mix(0.12,1.0,facing); br*=mix(1.0,shade,headAmt*(1.0-nm));
+          c=mix(c,vec3(0.75,0.9,1.0),0.35*pow(rim,3.0)*headAmt); }
+        c=mix(c,vec3(1.0),0.3*nm+0.7*scan);
+        vCol=c;
+        float tw=0.8+0.2*sin(t*2.0+sd*40.0);
+        float tunAmt=stg(clamp(s-2.0,0.0,1.0),sd);
+        float depth=mix(clamp(1.35-(-mv.z-3.2)*0.17,0.18,1.0), clamp(1.3-(-mv.z)*0.06,0.45,1.3), tunAmt);
+        float shoulder=mix(1.0, smoothstep(-1.36,-1.05,hy), headAmt*(1.0-nm));
+        float headDim=mix(1.0,uHeadA,headAmt*(1.0-nm));
+        vA=depth*tw*br*shoulder*headDim*(1.0+sg*2.4+mglow*1.4+scan*3.5+min(abs(uVel)*5.0,1.5))*mix(1.0,1.2,nm)*(0.95+0.4*(1.0-headAmt));
       }`,
     fragmentShader:`
       varying vec3 vCol; varying float vA;
       void main(){ vec2 uv=gl_PointCoord-0.5; float d=length(uv); if(d>0.5) discard;
         float glow=pow(1.0-d*2.0,2.4), core=smoothstep(0.13,0.0,d);
-        gl_FragColor=vec4(vCol*glow+vec3(1.0)*core*0.65,(glow*0.75+core)*vA*0.7); }`
+        gl_FragColor=vec4(vCol*glow+vec3(1.0)*core*0.6,(glow*0.75+core)*vA*0.58); }`
   });
-  const swarm = new THREE.Points(geo, mat); scene.add(swarm);
+  scene.add(new THREE.Points(geo, mat));
 
-  // ---------- deep star dust for depth ----------
-  const S = small ? 1400 : 3200, sp = new Float32Array(S*3), ss = new Float32Array(S);
-  for (let i=0;i<S;i++){ sp.set([(Math.random()-0.5)*26,(Math.random()-0.5)*16,-4-Math.random()*16], i*3); ss[i]=Math.random(); }
-  const sgeo = new THREE.BufferGeometry();
+  // ---------- deep star dust ----------
+  const S=small?1400:3400, sp=new Float32Array(S*3), ss=new Float32Array(S);
+  for(let k=0;k<S;k++){ sp.set([(Math.random()-0.5)*26,(Math.random()-0.5)*16,-4-Math.random()*16], k*3); ss[k]=Math.random(); }
+  const sgeo=new THREE.BufferGeometry();
   sgeo.setAttribute("position", new THREE.BufferAttribute(sp,3)); sgeo.setAttribute("aS", new THREE.BufferAttribute(ss,1));
-  const smat = new THREE.ShaderMaterial({ uniforms:{uTime:U.uTime,uPR:U.uPR}, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-    vertexShader:`uniform float uTime,uPR; attribute float aS; varying float vT;
-      void main(){ vec3 p=position; p.x+=sin(uTime*0.05+aS*30.0)*0.3; vec4 mv=modelViewMatrix*vec4(p,1.0); gl_Position=projectionMatrix*mv;
+  const smat=new THREE.ShaderMaterial({ uniforms:{uTime:U.uTime,uPR:U.uPR,uVel:U.uVel}, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    vertexShader:`uniform float uTime,uPR,uVel; attribute float aS; varying float vT;
+      void main(){ vec3 p=position; p.x+=sin(uTime*0.05+aS*30.0)*0.3; p.y+=uVel*3.0*aS; vec4 mv=modelViewMatrix*vec4(p,1.0); gl_Position=projectionMatrix*mv;
         vT=0.35+0.65*(0.5+0.5*sin(uTime*(0.8+aS*2.0)+aS*50.0)); gl_PointSize=(1.0+aS*2.2)*uPR*6.0/(-mv.z); }`,
     fragmentShader:`varying float vT; void main(){ float d=length(gl_PointCoord-0.5); if(d>0.5) discard; float a=pow(1.0-d*2.0,2.0)*vT;
       gl_FragColor=vec4(vec3(0.75,0.8,1.0)*a,a*0.8); }` });
@@ -982,10 +1100,13 @@ import * as THREE from "three";
 
   // ---------- interaction ----------
   let MX=0, MY=0, mx=0, my=0, hasMouse=false;
-  const fine = matchMedia("(hover:hover) and (pointer:fine)").matches;
-  if (fine) addEventListener("pointermove", e=>{ MX=e.clientX/innerWidth*2-1; MY=-(e.clientY/innerHeight*2-1); hasMouse=true; }, {passive:true});
-  const h1 = document.querySelector(".hero h1");
-  const metal = document.querySelector(".hero h1 .metal"), plate = document.querySelector(".nameplate");
+  const fine=matchMedia("(hover:hover) and (pointer:fine)").matches;
+  if(fine) addEventListener("pointermove", e=>{ MX=e.clientX/innerWidth*2-1; MY=-(e.clientY/innerHeight*2-1); hasMouse=true; }, {passive:true});
+  const h1=document.querySelector(".hero h1"), metal=document.querySelector(".hero h1 .metal"), plate=document.querySelector(".nameplate");
+  const exploreEl=document.getElementById("explore"), gridEl=document.getElementById("grid"), aboutEl=document.getElementById("about");
+  const tmp=new THREE.Vector3(), dir=new THREE.Vector3(), mouseW=new THREE.Vector3(99,99,0);
+  const toWorld=(sx,sy)=>[(2*sx/innerWidth-1)*TANH*camera.aspect, (1-2*sy/innerHeight)*TANH];
+
   function buildName(){
     const r=metal.getBoundingClientRect(); if(!r.width) return;
     const cs=getComputedStyle(metal), Wc=Math.ceil(r.width)+24, Hc=Math.ceil(r.height)+24;
@@ -996,62 +1117,87 @@ import * as THREE from "three";
     for(let y=0;y<Hc;y+=stp) for(let x=0;x<Wc;x+=stp) if(d[(y*Wc+x)*4+3]>140) pts.push(x-Wc/2, y-Hc/2);
     if(!pts.length) return;
     const k=2*TANH/innerHeight;
-    for(let i=0;i<N;i++){ const j=((Math.random()*pts.length/2)|0)*2;
-      nameArr[i*3]=(pts[j]+(Math.random()-0.5)*stp)*k; nameArr[i*3+1]=-(pts[j+1]+(Math.random()-0.5)*stp)*k; nameArr[i*3+2]=(Math.random()-0.5)*0.06; }
+    for(let n=0;n<N;n++){ const j=((Math.random()*pts.length/2)|0)*2;
+      nameArr[n*3]=(pts[j]+(Math.random()-0.5)*stp)*k; nameArr[n*3+1]=-(pts[j+1]+(Math.random()-0.5)*stp)*k; nameArr[n*3+2]=(Math.random()-0.5)*0.06; }
     geo.attributes.aName.needsUpdate=true;
   }
-  (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(buildName);
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(buildName);
   let hoverName=0;
-  if (fine){ plate.addEventListener("pointerenter",()=>{hoverName=1; plate.classList.add("particles");}); plate.addEventListener("pointerleave",()=>{hoverName=0; plate.classList.remove("particles");}); }
-  window.__augShock = (x,y)=>{ const nx=x/innerWidth*2-1, ny=-(y/innerHeight*2-1);
+  if(fine){ plate.addEventListener("pointerenter",()=>{hoverName=1; plate.classList.add("particles");}); plate.addEventListener("pointerleave",()=>{hoverName=0; plate.classList.remove("particles");}); }
+  window.__augShock=(x,y)=>{ const nx=x/innerWidth*2-1, ny=-(y/innerHeight*2-1);
     tmp.set(nx,ny,0.5).unproject(camera); dir.copy(tmp).sub(camera.position).normalize(); const k=-camera.position.z/dir.z;
     const w=camera.position.clone().addScaledVector(dir,k); U.uShock.value.set(w.x,w.y,clock.getElapsedTime()); };
-  // intro timeline
+
+  // intro timeline: scatter -> your name -> scan-builds the humanoid
   let seen=null; try{ seen=localStorage.getItem("augIntroSeen"); }catch(e){}
-  const introOn = !reduced && document.documentElement.classList.contains("intro");
-  const fullIntro = introOn && !seen;
-  let intro = introOn, introT0 = null, revealed = !introOn;
-  if (introOn){ U.uScat.value=1; U.uName.value = fullIntro ? 1 : 0; }
+  const introOn=!reduced && document.documentElement.classList.contains("intro");
+  const fullIntro=introOn && !seen;
+  let intro=introOn, introT0=null, revealed=!introOn;
+  if(introOn){ U.uScat.value=1; if(fullIntro){ U.uIntroName.value=1; U.uBuild.value=2; } }
   function reveal(){ revealed=true; document.documentElement.classList.remove("intro"); plate.classList.add("flash");
     setTimeout(()=>plate.classList.remove("flash"),1400); try{ localStorage.setItem("augIntroSeen","1"); }catch(e){} }
-  const ez = x => x<0?0:x>1?1:x*x*(3-2*x);
-  const tmp = new THREE.Vector3(), dir = new THREE.Vector3(), mouseW = new THREE.Vector3(99,99,0);
+  const ez=x=>x<0?0:x>1?1:x*x*(3-2*x);
 
   function resize(){
     const w=innerWidth, h=innerHeight;
     renderer.setPixelRatio(Math.min(devicePixelRatio||1, 1.75)); renderer.setSize(w,h,false);
     camera.aspect=w/h; camera.updateProjectionMatrix();
-    U.uPR.value=renderer.getPixelRatio(); U.uScale.value=Math.min(1.12, (w/h)*1.55);
+    U.uPR.value=renderer.getPixelRatio(); U.uScale.value=Math.min(1.12,(w/h)*1.55); U.uAspect.value=w/h;
   }
-  resize(); let rzT; addEventListener("resize", ()=>{ resize(); clearTimeout(rzT); rzT=setTimeout(buildName,250); });
+  resize(); let rzT; addEventListener("resize",()=>{ resize(); clearTimeout(rzT); rzT=setTimeout(buildName,250); });
 
-  let raf, running=true; const clock=new THREE.Clock();
+  // scroll journey: 0 humanoid -> 1 helix -> 2 galaxy -> 3 wormhole
+  function stageAt(y,vh){
+    const a1=Math.max(vh*0.4, exploreEl.getBoundingClientRect().top+y-vh*0.5);
+    const a2=Math.max(a1+vh*0.6, gridEl.getBoundingClientRect().top+y-vh*0.15);
+    const a3=Math.max(a2+vh*0.6, Math.min(document.documentElement.scrollHeight-vh-4, aboutEl.getBoundingClientRect().top+y-vh*0.6));
+    const sm=f=>{ f=Math.max(0,Math.min(1,f)); return f<0.1?0:f>0.9?1:(f-0.1)/0.8; };
+    if(y<=a1) return sm(y/a1);
+    if(y<=a2) return 1+sm((y-a1)/(a2-a1));
+    return 2+sm((y-a2)/(a3-a2));
+  }
+
+  let raf, running=true, lastY=scrollY, vel=0, stage=0, yaw=-0.75, pitch=0, lastT=0; const clock=new THREE.Clock();
   function frame(){
-    const t = reduced ? 8 : clock.getElapsedTime();
+    const t=reduced?8:clock.getElapsedTime(), dt=Math.min(0.05,t-lastT||0.016); lastT=t;
     U.uTime.value=t;
     const vh=innerHeight, sy=scrollY;
-    U.uMorph.value = Math.min(1, Math.max(0, (sy - vh*0.12) / (vh*0.75)));
-    const r=h1.getBoundingClientRect(), cy=r.top+r.height*0.5+vh*0.12;      // sphere follows the title
-    U.uLift.value = (1 - 2*cy/vh) * TANH * (1-U.uMorph.value*0.0);
+    vel+=(((sy-lastY)/vh)-vel)*0.15; lastY=sy; U.uVel.value=Math.max(-0.7,Math.min(0.7,vel*4.0));
+    stage+=(stageAt(sy,vh)-stage)*(reduced?1:0.08); U.uStage.value=stage;
+    U.uTravel.value+=dt*0.045+Math.abs(vel)*0.6;
+    // humanoid sits beside your name (desktop) and turns to follow the mouse
+    const r=h1.getBoundingClientRect(), pr=plate.getBoundingClientRect();
+    const wide=innerWidth>=980;
+    const hx= wide ? Math.min(innerWidth-innerWidth*0.12, pr.right+innerWidth*0.105) : innerWidth/2;
+    const hyS= wide ? pr.top+pr.height*0.45 : pr.top+pr.height*0.2;
+    const hw=toWorld(hx,hyS); U.uHeadP.value.set(hw[0],hw[1]);
+    U.uHeadS.value= wide ? Math.max(1.05,Math.min(1.6,vh/900*1.4)) : 1.0;
+    U.uHeadA.value= wide ? 1.0 : 0.55;
+    const baseYaw= wide ? -1.15 : -0.3;
+    yaw+=((baseYaw+mx*0.5+Math.sin(t*0.4)*0.06)-yaw)*0.06; pitch+=((my*0.28+Math.sin(t*0.33)*0.04)-pitch)*0.06;
+    U.uYaw.value=yaw; U.uPitch.value=pitch;
     U.uNameC.value.set((2*(r.left+r.width/2)/innerWidth-1)*TANH*camera.aspect, (1-2*(r.top+r.height/2)/vh)*TANH);
-    let nameTarget = hoverName;
-    if (intro){
-      if (introT0===null) introT0=t;
+    let nameTarget=hoverName;
+    if(intro){
+      if(introT0===null) introT0=t;
       const tt=t-introT0;
-      if (fullIntro){ U.uScat.value=1-ez(tt/1.6); nameTarget = tt<3.1?1:0; if(tt>3.0 && !revealed) reveal(); if(tt>4.8) intro=false; }
-      else { U.uScat.value=1-ez(tt/1.2); nameTarget=0; if(tt>0.7 && !revealed) reveal(); if(tt>1.5) intro=false; }
+      if(fullIntro){ U.uScat.value=1-ez(tt/1.6); U.uBuild.value = tt<3.0 ? 2 : 0.85-ez((tt-3.0)/1.9)*2.5;
+        if(tt>3.0 && !revealed) reveal(); if(tt>5.2){ intro=false; U.uIntroName.value=0; U.uBuild.value=-3; } }
+      else { U.uScat.value=1-ez(tt/1.2); if(tt>0.7 && !revealed) reveal(); if(tt>1.5) intro=false; }
     }
-    U.uName.value += (nameTarget-U.uName.value)*(intro?0.045:0.06);
+    U.uName.value+=(nameTarget-U.uName.value)*0.06;
     mx+=(MX-mx)*0.05; my+=(MY-my)*0.05;
-    camera.position.x=mx*0.35; camera.position.y=my*0.22; camera.lookAt(0,0,0);
-    if (hasMouse){ tmp.set(mx,my,0.5).unproject(camera); dir.copy(tmp).sub(camera.position).normalize(); const k=-camera.position.z/dir.z; mouseW.copy(camera.position).addScaledVector(dir,k); U.uMouse.value.lerp(mouseW,0.25); }
+    camera.position.x=mx*0.35; camera.position.y=my*0.22; camera.position.z=5-0.35*Math.sin(Math.min(stage,3)/3*Math.PI);
+    camera.lookAt(0,0,0);
+    if(hasMouse){ tmp.set(mx,my,0.5).unproject(camera); dir.copy(tmp).sub(camera.position).normalize(); const k=-camera.position.z/dir.z; mouseW.copy(camera.position).addScaledVector(dir,k); U.uMouse.value.lerp(mouseW,0.25); }
     renderer.render(scene,camera);
     if(!reduced && running) raf=requestAnimationFrame(frame);
   }
-  document.addEventListener("visibilitychange",()=>{ running=!document.hidden; if(running && !reduced){ cancelAnimationFrame(raf); raf=requestAnimationFrame(frame);} });
-  if (reduced) addEventListener("scroll", ()=>requestAnimationFrame(frame), {passive:true});
+  document.addEventListener("visibilitychange",()=>{ running=!document.hidden; if(running&&!reduced){ cancelAnimationFrame(raf); raf=requestAnimationFrame(frame);} });
+  if(reduced) addEventListener("scroll",()=>requestAnimationFrame(frame),{passive:true});
   frame();
 })();
+
 </script>
 </body>
 </html>
