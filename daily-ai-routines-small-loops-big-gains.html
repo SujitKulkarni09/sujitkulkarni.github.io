@@ -773,5 +773,23 @@
   }, {threshold:0.12});
   revealEls.forEach(el => io.observe(el));
 </script>
+
+<!-- AI AugMentor: back to hub button -->
+<a id="aug-back" href="./" aria-label="Back to the AI AugMentor hub"><span class="aug-back-arrow" aria-hidden="true">&#8592;</span><span class="aug-back-text">AI <b>Aug</b>Mentor</span></a>
+<style>
+#aug-back{position:fixed;left:16px;bottom:16px;z-index:2147483000;display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 16px 0 12px;
+  border-radius:999px;text-decoration:none;font:600 14px/1 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;letter-spacing:-.01em;color:#f4f2ff;
+  background:linear-gradient(135deg,rgba(168,85,247,.38),rgba(56,189,248,.20)),rgba(14,12,38,.72);
+  border:1px solid rgba(220,200,255,.45);backdrop-filter:blur(14px) saturate(150%);-webkit-backdrop-filter:blur(14px) saturate(150%);
+  box-shadow:0 0 26px -6px rgba(168,85,247,.85),0 10px 30px -12px rgba(0,0,0,.7),inset 0 1px 0 rgba(255,255,255,.22);
+  transition:transform .2s ease,box-shadow .2s ease;-webkit-tap-highlight-color:transparent}
+#aug-back:hover{transform:translateY(-2px);box-shadow:0 0 36px -4px rgba(168,85,247,1),0 14px 34px -12px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.28)}
+#aug-back:focus-visible{outline:2px solid #38bdf8;outline-offset:3px}
+#aug-back .aug-back-arrow{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:15px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22)}
+#aug-back b{font-weight:700;background:linear-gradient(120deg,#c084fc,#38bdf8 55%,#f472b6);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+@media (max-width:480px){#aug-back{left:12px;bottom:12px;padding:0 9px}#aug-back .aug-back-text{display:none}}
+@media (prefers-reduced-motion:reduce){#aug-back{transition:none}#aug-back:hover{transform:none}}
+@media print{#aug-back{display:none}}
+</style>
 </body>
 </html>

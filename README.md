@@ -8,7 +8,7 @@ Free AI guides, glossaries and interactive 3D demos to help anyone learn AI step
 
 ## What's inside
 
-- **47 pages** across **8 categories**
+- **52 pages** across **10 categories**
 - Beginner-friendly explainers through to agentic AI deep dives
 - Interactive and 3D visual demos
 - Content in **English, Hindi and Kannada**
@@ -96,6 +96,19 @@ Free AI guides, glossaries and interactive 3D demos to help anyone learn AI step
 |---|---|
 | [AI for all (Hindi)](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-for-all-hindi.html) | AI explained in Hindi |
 | [AI for all (Kannada)](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-for-all-kannada.html) | AI explained in Kannada |
+
+### 9. Coding Basics
+| Page | About |
+|---|---|
+| [How any programming language works](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/how-any-language-works.html) | The core ideas every programming language shares |
+| [Coding basics: interactive demo](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/coding-basics-interactive-demo.html) | Step through code and watch what it does |
+| [Coding basics: practice simulator](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/coding-basics-practice-simulator.html) | Practise coding basics hands-on |
+| [Coding basics glossary](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/coding-basics-glossary.html) | Coding terms explained simply |
+
+### 10. Tools and Simulators
+| Page | About |
+|---|---|
+| [ETD trade lifecycle simulator](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/etd-lifecycle-simulator.html) | Follow an exchange-traded derivatives trade end to end |
 
 ---
 
