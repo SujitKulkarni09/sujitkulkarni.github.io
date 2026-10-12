@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>How Any Programming Language Works</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --bg-app: #1e1f22;
+    --bg-panel: #26272b;
+    --bg-editor: #1b1c1e;
+    --bg-console: #101113;
+    --border: #38393e;
+    --text-main: #e3e3e6;
+    --text-dim: #9a9ba1;
+    --accent: #5aa9e6;
+    --accent-soft: rgba(90,169,230,0.14);
+    --success: #58c896;
+    --kw: #c586c0;
+    --str: #d69d6b;
+    --com: #7a7e85;
+    --fn: #d9c96e;
+    --num: #6fb3d2;
+    font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; background: var(--bg-app); color: var(--text-main); }
+  .wrap{ max-width:900px; margin:0 auto; padding:32px 24px 80px 24px; }
+
+  header{ margin-bottom:34px; }
+  header h1{ margin:0; font-size:24px; font-weight:700; }
+  header p{ margin:6px 0 0 0; font-size:13px; color: var(--text-dim); }
+
+  section{ margin-bottom:56px; }
+  .section-kicker{
+    font-size:12px; font-weight:600; color: var(--accent);
+    margin-bottom:8px;
+  }
+  section h2{ margin:0 0 12px 0; font-size:20px; }
+  section > p.lead{ font-size:14.5px; line-height:1.6; color: var(--text-main); max-width:70ch; }
+
+  .plain-box{
+    background: var(--bg-panel);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:16px 20px;
+    font-size:14.5px;
+    line-height:1.6;
+    margin:14px 0 22px 0;
+  }
+  .plain-box b{ color: var(--accent); }
+
+  /* ---------- 3-Stage 3D build animation ---------- */
+  .build-scene{
+    perspective: 1200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    padding:36px 10px;
+    background: radial-gradient(ellipse at center, #24262b 0%, #1a1b1e 70%);
+    border:1px solid var(--border);
+    border-radius:14px;
+    flex-wrap:wrap;
+  }
+  .build-block{
+    width:150px;
+    height:120px;
+    border-radius:12px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    text-align:center;
+    padding:10px;
+    transform-style: preserve-3d;
+    opacity:0;
+    transform: translateY(30px) rotateX(-35deg) rotateY(-15deg);
+  }
+  .build-block .icon{ font-size:26px; }
+  .build-block .label{ font-size:13.5px; font-weight:700; }
+  .build-block .sub{ font-size:11px; color: rgba(255,255,255,0.75); }
+
+  .block-input{ background: linear-gradient(145deg,#3a6fa8,#5aa9e6); box-shadow: 0 14px 30px -10px rgba(90,169,230,0.6); }
+  .block-process{ background: linear-gradient(145deg,#9457a3,#c586c0); box-shadow: 0 14px 30px -10px rgba(197,134,192,0.6); }
+  .block-output{ background: linear-gradient(145deg,#2f9e78,#58c896); box-shadow: 0 14px 30px -10px rgba(88,200,150,0.6); }
+
+  .build-connector{
+    width:0px;
+    height:3px;
+    background: var(--text-dim);
+    align-self:center;
+    opacity:0;
+  }
+
+  @keyframes blockIn{
+    to{ opacity:1; transform: translateY(0) rotateX(0) rotateY(0); }
+  }
+  @keyframes connectorIn{
+    to{ opacity:1; width:46px; }
+  }
+  .build-scene.play .build-block{ animation: blockIn 0.7s cubic-bezier(.2,.8,.3,1) forwards; }
+  .build-scene.play .build-block.b1{ animation-delay: 0.1s; }
+  .build-scene.play .build-block.b2{ animation-delay: 0.9s; }
+  .build-scene.play .build-block.b3{ animation-delay: 1.7s; }
+  .build-scene.play .build-connector.c1{ animation: connectorIn 0.4s ease forwards; animation-delay: 0.75s; }
+  .build-scene.play .build-connector.c2{ animation: connectorIn 0.4s ease forwards; animation-delay: 1.55s; }
+
+  .replay-row{ display:flex; justify-content:center; margin-top:14px; }
+  .ghost-btn{
+    background: transparent;
+    border:1px solid var(--border);
+    color: var(--text-main);
+    padding:8px 16px;
+    border-radius:6px;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+  .ghost-btn:hover{ border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- Language tabs ---------- */
+  .tab-bar{
+    display:flex;
+    gap:6px;
+    margin-bottom:0;
+    flex-wrap:wrap;
+  }
+  .tab-btn{
+    background: var(--bg-panel);
+    border:1px solid var(--border);
+    border-bottom:none;
+    color: var(--text-dim);
+    padding:9px 16px;
+    border-radius:8px 8px 0 0;
+    font-size:13px;
+    cursor:pointer;
+  }
+  .tab-btn.active{ background: var(--bg-editor); color: var(--text-main); font-weight:600; border-color: var(--accent); }
+
+  .editor-panel{
+    background: var(--bg-editor);
+    border:1px solid var(--border);
+    border-radius:0 10px 10px 10px;
+    overflow:hidden;
+  }
+  .panel-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:9px 14px; background: var(--bg-panel); border-bottom:1px solid var(--border);
+  }
+  .file-tab{ font-size:12.5px; color: var(--text-dim); font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace; }
+  .dots{ display:flex; gap:6px; }
+  .dots span{ width:9px; height:9px; border-radius:50%; display:inline-block; }
+  .dots span:nth-child(1){ background:#e6685a; }
+  .dots span:nth-child(2){ background:#e6b95a; }
+  .dots span:nth-child(3){ background:#58c896; }
+  .run-btn{
+    background: var(--success); color:#0d1f16; border:none; font-weight:600;
+    font-size:12.5px; padding:6px 14px; border-radius:6px; cursor:pointer;
+  }
+  .run-btn:hover{ filter:brightness(1.08); }
+
+  .code-body{
+    display:flex; font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size:13.5px; line-height:1.65; padding:14px 0; overflow-x:auto;
+  }
+  .line-numbers{ text-align:right; padding:0 12px 0 16px; color:#52545a; user-select:none; }
+  .code-content{ white-space:pre; padding-right:20px; }
+  .tok-kw{ color: var(--kw); } .tok-str{ color: var(--str); } .tok-com{ color: var(--com); }
+  .tok-fn{ color: var(--fn); } .tok-num{ color: var(--num); }
+
+  .console-panel{ background: var(--bg-console); border:1px solid var(--border); border-top:none; border-radius:0 0 10px 10px; overflow:hidden; }
+  .console-body{
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    font-size:13.5px; line-height:1.7; padding:14px 16px; min-height:30px; color:#cfead9; white-space:pre-wrap;
+  }
+  .console-body .placeholder{ color: var(--text-dim); font-style: italic; }
+  .console-body .ok-line{ color: var(--success); }
+
+  .caption-box{
+    margin-top:14px;
+    font-size:13.5px;
+    color: var(--text-dim);
+    border-left:none;
+    background: rgba(255,255,255,0.03);
+    padding:10px 14px;
+    border-radius:8px;
+  }
+  .caption-box b{ color: var(--text-main); }
+
+  /* ---------- Flip card simulation ---------- */
+  .flip-wrap{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:16px;
+  }
+  .flip-scene{ perspective: 1200px; }
+  .flip-card{
+    position:relative;
+    width:280px;
+    height:190px;
+    transform-style: preserve-3d;
+    transition: transform 0.7s cubic-bezier(.2,.8,.3,1);
+  }
+  .flip-card.flipped{ transform: rotateY(180deg); }
+  .flip-face{
+    position:absolute; inset:0;
+    backface-visibility:hidden;
+    border-radius:14px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:14px;
+    padding:16px;
+    text-align:center;
+  }
+  .flip-front{
+    background: linear-gradient(160deg,#2b3d55,#26272b);
+    border:1px solid var(--border);
+  }
+  .flip-front .q{ font-size:16px; font-weight:700; }
+  .flip-front .icon{ font-size:30px; }
+  .flip-btn-row{ display:flex; gap:10px; }
+  .flip-choice-btn{
+    background: var(--accent);
+    border:none;
+    color:#0d1720;
+    font-weight:700;
+    padding:8px 18px;
+    border-radius:6px;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+  .flip-choice-btn.no{ background: transparent; border:1px solid var(--border); color: var(--text-main); }
+  .flip-back{
+    transform: rotateY(180deg);
+    background: linear-gradient(160deg,#1f4a3a,#26272b);
+    border:1px solid var(--success);
+  }
+  .flip-back.no-variant{
+    background: linear-gradient(160deg,#4a3b1f,#26272b);
+    border:1px solid var(--warn, #e6b95a);
+  }
+  .flip-back .result-icon{ font-size:34px; }
+  .flip-back .result-text{ font-size:16px; font-weight:700; }
+  .flip-back .result-sub{ font-size:12px; color: var(--text-dim); }
+
+  footer{
+    text-align:center;
+    font-size:12px;
+    color: var(--text-dim);
+    margin-top:40px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>How Any Programming Language Works</h1>
+    <p>Curated by Sujit Kulkarni · An offline demo for complete beginners</p>
+  </header>
+
+  <!-- SECTION 1: Same idea, every language -->
+  <section id="sec-build">
+    <div class="section-kicker">PART 1 · THE ONE IDEA BEHIND EVERY PROGRAM</div>
+    <h2>Same Idea, Every Language</h2>
+    <p class="lead">A computer program is just a set of instructions — like a recipe. The recipe idea never changes; only the words used to write it down change from language to language.</p>
+
+    <div class="build-scene" id="buildScene">
+      <div class="build-block block-input b1">
+        <div class="icon">🧺</div>
+        <div class="label">Ingredients</div>
+        <div class="sub">(Input)</div>
+      </div>
+      <div class="build-connector c1"></div>
+      <div class="build-block block-process b2">
+        <div class="icon">⚙️</div>
+        <div class="label">Steps</div>
+        <div class="sub">(Process)</div>
+      </div>
+      <div class="build-connector c2"></div>
+      <div class="build-block block-output b3">
+        <div class="icon">🍽️</div>
+        <div class="label">Result</div>
+        <div class="sub">(Output)</div>
+      </div>
+    </div>
+    <div class="replay-row">
+      <button class="ghost-btn" id="replayBuild">↺ Replay the build</button>
+    </div>
+  </section>
+
+  <!-- SECTION 2: Same instruction, 4 languages -->
+  <section id="sec-langs">
+    <div class="section-kicker">PART 2 · WATCH 4 PROGRAMMERS WRITE THE SAME INSTRUCTION</div>
+    <h2>One Rule, Written 4 Ways</h2>
+
+    <div class="plain-box">
+      <b>In plain English:</b> "If it's raining, take an umbrella. Otherwise, leave it at home."<br>
+      That's the entire idea. Below, four different programming languages write down that exact same rule — only the spelling changes.
+    </div>
+
+    <div class="tab-bar" id="tabBar"></div>
+    <div id="langPanes"></div>
+
+    <div class="caption-box">
+      <b>Different spelling, same thinking.</b> Every version above performs one "Selection" step (if / else) — checking a condition and choosing one of two paths. That's true whether it's Python, JavaScript, Java, or C++.
+    </div>
+  </section>
+
+  <!-- SECTION 3: Follow the instruction (interactive) -->
+  <section id="sec-flip">
+    <div class="section-kicker">PART 3 · TRY IT YOURSELF</div>
+    <h2>Follow the Instruction</h2>
+    <p class="lead">Click Yes or No below and watch the decision get made in real time — this is exactly what a computer does when it hits an "if / else" in any language.</p>
+
+    <div class="flip-wrap">
+      <div class="flip-scene">
+        <div class="flip-card" id="flipCard">
+          <div class="flip-face flip-front">
+            <div class="icon">🌦️</div>
+            <div class="q">Is it raining?</div>
+            <div class="flip-btn-row">
+              <button class="flip-choice-btn" data-ans="yes">Yes</button>
+              <button class="flip-choice-btn no" data-ans="no">No</button>
+            </div>
+          </div>
+          <div class="flip-face flip-back" id="flipBack">
+            <div class="result-icon" id="resultIcon"></div>
+            <div class="result-text" id="resultText"></div>
+            <div class="result-sub" id="resultSub"></div>
+          </div>
+        </div>
+      </div>
+      <button class="ghost-btn" id="resetFlip">↺ Ask again</button>
+    </div>
+  </section>
+
+  <footer>Offline demo file — no internet connection required.</footer>
+</div>
+
+<script>
+/* ================= Section 1: build animation ================= */
+const buildScene = document.getElementById("buildScene");
+function playBuild(){
+  buildScene.classList.remove("play");
+  void buildScene.offsetWidth; // force reflow to restart animation
+  buildScene.classList.add("play");
+}
+document.getElementById("replayBuild").addEventListener("click", playBuild);
+window.addEventListener("load", playBuild);
+
+/* ================= Section 2: language tabs ================= */
+const langs = [
+  {
+    id: "python",
+    label: "Python",
+    file: "umbrella.py",
+    code:
+`is_raining = True
+
+if is_raining:
+    print("Take an umbrella")
+else:
+    print("Leave it at home")`,
+    output: `Take an umbrella`
+  },
+  {
+    id: "javascript",
+    label: "JavaScript",
+    file: "umbrella.js",
+    code:
+`let isRaining = true;
+
+if (isRaining) {
+  console.log("Take an umbrella");
+} else {
+  console.log("Leave it at home");
+}`,
+    output: `Take an umbrella`
+  },
+  {
+    id: "java",
+    label: "Java",
+    file: "Umbrella.java",
+    code:
+`boolean isRaining = true;
+
+if (isRaining) {
+    System.out.println("Take an umbrella");
+} else {
+    System.out.println("Leave it at home");
+}`,
+    output: `Take an umbrella`
+  },
+  {
+    id: "cpp",
+    label: "C++",
+    file: "umbrella.cpp",
+    code:
+`bool isRaining = true;
+
+if (isRaining) {
+    cout << "Take an umbrella" << endl;
+} else {
+    cout << "Leave it at home" << endl;
+}`,
+    output: `Take an umbrella`
+  }
+];
+
+const keywordSets = {
+  python: ["if","else","print","True","False"],
+  javascript: ["if","else","let","console","log","true","false"],
+  java: ["if","else","boolean","System","out","println","true","false"],
+  cpp: ["if","else","bool","cout","endl","true","false"]
+};
+
+function highlight(code, langId){
+  const keywords = keywordSets[langId] || [];
+  return code.split("\n").map(line => {
+    let escaped = line.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const commentIdx = escaped.indexOf("//") !== -1 ? escaped.indexOf("//") : escaped.indexOf("#");
+    let codePart = escaped, commentPart = "";
+    if(commentIdx !== -1){
+      codePart = escaped.slice(0, commentIdx);
+      commentPart = '<span class="tok-com">' + escaped.slice(commentIdx) + '</span>';
+    }
+    codePart = codePart.replace(/&quot;([^&]*)&quot;/g, m => '<span class="tok-str">' + m + '</span>');
+    codePart = codePart.replace(/"([^"]*)"/g, m => '<span class="tok-str">' + m + '</span>');
+    keywords.forEach(kw => {
+      const re = new RegExp('\\b(' + kw + ')\\b(?![^<]*>)', 'g');
+      const cls = (kw === "print" || kw === "log" || kw === "println" || kw === "cout") ? "tok-fn" : "tok-kw";
+      codePart = codePart.replace(re, '<span class="' + cls + '">$1</span>');
+    });
+    return codePart + commentPart;
+  }).join("\n");
+}
+
+const tabBar = document.getElementById("tabBar");
+const langPanes = document.getElementById("langPanes");
+let activeLang = "python";
+
+function buildTabs(){
+  tabBar.innerHTML = "";
+  langs.forEach(l => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (l.id === activeLang ? " active" : "");
+    btn.textContent = l.label;
+    btn.addEventListener("click", () => { activeLang = l.id; buildTabs(); buildPane(); });
+    tabBar.appendChild(btn);
+  });
+}
+
+function buildPane(){
+  const lang = langs.find(l => l.id === activeLang);
+  const lineCount = lang.code.split("\n").length;
+  let lineNums = "";
+  for(let i=1;i<=lineCount;i++) lineNums += i + "\n";
+
+  langPanes.innerHTML = `
+    <div class="editor-panel">
+      <div class="panel-header">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="file-tab">${lang.file}</div>
+        <button class="run-btn" id="runLangBtn">▶ Run</button>
+      </div>
+      <div class="code-body">
+        <div class="line-numbers">${lineNums}</div>
+        <div class="code-content">${highlight(lang.code, lang.id)}</div>
+      </div>
+    </div>
+    <div class="console-panel">
+      <div class="panel-header">
+        <div class="file-tab">Output</div>
+        <div class="file-tab" id="langRunStatus"></div>
+      </div>
+      <div class="console-body" id="langConsole"><span class="placeholder">Press ▶ Run to see the output.</span></div>
+    </div>
+  `;
+
+  document.getElementById("runLangBtn").addEventListener("click", () => {
+    const body = document.getElementById("langConsole");
+    const status = document.getElementById("langRunStatus");
+    body.innerHTML = "";
+    status.textContent = "running...";
+    const div = document.createElement("div");
+    div.textContent = lang.output;
+    body.appendChild(div);
+    setTimeout(() => {
+      const done = document.createElement("div");
+      done.className = "ok-line";
+      done.textContent = "✓ Program finished";
+      body.appendChild(done);
+      status.textContent = "done";
+    }, 250);
+  });
+}
+
+buildTabs();
+buildPane();
+
+/* ================= Section 3: flip card ================= */
+const flipCard = document.getElementById("flipCard");
+const flipBack = document.getElementById("flipBack");
+const resultIcon = document.getElementById("resultIcon");
+const resultText = document.getElementById("resultText");
+const resultSub = document.getElementById("resultSub");
+
+document.querySelectorAll(".flip-choice-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const ans = btn.getAttribute("data-ans");
+    if(ans === "yes"){
+      flipBack.classList.remove("no-variant");
+      resultIcon.textContent = "☔";
+      resultText.textContent = "Take an umbrella";
+      resultSub.textContent = "condition was TRUE → this path ran";
+    } else {
+      flipBack.classList.add("no-variant");
+      resultIcon.textContent = "🚪";
+      resultText.textContent = "Leave it at home";
+      resultSub.textContent = "condition was FALSE → this path ran";
+    }
+    flipCard.classList.add("flipped");
+  });
+});
+
+document.getElementById("resetFlip").addEventListener("click", () => {
+  flipCard.classList.remove("flipped");
+});
+</script>
+</body>
+</html>
