@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sujit's Model — Word to Output, Step by Step</title>
+<meta name="description" content="An interactive simulator showing how a language model turns your words into tokens, vectors, embeddings, and finally an output — with live step-by-step commentary.">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+:root{
+  --board:#1E2B23;
+  --board-2:#243A2C;
+  --ledge:#16211A;
+  --chalk:#EDEDE3;
+  --chalk-dim:#AEBDAE;
+  --yellow:#F2C94C;
+  --coral:#FF8C69;
+  --cyan:#6FE0D8;
+  --pink:#F28FB0;
+  --line:rgba(237,237,227,.18);
+  --hand:'Caveat', cursive;
+  --sans:'Inter', -apple-system, sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, monospace;
+}
+*{box-sizing:border-box;}
+body{
+  margin:0; background:var(--board);
+  background-image:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 34px 34px;
+  color:var(--chalk); font-family:var(--sans); line-height:1.55;
+  min-height:100vh;
+}
+.wrap{max-width:980px; margin:0 auto; padding:36px 20px 90px;}
+
+/* ===== header ===== */
+header{text-align:left; margin-bottom:28px;}
+.eyebrow{
+  font-family:var(--mono); font-size:.72rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--chalk-dim); margin-bottom:4px;
+}
+h1{
+  font-family:var(--hand); font-weight:700; font-size:3.4rem; margin:0 0 2px; color:var(--chalk);
+  text-shadow:0 0 1px rgba(237,237,227,.3);
+  transform:rotate(-0.6deg);
+}
+h1 .dot{color:var(--yellow);}
+.sub{color:var(--chalk-dim); font-size:1.02rem; max-width:640px;}
+
+/* ===== input row ===== */
+.input-card{
+  background:var(--ledge); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-top:22px;
+}
+.input-row{display:flex; gap:10px; flex-wrap:wrap;}
+#sentence{
+  flex:1; min-width:220px; background:#0F1712; border:1px solid var(--line); color:var(--chalk);
+  font-family:var(--mono); font-size:1rem; padding:12px 14px; border-radius:8px;
+}
+#sentence:focus{outline:2px solid var(--yellow); outline-offset:1px;}
+.run-btn{
+  background:var(--yellow); color:#1E2B23; border:none; font-weight:700; font-family:var(--sans);
+  padding:12px 22px; border-radius:8px; cursor:pointer; font-size:.95rem;
+}
+.run-btn:hover{filter:brightness(1.06);}
+.examples{display:flex; gap:8px; flex-wrap:wrap; margin-top:12px;}
+.chip{
+  font-family:var(--mono); font-size:.74rem; color:var(--chalk-dim); border:1px dashed var(--line);
+  padding:5px 11px; border-radius:20px; cursor:pointer; background:transparent;
+}
+.chip:hover{border-color:var(--yellow); color:var(--yellow);}
+
+/* ===== progress rail ===== */
+.rail{display:flex; gap:6px; margin:26px 0 8px; flex-wrap:wrap;}
+.step-pip{
+  flex:1; min-width:90px; text-align:center; padding:9px 6px; border-radius:8px; border:1px solid var(--line);
+  font-family:var(--mono); font-size:.68rem; color:var(--chalk-dim); background:var(--ledge); cursor:pointer;
+  transition:border-color .2s, color .2s;
+}
+.step-pip .n{display:block; font-family:var(--sans); font-weight:700; font-size:.95rem; margin-bottom:2px; color:var(--chalk-dim);}
+.step-pip.active{border-color:var(--yellow); color:var(--yellow);}
+.step-pip.active .n{color:var(--yellow);}
+.step-pip.done{border-color:var(--cyan); color:var(--cyan);}
+.step-pip.done .n{color:var(--cyan);}
+
+/* ===== stage ===== */
+.stage{
+  background:var(--board-2); border:1px solid var(--line); border-radius:16px; padding:26px 24px; margin-top:10px;
+  min-height:260px; position:relative; overflow:hidden;
+}
+.stage h2{
+  font-family:var(--hand); font-size:1.9rem; margin:0 0 4px; color:var(--yellow); font-weight:700;
+}
+.stage .stage-sub{color:var(--chalk-dim); font-size:.85rem; margin-bottom:18px;}
+
+/* commentary / speech bubble */
+.commentary{
+  margin-top:20px; background:#0F1712; border:1px solid var(--line); border-left:4px solid var(--coral);
+  border-radius:0 12px 12px 0; padding:14px 18px; position:relative;
+}
+.commentary::before{content:"🗣️ Sujit says:"; display:block; font-family:var(--mono); font-size:.66rem;
+  letter-spacing:.08em; text-transform:uppercase; color:var(--coral); margin-bottom:6px;}
+.commentary p{margin:0; font-size:.98rem; color:var(--chalk);}
+
+/* controls */
+.controls{display:flex; gap:10px; margin-top:20px; align-items:center; flex-wrap:wrap;}
+.ctrl-btn{
+  background:transparent; border:1px solid var(--line); color:var(--chalk); font-family:var(--sans);
+  padding:9px 16px; border-radius:8px; cursor:pointer; font-size:.88rem; font-weight:600;
+}
+.ctrl-btn:hover{border-color:var(--chalk);}
+.ctrl-btn:disabled{opacity:.35; cursor:not-allowed;}
+.ctrl-btn.primary{background:var(--cyan); color:#10221F; border:none;}
+.auto-toggle{display:flex; align-items:center; gap:6px; font-size:.82rem; color:var(--chalk-dim); margin-left:auto;}
+
+/* ===== token chips ===== */
+.token-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:6px;}
+.tok{
+  background:var(--yellow); color:#1E2B23; font-family:var(--mono); font-weight:700; font-size:.95rem;
+  padding:8px 14px; border-radius:8px; position:relative; opacity:0; transform:translateY(8px);
+  animation:popIn .35s ease forwards;
+}
+.tok .id{display:block; font-size:.62rem; font-weight:600; color:#4A3E10; margin-top:3px;}
+@keyframes popIn{to{opacity:1; transform:translateY(0);}}
+
+/* ===== vector bars ===== */
+.vec-col{display:flex; flex-direction:column; align-items:center; gap:4px;}
+.vec-label{font-family:var(--mono); font-size:.72rem; color:var(--chalk-dim); margin-bottom:2px;}
+.vec-bars{display:flex; gap:3px; align-items:flex-end; height:70px;}
+.vec-bar{width:9px; border-radius:2px 2px 0 0; transition:height .4s ease;}
+.vec-grid{display:flex; gap:16px; flex-wrap:wrap; margin-top:8px;}
+
+/* ===== neural net svg ===== */
+.net-wrap{width:100%; overflow-x:auto;}
+svg.net{display:block; margin:6px auto;}
+.net-node{fill:var(--board); stroke:var(--chalk-dim); stroke-width:1.5;}
+.net-node.pulse{animation:nodePulse 1s ease;}
+@keyframes nodePulse{
+  0%{fill:var(--board); stroke:var(--chalk-dim);}
+  40%{fill:var(--cyan); stroke:var(--cyan);}
+  100%{fill:var(--board); stroke:var(--chalk-dim);}
+}
+.net-line{stroke:var(--line); stroke-width:1; stroke-dasharray:4 5;}
+.net-line.flow{stroke:var(--cyan); stroke-dashoffset:0; animation:flowDash 1.1s linear infinite;}
+@keyframes flowDash{to{stroke-dashoffset:-18;}}
+
+/* ===== output bars ===== */
+.out-row{display:flex; align-items:center; gap:10px; margin:8px 0;}
+.out-label{font-family:var(--mono); width:80px; font-size:.85rem; color:var(--chalk); flex-shrink:0;}
+.out-track{flex:1; background:#0F1712; border-radius:6px; height:20px; overflow:hidden; border:1px solid var(--line);}
+.out-fill{height:100%; background:var(--chalk-dim); width:0%; transition:width .6s ease, background .3s ease;}
+.out-fill.top{background:var(--coral);}
+.out-pct{font-family:var(--mono); font-size:.78rem; color:var(--chalk-dim); width:48px; text-align:right; flex-shrink:0;}
+
+/* final sentence */
+.final-sentence{
+  font-family:var(--mono); font-size:1.1rem; margin-top:14px; padding:14px 16px; background:#0F1712;
+  border-radius:8px; border:1px dashed var(--line);
+}
+.final-sentence .new-word{color:var(--coral); font-weight:700;}
+
+footer{max-width:980px; margin:0 auto; padding:10px 20px 40px; color:var(--chalk-dim); font-size:.74rem; font-family:var(--mono);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">An interactive simulator</div>
+    <h1>Sujit<span class="dot">'</span>s Model</h1>
+    <p class="sub">Type any short phrase and watch, step by step, exactly what happens inside a language model between your words and its output — with live commentary at each stage.</p>
+  </header>
+
+  <div class="input-card">
+    <div class="input-row">
+      <input id="sentence" type="text" value="the cat sat on the" maxlength="40">
+      <button class="run-btn" id="runBtn">▶ Run the Model</button>
+    </div>
+    <div class="examples">
+      <button class="chip" data-ex="the cat sat on the">the cat sat on the</button>
+      <button class="chip" data-ex="once upon a">once upon a</button>
+      <button class="chip" data-ex="I love eating">I love eating</button>
+      <button class="chip" data-ex="artificial intelligence is">artificial intelligence is</button>
+    </div>
+  </div>
+
+  <div class="rail" id="rail"></div>
+
+  <div class="stage" id="stage">
+    <h2>Ready when you are</h2>
+    <div class="stage-sub">Press "Run the Model" above to begin.</div>
+    <div class="commentary"><p>Type a short phrase, then hit Run. I'll walk you through every step the model takes — from your raw text all the way to its predicted next word.</p></div>
+  </div>
+
+  <div class="controls">
+    <button class="ctrl-btn" id="prevBtn" disabled>← Back</button>
+    <button class="ctrl-btn primary" id="nextBtn" disabled>Next step →</button>
+    <label class="auto-toggle"><input type="checkbox" id="autoPlay"> Auto-play</label>
+  </div>
+
+</div>
+
+<footer>Sujit's Model is a simplified, illustrative simulation for teaching purposes — token IDs, vector values, and network activity are generated locally in your browser, not from a real trained model.</footer>
+
+<script>
+/* ============ deterministic pseudo-random helpers ============ */
+function hashStr(s){
+  let h = 2166136261;
+  for(let i=0;i<s.length;i++){ h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* ============ mock tokenizer ============ */
+function tokenize(sentence){
+  const words = sentence.trim().split(/\s+/).filter(Boolean);
+  const tokens = [];
+  words.forEach(w=>{
+    if(w.length > 5){
+      const cut = Math.ceil(w.length/2);
+      tokens.push(w.slice(0,cut));
+      tokens.push(w.slice(cut));
+    } else {
+      tokens.push(w);
+    }
+  });
+  return tokens;
+}
+function tokenId(tok){ return hashStr(tok.toLowerCase()) % 50000; }
+function embedding(tok, dims=6){
+  const rnd = mulberry32(hashStr(tok.toLowerCase()+"_emb"));
+  const vec = [];
+  for(let i=0;i<dims;i++) vec.push((rnd()*2-1));
+  return vec;
+}
+
+/* ============ candidate next words ============ */
+const NEXT_WORD_MAP = {
+  "the cat sat on the": ["mat","floor","sofa","chair","roof","bed"],
+  "once upon a": ["time","dream","hill","castle","forest","star"],
+  "i love eating": ["pizza","mangoes","chocolate","noodles","fruit","rice"],
+  "artificial intelligence is": ["everywhere","powerful","changing","complex","useful","new"],
+};
+function candidates(sentence){
+  const key = sentence.trim().toLowerCase();
+  if(NEXT_WORD_MAP[key]) return NEXT_WORD_MAP[key];
+  const generic = ["time","house","light","water","world","story"];
+  return generic;
+}
+function logitsFor(sentence){
+  const cands = candidates(sentence);
+  const rnd = mulberry32(hashStr(sentence.toLowerCase()));
+  const raw = cands.map((c,i)=> (i===0 ? 3.2 : 1.5) + rnd()*1.8 - 0.9);
+  return cands.map((c,i)=>({word:c, logit: raw[i]}));
+}
+function softmax(items){
+  const max = Math.max(...items.map(i=>i.logit));
+  const exps = items.map(i=>Math.exp(i.logit - max));
+  const sum = exps.reduce((a,b)=>a+b,0);
+  return items.map((it,i)=>({...it, prob: exps[i]/sum}));
+}
+
+/* ============ step definitions ============ */
+let tokens = [], ids = [], vecs = [], sentence = "";
+let currentStep = -1;
+const STEP_META = [
+  {key:"input",   label:"Input"},
+  {key:"tokens",  label:"Tokens"},
+  {key:"ids",     label:"Token IDs"},
+  {key:"embed",   label:"Embeddings"},
+  {key:"position",label:"+ Position"},
+  {key:"network", label:"Neural Layers"},
+  {key:"logits",  label:"Logits"},
+  {key:"output",  label:"Output"},
+];
+
+function renderRail(){
+  const rail = document.getElementById('rail');
+  rail.innerHTML = STEP_META.map((s,i)=>`
+    <div class="step-pip ${i===currentStep?'active':(i<currentStep?'done':'')}" data-i="${i}">
+      <span class="n">${i+1}</span>${s.label}
+    </div>`).join('');
+  rail.querySelectorAll('.step-pip').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const i = +el.dataset.i;
+      if(i <= Math.max(currentStep, 0) && tokens.length){ currentStep = i; renderStep(); }
+    });
+  });
+}
+
+function barColor(v){ return v >= 0 ? 'var(--cyan)' : 'var(--pink)'; }
+
+function renderStep(){
+  renderRail();
+  const stage = document.getElementById('stage');
+  const meta = STEP_META[currentStep];
+  document.getElementById('prevBtn').disabled = currentStep <= 0;
+  document.getElementById('nextBtn').disabled = currentStep >= STEP_META.length - 1;
+  document.getElementById('nextBtn').textContent = currentStep >= STEP_META.length - 1 ? "Done ✓" : "Next step →";
+
+  let html = "";
+
+  if(meta.key === "input"){
+    html = `
+      <h2>1 · Your raw input</h2>
+      <div class="stage-sub">This is all the model starts with — plain text, nothing else.</div>
+      <div class="final-sentence">"${sentence}"</div>
+      <div class="commentary"><p>The model never sees letters or meaning directly. Everything from here on is a translation of this exact string into something it can compute with.</p></div>`;
+  }
+
+  else if(meta.key === "tokens"){
+    html = `
+      <h2>2 · Tokenization</h2>
+      <div class="stage-sub">Your sentence is split into tokens — chunks of text, not always whole words.</div>
+      <div class="token-row">${tokens.map((t,i)=>`<span class="tok" style="animation-delay:${i*0.08}s">${t}</span>`).join('')}</div>
+      <div class="commentary"><p>Longer words get split into pieces (like real subword tokenizers do). This is exactly why a model can struggle to count letters inside a word — it often never sees the word as one whole unit.</p></div>`;
+  }
+
+  else if(meta.key === "ids"){
+    html = `
+      <h2>3 · Token → ID</h2>
+      <div class="stage-sub">Each token is looked up in a fixed vocabulary and replaced with a number.</div>
+      <div class="token-row">${tokens.map((t,i)=>`<span class="tok" style="animation-delay:${i*0.08}s">${t}<span class="id">#${ids[i]}</span></span>`).join('')}</div>
+      <div class="commentary"><p>From this point on, the model only ever works with these ID numbers — your original text is gone. Same word, same ID, every single time.</p></div>`;
+  }
+
+  else if(meta.key === "embed"){
+    html = `
+      <h2>4 · ID → Embedding vector</h2>
+      <div class="stage-sub">Each ID looks up a vector — a list of numbers placing that token in "meaning space."</div>
+      <div class="vec-grid">${tokens.map((t,i)=>`
+        <div class="vec-col">
+          <div class="vec-label">${t}</div>
+          <div class="vec-bars">${vecs[i].map(v=>`<div class="vec-bar" style="height:${Math.abs(v)*60+6}px; background:${barColor(v)};"></div>`).join('')}</div>
+        </div>`).join('')}</div>
+      <div class="commentary"><p>Words with similar meaning end up with similar vectors. This is the exact same mechanism used later for search and retrieval — just applied here to feed the model itself.</p></div>`;
+  }
+
+  else if(meta.key === "position"){
+    html = `
+      <h2>5 · Add position information</h2>
+      <div class="stage-sub">A small position signal gets added to each vector so order isn't lost.</div>
+      <div class="vec-grid">${tokens.map((t,i)=>{
+        const shifted = vecs[i].map((v,d)=> v + Math.sin((i+1)*(d+1))*0.15);
+        return `<div class="vec-col">
+          <div class="vec-label">${t} <span style="color:var(--chalk-dim)">(pos ${i})</span></div>
+          <div class="vec-bars">${shifted.map(v=>`<div class="vec-bar" style="height:${Math.min(Math.abs(v),1)*60+6}px; background:${barColor(v)};"></div>`).join('')}</div>
+        </div>`;
+      }).join('')}</div>
+      <div class="commentary"><p>Without this step, "dog bites man" and "man bites dog" would look identical to the model — same tokens, same vectors, no sense of order. This small nudge fixes that.</p></div>`;
+  }
+
+  else if(meta.key === "network"){
+    const nodeCounts = [5,5,5];
+    const w = 620, h = 200;
+    const colX = [90, 310, 530];
+    let svg = `<svg class="net" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">`;
+    const positions = colX.map(x => {
+      const ys = [];
+      for(let n=0;n<5;n++) ys.push(30 + n*35);
+      return ys.map(y=>({x,y}));
+    });
+    for(let c=0;c<positions.length-1;c++){
+      positions[c].forEach(p1=>{
+        positions[c+1].forEach((p2,j)=>{
+          const flow = (j%2===0);
+          svg += `<line class="net-line ${flow?'flow':''}" x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}"/>`;
+        });
+      });
+    }
+    positions.forEach((col,ci)=>{
+      col.forEach((p,ni)=>{
+        svg += `<circle class="net-node pulse" style="animation-delay:${(ci*0.3+ni*0.08)}s" cx="${p.x}" cy="${p.y}" r="10"/>`;
+      });
+    });
+    svg += `<text x="90" y="195" fill="var(--chalk-dim)" font-size="11" font-family="IBM Plex Mono">Attention</text>`;
+    svg += `<text x="290" y="195" fill="var(--chalk-dim)" font-size="11" font-family="IBM Plex Mono">Feed-forward</text>`;
+    svg += `<text x="510" y="195" fill="var(--chalk-dim)" font-size="11" font-family="IBM Plex Mono">Attention</text>`;
+    svg += `</svg>`;
+    html = `
+      <h2>6 · Flow through neural layers</h2>
+      <div class="stage-sub">Vectors pass through repeated blocks of attention and computation.</div>
+      <div class="net-wrap">${svg}</div>
+      <div class="commentary"><p>Attention lets every token "look at" every other token and decide what's relevant. Feed-forward layers then reshape that information. Real models repeat this dozens of times.</p></div>`;
+  }
+
+  else if(meta.key === "logits"){
+    const items = logitsFor(sentence);
+    const maxAbs = Math.max(...items.map(i=>Math.abs(i.logit)));
+    html = `
+      <h2>7 · Output scores (logits)</h2>
+      <div class="stage-sub">The final layer scores every candidate next-token — shown here for a handful of candidates.</div>
+      ${items.map(it=>`
+        <div class="out-row">
+          <div class="out-label">${it.word}</div>
+          <div class="out-track"><div class="out-fill" style="width:${(it.logit/ (maxAbs*1.2) )*50+40}%;"></div></div>
+          <div class="out-pct">${it.logit.toFixed(2)}</div>
+        </div>`).join('')}
+      <div class="commentary"><p>These raw scores ("logits") aren't probabilities yet — they're just relative preferences. A real model scores tens of thousands of candidates this same way, all at once.</p></div>`;
+  }
+
+  else if(meta.key === "output"){
+    const items = softmax(logitsFor(sentence)).sort((a,b)=>b.prob-a.prob);
+    const top = items[0];
+    html = `
+      <h2>8 · Softmax → prediction</h2>
+      <div class="stage-sub">Scores become probabilities. The model picks (or samples) the top one.</div>
+      ${items.map(it=>`
+        <div class="out-row">
+          <div class="out-label">${it.word}</div>
+          <div class="out-track"><div class="out-fill ${it===top?'top':''}" style="width:${(it.prob*100).toFixed(1)}%;"></div></div>
+          <div class="out-pct">${(it.prob*100).toFixed(1)}%</div>
+        </div>`).join('')}
+      <div class="final-sentence">"${sentence} <span class="new-word">${top.word}</span>"</div>
+      <div class="commentary"><p>That's one full forward pass — done. To generate a whole sentence, this entire pipeline repeats once per new word, each time feeding the growing sentence back in as input.</p></div>`;
+  }
+
+  stage.innerHTML = html;
+}
+
+function runSimulation(){
+  sentence = document.getElementById('sentence').value.trim();
+  if(!sentence){ return; }
+  tokens = tokenize(sentence);
+  ids = tokens.map(tokenId);
+  vecs = tokens.map(t=>embedding(t));
+  currentStep = 0;
+  renderStep();
+}
+
+document.getElementById('runBtn').addEventListener('click', runSimulation);
+document.getElementById('sentence').addEventListener('keydown', e=>{ if(e.key==='Enter') runSimulation(); });
+document.querySelectorAll('.chip').forEach(ch=>{
+  ch.addEventListener('click', ()=>{
+    document.getElementById('sentence').value = ch.dataset.ex;
+    runSimulation();
+  });
+});
+document.getElementById('nextBtn').addEventListener('click', ()=>{
+  if(currentStep < STEP_META.length-1){ currentStep++; renderStep(); }
+});
+document.getElementById('prevBtn').addEventListener('click', ()=>{
+  if(currentStep > 0){ currentStep--; renderStep(); }
+});
+
+let autoTimer = null;
+document.getElementById('autoPlay').addEventListener('change', e=>{
+  if(e.target.checked){
+    autoTimer = setInterval(()=>{
+      if(currentStep < STEP_META.length-1 && tokens.length){ currentStep++; renderStep(); }
+      else { e.target.checked = false; clearInterval(autoTimer); }
+    }, 3200);
+  } else {
+    clearInterval(autoTimer);
+  }
+});
+</script>
+</body>
+</html>
