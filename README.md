@@ -1,7 +1,5 @@
 # AI AugMentor
 
-*Curated by Sujit Kulkarni*
-
 Free AI guides, glossaries and interactive 3D demos to help anyone learn AI step by step.
 
 🌐 **Live site:** [sujitkulkarni09.github.io/sujitkulkarni.github.io](https://sujitkulkarni09.github.io/sujitkulkarni.github.io)
