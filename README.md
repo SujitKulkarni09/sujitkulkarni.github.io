@@ -4,7 +4,7 @@
 
 Free AI guides, glossaries and interactive 3D demos to help anyone learn AI step by step.
 
-🌐 **Live site:** [sujitkulkarni.github.io](https://sujitkulkarni.github.io)
+🌐 **Live site:** [sujitkulkarni09.github.io/sujitkulkarni.github.io](https://sujitkulkarni09.github.io/sujitkulkarni.github.io)
 
 ---
 
@@ -23,81 +23,81 @@ Free AI guides, glossaries and interactive 3D demos to help anyone learn AI step
 ### 1. AI Basics
 | Page | About |
 |---|---|
-| [AI for all](https://sujitkulkarni.github.io/ai-for-all.html) | AI explained simply for everyone |
-| [AI basics with live prototype](https://sujitkulkarni.github.io/ai-basics-with-live-prototype.html) | AI basics with a working demo |
-| [4 AI levels](https://sujitkulkarni.github.io/4-ai-levels.html) | The four levels of AI |
-| [AI adventure land](https://sujitkulkarni.github.io/ai-adventure-land.html) | A fun, game-style introduction to AI |
-| [Simple model](https://sujitkulkarni.github.io/Simple-model.html) | How a simple AI model works |
-| [Sujit's model (classic)](https://sujitkulkarni.github.io/sujits-model-classic.html) | A model explainer |
-| [Manual token output](https://sujitkulkarni.github.io/sujit-manual-token-output.html) | How an AI picks words (tokens), step by step |
-| [LLM live visualizer](https://sujitkulkarni.github.io/LLM_Live_Visualizer_Sujit_Kulkarni.html) | A live view of how a large language model works |
+| [AI for all](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-for-all.html) | AI explained simply for everyone |
+| [AI basics with live prototype](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-basics-with-live-prototype.html) | AI basics with a working demo |
+| [4 AI levels](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/4-ai-levels.html) | The four levels of AI |
+| [AI adventure land](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-adventure-land.html) | A fun, game-style introduction to AI |
+| [Simple model](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/Simple-model.html) | How a simple AI model works |
+| [Sujit's model (classic)](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/sujits-model-classic.html) | A model explainer |
+| [Manual token output](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/sujit-manual-token-output.html) | How an AI picks words (tokens), step by step |
+| [LLM live visualizer](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/LLM_Live_Visualizer_Sujit_Kulkarni.html) | A live view of how a large language model works |
 
 ### 2. Agentic AI
 | Page | About |
 |---|---|
-| [The Loop Doctrine](https://sujitkulkarni.github.io/) | Your AI isn't getting smarter, your system is |
-| [Agentic AI agent builder](https://sujitkulkarni.github.io/agentic-ai-agent-builder.html) | Build your own AI agent |
-| [Agentic AI build guide](https://sujitkulkarni.github.io/agentic-ai-build-guide.html) | Step-by-step guide to building agents |
-| [Agentic AI levels](https://sujitkulkarni.github.io/agentic-ai-levels.html) | The levels of agentic AI |
-| [LLM and agentic AI playbook](https://sujitkulkarni.github.io/llm-agentic-ai-playbook.html) | A playbook for LLMs and agents |
-| [LLM agentic guide](https://sujitkulkarni.github.io/llm-agentic-guide.html) | A guide to LLMs and agents |
-| [Harness engineering explained](https://sujitkulkarni.github.io/harness-engineering-explained.html) | Harness engineering explained |
-| [RAG architecture](https://sujitkulkarni.github.io/rag-architecture.html) | How retrieval-augmented generation works |
-| [Fine-tuning for the workforce](https://sujitkulkarni.github.io/fine-tuning-workforce.html) | Fine-tuning explained |
+| [The Loop Doctrine](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/loop-doctrine.html) | Your AI isn't getting smarter, your system is |
+| [Agentic AI agent builder](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/agentic-ai-agent-builder.html) | Build your own AI agent |
+| [Agentic AI build guide](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/agentic-ai-build-guide.html) | Step-by-step guide to building agents |
+| [Agentic AI levels](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/agentic-ai-levels.html) | The levels of agentic AI |
+| [LLM and agentic AI playbook](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/llm-agentic-ai-playbook.html) | A playbook for LLMs and agents |
+| [LLM agentic guide](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/llm-agentic-guide.html) | A guide to LLMs and agents |
+| [Harness engineering explained](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/harness-engineering-explained.html) | Harness engineering explained |
+| [RAG architecture](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/rag-architecture.html) | How retrieval-augmented generation works |
+| [Fine-tuning for the workforce](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/fine-tuning-workforce.html) | Fine-tuning explained |
 
 ### 3. 3D and Interactive Demos
 | Page | About |
 |---|---|
-| [Agentic IB workflow 3D](https://sujitkulkarni.github.io/agentic-ib-workflow-3d.html) | A 3D agentic banking workflow |
-| [AI agents in a galaxy](https://sujitkulkarni.github.io/ai-agents-in-galaxy.html) | AI agents visualised as a galaxy |
-| [Multi-agent 3D](https://sujitkulkarni.github.io/multi-agent-3d-v2.html) | A 3D multi-agent system |
-| [Obsidian vault 3D](https://sujitkulkarni.github.io/obsidian-vault-3d.html) | A 3D notes vault |
-| [Self-driving car AI demo](https://sujitkulkarni.github.io/self-driving-car-ai-demo.html) | A self-driving car AI demo |
-| [Solar system 3D](https://sujitkulkarni.github.io/solar-system-3d.html) | A 3D solar system |
-| [Prompt credits wheel](https://sujitkulkarni.github.io/prompt-credits-wheel.html) | An interactive prompt credits wheel |
+| [Agentic IB workflow 3D](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/agentic-ib-workflow-3d.html) | A 3D agentic banking workflow |
+| [AI agents in a galaxy](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-agents-in-galaxy.html) | AI agents visualised as a galaxy |
+| [Multi-agent 3D](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/multi-agent-3d-v2.html) | A 3D multi-agent system |
+| [Obsidian vault 3D](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/obsidian-vault-3d.html) | A 3D notes vault |
+| [Self-driving car AI demo](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/self-driving-car-ai-demo.html) | A self-driving car AI demo |
+| [Solar system 3D](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/solar-system-3d.html) | A 3D solar system |
+| [Prompt credits wheel](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/prompt-credits-wheel.html) | An interactive prompt credits wheel |
 
 ### 4. Glossaries and Cheat Sheets
 | Page | About |
 |---|---|
-| [AI glossary guide](https://sujitkulkarni.github.io/ai-glossary-guide.html) | AI terms from A to Z |
-| [Copilot complete glossary](https://sujitkulkarni.github.io/copilot-complete-glossary.html) | Copilot terms explained |
-| [Copilot debugging glossary](https://sujitkulkarni.github.io/copilot-debugging-glossary.html) | Fixing common Copilot problems |
-| [Corporate jargon glossary](https://sujitkulkarni.github.io/corporate-jargon-glossary.html) | Office jargon explained |
-| [20 API concepts](https://sujitkulkarni.github.io/20-api-concepts.html) | 20 key API concepts |
+| [AI glossary guide](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-glossary-guide.html) | AI terms from A to Z |
+| [Copilot complete glossary](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/copilot-complete-glossary.html) | Copilot terms explained |
+| [Copilot debugging glossary](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/copilot-debugging-glossary.html) | Fixing common Copilot problems |
+| [Corporate jargon glossary](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/corporate-jargon-glossary.html) | Office jargon explained |
+| [20 API concepts](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/20-api-concepts.html) | 20 key API concepts |
 
 ### 5. AI Tools and Copilot
 | Page | About |
 |---|---|
-| [AI tools](https://sujitkulkarni.github.io/AI-Tools.html) | A guide to AI tools |
-| [Claude ecosystem](https://sujitkulkarni.github.io/claude-ecosystem.html) | An overview of Claude products |
-| [Claude skills for the workforce](https://sujitkulkarni.github.io/claude-skills-workforce.html) | Claude skills at work |
-| [GPT-5.6 explained](https://sujitkulkarni.github.io/gpt-5-6-explained.html) | GPT-5.6 explained |
-| [M365 Copilot SOP](https://sujitkulkarni.github.io/m365-copilot-sop.html) | A how-to guide for Microsoft 365 Copilot |
-| [n8n guide (unofficial)](https://sujitkulkarni.github.io/n8n-unofficial-independent-guide.html) | Automation with n8n |
-| [Daily AI routines](https://sujitkulkarni.github.io/daily-ai-routines-small-loops-big-gains.html) | Small daily AI habits, big gains |
-| [HTML use case](https://sujitkulkarni.github.io/html-use-case.html) | Uses of HTML pages |
-| [Dashboard field guide](https://sujitkulkarni.github.io/dashboard-field-guide.html) | Building dashboards |
+| [AI tools](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/AI-Tools.html) | A guide to AI tools |
+| [Claude ecosystem](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/claude-ecosystem.html) | An overview of Claude products |
+| [Claude skills for the workforce](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/claude-skills-workforce.html) | Claude skills at work |
+| [GPT-5.6 explained](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/gpt-5-6-explained.html) | GPT-5.6 explained |
+| [M365 Copilot SOP](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/m365-copilot-sop.html) | A how-to guide for Microsoft 365 Copilot |
+| [n8n guide (unofficial)](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/n8n-unofficial-independent-guide.html) | Automation with n8n |
+| [Daily AI routines](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/daily-ai-routines-small-loops-big-gains.html) | Small daily AI habits, big gains |
+| [HTML use case](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/html-use-case.html) | Uses of HTML pages |
+| [Dashboard field guide](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/dashboard-field-guide.html) | Building dashboards |
 
 ### 6. Tech Deep Dives
 | Page | About |
 |---|---|
-| [AWS cloud deep dive](https://sujitkulkarni.github.io/aws-cloud-deep.html) | AWS cloud |
-| [DevOps roadmap](https://sujitkulkarni.github.io/devops-roadmap-deep.html) | A DevOps roadmap |
-| [SQL joins deep dive](https://sujitkulkarni.github.io/sql-joins-deep.html) | SQL joins in depth |
+| [AWS cloud deep dive](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/aws-cloud-deep.html) | AWS cloud |
+| [DevOps roadmap](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/devops-roadmap-deep.html) | A DevOps roadmap |
+| [SQL joins deep dive](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/sql-joins-deep.html) | SQL joins in depth |
 
 ### 7. Learning Path and Career
 | Page | About |
 |---|---|
-| [AI learning curriculum](https://sujitkulkarni.github.io/ai-learning-curriculum-sujit-kulkarni.html) | A structured AI curriculum |
-| [AI learning path guide](https://sujitkulkarni.github.io/ai-learning-path-guide.html) | Where to start learning AI |
-| [The new AI roles](https://sujitkulkarni.github.io/the-new-ai-roles.html) | New jobs created by AI |
-| [Career reference](https://sujitkulkarni.github.io/career-ref.html) | A career reference |
+| [AI learning curriculum](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-learning-curriculum-sujit-kulkarni.html) | A structured AI curriculum |
+| [AI learning path guide](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-learning-path-guide.html) | Where to start learning AI |
+| [The new AI roles](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/the-new-ai-roles.html) | New jobs created by AI |
+| [Career reference](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/career-ref.html) | A career reference |
 
 ### 8. In Your Language
 | Page | About |
 |---|---|
-| [AI for all (Hindi)](https://sujitkulkarni.github.io/ai-for-all-hindi.html) | AI explained in Hindi |
-| [AI for all (Kannada)](https://sujitkulkarni.github.io/ai-for-all-kannada.html) | AI explained in Kannada |
+| [AI for all (Hindi)](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-for-all-hindi.html) | AI explained in Hindi |
+| [AI for all (Kannada)](https://sujitkulkarni09.github.io/sujitkulkarni.github.io/ai-for-all-kannada.html) | AI explained in Kannada |
 
 ---
 
