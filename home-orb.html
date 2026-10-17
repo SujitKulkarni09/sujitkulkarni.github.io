@@ -52,10 +52,11 @@ nav{position:sticky;top:16px;z-index:20;margin-top:16px}
 .brand b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:600}
 .nav-links{display:flex;gap:6px}
 .nav-links a{text-decoration:none;color:var(--soft);font-size:14px;padding:10px 14px;border-radius:12px;transition:background .2s,color .2s}
-.nav-links a.view-switch{display:inline-flex;align-items:center;gap:7px;color:#fff;border:1px solid rgba(205,170,255,.45);
-  background:linear-gradient(135deg,rgba(168,85,247,.32),rgba(56,189,248,.16));box-shadow:0 0 18px -6px rgba(168,85,247,.8)}
-.nav-links a.view-switch:hover{background:linear-gradient(135deg,rgba(168,85,247,.5),rgba(56,189,248,.26))}
-.view-switch i{font-style:normal;font-size:13px;opacity:.9}
+.view-switch{display:inline-flex;gap:2px;padding:3px;border-radius:14px;border:1px solid rgba(205,170,255,.45);background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(56,189,248,.08));box-shadow:0 0 18px -6px rgba(168,85,247,.8)}
+.nav-links .view-switch a.vs{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:11px;font-size:13px}
+.nav-links .view-switch a.vs.on{color:#fff;background:linear-gradient(135deg,rgba(168,85,247,.55),rgba(56,189,248,.3))}
+.view-switch i{font-style:normal;font-size:12px;opacity:.9}
+@media (max-width:480px){.nav-bar{padding:10px 12px;gap:8px}.brand{font-size:14px;gap:8px;white-space:nowrap}.brand .logo{width:32px;height:32px}.nav-links .view-switch a.vs{padding:7px 8px;font-size:12px}.view-switch i{display:none}}
 .nav-links a:hover{background:rgba(168,85,247,0.16);color:#fff}
 
 /* Hero */
@@ -272,7 +273,7 @@ footer a:hover{text-decoration:underline}
 @media (max-width:760px){
   .wrap{padding:0 16px}
   nav{top:10px;margin-top:10px}
-  .nav-links a:not(:last-child){display:none}
+  .nav-links > a{display:none}
   .brand{font-size:16px}
   .hero{padding:72px 0 56px}
   .nameplate{padding:12px 18px 16px;border-radius:20px}.nameplate::before{border-radius:22px}
@@ -323,7 +324,7 @@ footer a:hover{text-decoration:underline}
         <a href="#explore">Explore</a>
         <a href="#featured">Featured</a>
         <a href="#about">About</a>
-        <a class="view-switch" href="./" title="Switch to the humanoid design"><i aria-hidden="true">◉</i>Humanoid view</a>
+        <div class="view-switch" role="group" aria-label="Homepage design"><a class="vs" href="./" title="Portrait design"><i aria-hidden="true">◈</i>Portrait</a><a class="vs" href="home-humanoid.html" title="Humanoid design"><i aria-hidden="true">◉</i>Humanoid</a><a class="vs on" href="home-orb.html" aria-current="page" title="Orb design"><i aria-hidden="true">◎</i>Orb</a></div>
       </div>
     </div>
   </nav>
